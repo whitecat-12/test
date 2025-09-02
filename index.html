@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Quiz Siswa - Firebase</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-6">
+  <div class="max-w-2xl mx-auto bg-white shadow-lg rounded-xl p-6">
+    <h1 class="text-xl font-bold text-center mb-4">Quiz Siswa</h1>
+
+    <!-- Tempat soal -->
+    <div id="quiz" class="space-y-4"></div>
+
+    <!-- Navigasi soal -->
+    <div class="flex justify-between mt-6">
+      <button id="prevBtn" class="bg-gray-400 text-white px-4 py-2 rounded-lg" disabled>← Sebelumnya</button>
+      <button id="nextBtn" class="bg-teal-600 text-white px-4 py-2 rounded-lg">Selanjutnya →</button>
+    </div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    // ✅ Config Firebase (sama dengan dashboard guru)
+    const firebaseConfig = {
+      apiKey: "AIzaSyAJ5I8k2MzAyDLt9fUcXHRNtRVjKB_ETLY",
+      authDomain: "projectid-81104.firebaseapp.com",
+      projectId: "projectid-81104",
+      storageBucket: "projectid-81104.firebasestorage.app",
+      messagingSenderId: "554913260457",
+      appId: "1:554913260457:web:bf988867ebfd902c651ab8",
+      measurementId: "G-8WFHQW5WGN"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const quizEl = document.getElementById("quiz");
+    const nextBtn = document.getElementById("nextBtn");
+    const prevBtn = document.getElementById("prevBtn");
+
+    let soalList = [];
+    let currentIndex = 0;
+
+    // 🔹 Ambil soal dari Firestore
+    async function loadSoal() {
+      const snapshot = await getDocs(collection(db, "soal"));
+      soalList = snapshot.docs.map(doc => doc.data());
+      renderSoal();
+    }
+
+    // 🔹 Tampilkan soal
+    function renderSoal() {
+      if (soalList.length === 0) {
+        quizEl.innerHTML = "<p class='text-center text-gray-500'>Belum ada soal.</p>";
+        return;
+      }
+
+      const data = soalList[currentIndex];
+      quizEl.innerHTML = `
+        <div class="p-4 bg-gray-50 rounded-lg shadow">
+          <h2 class="font-semibold mb-3">Soal ${currentIndex + 1}:</h2>
+          <p class="mb-4">${data.pertanyaan}</p>
+          <div class="space-y-2">
+            ${["A","B","C","D"].map(opt => `
+              <div class="option bg-gray-100 p-3 rounded-lg cursor-pointer hover:bg-gray-200"
+                   data-correct="${opt === data.jawaban}">
+                ${opt}. ${data.opsi[opt]}
+              </div>
+            `).join("")}
+          </div>
+          <p id="feedback" class="mt-4 font-semibold hidden"></p>
+        </div>
+      `;
+
+      // Event klik opsi jawaban
+      document.querySelectorAll(".option").forEach(opt => {
+        opt.addEventListener("click", () => {
+          const benar = opt.dataset.correct === "true";
+          const feedback = document.getElementById("feedback");
+          feedback.classList.remove("hidden");
+          if (benar) {
+            opt.classList.add("bg-green-300");
+            feedback.textContent = "✅ Benar! " + (data.penjelasan || "");
+            feedback.className = "mt-4 font-semibold text-green-600";
+          } else {
+            opt.classList.add("bg-red-300");
+            feedback.textContent = "❌ Salah. " + (data.penjelasan || "");
+            feedback.className = "mt-4 font-semibold text-red-600";
+          }
+        });
+      });
+
+      // Update tombol navigasi
+      prevBtn.disabled = currentIndex === 0;
+      nextBtn.disabled = currentIndex === soalList.length - 1;
+    }
+
+    // 🔹 Navigasi soal
+    nextBtn.addEventListener("click", () => {
+      if (currentIndex < soalList.length - 1) {
+        currentIndex++;
+        renderSoal();
+      }
+    });
+
+    prevBtn.addEventListener("click", () => {
+      if (currentIndex > 0) {
+        currentIndex--;
+        renderSoal();
+      }
+    });
+
+    loadSoal();
+  </script>
+</body>
+</html>

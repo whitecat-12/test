@@ -57,9 +57,9 @@
           if (userDoc.exists()) {
             const role = userDoc.data().role;
             if (role === "guru") {
-              window.location.href = "dashboard.html";
+              window.location.href = "dashboard guru.html";
             } else {
-              window.location.href = "quiz.html";
+              window.location.href = "dashboard.html";
             }
           } else {
             alert("Data user tidak ditemukan di Firestore.");

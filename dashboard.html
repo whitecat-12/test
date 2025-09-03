@@ -17,11 +17,15 @@
       <button id="prevBtn" class="bg-gray-400 text-white px-4 py-2 rounded-lg" disabled>← Sebelumnya</button>
       <button id="nextBtn" class="bg-teal-600 text-white px-4 py-2 rounded-lg">Selanjutnya →</button>
     </div>
+
+    <!-- Logout -->
+    <button id="logoutBtn" class="mt-4 w-full bg-red-500 text-white p-2 rounded-lg">Logout</button>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyAJ5I8k2MzAyDLt9fUcXHRNtRVjKB_ETLY",
@@ -35,32 +39,50 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+    const auth = getAuth();
 
     const quizEl = document.getElementById("quiz");
     const nextBtn = document.getElementById("nextBtn");
     const prevBtn = document.getElementById("prevBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
 
     let soalList = [];
     let currentIndex = 0;
 
+    // 🔹 Logout
+    logoutBtn.addEventListener("click", async () => {
+      await signOut(auth);
+      window.location.href = "login.html";
+    });
+
+    // 🔹 Cek login
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        window.location.href = "login.html";
+      } else {
+        loadSoal();
+      }
+    });
+
     // 🔹 Ambil soal dari Firestore
     async function loadSoal() {
-      const snapshot = await getDocs(collection(db, "soal"));
-      soalList = snapshot.docs.map(doc => doc.data());
-      console.log("Soal dari Firestore:", soalList); // 🔹 debug
-      renderSoal();
+      try {
+        const snapshot = await getDocs(collection(db, "soal"));
+        soalList = snapshot.docs.map(doc => doc.data());
+        if (soalList.length === 0) {
+          quizEl.innerHTML = "<p class='text-center text-gray-500'>Belum ada soal.</p>";
+        } else {
+          renderSoal();
+        }
+      } catch (err) {
+        console.error("Error load soal:", err);
+        quizEl.innerHTML = "<p class='text-center text-red-500'>Gagal mengambil soal. Cek rules Firestore & login user.</p>";
+      }
     }
 
     // 🔹 Tampilkan soal
     function renderSoal() {
-      if (soalList.length === 0) {
-        quizEl.innerHTML = "<p class='text-center text-gray-500'>Belum ada soal.</p>";
-        return;
-      }
-
       const data = soalList[currentIndex];
-      console.log("Soal saat ini:", data);
-
       quizEl.innerHTML = `
         <div class="p-4 bg-gray-50 rounded-lg shadow">
           <h2 class="font-semibold mb-3">Soal ${currentIndex + 1}:</h2>
@@ -77,7 +99,6 @@
         </div>
       `;
 
-      // Event klik opsi jawaban
       document.querySelectorAll(".option").forEach(optEl => {
         optEl.addEventListener("click", () => {
           const benar = optEl.dataset.correct === "true";
@@ -92,12 +113,10 @@
             feedback.textContent = "❌ Salah. " + (data.penjelasan || "");
             feedback.className = "mt-4 font-semibold text-red-600";
           }
-          // disable klik setelah memilih
           document.querySelectorAll(".option").forEach(o => o.style.pointerEvents = "none");
         });
       });
 
-      // Update tombol navigasi
       prevBtn.disabled = currentIndex === 0;
       nextBtn.disabled = currentIndex === soalList.length - 1;
     }
@@ -116,8 +135,6 @@
         renderSoal();
       }
     });
-
-    loadSoal();
   </script>
 </body>
 </html>

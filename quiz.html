@@ -116,7 +116,7 @@
         </div>
       `;
 
-      // 🔹 Render ulang LaTeX
+      // 🔹 Render ulang LaTeX di soal & opsi
       if (window.MathJax) {
         MathJax.typesetPromise();
       }
@@ -130,12 +130,17 @@
 
           if (benar) {
             optEl.classList.add("bg-green-300");
-            feedback.textContent = "✅ Benar! " + (data.penjelasan || "");
+            feedback.innerHTML = "✅ Benar! " + (data.penjelasan || "");
             feedback.className = "mt-4 font-semibold text-green-600";
           } else {
             optEl.classList.add("bg-red-300");
-            feedback.textContent = "❌ Salah. " + (data.penjelasan || "");
+            feedback.innerHTML = "❌ Salah. " + (data.penjelasan || "");
             feedback.className = "mt-4 font-semibold text-red-600";
+          }
+
+          // 🔹 Render ulang LaTeX di penjelasan
+          if (window.MathJax) {
+            MathJax.typesetPromise([feedback]);
           }
 
           document.querySelectorAll(".option").forEach(o => {

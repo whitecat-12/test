@@ -4,18 +4,14 @@
   <meta charset="UTF-8">
   <title>Rak Soal Siswa</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
-  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
-  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"
-    onload="renderMathInElement(document.body);"></script>
 </head>
 <body class="bg-gray-100 min-h-screen p-6">
   <div class="max-w-4xl mx-auto">
-    <h1 class="text-3xl font-bold text-center mb-8 text-teal-700">📚 Rak Soal Siswa</h1>
-    <div id="rakMapel" class="space-y-6"></div>
-    <button id="logoutBtn" class="mt-6 w-full bg-red-500 text-white p-3 rounded-lg hover:bg-red-600 transition font-semibold flex justify-center items-center gap-2">
-      <i class="fa-solid fa-right-from-bracket"></i> Logout
+    <h1 class="text-3xl font-bold text-center mb-8 text-teal-700">📚 Rak Soal</h1>
+    <div id="rakMapel" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+
+    <button id="logoutBtn" class="mt-6 w-full bg-red-500 text-white p-3 rounded-lg hover:bg-red-600 transition font-semibold">
+      Logout
     </button>
   </div>
 
@@ -24,7 +20,6 @@
     import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-    // 🔹 Config Firebase (sama kayak login)
     const firebaseConfig = {
       apiKey: "AIzaSyAJ5I8k2MzAyDLt9fUcXHRNtRVjKB_ETLY",
       authDomain: "projectid-81104.firebaseapp.com",
@@ -56,88 +51,25 @@
       }
     });
 
-    // 🔹 Load rak mapel
+    // 🔹 Ambil daftar mapel dari soal
     async function loadRak() {
       const snapshot = await getDocs(collection(db, "soal"));
+      const mapelSet = new Set();
 
-      // kelompokkan soal berdasarkan mapel
-      const grouped = {};
       snapshot.forEach(docSnap => {
         const data = docSnap.data();
-        if (!grouped[data.mapel]) grouped[data.mapel] = [];
-        grouped[data.mapel].push({ id: docSnap.id, ...data });
+        if (data.mapel) mapelSet.add(data.mapel);
       });
 
-      rakMapel.innerHTML = ""; // clear
-      Object.keys(grouped).forEach(mapel => {
-        const container = document.createElement("div");
-        container.className = "bg-white rounded-2xl shadow";
-
-        container.innerHTML = `
-          <div class="p-4 bg-teal-600 text-white rounded-t-2xl cursor-pointer flex justify-between items-center">
-            <h2 class="text-lg font-semibold">${mapel}</h2>
-            <i class="fa-solid fa-chevron-down"></i>
-          </div>
-          <div class="p-4 space-y-6 hidden"></div>
-        `;
-
-        const soalList = container.querySelector("div:last-child");
-
-        grouped[mapel].forEach(item => {
-          const soalBox = document.createElement("div");
-          soalBox.className = "bg-gray-50 p-4 rounded-xl shadow space-y-3";
-
-          soalBox.innerHTML = `
-            <p class="font-semibold katex-content">${item.pertanyaan}</p>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-              ${["A","B","C","D"].map(opt => `
-                <button data-jawaban="${item.jawaban}" data-opsi="${opt}" 
-                  class="opsiBtn border p-2 rounded-lg hover:bg-teal-100 transition text-left">
-                  <span class="font-bold">${opt}.</span> ${item.opsi[opt]}
-                </button>
-              `).join("")}
-            </div>
-            <p class="penjelasan hidden text-sm text-gray-600 mt-2 katex-content">
-              <span class="font-semibold">Penjelasan:</span> ${item.penjelasan || "Tidak ada penjelasan"}
-            </p>
-          `;
-          soalList.appendChild(soalBox);
-
-          // render latex
-          renderMathInElement(soalBox, {
-            delimiters: [
-              {left: "$$", right: "$$", display: true},
-              {left: "$", right: "$", display: false}
-            ]
-          });
+      rakMapel.innerHTML = "";
+      [...mapelSet].forEach(mapel => {
+        const card = document.createElement("div");
+        card.className = "bg-white shadow-md rounded-xl p-6 text-center cursor-pointer hover:bg-teal-50 transition";
+        card.innerHTML = `<h2 class="text-xl font-semibold text-teal-700">${mapel}</h2>`;
+        card.addEventListener("click", () => {
+          window.location.href = `quiz.html?mapel=${encodeURIComponent(mapel)}`;
         });
-
-        // toggle rak
-        container.querySelector("div:first-child").addEventListener("click", () => {
-          soalList.classList.toggle("hidden");
-        });
-
-        rakMapel.appendChild(container);
-      });
-
-      // event klik jawaban
-      document.querySelectorAll(".opsiBtn").forEach(btn => {
-        btn.addEventListener("click", () => {
-          const benar = btn.dataset.jawaban;
-          const pilih = btn.dataset.opsi;
-
-          if (pilih === benar) {
-            btn.classList.add("bg-green-200", "border-green-500");
-          } else {
-            btn.classList.add("bg-red-200", "border-red-500");
-          }
-
-          // tampilkan penjelasan di soalBox
-          btn.closest(".bg-gray-50").querySelector(".penjelasan").classList.remove("hidden");
-
-          // disable semua opsi di soal ini
-          btn.closest(".grid").querySelectorAll(".opsiBtn").forEach(b => b.disabled = true);
-        });
+        rakMapel.appendChild(card);
       });
     }
   </script>

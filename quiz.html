@@ -4,6 +4,15 @@
   <meta charset="UTF-8">
   <title>Quiz Siswa</title>
   <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- 🔹 Tambah MathJax untuk dukung LaTeX -->
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" async></script>
 </head>
 <body class="bg-gray-100 p-6">
   <div class="max-w-2xl mx-auto bg-white shadow-lg rounded-xl p-6">
@@ -45,18 +54,15 @@
     let soalList = [];
     let currentIndex = 0;
 
-    // 🔹 Ambil parameter mapel dari URL
     const params = new URLSearchParams(window.location.search);
     const mapel = params.get("mapel");
     judulMapel.textContent = `Quiz ${mapel}`;
 
-    // 🔹 Logout
     logoutBtn.addEventListener("click", async () => {
       await signOut(auth);
       window.location.href = "login.html";
     });
 
-    // 🔹 Cek login
     onAuthStateChanged(auth, (user) => {
       if (!user) {
         window.location.href = "login.html";
@@ -65,7 +71,6 @@
       }
     });
 
-    // 🔹 Ambil soal sesuai mapel
     async function loadSoal() {
       const q = query(collection(db, "soal"), where("mapel", "==", mapel));
       const snapshot = await getDocs(q);
@@ -78,7 +83,6 @@
       }
     }
 
-    // 🔹 Render soal
     function renderSoal() {
       const data = soalList[currentIndex];
       quizEl.innerHTML = `
@@ -96,6 +100,11 @@
           <p id="feedback" class="mt-4 font-semibold hidden"></p>
         </div>
       `;
+
+      // 🔹 Render LaTeX setelah soal dimuat
+      if (window.MathJax) {
+        MathJax.typeset();
+      }
 
       document.querySelectorAll(".option").forEach(optEl => {
         optEl.addEventListener("click", () => {
@@ -121,7 +130,6 @@
       nextBtn.disabled = currentIndex === soalList.length - 1;
     }
 
-    // 🔹 Navigasi
     nextBtn.addEventListener("click", () => {
       if (currentIndex < soalList.length - 1) {
         currentIndex++;

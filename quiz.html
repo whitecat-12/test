@@ -5,7 +5,7 @@
   <title>Quiz Siswa - Firebase</title>
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- 🔹 Tambah MathJax untuk LaTeX -->
+  <!-- 🔹 MathJax -->
   <script>
     window.MathJax = {
       tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
@@ -37,7 +37,7 @@
     </button>
   </div>
 
-   <script type="module">
+  <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
@@ -63,8 +63,8 @@
 
     let soalList = [];
     let currentIndex = 0;
-    let score = 0;                  // 🔹 skor total
-    let answered = {};              // 🔹 catat jawaban user
+    let score = 0;                 
+    let answered = {};             
     let currentUser = null;
 
     // 🔹 Logout
@@ -129,7 +129,7 @@
           const feedback = document.getElementById("feedback");
           feedback.classList.remove("hidden");
 
-          if (!answered[currentIndex]) {   // 🔹 hanya nilai pertama kali
+          if (!answered[currentIndex]) {   
             answered[currentIndex] = opt;
             if (benar) {
               score += (100 / soalList.length);
@@ -155,38 +155,16 @@
       });
 
       prevBtn.disabled = currentIndex === 0;
-      nextBtn.disabled = currentIndex === soalList.length - 1;
+      nextBtn.textContent = currentIndex === soalList.length - 1 ? "Selesai ✅" : "Selanjutnya →";
     }
 
     // 🔹 Navigasi soal
-    nextBtn.addEventListener("click", async () => {
+    nextBtn.addEventListener("click", () => {
       if (currentIndex < soalList.length - 1) {
         currentIndex++;
         renderSoal();
       } else {
-        // 🔹 Tampilkan nilai akhir
-        const finalScore = Math.round(score);
-        quizEl.innerHTML = `
-          <div class="p-6 bg-green-100 rounded-lg shadow text-center">
-            <h2 class="text-2xl font-bold mb-4">Quiz Selesai 🎉</h2>
-            <p class="text-lg">Nilai kamu: <span class="font-bold">${finalScore}</span> / 100</p>
-          </div>
-        `;
-        nextBtn.disabled = true;
-        prevBtn.disabled = true;
-
-        // 🔹 Simpan nilai ke Firestore
-        try {
-          await addDoc(collection(db, "nilai"), {
-            uid: currentUser.uid,
-            email: currentUser.email,
-            score: finalScore,
-            createdAt: new Date()
-          });
-          console.log("Nilai tersimpan");
-        } catch (err) {
-          console.error("Gagal simpan nilai:", err);
-        }
+        showResult();
       }
     });
 
@@ -196,6 +174,31 @@
         renderSoal();
       }
     });
+
+    // 🔹 Tampilkan hasil & simpan ke Firestore
+    async function showResult() {
+      const finalScore = Math.round(score);
+      quizEl.innerHTML = `
+        <div class="p-6 bg-green-100 rounded-lg shadow text-center">
+          <h2 class="text-2xl font-bold mb-4">Quiz Selesai 🎉</h2>
+          <p class="text-lg">Nilai kamu: <span class="font-bold">${finalScore}</span> / 100</p>
+        </div>
+      `;
+      nextBtn.style.display = "none";
+      prevBtn.style.display = "none";
+
+      try {
+        await addDoc(collection(db, "nilai"), {
+          uid: currentUser.uid,
+          email: currentUser.email,
+          score: finalScore,
+          createdAt: new Date()
+        });
+        console.log("Nilai tersimpan");
+      } catch (err) {
+        console.error("Gagal simpan nilai:", err);
+      }
+    }
   </script>
 </body>
 </html>

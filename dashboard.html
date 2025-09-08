@@ -2,55 +2,28 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Rak Soal Siswa</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/lucide@latest"></script>
 </head>
-<body class="bg-gray-100 min-h-screen">
-  <!-- Header -->
-  <div class="bg-white shadow p-4 flex items-center justify-center">
-    <h1 class="text-xl font-bold text-teal-700">📚 Rak Soal</h1>
-  </div>
+<body class="bg-gray-100 min-h-screen p-6">
+  <div class="max-w-4xl mx-auto">
+    <h1 class="text-3xl font-bold text-center mb-8 text-teal-700">📚 Rak Soal</h1>
 
-  <!-- Konten -->
-  <div class="p-4">
-    <!-- Container Rak -->
-    <div id="rakMapel" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
-  </div>
+    <!-- Grid Rak Mapel -->
+    <div id="rakMapel" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
 
-  <!-- Bottom Navigation -->
-  <div class="fixed bottom-0 left-0 right-0 bg-white shadow-inner border-t">
-    <div class="flex justify-around py-2 text-gray-600">
-      <button class="flex flex-col items-center text-teal-600">
-        <i data-lucide="home" class="w-6 h-6"></i>
-        <span class="text-xs">Beranda</span>
-      </button>
-      <button class="flex flex-col items-center">
-        <i data-lucide="flask-conical" class="w-6 h-6"></i>
-        <span class="text-xs">Soal Harian</span>
-      </button>
-      <button class="flex flex-col items-center">
-        <i data-lucide="bot" class="w-6 h-6"></i>
-        <span class="text-xs">Nayra AI</span>
-      </button>
-      <button class="flex flex-col items-center">
-        <i data-lucide="book-open" class="w-6 h-6"></i>
-        <span class="text-xs">Materi</span>
-      </button>
-      <button class="flex flex-col items-center">
-        <i data-lucide="user" class="w-6 h-6"></i>
-        <span class="text-xs">Profil</span>
-      </button>
-    </div>
+    <!-- Tombol Logout -->
+    <button id="logoutBtn" 
+      class="mt-6 w-full bg-red-500 text-white p-3 rounded-lg hover:bg-red-600 transition font-semibold">
+      Logout
+    </button>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-    // 🔹 Firebase Config
     const firebaseConfig = {
       apiKey: "AIzaSyAJ5I8k2MzAyDLt9fUcXHRNtRVjKB_ETLY",
       authDomain: "projectid-81104.firebaseapp.com",
@@ -65,6 +38,13 @@
     const auth = getAuth(app);
 
     const rakMapel = document.getElementById("rakMapel");
+    const logoutBtn = document.getElementById("logoutBtn");
+
+    // 🔹 Logout
+    logoutBtn.addEventListener("click", async () => {
+      await signOut(auth);
+      window.location.href = "login.html";
+    });
 
     // 🔹 Cek login
     onAuthStateChanged(auth, (user) => {
@@ -75,55 +55,49 @@
       }
     });
 
-    // 🔹 Ambil daftar mapel dari soal
+    // 🔹 Warna-warna berbeda untuk tiap card
+    const colors = [
+      "from-pink-400 to-pink-300",
+      "from-blue-400 to-blue-300",
+      "from-green-400 to-green-300",
+      "from-purple-400 to-purple-300",
+      "from-orange-400 to-orange-300",
+      "from-teal-400 to-teal-300",
+      "from-red-400 to-red-300",
+    ];
+
+    // 🔹 Ambil daftar mapel dari Firestore
     async function loadRak() {
       const snapshot = await getDocs(collection(db, "soal"));
       const mapelSet = new Set();
-
       snapshot.forEach(docSnap => {
         const data = docSnap.data();
         if (data.mapel) mapelSet.add(data.mapel);
       });
 
       rakMapel.innerHTML = "";
-
-      // Variasi warna + icon
-      const colors = [
-        "bg-green-100 text-green-700 border-l-4 border-green-500",
-        "bg-purple-100 text-purple-700 border-l-4 border-purple-500",
-        "bg-blue-100 text-blue-700 border-l-4 border-blue-500",
-        "bg-red-100 text-red-700 border-l-4 border-red-500",
-        "bg-yellow-100 text-yellow-700 border-l-4 border-yellow-500"
-      ];
-
-      const icons = ["flame", "sun", "star", "atom", "book-open"];
-
       let i = 0;
       [...mapelSet].forEach(mapel => {
-        const style = colors[i % colors.length];
-        const icon = icons[i % icons.length];
+        const color = colors[i % colors.length]; // looping warna
         i++;
 
         const card = document.createElement("div");
-        card.className = `flex items-center gap-4 ${style} p-5 rounded-xl shadow cursor-pointer hover:scale-[1.02] transition`;
+        card.className = `flex items-center bg-white shadow-md rounded-xl overflow-hidden cursor-pointer hover:shadow-lg transition`;
 
         card.innerHTML = `
-          <i data-lucide="${icon}" class="w-8 h-8"></i>
-          <div>
-            <h2 class="text-lg font-semibold">${mapel}</h2>
-            <p class="text-sm opacity-70">Kumpulan soal ${mapel}</p>
+          <div class="w-2 h-full bg-gradient-to-b ${color}"></div>
+          <div class="flex-1 p-6">
+            <h2 class="text-xl font-semibold text-gray-800">${mapel}</h2>
+            <p class="text-gray-500 text-sm">Klik untuk mulai soal</p>
           </div>
         `;
 
         card.addEventListener("click", () => {
-          window.location.href = \`quiz.html?mapel=\${encodeURIComponent(mapel)}\`;
+          window.location.href = "quiz.html?mapel=" + encodeURIComponent(mapel);
         });
 
         rakMapel.appendChild(card);
       });
-
-      // Render ulang semua icon Lucide
-      lucide.createIcons();
     }
   </script>
 </body>

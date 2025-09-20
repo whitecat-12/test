@@ -2,24 +2,56 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-  <title>Login</title>
+  <title>Auth System</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="flex items-center justify-center h-screen bg-gray-100">
   <div class="bg-white p-6 rounded-lg shadow-md w-96">
-    <h1 class="text-xl font-bold mb-4 text-center">Login</h1>
+    <h1 class="text-xl font-bold mb-4 text-center">Auth System</h1>
+
+    <!-- 🔹 Tab Menu -->
+    <div class="flex justify-around mb-4">
+      <button id="tabLogin" class="tabBtn font-semibold text-teal-600">Login</button>
+      <button id="tabRegister" class="tabBtn text-gray-500">Register</button>
+      <button id="tabReset" class="tabBtn text-gray-500">Reset</button>
+    </div>
+
+    <!-- 🔹 LOGIN -->
     <form id="loginForm" class="space-y-4">
-      <input type="email" id="email" placeholder="Email" class="w-full border p-2 rounded" required>
-      <input type="password" id="password" placeholder="Password" class="w-full border p-2 rounded" required>
+      <input type="email" id="loginEmail" placeholder="Email" class="w-full border p-2 rounded" required>
+      <input type="password" id="loginPassword" placeholder="Password" class="w-full border p-2 rounded" required>
       <button type="submit" class="w-full bg-teal-600 text-white p-2 rounded">Login</button>
     </form>
+
+    <!-- 🔹 REGISTER -->
+    <form id="registerForm" class="space-y-4 hidden">
+      <input type="email" id="regEmail" placeholder="Email" class="w-full border p-2 rounded" required>
+      <input type="password" id="regPassword" placeholder="Password (min 6)" class="w-full border p-2 rounded" required>
+      <select id="regRole" class="w-full border p-2 rounded">
+        <option value="siswa">Siswa</option>
+        <option value="guru">Guru</option>
+      </select>
+      <button type="submit" class="w-full bg-green-600 text-white p-2 rounded">Daftar</button>
+    </form>
+
+    <!-- 🔹 RESET PASSWORD -->
+    <form id="resetForm" class="space-y-4 hidden">
+      <input type="email" id="resetEmail" placeholder="Email" class="w-full border p-2 rounded" required>
+      <button type="submit" class="w-full bg-orange-500 text-white p-2 rounded">Kirim Link Reset</button>
+    </form>
+
+    <!-- 🔹 Error / Info -->
     <p id="errorMsg" class="text-red-500 text-sm mt-3"></p>
+    <p id="infoMsg" class="text-green-600 text-sm mt-3"></p>
   </div>
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, signInWithEmailAndPassword, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { 
+      getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, 
+      sendPasswordResetEmail, onAuthStateChanged, signOut 
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     // 🔹 Config Firebase
     const firebaseConfig = { 
@@ -35,21 +67,81 @@
     const auth = getAuth(app);
     const db = getFirestore(app);
 
-    // 🔹 Login submit
-    document.getElementById("loginForm").addEventListener("submit", async (e) => {
+    const errorMsg = document.getElementById("errorMsg");
+    const infoMsg = document.getElementById("infoMsg");
+
+    // 🔹 Helper untuk tab switch
+    const forms = {
+      login: document.getElementById("loginForm"),
+      register: document.getElementById("registerForm"),
+      reset: document.getElementById("resetForm"),
+    };
+    const tabs = {
+      login: document.getElementById("tabLogin"),
+      register: document.getElementById("tabRegister"),
+      reset: document.getElementById("tabReset"),
+    };
+
+    function showTab(name) {
+      Object.keys(forms).forEach(k => {
+        forms[k].classList.add("hidden");
+        tabs[k].classList.remove("text-teal-600","font-semibold");
+        tabs[k].classList.add("text-gray-500");
+      });
+      forms[name].classList.remove("hidden");
+      tabs[name].classList.add("text-teal-600","font-semibold");
+      errorMsg.textContent = "";
+      infoMsg.textContent = "";
+    }
+    tabs.login.addEventListener("click", () => showTab("login"));
+    tabs.register.addEventListener("click", () => showTab("register"));
+    tabs.reset.addEventListener("click", () => showTab("reset"));
+
+    // 🔹 LOGIN
+    forms.login.addEventListener("submit", async (e) => {
       e.preventDefault();
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
       try {
-        await signInWithEmailAndPassword(auth, email, password);
-        // clear error
-        document.getElementById("errorMsg").textContent = "";
-      } catch (error) {
-        document.getElementById("errorMsg").textContent = error.message;
+        await signInWithEmailAndPassword(auth, 
+          document.getElementById("loginEmail").value,
+          document.getElementById("loginPassword").value
+        );
+      } catch (err) {
+        errorMsg.textContent = translateError(err.code);
       }
     });
 
-    // 🔹 Cek login & redirect otomatis
+    // 🔹 REGISTER
+    forms.register.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      try {
+        const cred = await createUserWithEmailAndPassword(auth, 
+          document.getElementById("regEmail").value,
+          document.getElementById("regPassword").value
+        );
+        const role = document.getElementById("regRole").value;
+        await setDoc(doc(db, "users", cred.user.uid), {
+          email: cred.user.email,
+          role: role
+        });
+        infoMsg.textContent = "✅ Akun berhasil dibuat, silakan login.";
+        showTab("login");
+      } catch (err) {
+        errorMsg.textContent = translateError(err.code);
+      }
+    });
+
+    // 🔹 RESET PASSWORD
+    forms.reset.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      try {
+        await sendPasswordResetEmail(auth, document.getElementById("resetEmail").value);
+        infoMsg.textContent = "📩 Link reset password sudah dikirim ke email.";
+      } catch (err) {
+        errorMsg.textContent = translateError(err.code);
+      }
+    });
+
+    // 🔹 Redirect setelah login
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         try {
@@ -63,13 +155,26 @@
             }
           } else {
             alert("Data user tidak ditemukan di Firestore.");
-            await auth.signOut();
+            await signOut(auth);
           }
         } catch (err) {
-          console.error("Error ambil role user:", err);
+          console.error("Error ambil role:", err);
         }
       }
     });
+
+    // 🔹 Translate error Firebase ke bahasa Indonesia
+    function translateError(code) {
+      switch(code) {
+        case "auth/invalid-email": return "Email tidak valid.";
+        case "auth/user-disabled": return "Akun dinonaktifkan.";
+        case "auth/user-not-found": return "Email tidak terdaftar.";
+        case "auth/wrong-password": return "Password salah.";
+        case "auth/email-already-in-use": return "Email sudah digunakan.";
+        case "auth/weak-password": return "Password terlalu lemah (min 6 karakter).";
+        default: return "Terjadi kesalahan: " + code;
+      }
+    }
   </script>
 </body>
 </html>

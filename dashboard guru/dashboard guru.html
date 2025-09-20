@@ -19,7 +19,6 @@
       <form id="soalForm" class="space-y-4">
         <input type="hidden" id="soalId">
 
-        <!-- Mata Pelajaran Dinamis -->
         <div>
           <label class="block font-semibold mb-1">Mata Pelajaran:</label>
           <div class="flex gap-2 mb-2">
@@ -65,19 +64,18 @@
       </form>
     </div>
 
-
-
-<!-- 🔹 Form Fakta Harian -->
-<div class="bg-white p-6 rounded-2xl shadow-lg mb-8">
-  <h2 class="text-xl font-bold text-teal-700 mb-4">Fakta Sains Harian</h2>
-  <form id="faktaForm" class="space-y-4">
-    <textarea id="faktaInput" class="w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-400"
-      placeholder="Masukkan fakta sains harian di sini..." required></textarea>
-    <button type="submit" class="w-full bg-teal-600 text-white p-3 rounded-lg hover:bg-teal-700 transition font-semibold flex justify-center items-center gap-2">
-      <i class="fa-solid fa-floppy-disk"></i> Simpan Fakta
-    </button>
-  </form>
-</div>
+    <!-- 🔹 Form Fakta Harian -->
+    <div class="bg-white p-6 rounded-2xl shadow-lg mb-8">
+      <h2 class="text-xl font-bold text-teal-700 mb-4">Fakta Sains Harian</h2>
+      <form id="faktaForm" class="space-y-4">
+        <textarea id="faktaInput" class="w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-400"
+          placeholder="Masukkan fakta sains harian di sini..." required></textarea>
+        <input type="text" id="sumberInput" class="w-full border p-2 rounded-lg focus:ring-1 focus:ring-teal-400" placeholder="Sumber fakta (contoh: Sains Daily)">
+        <button type="submit" class="w-full bg-teal-600 text-white p-3 rounded-lg hover:bg-teal-700 transition font-semibold flex justify-center items-center gap-2">
+          <i class="fa-solid fa-floppy-disk"></i> Simpan Fakta
+        </button>
+      </form>
+    </div>
 
     <!-- Daftar soal -->
     <div id="daftarSoal" class="space-y-6"></div>
@@ -89,7 +87,7 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
     const firebaseConfig = {
@@ -114,6 +112,10 @@
     const tambahMapelBtn = document.getElementById("tambahMapel");
     const daftarMapelDiv = document.getElementById("daftarMapel");
 
+    const faktaForm = document.getElementById("faktaForm");
+    const faktaInput = document.getElementById("faktaInput");
+    const sumberInput = document.getElementById("sumberInput");
+
     let daftarMapel = [];
 
     onAuthStateChanged(auth, (user) => {
@@ -125,44 +127,37 @@
       window.location.href = "login.html";
     });
 
+    // 🔹 Load fakta saat dashboard dibuka
+    async function loadFakta() {
+      const snap = await getDoc(doc(db, "beranda", "faktaHarian"));
+      if (snap.exists()) {
+        faktaInput.value = snap.data().teks || "";
+        sumberInput.value = snap.data().sumber || "";
+      }
+    }
+    loadFakta();
 
-
-        import { setDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-const faktaForm = document.getElementById("faktaForm");
-const faktaInput = document.getElementById("faktaInput");
-
-// 🔹 Load fakta saat dashboard dibuka
-async function loadFakta() {
-  const snap = await getDoc(doc(db, "beranda", "faktaHarian"));
-  if (snap.exists()) {
-    faktaInput.value = snap.data().teks || "";
-  }
-}
-loadFakta();
-
-// 🔹 Simpan fakta baru/ubah fakta lama
-faktaForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  await setDoc(doc(db, "beranda", "faktaHarian"), {
-    teks: faktaInput.value,
-    updatedAt: new Date()
-  });
-  alert("Fakta sains harian berhasil disimpan ✅");
-});
+    // 🔹 Simpan fakta baru/ubah fakta lama
+    faktaForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      await setDoc(doc(db, "beranda", "faktaHarian"), {
+        teks: faktaInput.value,
+        sumber: sumberInput.value || "Sumber tidak diketahui",
+        updatedAt: new Date()
+      });
+      alert("Fakta sains harian berhasil disimpan ✅");
+    });
 
     // Tambah mata pelajaran
     tambahMapelBtn.addEventListener("click", () => {
       const namaMapel = mapelInput.value.trim();
       if (!namaMapel) return;
       if (daftarMapel.includes(namaMapel)) return alert("Mata pelajaran sudah ada!");
-
       daftarMapel.push(namaMapel);
 
       const span = document.createElement("span");
       span.className = "bg-teal-100 text-teal-700 px-3 py-1 rounded-full flex items-center gap-2";
       span.innerHTML = `${namaMapel} <i class="fa-solid fa-xmark cursor-pointer"></i>`;
-      
       span.querySelector("i").addEventListener("click", () => {
         daftarMapel = daftarMapel.filter(m => m !== namaMapel);
         daftarMapelDiv.removeChild(span);
@@ -172,6 +167,7 @@ faktaForm.addEventListener("submit", async (e) => {
       mapelInput.value = "";
     });
 
+    // 🔹 Form soal
     soalForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       const soalId = document.getElementById("soalId").value;
@@ -181,9 +177,7 @@ faktaForm.addEventListener("submit", async (e) => {
         return;
       }
 
-      // ambil mata pelajaran terakhir yang ditambahkan
       const mapel = daftarMapel[daftarMapel.length - 1];
-
       const soalData = {
         mapel: mapel,
         pertanyaan: document.getElementById("pertanyaan").value,
@@ -208,6 +202,7 @@ faktaForm.addEventListener("submit", async (e) => {
       loadSoal();
     });
 
+    // 🔹 Load soal
     async function loadSoal() {
       daftarSoal.innerHTML = "";
       const snapshot = await getDocs(collection(db, "soal"));
@@ -229,7 +224,6 @@ faktaForm.addEventListener("submit", async (e) => {
           </div>
           <div class="p-4 space-y-4 hidden"></div>
         `;
-
         const soalList = container.querySelector("div:last-child");
 
         grouped[mapel].forEach(item => {
@@ -267,6 +261,7 @@ faktaForm.addEventListener("submit", async (e) => {
         daftarSoal.appendChild(container);
       });
 
+      // Edit & Hapus soal
       document.querySelectorAll(".editBtn").forEach(btn => {
         btn.addEventListener("click", async () => {
           const docId = btn.dataset.id;

@@ -127,7 +127,10 @@
 
 
 
-        import { setDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { 
+  getFirestore, collection, addDoc, getDocs, 
+  doc, setDoc, updateDoc, deleteDoc, getDoc 
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 const faktaForm = document.getElementById("faktaForm");
 const faktaInput = document.getElementById("faktaInput");

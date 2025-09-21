@@ -9,7 +9,7 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
-  <!-- Font Awesome untuk ikon -->
+  <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
@@ -48,12 +48,8 @@
             class="w-full border-b border-gray-300 px-1 py-2 focus:outline-none focus:border-blue-500 placeholder-gray-500">
           <div class="flex justify-between items-center mt-3">
             <div class="flex space-x-2 text-blue-500">
-              <button class="p-2 rounded-full hover:bg-blue-50">
-                <i class="fas fa-image"></i>
-              </button>
-              <button class="p-2 rounded-full hover:bg-blue-50">
-                <i class="fas fa-code"></i>
-              </button>
+              <button class="p-2 rounded-full hover:bg-blue-50"><i class="fas fa-image"></i></button>
+              <button class="p-2 rounded-full hover:bg-blue-50"><i class="fas fa-code"></i></button>
             </div>
             <button id="sendBtn" class="bg-blue-500 text-white px-4 py-2 rounded-full font-medium hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
               Post
@@ -128,7 +124,6 @@
         uid: currentUser.uid,
         email: currentUser.email,
         teks: msgInput.value,
-        replies: [],
         likes: 0,
         likedBy: [],
         createdAt: serverTimestamp()
@@ -143,8 +138,7 @@
       onSnapshot(q, (snapshot) => {
         threadsDiv.innerHTML = "";
         snapshot.forEach((docSnap) => {
-          const data = docSnap.data();
-          renderThread(docSnap.id, data);
+          renderThread(docSnap.id, docSnap.data());
         });
         renderMathInElement(threadsDiv, {
           delimiters: [
@@ -160,7 +154,7 @@
       const div = document.createElement("div");
       div.className = "thread-card bg-white p-4 rounded-lg border border-gray-200";
       
-      const colors = ['bg-blue-500', 'bg-red-500', 'bg-green-500', 'bg-purple-500', 'bg-pink-500', 'bg-yellow-500'];
+      const colors = ['bg-blue-500','bg-red-500','bg-green-500','bg-purple-500','bg-pink-500','bg-yellow-500'];
       const colorIndex = Math.abs(hashCode(data.email)) % colors.length;
       const avatarColor = colors[colorIndex];
       const userInitial = data.email.charAt(0).toUpperCase();
@@ -182,12 +176,10 @@
                 <i class="fas fa-heart ${isLiked ? 'text-red-500' : ''}"></i><span>${likeCount}</span>
               </button>
               <button class="reply-btn flex items-center space-x-1" onclick="focusReply('${id}')">
-                <i class="fas fa-comment"></i><span>${(data.replies || []).length}</span>
+                <i class="fas fa-comment"></i><span id="reply-count-${id}">0</span>
               </button>
             </div>
-            <div class="mt-4 space-y-3" id="replies-${id}">
-              ${(data.replies || []).map(r => renderReply(r, colors)).join("")}
-            </div>
+            <div class="mt-4 space-y-3" id="replies-${id}"></div>
             <div class="mt-4 flex items-start space-x-2">
               <div class="avatar bg-gray-200 flex-shrink-0" style="width:32px;height:32px;font-size:0.875rem;">
                 <span>${currentUser.email.charAt(0).toUpperCase()}</span>
@@ -201,6 +193,22 @@
           </div>
         </div>
       `;
+      threadsDiv.appendChild(div);
+
+      // 🔹 Listener replies
+      const repliesRef = collection(db, "threads", id, "replies");
+      const q = query(repliesRef, orderBy("createdAt", "asc"));
+      onSnapshot(q, (snap) => {
+        const repliesDiv = document.getElementById(`replies-${id}`);
+        const replyCountSpan = document.getElementById(`reply-count-${id}`);
+        repliesDiv.innerHTML = "";
+        let count = 0;
+        snap.forEach((r) => {
+          repliesDiv.innerHTML += renderReply(r.data(), colors);
+          count++;
+        });
+        replyCountSpan.textContent = count;
+      });
 
       // Enter key untuk balas
       setTimeout(() => {
@@ -214,8 +222,6 @@
           });
         }
       }, 100);
-
-      threadsDiv.appendChild(div);
     }
 
     // 🔹 Render reply
@@ -232,7 +238,7 @@
             <div class="flex items-center space-x-1">
               <p class="text-xs font-medium text-gray-900">${r.email}</p>
               <span class="text-xs text-gray-500">•</span>
-              <p class="text-xs text-gray-500">${formatDate(r.createdAt?.toDate())}</p>
+              <p class="text-xs text-gray-500">${formatDate(r.createdAt?.toDate?.() || r.createdAt)}</p>
             </div>
             <p class="mt-1 text-sm text-gray-800">${r.teks}</p>
           </div>
@@ -240,18 +246,16 @@
       `;
     }
 
-    // 🔹 Balas thread
+    // 🔹 Balas thread (subkoleksi)
     window.replyToThread = async function(id) {
       const input = document.getElementById(`reply-${id}`);
       if (!input.value.trim()) return;
-      const ref = doc(db, "threads", id);
-      await updateDoc(ref, {
-        replies: arrayUnion({
-          uid: currentUser.uid,
-          email: currentUser.email,
-          teks: input.value,
-          createdAt: serverTimestamp()
-        })
+      const repliesRef = collection(db, "threads", id, "replies");
+      await addDoc(repliesRef, {
+        uid: currentUser.uid,
+        email: currentUser.email,
+        teks: input.value,
+        createdAt: serverTimestamp()
       });
       input.value = "";
     };
@@ -262,7 +266,6 @@
       const snap = await getDoc(ref);
       const data = snap.data();
       const currentLikes = data.likes || 0;
-      const likedBy = data.likedBy || [];
       if (isCurrentlyLiked) {
         await updateDoc(ref, { likes: currentLikes - 1, likedBy: arrayRemove(currentUser.uid) });
       } else {

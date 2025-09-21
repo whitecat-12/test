@@ -1,16 +1,19 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="id">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Forum Diskusi</title>
   <script src="https://cdn.tailwindcss.com"></script>
+
   <!-- KaTeX -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
   <style>
     body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
     .thread-card { transition: all 0.2s ease; }
@@ -18,6 +21,7 @@
     .like-btn:hover { color: #e53e3e; }
     .reply-btn:hover { color: #3182ce; }
     .avatar { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; }
+    .katex-display { margin: 0.5rem 0; }
   </style>
 </head>
 <body class="bg-gray-50 flex flex-col min-h-screen">
@@ -97,6 +101,11 @@
     let currentUser = null;
     let currentProfile = null;
 
+    // 🔹 Fungsi global (supaya bisa dipanggil dari innerHTML)
+    window.replyToThread = replyToThread;
+    window.likeThread = likeThread;
+    window.focusReply = (id) => document.getElementById(`reply-${id}`).focus();
+
     // 🔹 Ambil profil user
     async function getUserProfile(uid) {
       const userRef = doc(db, "users", uid);
@@ -104,12 +113,10 @@
       return snap.exists() ? snap.data() : null;
     }
 
-    // 🔹 Aktifkan tombol hanya kalau ada teks
     msgInput.addEventListener('input', () => {
       sendBtn.disabled = !msgInput.value.trim();
     });
 
-    // 🔹 Cek login
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
         window.location.href = "index.html";
@@ -121,12 +128,10 @@
       }
     });
 
-    // 🔹 Logout
     logoutBtn.addEventListener("click", async () => {
       await signOut(auth);
     });
 
-    // 🔹 Post thread baru
     sendBtn.addEventListener("click", async () => {
       if (!msgInput.value.trim()) return;
       await addDoc(collection(db, "threads"), {
@@ -142,7 +147,6 @@
       sendBtn.disabled = true;
     });
 
-    // 🔹 Ambil thread real-time
     function loadThreads() {
       const q = query(collection(db, "threads"), orderBy("createdAt", "desc"));
       onSnapshot(q, (snapshot) => {
@@ -159,7 +163,6 @@
       });
     }
 
-    // 🔹 Render Thread
     function renderThread(id, data) {
       const div = document.createElement("div");
       div.className = "thread-card bg-white p-4 rounded-lg border border-gray-200";
@@ -205,7 +208,6 @@
       `;
       threadsDiv.appendChild(div);
 
-      // 🔹 Listener replies
       const repliesRef = collection(db, "threads", id, "replies");
       const q = query(repliesRef, orderBy("createdAt", "asc"));
       onSnapshot(q, (snap) => {
@@ -218,23 +220,15 @@
           count++;
         });
         replyCountSpan.textContent = count;
+        renderMathInElement(repliesDiv, {
+          delimiters: [
+            {left: "$$", right: "$$", display: true},
+            {left: "$", right: "$", display: false}
+          ]
+        });
       });
-
-      // Enter key untuk balas
-      setTimeout(() => {
-        const replyInput = div.querySelector(`#reply-${id}`);
-        if (replyInput) {
-          replyInput.addEventListener("keydown", (e) => {
-            if (e.key === "Enter") {
-              e.preventDefault();
-              window.replyToThread(id);
-            }
-          });
-        }
-      }, 100);
     }
 
-    // 🔹 Render reply
     function renderReply(r, colors) {
       const replyColorIndex = Math.abs(hashCode(r.name || r.email)) % colors.length;
       const replyAvatarColor = colors[replyColorIndex];
@@ -256,8 +250,7 @@
       `;
     }
 
-    // 🔹 Balas thread (subkoleksi)
-    window.replyToThread = async function(id) {
+    async function replyToThread(id) {
       const input = document.getElementById(`reply-${id}`);
       if (!input.value.trim()) return;
       const repliesRef = collection(db, "threads", id, "replies");
@@ -269,10 +262,9 @@
         createdAt: serverTimestamp()
       });
       input.value = "";
-    };
+    }
 
-    // 🔹 Like / Unlike
-    window.likeThread = async function(id, isCurrentlyLiked) {
+    async function likeThread(id, isCurrentlyLiked) {
       const ref = doc(db, "threads", id);
       const snap = await getDoc(ref);
       const data = snap.data();
@@ -282,13 +274,8 @@
       } else {
         await updateDoc(ref, { likes: currentLikes + 1, likedBy: arrayUnion(currentUser.uid) });
       }
-    };
+    }
 
-    window.focusReply = function(id) {
-      document.getElementById(`reply-${id}`).focus();
-    };
-
-    // 🔹 Helpers
     function hashCode(str) { let hash = 0; for (let i=0;i<str.length;i++){ hash=str.charCodeAt(i)+((hash<<5)-hash);} return hash; }
     function formatDate(date) {
       if (!date) return 'baru saja';

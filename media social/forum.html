@@ -19,6 +19,79 @@
     .reply-btn:hover { color: #3182ce; }
     .avatar { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; }
     .small-btn { font-size: 0.85rem; padding: .25rem .5rem; border-radius: .5rem; }
+    
+    /* FAB Styles */
+    .fab-container {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      z-index: 1000;
+      transition: all 0.3s ease;
+    }
+    
+    .fab {
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background-color: #3b82f6;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .fab:hover {
+      background-color: #2563eb;
+      transform: scale(1.05);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    }
+    
+    .fab i {
+      font-size: 1.5rem;
+    }
+    
+    .fab-form-container {
+      position: fixed;
+      bottom: 90px;
+      right: 24px;
+      width: 300px;
+      background-color: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+      padding: 16px;
+      z-index: 999;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.3s ease;
+      pointer-events: none;
+    }
+    
+    .fab-form-container.active {
+      opacity: 1;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+    
+    .fab-form-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 998;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    
+    .fab-form-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
   </style>
 </head>
 <body class="bg-gray-50 flex flex-col min-h-screen">
@@ -37,27 +110,41 @@
     </div>
   </header>
 
-  <!-- Post Form -->
-  <div class="bg-white border-b border-gray-200">
-    <div class="max-w-2xl mx-auto p-4">
-      <div class="flex items-start space-x-3">
-        <div class="avatar bg-blue-500">
-          <span id="userInitial" class="text-lg">U</span>
-        </div>
-        <div class="flex-1">
-          <input id="msgInput" type="text" placeholder="Apa yang ingin Anda diskusikan? (bisa LaTeX: $x^2+y^2=z^2$)" 
-            class="w-full border-b border-gray-300 px-1 py-2 focus:outline-none focus:border-blue-500 placeholder-gray-500">
-          <div class="flex justify-between items-center mt-3">
-            <div class="flex space-x-2 text-blue-500">
-              <button class="p-2 rounded-full hover:bg-blue-50"><i class="fas fa-image"></i></button>
-              <button class="p-2 rounded-full hover:bg-blue-50"><i class="fas fa-code"></i></button>
-            </div>
-            <button id="sendBtn" class="bg-blue-500 text-white px-4 py-2 rounded-full font-medium hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
-              Post
-            </button>
-          </div>
-        </div>
+  <!-- Post Form (Hidden by default, will be shown via FAB) -->
+  <div class="fab-form-overlay" id="fabFormOverlay"></div>
+  
+  <div class="fab-form-container" id="fabFormContainer">
+    <div class="flex items-start space-x-3 mb-4">
+      <div class="avatar bg-blue-500">
+        <span id="userInitial" class="text-lg">U</span>
       </div>
+      <div>
+        <p class="text-sm font-semibold" id="fabUserName">User</p>
+      </div>
+    </div>
+    
+    <textarea 
+      id="fabMsgInput" 
+      placeholder="Apa yang ingin Anda diskusikan? (bisa LaTeX: $x^2+y^2=z^2$)" 
+      rows="4"
+      class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+    ></textarea>
+    
+    <div class="flex justify-between items-center mt-3">
+      <div class="flex space-x-2 text-blue-500">
+        <button class="p-2 rounded-full hover:bg-blue-50"><i class="fas fa-image"></i></button>
+        <button class="p-2 rounded-full hover:bg-blue-50"><i class="fas fa-code"></i></button>
+      </div>
+      <button id="fabSendBtn" class="bg-blue-500 text-white px-4 py-2 rounded-full font-medium hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+        Post
+      </button>
+    </div>
+  </div>
+
+  <!-- FAB Button -->
+  <div class="fab-container">
+    <div class="fab" id="fabButton">
+      <i class="fas fa-plus"></i>
     </div>
   </div>
 
@@ -91,13 +178,46 @@
     const db = getFirestore(app);
 
     const threadsDiv = document.getElementById("threads");
-    const msgInput = document.getElementById("msgInput");
-    const sendBtn = document.getElementById("sendBtn");
     const logoutBtn = document.getElementById("logoutBtn");
     const userInitial = document.getElementById("userInitial");
+    const fabUserName = document.getElementById("fabUserName");
+    
+    // FAB elements
+    const fabButton = document.getElementById("fabButton");
+    const fabFormContainer = document.getElementById("fabFormContainer");
+    const fabFormOverlay = document.getElementById("fabFormOverlay");
+    const fabMsgInput = document.getElementById("fabMsgInput");
+    const fabSendBtn = document.getElementById("fabSendBtn");
 
     let currentUser = null;
     let currentProfile = null;
+
+    // Toggle FAB form
+    function toggleFabForm() {
+      fabFormContainer.classList.toggle("active");
+      fabFormOverlay.classList.toggle("active");
+      
+      if (fabFormContainer.classList.contains("active")) {
+        fabMsgInput.focus();
+      }
+    }
+
+    // Close FAB form
+    function closeFabForm() {
+      fabFormContainer.classList.remove("active");
+      fabFormOverlay.classList.remove("active");
+      fabMsgInput.value = "";
+      fabSendBtn.disabled = true;
+    }
+
+    // Event listeners for FAB
+    fabButton.addEventListener("click", toggleFabForm);
+    fabFormOverlay.addEventListener("click", closeFabForm);
+
+    // Aktifkan tombol hanya kalau ada teks
+    fabMsgInput.addEventListener('input', () => {
+      fabSendBtn.disabled = !fabMsgInput.value.trim();
+    });
 
     // Ambil profil user (dari collection users -> field name)
     async function getUserProfile(uid) {
@@ -111,11 +231,6 @@
       }
     }
 
-    // Aktifkan tombol hanya kalau ada teks
-    msgInput.addEventListener('input', () => {
-      sendBtn.disabled = !msgInput.value.trim();
-    });
-
     // Cek login
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
@@ -123,7 +238,9 @@
       } else {
         currentUser = user;
         currentProfile = await getUserProfile(user.uid);
-        userInitial.textContent = (currentProfile?.name?.charAt(0) || user.email.charAt(0)).toUpperCase();
+        const initial = (currentProfile?.name?.charAt(0) || user.email.charAt(0)).toUpperCase();
+        userInitial.textContent = initial;
+        fabUserName.textContent = currentProfile?.name || user.email;
         loadThreads();
       }
     });
@@ -133,24 +250,31 @@
       await signOut(auth);
     });
 
-    // Post thread baru
-    sendBtn.addEventListener("click", async () => {
-      if (!msgInput.value.trim()) return;
+    // Post thread baru dari FAB form
+    fabSendBtn.addEventListener("click", async () => {
+      if (!fabMsgInput.value.trim()) return;
       try {
         await addDoc(collection(db, "threads"), {
           uid: currentUser.uid,
           email: currentUser.email,
           name: currentProfile?.name || currentUser.email,
-          teks: msgInput.value,
+          teks: fabMsgInput.value,
           likes: 0,
           likedBy: [],
           createdAt: serverTimestamp()
         });
-        msgInput.value = "";
-        sendBtn.disabled = true;
+        closeFabForm();
       } catch (err) {
         console.error("add thread error:", err);
         alert("Gagal membuat thread: " + err.message);
+      }
+    });
+
+    // Enter key untuk post dari FAB form
+    fabMsgInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && e.ctrlKey) {
+        e.preventDefault();
+        fabSendBtn.click();
       }
     });
 

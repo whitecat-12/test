@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Forum Diskusi</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- KaTeX -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+  <!-- Font Awesome untuk ikon -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+    .thread-card { transition: all 0.2s ease; }
+    .thread-card:hover { box-shadow: 0 4px 6px -1px rgba(0,0,0,.1), 0 2px 4px -1px rgba(0,0,0,.06); }
+    .like-btn:hover { color: #e53e3e; }
+    .reply-btn:hover { color: #3182ce; }
+    .avatar { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; }
+  </style>
+</head>
+<body class="bg-gray-50 flex flex-col min-h-screen">
+
+  <!-- Header -->
+  <header class="bg-white border-b border-gray-200 sticky top-0 z-10">
+    <div class="max-w-2xl mx-auto p-4 flex justify-between items-center">
+      <div class="flex items-center space-x-2">
+        <i class="fab fa-twitter text-blue-500 text-2xl"></i>
+        <h1 class="text-xl font-bold text-gray-900">Forum Diskusi</h1>
+      </div>
+      <button id="logoutBtn" class="bg-white text-gray-700 px-4 py-2 rounded-full border border-gray-300 hover:bg-gray-50 flex items-center space-x-1">
+        <i class="fas fa-sign-out-alt"></i>
+        <span>Logout</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Post Form -->
+  <div class="bg-white border-b border-gray-200">
+    <div class="max-w-2xl mx-auto p-4">
+      <div class="flex items-start space-x-3">
+        <div class="avatar bg-blue-500">
+          <span id="userInitial" class="text-lg">U</span>
+        </div>
+        <div class="flex-1">
+          <input id="msgInput" type="text" placeholder="Apa yang ingin Anda diskusikan? (bisa LaTeX: $x^2+y^2=z^2$)" 
+            class="w-full border-b border-gray-300 px-1 py-2 focus:outline-none focus:border-blue-500 placeholder-gray-500">
+          <div class="flex justify-between items-center mt-3">
+            <div class="flex space-x-2 text-blue-500">
+              <button class="p-2 rounded-full hover:bg-blue-50">
+                <i class="fas fa-image"></i>
+              </button>
+              <button class="p-2 rounded-full hover:bg-blue-50">
+                <i class="fas fa-code"></i>
+              </button>
+            </div>
+            <button id="sendBtn" class="bg-blue-500 text-white px-4 py-2 rounded-full font-medium hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+              Post
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Thread Container -->
+  <main class="flex-1 bg-gray-50">
+    <div id="threads" class="max-w-2xl mx-auto p-4 space-y-4"></div>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { 
+      getFirestore, collection, addDoc, serverTimestamp, 
+      query, orderBy, onSnapshot, doc, updateDoc, 
+      arrayUnion, arrayRemove, getDoc
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    // 🔹 Firebase Config
+    const firebaseConfig = { 
+      apiKey: "AIzaSyAJ5I8k2MzAyDLt9fUcXHRNtRVjKB_ETLY",
+      authDomain: "projectid-81104.firebaseapp.com",
+      projectId: "projectid-81104",
+      storageBucket: "projectid-81104.appspot.com",
+      messagingSenderId: "554913260457",
+      appId: "1:554913260457:web:bf988867ebfd902c651ab8"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    const threadsDiv = document.getElementById("threads");
+    const msgInput = document.getElementById("msgInput");
+    const sendBtn = document.getElementById("sendBtn");
+    const logoutBtn = document.getElementById("logoutBtn");
+    const userInitial = document.getElementById("userInitial");
+
+    let currentUser = null;
+
+    // 🔹 Aktifkan tombol hanya kalau ada teks
+    msgInput.addEventListener('input', () => {
+      sendBtn.disabled = !msgInput.value.trim();
+    });
+
+    // 🔹 Cek login
+    onAuthStateChanged(auth, (user) => {
+      if (!user) {
+        window.location.href = "index.html";
+      } else {
+        currentUser = user;
+        userInitial.textContent = user.email.charAt(0).toUpperCase();
+        loadThreads();
+      }
+    });
+
+    // 🔹 Logout
+    logoutBtn.addEventListener("click", async () => {
+      await signOut(auth);
+    });
+
+    // 🔹 Post thread baru
+    sendBtn.addEventListener("click", async () => {
+      if (!msgInput.value.trim()) return;
+      await addDoc(collection(db, "threads"), {
+        uid: currentUser.uid,
+        email: currentUser.email,
+        teks: msgInput.value,
+        replies: [],
+        likes: 0,
+        likedBy: [],
+        createdAt: serverTimestamp()
+      });
+      msgInput.value = "";
+      sendBtn.disabled = true;
+    });
+
+    // 🔹 Ambil thread real-time
+    function loadThreads() {
+      const q = query(collection(db, "threads"), orderBy("createdAt", "desc"));
+      onSnapshot(q, (snapshot) => {
+        threadsDiv.innerHTML = "";
+        snapshot.forEach((docSnap) => {
+          const data = docSnap.data();
+          renderThread(docSnap.id, data);
+        });
+        renderMathInElement(threadsDiv, {
+          delimiters: [
+            {left: "$$", right: "$$", display: true},
+            {left: "$", right: "$", display: false}
+          ]
+        });
+      });
+    }
+
+    // 🔹 Render Thread
+    function renderThread(id, data) {
+      const div = document.createElement("div");
+      div.className = "thread-card bg-white p-4 rounded-lg border border-gray-200";
+      
+      const colors = ['bg-blue-500', 'bg-red-500', 'bg-green-500', 'bg-purple-500', 'bg-pink-500', 'bg-yellow-500'];
+      const colorIndex = Math.abs(hashCode(data.email)) % colors.length;
+      const avatarColor = colors[colorIndex];
+      const userInitial = data.email.charAt(0).toUpperCase();
+      const isLiked = data.likedBy && data.likedBy.includes(currentUser.uid);
+      const likeCount = data.likes || 0;
+
+      div.innerHTML = `
+        <div class="flex items-start space-x-3">
+          <div class="avatar ${avatarColor}"><span>${userInitial}</span></div>
+          <div class="flex-1">
+            <div class="flex items-center space-x-1">
+              <p class="text-sm font-semibold text-gray-900">${data.email}</p>
+              <span class="text-xs text-gray-500">•</span>
+              <p class="text-xs text-gray-500">${formatDate(data.createdAt?.toDate())}</p>
+            </div>
+            <p class="mt-2 text-gray-800">${data.teks}</p>
+            <div class="mt-3 flex items-center space-x-4 text-gray-500">
+              <button class="like-btn flex items-center space-x-1 ${isLiked ? 'text-red-500' : ''}" onclick="likeThread('${id}', ${isLiked})">
+                <i class="fas fa-heart ${isLiked ? 'text-red-500' : ''}"></i><span>${likeCount}</span>
+              </button>
+              <button class="reply-btn flex items-center space-x-1" onclick="focusReply('${id}')">
+                <i class="fas fa-comment"></i><span>${(data.replies || []).length}</span>
+              </button>
+            </div>
+            <div class="mt-4 space-y-3" id="replies-${id}">
+              ${(data.replies || []).map(r => renderReply(r, colors)).join("")}
+            </div>
+            <div class="mt-4 flex items-start space-x-2">
+              <div class="avatar bg-gray-200 flex-shrink-0" style="width:32px;height:32px;font-size:0.875rem;">
+                <span>${currentUser.email.charAt(0).toUpperCase()}</span>
+              </div>
+              <div class="flex-1 flex items-center">
+                <input id="reply-${id}" type="text" placeholder="Tulis balasan..." 
+                  class="flex-1 border-b border-gray-300 px-1 py-1 text-sm focus:outline-none focus:border-blue-500 placeholder-gray-500">
+                <button onclick="replyToThread('${id}')" class="ml-2 text-blue-500 font-medium text-sm hover:text-blue-700 px-2 py-1">Balas</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+
+      // Enter key untuk balas
+      setTimeout(() => {
+        const replyInput = div.querySelector(`#reply-${id}`);
+        if (replyInput) {
+          replyInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              window.replyToThread(id);
+            }
+          });
+        }
+      }, 100);
+
+      threadsDiv.appendChild(div);
+    }
+
+    // 🔹 Render reply
+    function renderReply(r, colors) {
+      const replyColorIndex = Math.abs(hashCode(r.email)) % colors.length;
+      const replyAvatarColor = colors[replyColorIndex];
+      const replyInitial = r.email.charAt(0).toUpperCase();
+      return `
+        <div class="flex items-start space-x-2">
+          <div class="avatar ${replyAvatarColor}" style="width:32px;height:32px;font-size:0.875rem;">
+            <span>${replyInitial}</span>
+          </div>
+          <div class="bg-gray-50 p-3 rounded-lg flex-1">
+            <div class="flex items-center space-x-1">
+              <p class="text-xs font-medium text-gray-900">${r.email}</p>
+              <span class="text-xs text-gray-500">•</span>
+              <p class="text-xs text-gray-500">${formatDate(r.createdAt?.toDate())}</p>
+            </div>
+            <p class="mt-1 text-sm text-gray-800">${r.teks}</p>
+          </div>
+        </div>
+      `;
+    }
+
+    // 🔹 Balas thread
+    window.replyToThread = async function(id) {
+      const input = document.getElementById(`reply-${id}`);
+      if (!input.value.trim()) return;
+      const ref = doc(db, "threads", id);
+      await updateDoc(ref, {
+        replies: arrayUnion({
+          uid: currentUser.uid,
+          email: currentUser.email,
+          teks: input.value,
+          createdAt: serverTimestamp()
+        })
+      });
+      input.value = "";
+    };
+
+    // 🔹 Like / Unlike
+    window.likeThread = async function(id, isCurrentlyLiked) {
+      const ref = doc(db, "threads", id);
+      const snap = await getDoc(ref);
+      const data = snap.data();
+      const currentLikes = data.likes || 0;
+      const likedBy = data.likedBy || [];
+      if (isCurrentlyLiked) {
+        await updateDoc(ref, { likes: currentLikes - 1, likedBy: arrayRemove(currentUser.uid) });
+      } else {
+        await updateDoc(ref, { likes: currentLikes + 1, likedBy: arrayUnion(currentUser.uid) });
+      }
+    };
+
+    window.focusReply = function(id) {
+      document.getElementById(`reply-${id}`).focus();
+    };
+
+    // 🔹 Helpers
+    function hashCode(str) { let hash = 0; for (let i=0;i<str.length;i++){ hash=str.charCodeAt(i)+((hash<<5)-hash);} return hash; }
+    function formatDate(date) {
+      if (!date) return 'baru saja';
+      const now = new Date(), diff = Math.floor((now - date)/1000);
+      if (diff<60) return 'beberapa detik lalu';
+      if (diff<3600) return `${Math.floor(diff/60)} menit lalu`;
+      if (diff<86400) return `${Math.floor(diff/3600)} jam lalu`;
+      if (diff<2592000) return `${Math.floor(diff/86400)} hari lalu`;
+      return date.toLocaleDateString('id-ID',{year:'numeric',month:'short',day:'numeric'});
+    }
+  </script>
+</body>
+</html>

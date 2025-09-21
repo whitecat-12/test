@@ -95,6 +95,14 @@
     const userInitial = document.getElementById("userInitial");
 
     let currentUser = null;
+    let currentProfile = null;
+
+    // 🔹 Ambil profil user
+    async function getUserProfile(uid) {
+      const userRef = doc(db, "users", uid);
+      const snap = await getDoc(userRef);
+      return snap.exists() ? snap.data() : null;
+    }
 
     // 🔹 Aktifkan tombol hanya kalau ada teks
     msgInput.addEventListener('input', () => {
@@ -102,12 +110,13 @@
     });
 
     // 🔹 Cek login
-    onAuthStateChanged(auth, (user) => {
+    onAuthStateChanged(auth, async (user) => {
       if (!user) {
         window.location.href = "index.html";
       } else {
         currentUser = user;
-        userInitial.textContent = user.email.charAt(0).toUpperCase();
+        currentProfile = await getUserProfile(user.uid);
+        userInitial.textContent = (currentProfile?.username?.charAt(0) || user.email.charAt(0)).toUpperCase();
         loadThreads();
       }
     });
@@ -123,6 +132,7 @@
       await addDoc(collection(db, "threads"), {
         uid: currentUser.uid,
         email: currentUser.email,
+        username: currentProfile?.username || currentUser.email,
         teks: msgInput.value,
         likes: 0,
         likedBy: [],
@@ -155,9 +165,9 @@
       div.className = "thread-card bg-white p-4 rounded-lg border border-gray-200";
       
       const colors = ['bg-blue-500','bg-red-500','bg-green-500','bg-purple-500','bg-pink-500','bg-yellow-500'];
-      const colorIndex = Math.abs(hashCode(data.email)) % colors.length;
+      const colorIndex = Math.abs(hashCode(data.username || data.email)) % colors.length;
       const avatarColor = colors[colorIndex];
-      const userInitial = data.email.charAt(0).toUpperCase();
+      const userInitial = (data.username || data.email).charAt(0).toUpperCase();
       const isLiked = data.likedBy && data.likedBy.includes(currentUser.uid);
       const likeCount = data.likes || 0;
 
@@ -166,7 +176,7 @@
           <div class="avatar ${avatarColor}"><span>${userInitial}</span></div>
           <div class="flex-1">
             <div class="flex items-center space-x-1">
-              <p class="text-sm font-semibold text-gray-900">${data.email}</p>
+              <p class="text-sm font-semibold text-gray-900">${data.username || data.email}</p>
               <span class="text-xs text-gray-500">•</span>
               <p class="text-xs text-gray-500">${formatDate(data.createdAt?.toDate())}</p>
             </div>
@@ -182,7 +192,7 @@
             <div class="mt-4 space-y-3" id="replies-${id}"></div>
             <div class="mt-4 flex items-start space-x-2">
               <div class="avatar bg-gray-200 flex-shrink-0" style="width:32px;height:32px;font-size:0.875rem;">
-                <span>${currentUser.email.charAt(0).toUpperCase()}</span>
+                <span>${(currentProfile?.username?.charAt(0) || currentUser.email.charAt(0)).toUpperCase()}</span>
               </div>
               <div class="flex-1 flex items-center">
                 <input id="reply-${id}" type="text" placeholder="Tulis balasan..." 
@@ -226,9 +236,9 @@
 
     // 🔹 Render reply
     function renderReply(r, colors) {
-      const replyColorIndex = Math.abs(hashCode(r.email)) % colors.length;
+      const replyColorIndex = Math.abs(hashCode(r.username || r.email)) % colors.length;
       const replyAvatarColor = colors[replyColorIndex];
-      const replyInitial = r.email.charAt(0).toUpperCase();
+      const replyInitial = (r.username || r.email).charAt(0).toUpperCase();
       return `
         <div class="flex items-start space-x-2">
           <div class="avatar ${replyAvatarColor}" style="width:32px;height:32px;font-size:0.875rem;">
@@ -236,7 +246,7 @@
           </div>
           <div class="bg-gray-50 p-3 rounded-lg flex-1">
             <div class="flex items-center space-x-1">
-              <p class="text-xs font-medium text-gray-900">${r.email}</p>
+              <p class="text-xs font-medium text-gray-900">${r.username || r.email}</p>
               <span class="text-xs text-gray-500">•</span>
               <p class="text-xs text-gray-500">${formatDate(r.createdAt?.toDate?.() || r.createdAt)}</p>
             </div>
@@ -254,6 +264,7 @@
       await addDoc(repliesRef, {
         uid: currentUser.uid,
         email: currentUser.email,
+        username: currentProfile?.username || currentUser.email,
         teks: input.value,
         createdAt: serverTimestamp()
       });

@@ -68,6 +68,21 @@
             font-size: 1.25rem;
             color: #4f91f2;
         }
+
+        /* Animasi untuk kartu */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+
+        .card-hover:hover {
+            animation: float 2s ease-in-out infinite;
+        }
     </style>
 </head>
 <body>
@@ -88,13 +103,8 @@
         <!-- Main Content Area -->
         <main class="pb-20">
             <div class="p-4">
-                <!-- Judul dengan ikon flask dihapus -->
-                <h1 class="text-3xl font-extrabold text-center mb-6 text-sky-400">
-                    <!-- Teks "Teta Sains" dan ikon flask di bawah telah dihapus -->
-                </h1>
-
                 <!-- Container Rak -->
-                <div id="rakMapel" class="grid grid-cols-1 gap-4"></div>
+                <div id="rakMapel" class="grid grid-cols-1 gap-5"></div>
             </div>
         </main>
         
@@ -162,30 +172,35 @@
 
             rakMapel.innerHTML = "";
 
-            const colors = [
-                "bg-white text-green-700 border-l-4 border-green-500",
-                "bg-white text-purple-700 border-l-4 border-purple-500",
-                "bg-white text-blue-700 border-l-4 border-blue-500",
-                "bg-white text-red-700 border-l-4 border-red-500",
-                "bg-white text-yellow-700 border-l-4 border-yellow-500"
+            // Warna-warna cerah dan ramah anak tanpa gradien
+            const colorSchemes = [
+                { bg: "bg-blue-100", border: "border-l-8 border-blue-400", text: "text-blue-800", icon: "flask", iconColor: "text-blue-500" },
+                { bg: "bg-green-100", border: "border-l-8 border-green-400", text: "text-green-800", icon: "atom", iconColor: "text-green-500" },
+                { bg: "bg-yellow-100", border: "border-l-8 border-yellow-400", text: "text-yellow-800", icon: "bolt", iconColor: "text-yellow-500" },
+                { bg: "bg-red-100", border: "border-l-8 border-red-400", text: "text-red-800", icon: "dna", iconColor: "text-red-500" },
+                { bg: "bg-purple-100", border: "border-l-8 border-purple-400", text: "text-purple-800", icon: "calculator", iconColor: "text-purple-500" },
+                { bg: "bg-pink-100", border: "border-l-8 border-pink-400", text: "text-pink-800", icon: "star", iconColor: "text-pink-500" },
+                { bg: "bg-indigo-100", border: "border-l-8 border-indigo-400", text: "text-indigo-800", icon: "microscope", iconColor: "text-indigo-500" }
             ];
-
-            const icons = ["flask", "atom", "bolt", "dna", "calculator"];
 
             let i = 0;
             [...mapelSet].forEach(mapel => {
-                const style = colors[i % colors.length];
-                const icon = icons[i % icons.length];
+                const scheme = colorSchemes[i % colorSchemes.length];
                 i++;
 
                 const card = document.createElement("div");
-                card.className = `flex items-center gap-4 ${style} p-5 rounded-xl shadow-lg cursor-pointer transition duration-300 hover:shadow-xl`;
+                card.className = `flex items-center gap-5 ${scheme.bg} ${scheme.border} ${scheme.text} p-6 rounded-2xl shadow-md cursor-pointer card-hover`;
 
                 card.innerHTML = `
-                    <i class="fas fa-${icon} text-xl"></i>
-                    <div>
-                        <h2 class="text-lg font-semibold">${mapel}</h2>
-                        <p class="text-sm opacity-70">Kumpulan soal ${mapel}</p>
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-${scheme.icon} text-3xl ${scheme.iconColor}"></i>
+                    </div>
+                    <div class="flex-grow">
+                        <h2 class="text-xl font-bold mb-1">${mapel}</h2>
+                        <p class="text-sm opacity-80">Kumpulan soal ${mapel} yang seru!</p>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-chevron-right opacity-60"></i>
                     </div>
                 `;
 
@@ -195,6 +210,16 @@
 
                 rakMapel.appendChild(card);
             });
+
+            // Jika tidak ada mata pelajaran
+            if (rakMapel.innerHTML === "") {
+                rakMapel.innerHTML = `
+                    <div class="text-center py-10">
+                        <i class="fas fa-book-open text-5xl text-gray-300 mb-4"></i>
+                        <p class="text-gray-500">Belum ada mata pelajaran tersedia</p>
+                    </div>
+                `;
+            }
         }
 
         // Simple interaction for bottom nav

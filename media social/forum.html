@@ -217,6 +217,161 @@
       pointer-events: auto;
     }
     
+    /* Hamburger Menu Styles */
+    .hamburger-menu {
+      position: fixed;
+      top: 0;
+      right: -300px;
+      width: 300px;
+      height: 100%;
+      background-color: white;
+      box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+      z-index: 1001;
+      transition: right 0.3s ease;
+      overflow-y: auto;
+    }
+    
+    .hamburger-menu.active {
+      right: 0;
+    }
+    
+    .hamburger-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 1000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    
+    .hamburger-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    
+    .hamburger-header {
+      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      color: white;
+      padding: 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .hamburger-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+    
+    .hamburger-close {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+    
+    .chat-container {
+      padding: 1rem;
+      height: calc(100% - 70px);
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      margin-bottom: 1rem;
+      padding-right: 0.5rem;
+    }
+    
+    .message {
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: flex-start;
+    }
+    
+    .message.own {
+      flex-direction: row-reverse;
+    }
+    
+    .message-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: white;
+      margin: 0 0.5rem;
+    }
+    
+    .message-content {
+      max-width: 70%;
+      background-color: #f1f5f9;
+      padding: 0.75rem;
+      border-radius: 1rem;
+      position: relative;
+    }
+    
+    .message.own .message-content {
+      background-color: #3b82f6;
+      color: white;
+    }
+    
+    .message-sender {
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+    }
+    
+    .message-time {
+      font-size: 0.65rem;
+      opacity: 0.7;
+      margin-top: 0.25rem;
+      text-align: right;
+    }
+    
+    .chat-input-container {
+      display: flex;
+      gap: 0.5rem;
+    }
+    
+    .chat-input {
+      flex: 1;
+      padding: 0.75rem;
+      border: 1px solid #e2e8f0;
+      border-radius: 1.5rem;
+      outline: none;
+    }
+    
+    .chat-send-btn {
+      background-color: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+    
+    .hamburger-toggle {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0.25rem;
+    }
+    
     /* Improved mobile styles */
     @media (max-width: 414px) {
       .thread-card {
@@ -247,6 +402,11 @@
       .fab-form-container.active {
         transform: translate(50%, 0);
       }
+      
+      .hamburger-menu {
+        width: 85%;
+        right: -85%;
+      }
     }
   </style>
 </head>
@@ -265,7 +425,9 @@
         </div>
         <div class="flex items-center space-x-3">
           <i class="fas fa-search"></i>
-          <i class="fas fa-user-circle text-xl"></i>
+          <button class="hamburger-toggle" id="hamburgerToggle">
+            <i class="fas fa-bars"></i>
+          </button>
         </div>
       </div>
     </header>
@@ -310,6 +472,39 @@
     <div class="fab-container">
       <div class="fab" id="fabButton">
         <i class="fas fa-plus"></i>
+      </div>
+    </div>
+    
+    <!-- Hamburger Menu with Chat -->
+    <div class="hamburger-overlay" id="hamburgerOverlay"></div>
+    
+    <div class="hamburger-menu" id="hamburgerMenu">
+      <div class="hamburger-header">
+        <h2 class="hamburger-title">Chat</h2>
+        <button class="hamburger-close" id="hamburgerClose">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <div class="chat-container">
+        <div class="chat-messages" id="chatMessages">
+          <!-- Chat messages will be dynamically inserted here -->
+          <div class="message">
+            <div class="message-avatar bg-blue-500">B</div>
+            <div class="message-content">
+              <div class="message-sender">Bot</div>
+              <div>Halo! Selamat datang di fitur chat. Ada yang bisa saya bantu?</div>
+              <div class="message-time">12:00</div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="chat-input-container">
+          <input type="text" class="chat-input" id="chatInput" placeholder="Ketik pesan...">
+          <button class="chat-send-btn" id="chatSendBtn">
+            <i class="fas fa-paper-plane"></i>
+          </button>
+        </div>
       </div>
     </div>
     
@@ -372,6 +567,15 @@
     const fabFormOverlay = document.getElementById("fabFormOverlay");
     const fabMsgInput = document.getElementById("fabMsgInput");
     const fabSendBtn = document.getElementById("fabSendBtn");
+    
+    // Hamburger menu elements
+    const hamburgerToggle = document.getElementById("hamburgerToggle");
+    const hamburgerMenu = document.getElementById("hamburgerMenu");
+    const hamburgerOverlay = document.getElementById("hamburgerOverlay");
+    const hamburgerClose = document.getElementById("hamburgerClose");
+    const chatMessages = document.getElementById("chatMessages");
+    const chatInput = document.getElementById("chatInput");
+    const chatSendBtn = document.getElementById("chatSendBtn");
 
     let currentUser = null;
     let currentProfile = null;
@@ -394,9 +598,93 @@
       fabSendBtn.disabled = true;
     }
 
+    // Toggle Hamburger Menu
+    function toggleHamburgerMenu() {
+      hamburgerMenu.classList.toggle("active");
+      hamburgerOverlay.classList.toggle("active");
+      
+      if (hamburgerMenu.classList.contains("active")) {
+        chatInput.focus();
+      }
+    }
+
+    // Close Hamburger Menu
+    function closeHamburgerMenu() {
+      hamburgerMenu.classList.remove("active");
+      hamburgerOverlay.classList.remove("active");
+      chatInput.value = "";
+    }
+
     // Event listeners for FAB
     fabButton.addEventListener("click", toggleFabForm);
     fabFormOverlay.addEventListener("click", closeFabForm);
+
+    // Event listeners for Hamburger Menu
+    hamburgerToggle.addEventListener("click", toggleHamburgerMenu);
+    hamburgerOverlay.addEventListener("click", closeHamburgerMenu);
+    hamburgerClose.addEventListener("click", closeHamburgerMenu);
+
+    // Send chat message
+    function sendChatMessage() {
+      if (!chatInput.value.trim()) return;
+      
+      const message = chatInput.value.trim();
+      const timestamp = new Date();
+      const timeString = timestamp.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+      
+      // Add message to chat UI
+      addMessageToChat(currentProfile?.name || currentUser.email, message, timeString, true);
+      
+      // Clear input
+      chatInput.value = "";
+      
+      // Simulate bot response after a delay
+      setTimeout(() => {
+        const botResponses = [
+          "Terima kasih atas pesannya!",
+          "Saya akan mencatat pertanyaan Anda.",
+          "Apakah ada hal lain yang bisa saya bantu?",
+          "Pesan Anda telah diterima.",
+          "Terima kasih telah menggunakan fitur chat kami."
+        ];
+        const randomResponse = botResponses[Math.floor(Math.random() * botResponses.length)];
+        const botTime = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+        
+        addMessageToChat("Bot", randomResponse, botTime, false);
+      }, 1000);
+    }
+
+    // Add message to chat UI
+    function addMessageToChat(sender, message, time, isOwn) {
+      const messageDiv = document.createElement("div");
+      messageDiv.className = `message ${isOwn ? 'own' : ''}`;
+      
+      const colors = ['bg-blue-500','bg-red-500','bg-green-500','bg-purple-500','bg-pink-500','bg-yellow-500'];
+      const colorIndex = Math.abs(hashCode(sender)) % colors.length;
+      const avatarColor = colors[colorIndex];
+      const initial = sender.charAt(0).toUpperCase();
+      
+      messageDiv.innerHTML = `
+        <div class="message-avatar ${avatarColor}">${initial}</div>
+        <div class="message-content">
+          <div class="message-sender">${escapeHtml(sender)}</div>
+          <div>${escapeHtml(message)}</div>
+          <div class="message-time">${time}</div>
+        </div>
+      `;
+      
+      chatMessages.appendChild(messageDiv);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    // Event listeners for chat
+    chatSendBtn.addEventListener("click", sendChatMessage);
+    chatInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        sendChatMessage();
+      }
+    });
 
     // Aktifkan tombol hanya kalau ada teks
     fabMsgInput.addEventListener('input', () => {

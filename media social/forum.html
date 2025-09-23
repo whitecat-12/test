@@ -331,6 +331,72 @@
       color: #718096;
     }
     
+    /* Pagination Styles */
+    .pagination {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 1rem;
+      gap: 0.5rem;
+    }
+    
+    .pagination-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: #f1f5f9;
+      color: #475569;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .pagination-btn:hover:not(:disabled) {
+      background-color: #e2e8f0;
+    }
+    
+    .pagination-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    
+    .pagination-btn.active {
+      background-color: #3b82f6;
+      color: white;
+    }
+    
+    .pagination-info {
+      font-size: 0.875rem;
+      color: #64748b;
+      margin: 0 0.5rem;
+    }
+    
+    .loading-indicator {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 1rem;
+      color: #64748b;
+    }
+    
+    .loading-spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid #e2e8f0;
+      border-top: 2px solid #3b82f6;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-right: 0.5rem;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
     /* Improved mobile styles */
     @media (max-width: 414px) {
       .thread-card {
@@ -366,6 +432,15 @@
         width: 280px;
         right: -280px;
       }
+      
+      .pagination {
+        padding: 0.75rem;
+      }
+      
+      .pagination-btn {
+        width: 32px;
+        height: 32px;
+      }
     }
   </style>
 </head>
@@ -392,44 +467,77 @@
     </header>
 
     <!-- Sidebar -->
-	<div class="sidebar-overlay" id="sidebarOverlay"></div>
-	
-	<div class="sidebar" id="sidebar">
-	  <div class="sidebar-header">
-	    <div class="sidebar-title">Menu AI</div>
-	    <button class="hamburger" id="closeSidebar">
-	      <i class="fas fa-times"></i>
-	    </button>
-	  </div>
-	  
-	  <div class="sidebar-content">
-	    <!-- Link ke pesan.html -->
-	    <a href="../pesan/pesan.html" class="ai-feature">
-	      <div class="ai-icon">
-	        <i class="fas fa-paper-plane"></i>
-	      </div>
-	      <div class="ai-text">
-	        <div class="ai-title">Message</div>
-	        <div class="ai-desc">Sapa Teman dengan pesan singkat</div>
-	      </div>
-	    </a>
-	    
-	    <!-- Link ke nayra.html -->
-	    <a href="../ai/nayra.html" class="ai-feature">
-	      <div class="ai-icon">
-	        <i class="fas fa-robot"></i>
-	      </div>
-	      <div class="ai-text">
-	        <div class="ai-title">Nayra AI</div>
-	        <div class="ai-desc">Asisten AI untuk membantu belajar sains</div>
-	      </div>
-	    </a>
-	  </div>
-	</div>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    
+    <div class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-title">Menu AI</div>
+        <button class="hamburger" id="closeSidebar">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <div class="sidebar-content">
+        <div class="ai-feature" onclick="openAIFeature('nayra')">
+          <div class="ai-icon">
+            <i class="fas fa-robot"></i>
+          </div>
+          <div class="ai-text">
+            <div class="ai-title">Nayra AI</div>
+            <div class="ai-desc">Asisten AI untuk membantu belajar sains</div>
+          </div>
+        </div>
+        
+        <div class="ai-feature" onclick="openAIFeature('tutor')">
+          <div class="ai-icon">
+            <i class="fas fa-chalkboard-teacher"></i>
+          </div>
+          <div class="ai-text">
+            <div class="ai-title">AI Tutor</div>
+            <div class="ai-desc">Pembelajaran personal dengan AI</div>
+          </div>
+        </div>
+        
+        <div class="ai-feature" onclick="openAIFeature('quiz')">
+          <div class="ai-icon">
+            <i class="fas fa-question-circle"></i>
+          </div>
+          <div class="ai-text">
+            <div class="ai-title">AI Quiz Generator</div>
+            <div class="ai-desc">Buat kuis otomatis berdasarkan materi</div>
+          </div>
+        </div>
+        
+        <div class="ai-feature" onclick="openAIFeature('explain')">
+          <div class="ai-icon">
+            <i class="fas fa-lightbulb"></i>
+          </div>
+          <div class="ai-text">
+            <div class="ai-title">Penjelasan AI</div>
+            <div class="ai-desc">Dapatkan penjelasan detail konsep sains</div>
+          </div>
+        </div>
+        
+        <div class="ai-feature" onclick="openAIFeature('translate')">
+          <div class="ai-icon">
+            <i class="fas fa-language"></i>
+          </div>
+          <div class="ai-text">
+            <div class="ai-title">Terjemahan AI</div>
+            <div class="ai-desc">Terjemahkan materi sains ke bahasa lain</div>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- Thread Container -->
     <main class="pb-20">
       <div id="threads" class="p-3 space-y-3"></div>
+      <div id="loadingIndicator" class="loading-indicator" style="display: none;">
+        <div class="loading-spinner"></div>
+        <span>Memuat thread...</span>
+      </div>
+      <div id="pagination" class="pagination"></div>
     </main>
 
     <!-- Post Form (Hidden by default, will be shown via FAB) -->
@@ -485,7 +593,7 @@
         <span class="text-xs mt-1">Nayra AI</span>
       </a>
       <a href="kategori/kategori materi.html" class="flex flex-col items-center text-gray-500">
-        <i class="fas fa-chalkboard-teacher nav-icon text-xl"></i>
+        <i class="fas fa-chalkboard-teacher nav-icon text-xl active"></i>
         <span class="text-xs mt-1">Materi Harian</span>
       </a>
       <a href="profil.html" class="flex flex-col items-center text-gray-500">
@@ -502,8 +610,7 @@
       getFirestore, collection, addDoc, serverTimestamp,
       query, orderBy, onSnapshot, doc, updateDoc,
       arrayUnion, arrayRemove, getDoc,
-      deleteDoc, getDocs, writeBatch,
-      limit, startAfter // Tambahkan ini
+      deleteDoc, getDocs, writeBatch, limit, startAfter, endBefore, limitToLast
     } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     // 🔹 Firebase Config (ganti kalau perlu)
@@ -523,6 +630,8 @@
     const threadsDiv = document.getElementById("threads");
     const userInitial = document.getElementById("userInitial");
     const fabUserName = document.getElementById("fabUserName");
+    const loadingIndicator = document.getElementById("loadingIndicator");
+    const paginationDiv = document.getElementById("pagination");
     
     // FAB elements
     const fabButton = document.getElementById("fabButton");
@@ -536,6 +645,16 @@
     const closeSidebar = document.getElementById("closeSidebar");
     const sidebar = document.getElementById("sidebar");
     const sidebarOverlay = document.getElementById("sidebarOverlay");
+
+    // Pagination variables
+    const THREADS_PER_PAGE = 5;
+    let currentPage = 1;
+    let lastVisible = null;
+    let firstVisible = null;
+    let totalThreads = 0;
+    let totalPages = 1;
+    let threadsQuery = null;
+    let threadsUnsubscribe = null;
 
     let currentUser = null;
     let currentProfile = null;
@@ -606,7 +725,7 @@
         const initial = (currentProfile?.name?.charAt(0) || user.email.charAt(0)).toUpperCase();
         userInitial.textContent = initial;
         fabUserName.textContent = currentProfile?.name || user.email;
-        loadThreads();
+        await loadThreads();
       }
     });
 
@@ -624,6 +743,9 @@
           createdAt: serverTimestamp()
         });
         closeFabForm();
+        // Reset to first page after posting
+        currentPage = 1;
+        await loadThreads();
       } catch (err) {
         console.error("add thread error:", err);
         alert("Gagal membuat thread: " + err.message);
@@ -638,44 +760,161 @@
       }
     });
 
-    // Ambil thread real-time
-    let lastVisible = null; // variabel untuk menyimpan referensi thread terakhir yang dimuat
+    // Hitung total jumlah thread untuk pagination
+    async function getTotalThreads() {
+      try {
+        const threadsSnapshot = await getDocs(collection(db, "threads"));
+        return threadsSnapshot.size;
+      } catch (err) {
+        console.error("Error getting total threads:", err);
+        return 0;
+      }
+    }
 
-function loadThreads() {
-  // Membatasi jumlah thread yang diambil per load (misalnya 10)
-  let q = query(
-    collection(db, "threads"),
-    orderBy("createdAt", "desc"),
-    limit(10) // Membatasi 10 thread per load
-  );
+    // Load threads dengan pagination
+    async function loadThreads() {
+      try {
+        loadingIndicator.style.display = "flex";
+        threadsDiv.innerHTML = "";
+        
+        // Unsubscribe previous listener if exists
+        if (threadsUnsubscribe) {
+          threadsUnsubscribe();
+        }
+        
+        // Get total threads count
+        totalThreads = await getTotalThreads();
+        totalPages = Math.ceil(totalThreads / THREADS_PER_PAGE);
+        
+        // Build query based on current page
+        if (currentPage === 1) {
+          threadsQuery = query(
+            collection(db, "threads"), 
+            orderBy("createdAt", "desc"), 
+            limit(THREADS_PER_PAGE)
+          );
+        } else {
+          // We need to get the last document from previous page
+          const firstPageQuery = query(
+            collection(db, "threads"),
+            orderBy("createdAt", "desc"),
+            limit((currentPage - 1) * THREADS_PER_PAGE)
+          );
+          
+          const firstPageSnapshot = await getDocs(firstPageQuery);
+          const lastDoc = firstPageSnapshot.docs[firstPageSnapshot.docs.length - 1];
+          
+          threadsQuery = query(
+            collection(db, "threads"),
+            orderBy("createdAt", "desc"),
+            startAfter(lastDoc),
+            limit(THREADS_PER_PAGE)
+          );
+        }
+        
+        // Set up real-time listener for current page
+        threadsUnsubscribe = onSnapshot(threadsQuery, (snapshot) => {
+          threadsDiv.innerHTML = "";
+          snapshot.forEach((docSnap) => {
+            renderThread(docSnap.id, docSnap.data());
+          });
+          
+          // Update pagination UI
+          renderPagination();
+          
+          // render LaTeX
+          renderMathInElement(threadsDiv, {
+            delimiters: [
+              {left: "$$", right: "$$", display: true},
+              {left: "$", right: "$", display: false}
+            ]
+          });
+          
+          loadingIndicator.style.display = "none";
+        }, (err) => {
+          console.error("thread snapshot error:", err);
+          loadingIndicator.style.display = "none";
+        });
+      } catch (err) {
+        console.error("Error loading threads:", err);
+        loadingIndicator.style.display = "none";
+      }
+    }
 
-  if (lastVisible) {
-    q = query(q, startAfter(lastVisible)); // Memulai load setelah thread terakhir yang dimuat
-  }
+    // Render pagination controls
+    function renderPagination() {
+      if (totalPages <= 1) {
+        paginationDiv.innerHTML = "";
+        return;
+      }
+      
+      let paginationHTML = "";
+      
+      // Previous button
+      paginationHTML += `
+        <button class="pagination-btn" ${currentPage === 1 ? 'disabled' : ''} onclick="changePage(${currentPage - 1})">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+      `;
+      
+      // Page numbers
+      const maxVisiblePages = 5;
+      let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+      let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+      
+      if (endPage - startPage + 1 < maxVisiblePages) {
+        startPage = Math.max(1, endPage - maxVisiblePages + 1);
+      }
+      
+      if (startPage > 1) {
+        paginationHTML += `
+          <button class="pagination-btn" onclick="changePage(1)">1</button>
+          ${startPage > 2 ? '<span class="pagination-info">...</span>' : ''}
+        `;
+      }
+      
+      for (let i = startPage; i <= endPage; i++) {
+        paginationHTML += `
+          <button class="pagination-btn ${i === currentPage ? 'active' : ''}" onclick="changePage(${i})">
+            ${i}
+          </button>
+        `;
+      }
+      
+      if (endPage < totalPages) {
+        paginationHTML += `
+          ${endPage < totalPages - 1 ? '<span class="pagination-info">...</span>' : ''}
+          <button class="pagination-btn" onclick="changePage(${totalPages})">${totalPages}</button>
+        `;
+      }
+      
+      // Next button
+      paginationHTML += `
+        <button class="pagination-btn" ${currentPage === totalPages ? 'disabled' : ''} onclick="changePage(${currentPage + 1})">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      `;
+      
+      // Page info
+      paginationHTML += `
+        <span class="pagination-info">
+          Halaman ${currentPage} dari ${totalPages}
+        </span>
+      `;
+      
+      paginationDiv.innerHTML = paginationHTML;
+    }
 
-  onSnapshot(q, (snapshot) => {
-    threadsDiv.innerHTML = ""; // Menghapus isi sebelumnya
-    snapshot.forEach((docSnap) => {
-      renderThread(docSnap.id, docSnap.data());
-    });
-
-    // Menyimpan thread terakhir yang dimuat untuk paginasi
-    lastVisible = snapshot.docs[snapshot.docs.length - 1];
-
-    // render LaTeX di dalam thread
-    renderMathInElement(threadsDiv, {
-      delimiters: [
-        {left: "$$", right: "$$", display: true},
-        {left: "$", right: "$", display: false}
-      ]
-    });
-
-  }, (err) => {
-    console.error("thread snapshot error:", err);
-  });
-}
-
-    
+    // Change page function
+    window.changePage = async function(page) {
+      if (page < 1 || page > totalPages || page === currentPage) return;
+      
+      currentPage = page;
+      await loadThreads();
+      
+      // Scroll to top of threads
+      threadsDiv.scrollIntoView({ behavior: 'smooth' });
+    };
 
     // Render Thread (dengan tombol delete bila pemilik)
     function renderThread(id, data) {
@@ -846,6 +1085,9 @@ function loadThreads() {
         const threadRef = doc(db, "threads", threadId);
         batch.delete(threadRef);
         await batch.commit();
+        
+        // Reload threads after deletion
+        await loadThreads();
       } catch (err) {
         console.error("delete thread error:", err);
         alert("Gagal menghapus thread: " + err.message);
@@ -886,7 +1128,7 @@ function loadThreads() {
       if (!date) return 'baru saja';
       const now = new Date(), diff = Math.floor((now - date)/1000);
       if (diff<60) return 'beberapa detik lalu';
-      if (diff<3600) return `${Math.floor(diff/60)} menit lalu`;
+      if (diff<3600) return `${Math.floor(diff/60)} mennt lalu`;
       if (diff<86400) return `${Math.floor(diff/3600)} jam lalu`;
       if (diff<2592000) return `${Math.floor(diff/86400)} hari lalu`;
       return date.toLocaleDateString('id-ID',{year:'numeric',month:'short',day:'numeric'});

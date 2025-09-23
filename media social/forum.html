@@ -724,18 +724,7 @@
       }
     });
 
-           // render LaTeX
-        renderMathInElement(threadsDiv, {
-          delimiters: [
-            {left: "$$", right: "$$", display: true},
-            {left: "$", right: "$", display: false}
-          ]
-        });
-      }, (err) => {
-        console.error("thread snapshot error:", err);
-      });
-    }
-
+ 
     // Render Thread (dengan tombol delete bila pemilik)
     function renderThread(id, data) {
       const div = document.createElement("div");

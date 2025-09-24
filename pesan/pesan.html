@@ -50,6 +50,7 @@
     .app-logo {
       display: flex;
       align-items: center;
+      cursor: pointer;
     }
     
     .app-logo-icon {
@@ -171,10 +172,17 @@
       margin-right: 0.25rem;
     }
     
+    .no-users {
+      text-align: center;
+      padding: 2rem;
+      color: #6b7280;
+    }
+    
     .chat-messages {
       padding: 1rem;
       max-height: calc(100vh - 200px);
       overflow-y: auto;
+      display: none;
     }
     
     .message {
@@ -225,7 +233,7 @@
       background: white;
       padding: 0.75rem;
       border-top: 1px solid #e2e8f0;
-      display: flex;
+      display: none;
       align-items: center;
       gap: 0.5rem;
     }
@@ -264,6 +272,29 @@
     .send-button:disabled {
       background-color: #9ca3af;
       cursor: not-allowed;
+    }
+    
+    /* Loading indicator */
+    .loading {
+      display: flex;
+      justify-content: center;
+      padding: 1rem;
+      color: #6b7280;
+    }
+    
+    .loading-spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid #e2e8f0;
+      border-top: 2px solid #3b82f6;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-right: 0.5rem;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
     }
     
     /* Sidebar Styles */
@@ -347,6 +378,8 @@
       background-color: #f7f9fc;
       transition: all 0.3s ease;
       cursor: pointer;
+      text-decoration: none;
+      color: inherit;
     }
     
     .ai-feature:hover {
@@ -414,7 +447,7 @@
     <!-- App Header -->
     <header class="bg-gradient-to-r from-primary to-secondary p-4 text-white">
       <div class="flex justify-between items-center">
-        <div class="app-logo">
+        <div class="app-logo" id="backButton">
           <div class="app-logo-icon" style="background: #4f91f2; color: white;">
             <i class="fas fa-comments"></i>
           </div>
@@ -476,17 +509,20 @@
 
       <!-- User List -->
       <div id="userList" class="user-list">
-        <!-- User items will be populated here -->
+        <div class="loading">
+          <div class="loading-spinner"></div>
+          <span>Memuat pengguna...</span>
+        </div>
       </div>
 
       <!-- Chat Messages (Hidden by default) -->
-      <div id="chatMessages" class="chat-messages" style="display: none;">
+      <div id="chatMessages" class="chat-messages">
         <!-- Messages will be populated here -->
       </div>
     </div>
 
     <!-- Message Input (Hidden by default) -->
-    <div id="messageInputContainer" class="message-input-container" style="display: none;">
+    <div id="messageInputContainer" class="message-input-container">
       <input type="text" id="messageInput" class="message-input" placeholder="Ketik pesan...">
       <button id="sendButton" class="send-button" disabled>
         <i class="fas fa-paper-plane"></i>
@@ -520,11 +556,10 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
     import {
       getFirestore, collection, addDoc, serverTimestamp,
-      query, orderBy, onSnapshot, doc, updateDoc,
-      arrayUnion, arrayRemove, getDoc, getDocs, where
+      query, orderBy, onSnapshot, doc, getDocs
     } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     // Firebase Config
@@ -548,6 +583,7 @@
     const messageInput = document.getElementById("messageInput");
     const sendButton = document.getElementById("sendButton");
     const searchInput = document.getElementById("searchInput");
+    const backButton = document.getElementById("backButton");
     
     // Sidebar elements
     const hamburgerButton = document.getElementById("hamburgerButton");
@@ -558,7 +594,6 @@
     let currentUser = null;
     let currentProfile = null;
     let selectedUser = null;
-    let usersUnsubscribe = null;
     let messagesUnsubscribe = null;
 
     // Toggle sidebar
@@ -606,6 +641,9 @@
       }
     });
 
+    // Back button functionality
+    backButton.addEventListener("click", backToUserList);
+
     async function sendMessage() {
       if (!messageInput.value.trim() || !selectedUser) return;
       
@@ -626,7 +664,9 @@
         sendButton.disabled = true;
         
         // Scroll to bottom of messages
-        chatMessages.scrollTop = chatMessages.scrollHeight;
+        setTimeout(() => {
+          chatMessages.scrollTop = chatMessages.scrollHeight;
+        }, 100);
       } catch (err) {
         console.error("Error sending message:", err);
         alert("Gagal mengirim pesan: " + err.message);
@@ -642,10 +682,18 @@
     async function getUserProfile(uid) {
       try {
         const userRef = doc(db, "users", uid);
-        const snap = await getDoc(userRef);
-        return snap.exists() ? snap.data() : null;
+        const userDoc = await getDocs(collection(db, "users"));
+        let userData = null;
+        
+        userDoc.forEach((doc) => {
+          if (doc.id === uid) {
+            userData = doc.data();
+          }
+        });
+        
+        return userData;
       } catch (err) {
-        console.error("getUserProfile:", err);
+        console.error("Error getting user profile:", err);
         return null;
       }
     }
@@ -653,25 +701,56 @@
     // Get all users (excluding current user)
     async function loadUsers() {
       try {
-        if (usersUnsubscribe) {
-          usersUnsubscribe();
+        userList.innerHTML = `
+          <div class="loading">
+            <div class="loading-spinner"></div>
+            <span>Memuat pengguna...</span>
+          </div>
+        `;
+
+        const usersQuery = query(collection(db, "users"));
+        const querySnapshot = await getDocs(usersQuery);
+        
+        if (querySnapshot.empty) {
+          userList.innerHTML = `
+            <div class="no-users">
+              <i class="fas fa-users fa-2x mb-2"></i>
+              <p>Tidak ada pengguna lain yang ditemukan</p>
+              <p class="text-sm mt-2">Pastikan collection 'users' ada di Firestore</p>
+            </div>
+          `;
+          return;
         }
         
-        const usersQuery = query(collection(db, "users"));
-        usersUnsubscribe = onSnapshot(usersQuery, (snapshot) => {
-          userList.innerHTML = "";
-          snapshot.forEach((docSnap) => {
-            const userData = docSnap.data();
-            // Don't show current user in the list
-            if (docSnap.id !== currentUser.uid) {
-              renderUser(docSnap.id, userData);
-            }
-          });
-        }, (err) => {
-          console.error("Error loading users:", err);
+        userList.innerHTML = "";
+        let usersFound = false;
+        
+        querySnapshot.forEach((docSnap) => {
+          const userData = docSnap.data();
+          // Don't show current user in the list
+          if (docSnap.id !== currentUser.uid) {
+            renderUser(docSnap.id, userData);
+            usersFound = true;
+          }
         });
+        
+        if (!usersFound) {
+          userList.innerHTML = `
+            <div class="no-users">
+              <i class="fas fa-users fa-2x mb-2"></i>
+              <p>Tidak ada pengguna lain yang ditemukan</p>
+            </div>
+          `;
+        }
       } catch (err) {
         console.error("Error loading users:", err);
+        userList.innerHTML = `
+          <div class="no-users">
+            <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
+            <p>Error memuat pengguna: ${err.message}</p>
+            <p class="text-sm mt-2">Pastikan Firestore Rules sudah dikonfigurasi dengan benar</p>
+          </div>
+        `;
       }
     }
 
@@ -691,7 +770,7 @@
           <span>${initial}</span>
         </div>
         <div class="user-info">
-          <div class="user-name">${escapeHtml(userData.name || userData.email)}</div>
+          <div class="user-name">${escapeHtml(userData.name || userData.email || "User")}</div>
           <div class="user-status">
             <span class="online-indicator"></span>
             <span>Online</span>
@@ -705,14 +784,6 @@
 
     // Select a user to chat with
     function selectUser(userId, userData) {
-      // Remove active class from all users
-      document.querySelectorAll(".user-item").forEach(item => {
-        item.classList.remove("active");
-      });
-      
-      // Add active class to selected user
-      document.querySelector(`.user-item[data-user-id="${userId}"]`).classList.add("active");
-      
       selectedUser = {
         id: userId,
         ...userData
@@ -745,18 +816,45 @@
         
         messagesUnsubscribe = onSnapshot(messagesQuery, (snapshot) => {
           chatMessages.innerHTML = "";
+          
+          if (snapshot.empty) {
+            chatMessages.innerHTML = `
+              <div class="no-users" style="padding: 2rem; text-align: center; color: #6b7280;">
+                <i class="fas fa-comments fa-2x mb-2"></i>
+                <p>Belum ada pesan</p>
+                <p class="text-sm">Mulai percakapan dengan mengirim pesan pertama</p>
+              </div>
+            `;
+            return;
+          }
+          
           snapshot.forEach((docSnap) => {
             const messageData = docSnap.data();
             renderMessage(messageData);
           });
           
           // Scroll to bottom
-          chatMessages.scrollTop = chatMessages.scrollHeight;
+          setTimeout(() => {
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+          }, 100);
         }, (err) => {
           console.error("Error loading messages:", err);
+          chatMessages.innerHTML = `
+            <div class="no-users" style="padding: 2rem; text-align: center; color: #6b7280;">
+              <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
+              <p>Error memuat pesan</p>
+              <p class="text-sm">${err.message}</p>
+            </div>
+          `;
         });
       } catch (err) {
         console.error("Error loading messages:", err);
+        chatMessages.innerHTML = `
+          <div class="no-users" style="padding: 2rem; text-align: center; color: #6b7280;">
+            <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
+            <p>Error memuat pesan: ${err.message}</p>
+          </div>
+        `;
       }
     }
 
@@ -783,6 +881,8 @@
 
     // Back to user list
     function backToUserList() {
+      if (!selectedUser) return;
+      
       selectedUser = null;
       
       // Show user list, hide chat interface
@@ -793,10 +893,9 @@
       // Update header
       document.querySelector(".app-name").textContent = "CHAT PRIBADI";
       
-      // Remove active class from all users
-      document.querySelectorAll(".user-item").forEach(item => {
-        item.classList.remove("active");
-      });
+      // Clear message input
+      messageInput.value = "";
+      sendButton.disabled = true;
       
       // Unsubscribe from messages
       if (messagesUnsubscribe) {
@@ -804,13 +903,6 @@
         messagesUnsubscribe = null;
       }
     }
-
-    // Add back button functionality to header
-    document.querySelector(".app-logo").addEventListener("click", () => {
-      if (selectedUser) {
-        backToUserList();
-      }
-    });
 
     // Check authentication
     onAuthStateChanged(auth, async (user) => {
@@ -835,20 +927,16 @@
     function formatTime(date) {
       if (!date) return '';
       const now = new Date();
-      const diff = Math.floor((now - date)/1000);
-      
-      if (diff < 60) return 'baru saja';
-      if (diff < 3600) return `${Math.floor(diff/60)} menit lalu`;
       
       // If today, show time only
       if (date.toDateString() === now.toDateString()) {
         return date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
       }
       
-      // Otherwise show date
+      // Otherwise show date and time
       return date.toLocaleDateString('id-ID', { 
         day: '2-digit', 
-        month: 'short', 
+        month: 'short',
         hour: '2-digit', 
         minute: '2-digit' 
       });

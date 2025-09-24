@@ -685,7 +685,7 @@
       return uid1 < uid2 ? `${uid1}_${uid2}` : `${uid2}_${uid1}`;
     }
 
-    // Get user profile - PERBAIKAN: menggunakan getDoc bukan getDocs
+    // Get user profile - PERBAIKAN: Menggunakan getDoc yang benar
     async function getUserProfile(uid) {
       try {
         const userRef = doc(db, "users", uid);
@@ -694,7 +694,7 @@
         if (userDoc.exists()) {
           return userDoc.data();
         } else {
-          console.log("No such document!");
+          console.log("No profile found for user:", uid);
           return null;
         }
       } catch (err) {
@@ -703,7 +703,7 @@
       }
     }
 
-    // Get all users (excluding current user) - PERBAIKAN: error handling
+    // Get all users (excluding current user) - PERBAIKAN: Error handling yang lebih baik
     async function loadUsers() {
       try {
         userList.innerHTML = `
@@ -731,7 +731,7 @@
         allUsers = []; // Reset array users
         let usersFound = false;
         
-        querySnapshot.forEach((docSnap) => {
+        for (const docSnap of querySnapshot.docs) {
           const userData = docSnap.data();
           // Don't show current user in the list
           if (docSnap.id !== currentUser.uid) {
@@ -742,14 +742,14 @@
             });
             usersFound = true;
           }
-        });
+        }
         
         if (!usersFound) {
           userList.innerHTML = `
             <div class="no-users">
               <i class="fas fa-users fa-2x mb-2"></i>
               <p>Tidak ada pengguna lain yang ditemukan</p>
-              <p class="text-sm mt-2">Hanya Anda yang terdaftar di sistem</p>
+              <p class="text-sm mt-2">Hanya ada satu pengguna dalam sistem</p>
             </div>
           `;
         }
@@ -762,11 +762,16 @@
         userList.innerHTML = `
           <div class="no-users">
             <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
-            <p>Error memuat pengguna</p>
-            <p class="text-sm mt-2">${err.message}</p>
-            <p class="text-xs mt-1">Periksa koneksi internet dan Firestore rules</p>
+            <p>Error memuat pengguna: ${err.message}</p>
+            <p class="text-sm mt-2">Periksa koneksi internet dan konfigurasi Firestore</p>
+            <button id="retryButton" class="mt-2 px-4 py-2 bg-blue-500 text-white rounded-lg">
+              Coba Lagi
+            </button>
           </div>
         `;
+        
+        // Tambahkan tombol retry
+        document.getElementById("retryButton").addEventListener("click", loadUsers);
       }
     }
 
@@ -775,7 +780,7 @@
       const colors = ['bg-blue-500','bg-red-500','bg-green-500','bg-purple-500','bg-pink-500','bg-yellow-500'];
       const colorIndex = Math.abs(hashCode(userData.name || userData.email || "")) % colors.length;
       const avatarColor = colors[colorIndex];
-      const initial = (userData.name || userData.email || "U").charAt(0).toUpperCase();
+      const initial = (userData.name || userData.email || "").charAt(0).toUpperCase();
       
       const userItem = document.createElement("div");
       userItem.className = "user-item";
@@ -817,7 +822,7 @@
       loadMessages(userId);
     }
 
-    // Load messages for a chat - PERBAIKAN: error handling
+    // Load messages for a chat
     async function loadMessages(otherUserId) {
       try {
         if (messagesUnsubscribe) {
@@ -830,50 +835,39 @@
           orderBy("timestamp", "asc")
         );
         
-        // Show loading initially
-        chatMessages.innerHTML = `
-          <div class="loading">
-            <div class="loading-spinner"></div>
-            <span>Memuat pesan...</span>
-          </div>
-        `;
-        
-        messagesUnsubscribe = onSnapshot(messagesQuery, 
-          (snapshot) => {
-            chatMessages.innerHTML = "";
-            
-            if (snapshot.empty) {
-              chatMessages.innerHTML = `
-                <div class="no-users" style="padding: 2rem; text-align: center; color: #6b7280;">
-                  <i class="fas fa-comments fa-2x mb-2"></i>
-                  <p>Belum ada pesan</p>
-                  <p class="text-sm">Mulai percakapan dengan mengirim pesan pertama</p>
-                </div>
-              `;
-              return;
-            }
-            
-            snapshot.forEach((docSnap) => {
-              const messageData = docSnap.data();
-              renderMessage(messageData);
-            });
-            
-            // Scroll to bottom
-            setTimeout(() => {
-              chatMessages.scrollTop = chatMessages.scrollHeight;
-            }, 100);
-          }, 
-          (err) => {
-            console.error("Error loading messages:", err);
+        messagesUnsubscribe = onSnapshot(messagesQuery, (snapshot) => {
+          chatMessages.innerHTML = "";
+          
+          if (snapshot.empty) {
             chatMessages.innerHTML = `
               <div class="no-users" style="padding: 2rem; text-align: center; color: #6b7280;">
-                <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
-                <p>Error memuat pesan</p>
-                <p class="text-sm">${err.message}</p>
+                <i class="fas fa-comments fa-2x mb-2"></i>
+                <p>Belum ada pesan</p>
+                <p class="text-sm">Mulai percakapan dengan mengirim pesan pertama</p>
               </div>
             `;
+            return;
           }
-        );
+          
+          snapshot.forEach((docSnap) => {
+            const messageData = docSnap.data();
+            renderMessage(messageData);
+          });
+          
+          // Scroll to bottom
+          setTimeout(() => {
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+          }, 100);
+        }, (err) => {
+          console.error("Error loading messages:", err);
+          chatMessages.innerHTML = `
+            <div class="no-users" style="padding: 2rem; text-align: center; color: #6b7280;">
+              <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
+              <p>Error memuat pesan</p>
+              <p class="text-sm">${err.message}</p>
+            </div>
+          `;
+        });
       } catch (err) {
         console.error("Error loading messages:", err);
         chatMessages.innerHTML = `
@@ -934,7 +928,7 @@
       }
     }
 
-    // Check authentication - PERBAIKAN: error handling
+    // Check authentication - PERBAIKAN: Error handling yang lebih baik
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
         window.location.href = "../index.html";
@@ -944,14 +938,20 @@
           currentProfile = await getUserProfile(user.uid);
           await loadUsers();
         } catch (err) {
-          console.error("Error in auth state change:", err);
+          console.error("Error during authentication:", err);
           userList.innerHTML = `
             <div class="no-users">
               <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
-              <p>Error memuat data</p>
-              <p class="text-sm">${err.message}</p>
+              <p>Error saat memuat data: ${err.message}</p>
+              <button id="retryAuthButton" class="mt-2 px-4 py-2 bg-blue-500 text-white rounded-lg">
+                Coba Lagi
+              </button>
             </div>
           `;
+          
+          document.getElementById("retryAuthButton").addEventListener("click", () => {
+            location.reload();
+          });
         }
       }
     });

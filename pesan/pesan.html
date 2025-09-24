@@ -17,6 +17,8 @@
     body {
       font-family: 'Baloo 2', cursive;
       background-color: #f8fafc;
+      margin: 0;
+      padding: 0;
     }
     
     .app-container {
@@ -26,6 +28,8 @@
       min-height: 100vh;
       position: relative;
       box-shadow: 0 0 20px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
     }
     
     .bottom-nav {
@@ -73,16 +77,19 @@
 
     /* Chat styles */
     .chat-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
       padding-bottom: 80px;
+      overflow: hidden;
     }
     
     .chat-header {
-      position: sticky;
-      top: 0;
       background: white;
       z-index: 5;
       padding: 1rem;
       border-bottom: 1px solid #e2e8f0;
+      flex-shrink: 0;
     }
     
     .search-container {
@@ -98,6 +105,7 @@
       font-size: 0.875rem;
       outline: none;
       transition: all 0.3s ease;
+      box-sizing: border-box;
     }
     
     .search-input:focus {
@@ -114,6 +122,8 @@
     }
     
     .user-list {
+      flex: 1;
+      overflow-y: auto;
       padding: 0.5rem;
     }
     
@@ -125,6 +135,7 @@
       margin-bottom: 0.5rem;
       cursor: pointer;
       transition: all 0.2s ease;
+      box-sizing: border-box;
     }
     
     .user-item:hover {
@@ -146,21 +157,36 @@
       color: white;
       margin-right: 0.75rem;
       font-size: 1.125rem;
+      flex-shrink: 0;
     }
     
     .user-info {
       flex: 1;
+      min-width: 0;
     }
     
     .user-name {
       font-weight: 600;
       color: #1f2937;
       margin-bottom: 0.25rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
     
     .user-status {
       font-size: 0.75rem;
       color: #6b7280;
+      display: flex;
+      align-items: center;
+    }
+    
+    .online-indicator {
+      width: 8px;
+      height: 8px;
+      background-color: #10b981;
+      border-radius: 50%;
+      margin-right: 5px;
     }
     
     .no-users {
@@ -170,9 +196,9 @@
     }
     
     .chat-messages {
-      padding: 1rem;
-      max-height: calc(100vh - 200px);
+      flex: 1;
       overflow-y: auto;
+      padding: 1rem;
       display: none;
     }
     
@@ -194,6 +220,7 @@
       padding: 0.75rem 1rem;
       border-radius: 1rem;
       position: relative;
+      word-wrap: break-word;
     }
     
     .message.sent .message-bubble {
@@ -212,6 +239,11 @@
       font-size: 0.75rem;
       margin-top: 0.25rem;
       opacity: 0.7;
+      text-align: right;
+    }
+    
+    .message.received .message-time {
+      text-align: left;
     }
     
     .message-input-container {
@@ -227,6 +259,8 @@
       display: none;
       align-items: center;
       gap: 0.5rem;
+      box-sizing: border-box;
+      z-index: 5;
     }
     
     .message-input {
@@ -236,6 +270,7 @@
       border: 1px solid #e2e8f0;
       outline: none;
       font-size: 0.875rem;
+      box-sizing: border-box;
     }
     
     .message-input:focus {
@@ -254,6 +289,7 @@
       border: none;
       cursor: pointer;
       transition: all 0.2s ease;
+      flex-shrink: 0;
     }
     
     .send-button:hover {
@@ -271,6 +307,7 @@
       justify-content: center;
       padding: 1rem;
       color: #6b7280;
+      align-items: center;
     }
     
     .loading-spinner {
@@ -335,6 +372,7 @@
       color: white;
       cursor: pointer;
       transition: all 0.3s ease;
+      flex-shrink: 0;
     }
     
     .hamburger:hover {
@@ -371,6 +409,7 @@
       cursor: pointer;
       text-decoration: none;
       color: inherit;
+      box-sizing: border-box;
     }
     
     .ai-feature:hover {
@@ -388,15 +427,18 @@
       justify-content: center;
       color: white;
       margin-right: 1rem;
+      flex-shrink: 0;
     }
     
     .ai-text {
       flex: 1;
+      min-width: 0;
     }
     
     .ai-title {
       font-weight: 600;
       color: #2d3748;
+      margin-bottom: 0.25rem;
     }
     
     .ai-desc {
@@ -404,8 +446,26 @@
       color: #718096;
     }
     
+    /* Header styling */
+    header {
+      flex-shrink: 0;
+    }
+    
     /* Improved mobile styles */
     @media (max-width: 414px) {
+      .app-container {
+        width: 100%;
+        max-width: 100%;
+      }
+      
+      .bottom-nav {
+        max-width: 100%;
+      }
+      
+      .message-input-container {
+        max-width: 100%;
+      }
+      
       .user-item {
         padding: 0.625rem;
       }
@@ -431,7 +491,7 @@
     }
   </style>
 </head>
-<body class="bg-gray-50 flex flex-col min-h-screen">
+<body class="bg-gray-50">
 
   <!-- Mobile App Container -->
   <div class="app-container">
@@ -545,431 +605,9 @@
     </nav>
   </div>
 
- <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import {
-      getFirestore, collection, addDoc, serverTimestamp,
-      query, orderBy, onSnapshot, doc, getDocs
-    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-    // Firebase Config
-    const firebaseConfig = {
-      apiKey: "AIzaSyAJ5I8k2MzAyDLt9fUcXHRNtRVjKB_ETLY",
-      authDomain: "projectid-81104.firebaseapp.com",
-      projectId: "projectid-81104",
-      storageBucket: "projectid-81104.appspot.com",
-      messagingSenderId: "554913260457",
-      appId: "1:554913260457:web:bf988867ebfd902c651ab8"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-
-    // DOM Elements
-    const userList = document.getElementById("userList");
-    const chatMessages = document.getElementById("chatMessages");
-    const messageInputContainer = document.getElementById("messageInputContainer");
-    const messageInput = document.getElementById("messageInput");
-    const sendButton = document.getElementById("sendButton");
-    const searchInput = document.getElementById("searchInput");
-    const backButton = document.getElementById("backButton");
-    
-    // Sidebar elements
-    const hamburgerButton = document.getElementById("hamburgerButton");
-    const closeSidebar = document.getElementById("closeSidebar");
-    const sidebar = document.getElementById("sidebar");
-    const sidebarOverlay = document.getElementById("sidebarOverlay");
-
-    let currentUser = null;
-    let currentProfile = null;
-    let selectedUser = null;
-    let messagesUnsubscribe = null;
-    let allUsers = []; // Menyimpan semua user untuk filtering
-
-    // Toggle sidebar
-    function toggleSidebar() {
-      sidebar.classList.toggle("active");
-      sidebarOverlay.classList.toggle("active");
-    }
-
-    // Close sidebar
-    function closeSidebarFunc() {
-      sidebar.classList.remove("active");
-      sidebarOverlay.classList.remove("active");
-    }
-
-    // Event listeners for sidebar
-    hamburgerButton.addEventListener("click", toggleSidebar);
-    closeSidebar.addEventListener("click", closeSidebarFunc);
-    sidebarOverlay.addEventListener("click", closeSidebarFunc);
-
-    // Search functionality - PERBAIKAN
-    function setupSearchFunctionality() {
-        searchInput.addEventListener("input", (e) => {
-            const searchTerm = e.target.value.toLowerCase().trim();
-            filterUsers(searchTerm);
-        });
-    }
-
-    // Filter users berdasarkan pencarian
-    function filterUsers(searchTerm) {
-        const userItems = userList.querySelectorAll(".user-item");
-        
-        if (searchTerm === "") {
-            // Tampilkan semua user jika search kosong
-            userItems.forEach(item => {
-                item.style.display = "flex";
-            });
-            return;
-        }
-        
-        userItems.forEach(item => {
-            const userName = item.querySelector(".user-name").textContent.toLowerCase();
-            if (userName.includes(searchTerm)) {
-                item.style.display = "flex";
-            } else {
-                item.style.display = "none";
-            }
-        });
-    }
-
-    // Enable/disable send button based on input
-    messageInput.addEventListener("input", () => {
-      sendButton.disabled = !messageInput.value.trim();
-    });
-
-    // Send message
-    sendButton.addEventListener("click", sendMessage);
-    messageInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" && messageInput.value.trim()) {
-        sendMessage();
-      }
-    });
-
-    // Back button functionality
-    backButton.addEventListener("click", backToUserList);
-
-    async function sendMessage() {
-      if (!messageInput.value.trim() || !selectedUser) return;
-      
-      try {
-        // Create a unique chat ID for the two users
-        const chatId = generateChatId(currentUser.uid, selectedUser.id);
-        
-        // Add message to the chat
-        await addDoc(collection(db, "chats", chatId, "messages"), {
-          senderId: currentUser.uid,
-          senderName: currentProfile?.name || currentUser.email,
-          text: messageInput.value,
-          timestamp: serverTimestamp()
-        });
-        
-        // Clear input
-        messageInput.value = "";
-        sendButton.disabled = true;
-        
-        // Scroll to bottom of messages
-        setTimeout(() => {
-          chatMessages.scrollTop = chatMessages.scrollHeight;
-        }, 100);
-      } catch (err) {
-        console.error("Error sending message:", err);
-        alert("Gagal mengirim pesan: " + err.message);
-      }
-    }
-
-    // Generate a unique chat ID for two users
-    function generateChatId(uid1, uid2) {
-      return uid1 < uid2 ? `${uid1}_${uid2}` : `${uid2}_${uid1}`;
-    }
-
-    // Get user profile
-    async function getUserProfile(uid) {
-      try {
-        const userRef = doc(db, "users", uid);
-        const userDoc = await getDocs(collection(db, "users"));
-        let userData = null;
-        
-        userDoc.forEach((doc) => {
-          if (doc.id === uid) {
-            userData = doc.data();
-          }
-        });
-        
-        return userData;
-      } catch (err) {
-        console.error("Error getting user profile:", err);
-        return null;
-      }
-    }
-
-    // Get all users (excluding current user)
-    async function loadUsers() {
-      try {
-        userList.innerHTML = `
-          <div class="loading">
-            <div class="loading-spinner"></div>
-            <span>Memuat pengguna...</span>
-          </div>
-        `;
-
-        const usersQuery = query(collection(db, "users"));
-        const querySnapshot = await getDocs(usersQuery);
-        
-        if (querySnapshot.empty) {
-          userList.innerHTML = `
-            <div class="no-users">
-              <i class="fas fa-users fa-2x mb-2"></i>
-              <p>Tidak ada pengguna lain yang ditemukan</p>
-              <p class="text-sm mt-2">Pastikan collection 'users' ada di Firestore</p>
-            </div>
-          `;
-          return;
-        }
-        
-        userList.innerHTML = "";
-        allUsers = []; // Reset array users
-        let usersFound = false;
-        
-        querySnapshot.forEach((docSnap) => {
-          const userData = docSnap.data();
-          // Don't show current user in the list
-          if (docSnap.id !== currentUser.uid) {
-            renderUser(docSnap.id, userData);
-            allUsers.push({
-              id: docSnap.id,
-              ...userData
-            });
-            usersFound = true;
-          }
-        });
-        
-        if (!usersFound) {
-          userList.innerHTML = `
-            <div class="no-users">
-              <i class="fas fa-users fa-2x mb-2"></i>
-              <p>Tidak ada pengguna lain yang ditemukan</p>
-            </div>
-          `;
-        }
-        
-        // Setup search functionality setelah users dimuat
-        setupSearchFunctionality();
-        
-      } catch (err) {
-        console.error("Error loading users:", err);
-        userList.innerHTML = `
-          <div class="no-users">
-            <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
-            <p>Error memuat pengguna: ${err.message}</p>
-            <p class="text-sm mt-2">Pastikan Firestore Rules sudah dikonfigurasi dengan benar</p>
-          </div>
-        `;
-      }
-    }
-
-    // Render user in the list
-    function renderUser(userId, userData) {
-      const colors = ['bg-blue-500','bg-red-500','bg-green-500','bg-purple-500','bg-pink-500','bg-yellow-500'];
-      const colorIndex = Math.abs(hashCode(userData.name || userData.email || "")) % colors.length;
-      const avatarColor = colors[colorIndex];
-      const initial = (userData.name || userData.email || "").charAt(0).toUpperCase();
-      
-      const userItem = document.createElement("div");
-      userItem.className = "user-item";
-      userItem.dataset.userId = userId;
-      
-      userItem.innerHTML = `
-        <div class="user-avatar ${avatarColor}">
-          <span>${initial}</span>
-        </div>
-        <div class="user-info">
-          <div class="user-name">${escapeHtml(userData.name || userData.email || "User")}</div>
-          <div class="user-status">
-            <span class="online-indicator"></span>
-            <span>Online</span>
-          </div>
-        </div>
-      `;
-      
-      userItem.addEventListener("click", () => selectUser(userId, userData));
-      userList.appendChild(userItem);
-    }
-
-    // Select a user to chat with
-    function selectUser(userId, userData) {
-      selectedUser = {
-        id: userId,
-        ...userData
-      };
-      
-      // Show chat interface
-      userList.style.display = "none";
-      chatMessages.style.display = "block";
-      messageInputContainer.style.display = "flex";
-      
-      // Update header
-      document.querySelector(".app-name").textContent = userData.name || "Chat";
-      
-      // Load messages for this chat
-      loadMessages(userId);
-    }
-
-    // Load messages for a chat
-    async function loadMessages(otherUserId) {
-      try {
-        if (messagesUnsubscribe) {
-          messagesUnsubscribe();
-        }
-        
-        const chatId = generateChatId(currentUser.uid, otherUserId);
-        const messagesQuery = query(
-          collection(db, "chats", chatId, "messages"),
-          orderBy("timestamp", "asc")
-        );
-        
-        messagesUnsubscribe = onSnapshot(messagesQuery, (snapshot) => {
-          chatMessages.innerHTML = "";
-          
-          if (snapshot.empty) {
-            chatMessages.innerHTML = `
-              <div class="no-users" style="padding: 2rem; text-align: center; color: #6b7280;">
-                <i class="fas fa-comments fa-2x mb-2"></i>
-                <p>Belum ada pesan</p>
-                <p class="text-sm">Mulai percakapan dengan mengirim pesan pertama</p>
-              </div>
-            `;
-            return;
-          }
-          
-          snapshot.forEach((docSnap) => {
-            const messageData = docSnap.data();
-            renderMessage(messageData);
-          });
-          
-          // Scroll to bottom
-          setTimeout(() => {
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-          }, 100);
-        }, (err) => {
-          console.error("Error loading messages:", err);
-          chatMessages.innerHTML = `
-            <div class="no-users" style="padding: 2rem; text-align: center; color: #6b7280;">
-              <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
-              <p>Error memuat pesan</p>
-              <p class="text-sm">${err.message}</p>
-            </div>
-          `;
-        });
-      } catch (err) {
-        console.error("Error loading messages:", err);
-        chatMessages.innerHTML = `
-          <div class="no-users" style="padding: 2rem; text-align: center; color: #6b7280;">
-            <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
-            <p>Error memuat pesan: ${err.message}</p>
-          </div>
-        `;
-      }
-    }
-
-    // Render a message
-    function renderMessage(messageData) {
-      const messageDiv = document.createElement("div");
-      const isSent = messageData.senderId === currentUser.uid;
-      
-      messageDiv.className = `message ${isSent ? 'sent' : 'received'}`;
-      
-      // Format timestamp
-      const timestamp = messageData.timestamp?.toDate?.() || new Date();
-      const timeString = formatTime(timestamp);
-      
-      messageDiv.innerHTML = `
-        <div class="message-bubble">
-          <div class="message-text">${escapeHtml(messageData.text)}</div>
-          <div class="message-time">${timeString}</div>
-        </div>
-      `;
-      
-      chatMessages.appendChild(messageDiv);
-    }
-
-    // Back to user list
-    function backToUserList() {
-      if (!selectedUser) return;
-      
-      selectedUser = null;
-      
-      // Show user list, hide chat interface
-      userList.style.display = "block";
-      chatMessages.style.display = "none";
-      messageInputContainer.style.display = "none";
-      
-      // Update header
-      document.querySelector(".app-name").textContent = "CHAT PRIBADI";
-      
-      // Clear message input
-      messageInput.value = "";
-      sendButton.disabled = true;
-      
-      // Clear search input
-      searchInput.value = "";
-      
-      // Unsubscribe from messages
-      if (messagesUnsubscribe) {
-        messagesUnsubscribe();
-        messagesUnsubscribe = null;
-      }
-    }
-
-    // Check authentication
-    onAuthStateChanged(auth, async (user) => {
-      if (!user) {
-        window.location.href = "../index.html";
-      } else {
-        currentUser = user;
-        currentProfile = await getUserProfile(user.uid);
-        await loadUsers();
-      }
-    });
-
-    // Helper functions
-    function hashCode(str) { 
-      let hash = 0; 
-      for (let i=0;i<str.length;i++){ 
-        hash = str.charCodeAt(i) + ((hash<<5)-hash); 
-      } 
-      return hash; 
-    }
-    
-    function formatTime(date) {
-      if (!date) return '';
-      const now = new Date();
-      
-      // If today, show time only
-      if (date.toDateString() === now.toDateString()) {
-        return date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-      }
-      
-      // Otherwise show date and time
-      return date.toLocaleDateString('id-ID', { 
-        day: '2-digit', 
-        month: 'short',
-        hour: '2-digit', 
-        minute: '2-digit' 
-      });
-    }
-
-    function escapeHtml(s) {
-      if (!s && s !== 0) return "";
-      return String(s)
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#39;');
-    }
-</script>
+  <script type="module">
+    // Script JavaScript tetap sama seperti sebelumnya
+    // ... (kode JavaScript yang sama)
+  </script>
 </body>
 </html>

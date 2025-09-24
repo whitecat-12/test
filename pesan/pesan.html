@@ -17,23 +17,22 @@
     body {
       font-family: 'Baloo 2', cursive;
       background-color: #f8fafc;
-      margin: 0;
-      padding: 0;
     }
     
     .app-container {
-      max-width: 100%;
+      max-width: 414px;
       margin: 0 auto;
       background: white;
       min-height: 100vh;
       position: relative;
-      overflow-x: hidden;
+      box-shadow: 0 0 20px rgba(0,0,0,0.1);
     }
     
     .bottom-nav {
       position: fixed;
       bottom: 0;
       width: 100%;
+      max-width: 414px;
       box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
       background: white;
       z-index: 10;
@@ -75,7 +74,6 @@
     /* Chat styles */
     .chat-container {
       padding-bottom: 80px;
-      padding-top: 10px;
     }
     
     .chat-header {
@@ -83,7 +81,7 @@
       top: 0;
       background: white;
       z-index: 5;
-      padding: 0.5rem 1rem;
+      padding: 1rem;
       border-bottom: 1px solid #e2e8f0;
     }
     
@@ -100,7 +98,6 @@
       font-size: 0.875rem;
       outline: none;
       transition: all 0.3s ease;
-      box-sizing: border-box;
     }
     
     .search-input:focus {
@@ -128,7 +125,6 @@
       margin-bottom: 0.5rem;
       cursor: pointer;
       transition: all 0.2s ease;
-      box-sizing: border-box;
     }
     
     .user-item:hover {
@@ -150,28 +146,21 @@
       color: white;
       margin-right: 0.75rem;
       font-size: 1.125rem;
-      flex-shrink: 0;
     }
     
     .user-info {
       flex: 1;
-      min-width: 0; /* Agar teks tidak keluar dari container */
     }
     
     .user-name {
       font-weight: 600;
       color: #1f2937;
       margin-bottom: 0.25rem;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
     }
     
     .user-status {
       font-size: 0.75rem;
       color: #6b7280;
-      display: flex;
-      align-items: center;
     }
     
     .online-indicator {
@@ -181,7 +170,6 @@
       border-radius: 50%;
       background-color: #10b981;
       margin-right: 0.25rem;
-      flex-shrink: 0;
     }
     
     .no-users {
@@ -195,7 +183,6 @@
       max-height: calc(100vh - 200px);
       overflow-y: auto;
       display: none;
-      box-sizing: border-box;
     }
     
     .message {
@@ -212,12 +199,10 @@
     }
     
     .message-bubble {
-      max-width: 85%;
+      max-width: 70%;
       padding: 0.75rem 1rem;
       border-radius: 1rem;
       position: relative;
-      box-sizing: border-box;
-      word-wrap: break-word;
     }
     
     .message.sent .message-bubble {
@@ -243,15 +228,14 @@
       bottom: 80px;
       left: 0;
       right: 0;
-      width: 100%;
+      max-width: 414px;
+      margin: 0 auto;
       background: white;
       padding: 0.75rem;
       border-top: 1px solid #e2e8f0;
       display: none;
       align-items: center;
       gap: 0.5rem;
-      box-sizing: border-box;
-      z-index: 5;
     }
     
     .message-input {
@@ -261,7 +245,6 @@
       border: 1px solid #e2e8f0;
       outline: none;
       font-size: 0.875rem;
-      box-sizing: border-box;
     }
     
     .message-input:focus {
@@ -280,7 +263,6 @@
       border: none;
       cursor: pointer;
       transition: all 0.2s ease;
-      flex-shrink: 0;
     }
     
     .send-button:hover {
@@ -298,7 +280,6 @@
       justify-content: center;
       padding: 1rem;
       color: #6b7280;
-      align-items: center;
     }
     
     .loading-spinner {
@@ -445,7 +426,7 @@
       }
       
       .message-bubble {
-        max-width: 90%;
+        max-width: 80%;
       }
       
       .message-input-container {
@@ -455,30 +436,6 @@
       .sidebar {
         width: 280px;
         right: -280px;
-      }
-      
-      .chat-header {
-        padding: 0.5rem;
-      }
-      
-      .search-input {
-        padding: 0.625rem 1rem 0.625rem 2.5rem;
-      }
-    }
-    
-    @media (max-width: 320px) {
-      .user-avatar {
-        width: 36px;
-        height: 36px;
-        font-size: 0.875rem;
-      }
-      
-      .user-name {
-        font-size: 0.9rem;
-      }
-      
-      .app-name {
-        font-size: 1.1rem;
       }
     }
   </style>

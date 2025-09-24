@@ -40,14 +40,18 @@
       box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
       background: white;
       z-index: 10;
+      height: 70px; /* PERBAIKAN: Tambahkan tinggi tetap */
+      display: flex;
+      align-items: center;
     }
     
     .nav-icon {
       transition: all 0.3s ease;
+      font-size: 1.25rem; /* PERBAIKAN: Ukuran konsisten */
     }
     
     .nav-icon.active {
-      transform: translateY(-10px);
+      transform: translateY(-5px); /* PERBAIKAN: Kurangi efek translate */
       color: var(--primary);
     }
     
@@ -397,6 +401,24 @@
       100% { transform: rotate(360deg); }
     }
     
+    /* PERBAIKAN: Style khusus untuk bottom nav items */
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #6b7280;
+      text-decoration: none;
+      flex: 1;
+      height: 100%;
+      padding: 0.5rem 0;
+    }
+    
+    .nav-item span {
+      font-size: 0.75rem;
+      margin-top: 0.25rem;
+    }
+    
     /* Improved mobile styles */
     @media (max-width: 414px) {
       .thread-card {
@@ -441,10 +463,18 @@
         width: 32px;
         height: 32px;
       }
+      
+      .bottom-nav {
+        height: 65px; /* PERBAIKAN: Tinggi sedikit lebih kecil di mobile */
+      }
+      
+      .nav-icon {
+        font-size: 1.1rem; /* PERBAIKAN: Ukuran sedikit lebih kecil di mobile */
+      }
     }
   </style>
 </head>
-<body class="bg-gray-50 flex flex-col min-h-screen">
+<body class="bg-gray-50">
 
   <!-- Mobile App Container -->
   <div class="app-container">
@@ -549,27 +579,27 @@
       </div>
     </div>
     
-    <!-- Bottom Navigation -->
-    <nav class="bottom-nav bg-white p-2 flex justify-around items-center">
-      <a href="../dashboard siswa.html" class="flex flex-col items-center text-gray-500">
-        <i class="fas fa-home nav-icon text-xl"></i>
-        <span class="text-xs mt-1">Beranda</span>
+    <!-- Bottom Navigation - PERBAIKAN: Ganti dengan struktur yang lebih konsisten -->
+    <nav class="bottom-nav">
+      <a href="../dashboard siswa.html" class="nav-item">
+        <i class="fas fa-home nav-icon"></i>
+        <span>Beranda</span>
       </a>
-      <a href="../soal harian/dashboard soal.html" class="flex flex-col items-center text-gray-500">
-        <i class="fas fa-flask nav-icon text-xl"></i>
-        <span class="text-xs mt-1">Soal Harian</span>
+      <a href="../soal harian/dashboard soal.html" class="nav-item">
+        <i class="fas fa-flask nav-icon"></i>
+        <span>Soal Harian</span>
       </a>
-      <a href="../ai/nayra.html" class="flex flex-col items-center text-gray-500">
-        <i class="fas fa-robot nav-icon text-xl"></i>
-        <span class="text-xs mt-1">Nayra AI</span>
+      <a href="../ai/nayra.html" class="nav-item">
+        <i class="fas fa-robot nav-icon"></i>
+        <span>Nayra AI</span>
       </a>
-      <a href="kategori/kategori materi.html" class="flex flex-col items-center text-gray-500">
-        <i class="fas fa-chalkboard-teacher nav-icon text-xl"></i>
-        <span class="text-xs mt-1">Materi Harian</span>
+      <a href="kategori/kategori materi.html" class="nav-item">
+        <i class="fas fa-chalkboard-teacher nav-icon"></i>
+        <span>Materi Harian</span>
       </a>
-      <a href="profil.html" class="flex flex-col items-center text-gray-500">
-        <i class="fas fa-user nav-icon text-xl"></i>
-        <span class="text-xs mt-1">Profil</span>
+      <a href="profil.html" class="nav-item">
+        <i class="fas fa-user nav-icon"></i>
+        <span>Profil</span>
       </a>
     </nav>
   </div>

@@ -255,6 +255,10 @@
         <!-- Register Form -->
         <form id="registerForm" class="form-transition hidden">
           <div class="form-group">
+            <label for="regName" class="form-label">Nama</label>
+            <input type="text" id="regName" placeholder="Nama lengkap Anda" class="form-input w-full" required>
+          </div>
+          <div class="form-group">
             <label for="regEmail" class="form-label">Email</label>
             <input type="email" id="regEmail" placeholder="Email Anda" class="form-input w-full" required>
           </div>
@@ -294,6 +298,7 @@
   </div>
 
   <script type="module">
+	import { updateProfile } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
     import { 
       getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, 
@@ -394,54 +399,58 @@
       }
     });
 
-    // Register Form Submission
-    forms.register.addEventListener("submit", async (e) => {
-      e.preventDefault();
-      
-      const email = document.getElementById("regEmail").value;
-      const password = document.getElementById("regPassword").value;
-      let role = document.getElementById("regRole").value;
-      
-      // Show loading state
-      const submitBtn = forms.register.querySelector('button[type="submit"]');
-      const originalText = submitBtn.textContent;
-      submitBtn.textContent = "Mendaftarkan...";
-      submitBtn.disabled = true;
-      
-      try {
-        const cred = await createUserWithEmailAndPassword(auth, email, password);
-        
-        // If role is guru, set to pending
-        if (role === "guru") {
-          role = "pending";
-        }
-        
-        await setDoc(doc(db, "users", cred.user.uid), {
-          email: cred.user.email,
-          role: role,
-          createdAt: new Date()
-        });
-        
-        if (role === "pending") {
-          infoMsg.textContent = "✅ Akun berhasil dibuat, menunggu persetujuan admin untuk menjadi Guru.";
-        } else {
-          infoMsg.textContent = "✅ Akun berhasil dibuat, silakan login.";
-        }
-        
-        infoMsg.classList.remove("hidden");
-        errorMsg.classList.add("hidden");
-        
-        // Switch to login tab after successful registration
-        setTimeout(() => showTab("login"), 2000);
-      } catch (err) {
-        errorMsg.textContent = translateError(err.code);
-        errorMsg.classList.remove("hidden");
-        infoMsg.classList.add("hidden");
-      } finally {
-        submitBtn.textContent = originalText;
-        submitBtn.disabled = false;
-      }
-    });
+
+	// Register Form Submission
+	forms.register.addEventListener("submit", async (e) => {
+	  e.preventDefault();
+
+	  const name = document.getElementById("regName").value; // Ambil nama
+	  const email = document.getElementById("regEmail").value;
+	  const password = document.getElementById("regPassword").value;
+	  let role = document.getElementById("regRole").value;
+
+	  const submitBtn = forms.register.querySelector('button[type="submit"]');
+	  const originalText = submitBtn.textContent;
+	  submitBtn.textContent = "Mendaftarkan...";
+	  submitBtn.disabled = true;
+
+	  try {
+		const cred = await createUserWithEmailAndPassword(auth, email, password);
+
+		// Update nama di Firebase Auth
+		await updateProfile(cred.user, { displayName: name });
+
+		// Jika role guru, ubah jadi pending
+		if (role === "guru") role = "pending";
+
+		// Simpan ke Firestore
+		await setDoc(doc(db, "users", cred.user.uid), {
+		  name: name,        // ⬅️ Ini penting
+		  email: cred.user.email,
+		  role: role,
+		  createdAt: new Date()
+		});
+
+		if (role === "pending") {
+		  infoMsg.textContent = "✅ Akun berhasil dibuat, menunggu persetujuan admin untuk menjadi Guru.";
+		} else {
+		  infoMsg.textContent = "✅ Akun berhasil dibuat, silakan login.";
+		}
+
+		infoMsg.classList.remove("hidden");
+		errorMsg.classList.add("hidden");
+
+		setTimeout(() => showTab("login"), 2000);
+
+	  } catch (err) {
+		errorMsg.textContent = translateError(err.code);
+		errorMsg.classList.remove("hidden");
+		infoMsg.classList.add("hidden");
+	  } finally {
+		submitBtn.textContent = originalText;
+		submitBtn.disabled = false;
+	  }
+	});
 
     // Reset Password Form Submission
     forms.reset.addEventListener("submit", async (e) => {

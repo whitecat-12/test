@@ -33,15 +33,30 @@
             box-shadow: 0 0 20px rgba(0,0,0,0.1);
         }
         
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            max-width: 414px;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
-            background: white;
-            z-index: 10;
-        }
+       .bottom-nav {
+		    position: fixed;
+		    bottom: 0;
+		    width: 100%;
+		    max-width: 414px;
+		    box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+		    background: white;
+		    z-index: 10;
+		    height: 70px; /* PERBAIKAN: Tambahkan tinggi tetap */
+		    display: flex;
+		    align-items: center;
+		}
+
+		.nav-item {
+		    display: flex;
+		    flex-direction: column;
+		    align-items: center;
+		    justify-content: center;
+		    color: #6b7280;
+		    text-decoration: none;
+		    flex: 1;
+		    height: 100%;  /* ← PERBEDAAN BESAR */
+		    padding: 0.5rem 0;
+		}
         
         .nav-icon {
             transition: all 0.3s ease;

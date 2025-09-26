@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -33,37 +32,50 @@
             box-shadow: 0 0 20px rgba(0,0,0,0.1);
         }
         
-       .bottom-nav {
-		    position: fixed;
-		    bottom: 0;
-		    width: 100%;
-		    max-width: 414px;
-		    box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
-		    background: white;
-		    z-index: 10;
-		    height: 70px; /* PERBAIKAN: Tambahkan tinggi tetap */
-		    display: flex;
-		    align-items: center;
-		}
-
-		.nav-item {
-		    display: flex;
-		    flex-direction: column;
-		    align-items: center;
-		    justify-content: center;
-		    color: #6b7280;
-		    text-decoration: none;
-		    flex: 1;
-		    height: 100%;  /* ← PERBEDAAN BESAR */
-		    padding: 0.5rem 0;
-		}
+        /* NAVBAR YANG SUDAH DIPERBAIKI - SAMA DENGAN FILE CHAT */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            max-width: 414px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            background: white;
+            z-index: 10;
+            height: 70px; /* TINGGI KONSISTEN */
+            display: flex;
+            align-items: center;
+        }
         
-        .nav-icon {
+        /* STYLE UNTUK NAV ITEM - SAMA DENGAN FILE CHAT */
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+            text-decoration: none;
+            flex: 1;
+            height: 100%;
+            padding: 0.5rem 0;
             transition: all 0.3s ease;
         }
         
+        .nav-item span {
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
+        
+        .nav-item.active {
+            color: var(--primary);
+        }
+        
+        .nav-icon {
+            transition: all 0.3s ease;
+            font-size: 1.25rem; /* UKURAN KONSISTEN */
+        }
+        
         .nav-icon.active {
-            transform: translateY(-10px);
+            transform: translateY(-5px); /* EFEK YANG SAMA */
             color: var(--primary);
         }
         
@@ -380,6 +392,17 @@
             background: linear-gradient(90deg, transparent, #e2e8f0, transparent);
             margin: 16px 0;
         }
+
+        /* Improved mobile styles untuk konsistensi */
+        @media (max-width: 414px) {
+            .bottom-nav {
+                height: 65px; /* SAMA DENGAN FILE CHAT */
+            }
+            
+            .nav-icon {
+                font-size: 1.1rem; /* SAMA DENGAN FILE CHAT */
+            }
+        }
     </style>
 </head>
 <body>
@@ -556,136 +579,133 @@
             </section>
         </main>
         
-        <!-- Bottom Navigation -->
+        <!-- BOTTOM NAVIGATION YANG SUDAH DIPERBAIKI - SAMA DENGAN FILE CHAT -->
         <nav class="bottom-nav">
-	      <a href="../dashboard siswa.html" class="nav-item">
-	        <i class="fas fa-home nav-icon"></i>
-	        <span>Beranda</span>
-	      </a>
-	      <a href="../soal harian/dashboard soal.html" class="nav-item">
-	        <i class="fas fa-flask nav-icon"></i>
-	        <span>Soal Harian</span>
-	      </a>
-	      <a href="../ai/nayra.html" class="nav-item">
-	        <i class="fas fa-robot nav-icon"></i>
-	        <span>Nayra AI</span>
-	      </a>
-	      <a href="../kategori/kategori materi.html" class="nav-item">
-	        <i class="fas fa-chalkboard-teacher nav-icon"></i>
-	        <span>Materi Harian</span>
-	      </a>
-	      <a href="../profil.html" class="nav-item">
-	        <i class="fas fa-user nav-icon"></i>
-	        <span>Profil</span>
-	      </a>
-	    </nav>
-	  </div>
-  
-   <script type="module">
-  // Import Firebase
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-  import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+            <a href="dashboad siswa.html" class="nav-item">
+                <i class="fas fa-home nav-icon"></i>
+                <span>Beranda</span>
+            </a>
+            <a href="soal harian/dashboard soal.html" class="nav-item">
+                <i class="fas fa-flask nav-icon"></i>
+                <span>Soal Harian</span>
+            </a>
+            <a href="ai/index.html" class="nav-item">
+                <i class="fas fa-robot nav-icon"></i>
+                <span>Nayra AI</span>
+            </a>
+            <a href="kategori/kategori materi.html" class="nav-item">
+                <i class="fas fa-chalkboard-teacher nav-icon"></i>
+                <span>Materi Harian</span>
+            </a>
+            <a href="profil.html" class="nav-item">
+                <i class="fas fa-user nav-icon"></i>
+                <span>Profil</span>
+            </a>
+        </nav>
+    </div>
 
-  // Konfigurasi Firebase
-  const firebaseConfig = {
-      apiKey: "AIzaSyAJ5I8k2MzAyDLt9fUcXHRNtRVjKB_ETLY",
-      authDomain: "projectid-81104.firebaseapp.com",
-      projectId: "projectid-81104",
-      storageBucket: "projectid-81104.appspot.com",
-      messagingSenderId: "554913260457",
-      appId: "1:554913260457:web:bf988867ebfd902c651ab8",
-      measurementId: "G-8WFHQW5WGN"
-  };
+    <script type="module">
+        // Import Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-  // Inisialisasi
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
-  const auth = getAuth(app);
+        // Konfigurasi Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyAJ5I8k2MzAyDLt9fUcXHRNtRVjKB_ETLY",
+            authDomain: "projectid-81104.firebaseapp.com",
+            projectId: "projectid-81104",
+            storageBucket: "projectid-81104.appspot.com",
+            messagingSenderId: "554913260457",
+            appId: "1:554913260457:web:bf988867ebfd902c651ab8",
+            measurementId: "G-8WFHQW5WGN"
+        };
 
-  // 🔹 Ambil Fakta Harian dari Firestore
-  async function loadDailyDose() {
-      try {
-          const docRef = doc(db, "beranda", "faktaHarian"); 
-          const snapshot = await getDoc(docRef);
+        // Inisialisasi
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
 
-          if (snapshot.exists()) {
-              const data = snapshot.data();
-              document.querySelector(".daily-dose-verse").innerHTML = `
-                ${data.teks} <br>
-                <span style="font-size:0.9em; color: gray; font-style: italic;">- ${data.sumber}</span>
-              `;
-          } else {
-              console.log("Tidak ada data fakta harian.");
-          }
-      } catch (err) {
-          console.error("Error saat mengambil Fakta Harian:", err);
-      }
-  }
+        // 🔹 Ambil Fakta Harian dari Firestore
+        async function loadDailyDose() {
+            try {
+                const docRef = doc(db, "beranda", "faktaHarian"); 
+                const snapshot = await getDoc(docRef);
 
-  // Tunggu sampai auth siap
-  onAuthStateChanged(auth, (user) => {
-      if (user) {
-          // User sudah login, load fakta harian
-          loadDailyDose();
-      } else {
-          // User belum login, redirect ke halaman login
-          window.location.href = "login.html";
-      }
-  });
+                if (snapshot.exists()) {
+                    const data = snapshot.data();
+                    document.querySelector(".daily-dose-verse").innerHTML = `
+                        ${data.teks} <br>
+                        <span style="font-size:0.9em; color: gray; font-style: italic;">- ${data.sumber}</span>
+                    `;
+                } else {
+                    console.log("Tidak ada data fakta harian.");
+                }
+            } catch (err) {
+                console.error("Error saat mengambil Fakta Harian:", err);
+            }
+        }
 
-  // Fungsi logout
-  window.handleLogout = async function() {
-      try {
-          await signOut(auth);
-          alert('Logout berhasil!');
-          window.location.href = 'login.html';
-      } catch (error) {
-          console.error('Error saat logout:', error);
-          alert('Terjadi kesalahan saat logout. Silakan coba lagi.');
-      }
-  };
+        // Tunggu sampai auth siap
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // User sudah login, load fakta harian
+                loadDailyDose();
+            } else {
+                // User belum login, redirect ke halaman login
+                window.location.href = "login.html";
+            }
+        });
 
-  // Simple interaction for bottom nav
-  document.addEventListener('DOMContentLoaded', function() {
-      const navItems = document.querySelectorAll('.nav-icon');
-      
-      navItems.forEach(item => {
-          item.addEventListener('click', function() {
-              navItems.forEach(nav => {
-                  nav.classList.remove('active');
-                  nav.parentElement.classList.remove('text-primary');
-                  nav.parentElement.classList.add('text-gray-500');
-              });
-              
-              this.classList.add('active');
-              this.parentElement.classList.add('text-primary');
-              this.parentElement.classList.remove('text-gray-500');
-          });
-      });
-      
-      // Card hover effects
-      const cards = document.querySelectorAll('.card-hover');
-      cards.forEach(card => {
-          card.addEventListener('mouseenter', function() {
-              this.classList.add('shadow-md');
-              this.classList.remove('shadow-sm');
-          });
-          card.addEventListener('mouseleave', function() {
-              this.classList.remove('shadow-md');
-              this.classList.add('shadow-sm');
-          });
-      });
-  });
+        // Fungsi logout
+        window.handleLogout = async function() {
+            try {
+                await signOut(auth);
+                alert('Logout berhasil!');
+                window.location.href = 'login.html';
+            } catch (error) {
+                console.error('Error saat logout:', error);
+                alert('Terjadi kesalahan saat logout. Silakan coba lagi.');
+            }
+        };
 
-  function showSection(sectionId) {
-      document.querySelectorAll('.section-content').forEach(section => {
-          section.classList.remove('active-section');
-      });
-      document.getElementById(sectionId).classList.add('active-section');
-      document.getElementById(sectionId).scrollIntoView({ behavior: 'smooth' });
-  }
-</script>
+        // Simple interaction for bottom nav - DIPERBAIKI UNTUK NAVIGASI BARU
+        document.addEventListener('DOMContentLoaded', function() {
+            const navItems = document.querySelectorAll('.nav-item');
+            
+            navItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    navItems.forEach(nav => {
+                        nav.classList.remove('active');
+                        nav.querySelector('.nav-icon').classList.remove('active');
+                    });
+                    
+                    this.classList.add('active');
+                    this.querySelector('.nav-icon').classList.add('active');
+                });
+            });
+            
+            // Card hover effects
+            const cards = document.querySelectorAll('.card-hover');
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.classList.add('shadow-md');
+                    this.classList.remove('shadow-sm');
+                });
+                card.addEventListener('mouseleave', function() {
+                    this.classList.remove('shadow-md');
+                    this.classList.add('shadow-sm');
+                });
+            });
+        });
+
+        function showSection(sectionId) {
+            document.querySelectorAll('.section-content').forEach(section => {
+                section.classList.remove('active-section');
+            });
+            document.getElementById(sectionId).classList.add('active-section');
+            document.getElementById(sectionId).scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
 </body>
 </html>
-

@@ -546,7 +546,7 @@
     
     <div class="fab-form-container" id="fabFormContainer">
       <div class="flex items-start space-x-3 mb-4">
-        <div class="avatar bg-blue-500">
+        <div class="avatar" style="background-color: #9999ff;">
           <span id="userInitial" class="text-lg">U</span>
         </div>
         <div>
@@ -558,15 +558,17 @@
         id="fabMsgInput" 
         placeholder="Apa yang ingin Anda diskusikan? (bisa LaTeX: $x^2+y^2=z^2$)" 
         rows="4"
-        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-9999ff focus:border-transparent resize-none"
+        style="--tw-ring-color: #9999ff;"
       ></textarea>
       
       <div class="flex justify-between items-center mt-3">
-        <div class="flex space-x-2 text-blue-500">
+        <div class="flex space-x-2" style="color: #9999ff;">
           <button class="p-2 rounded-full hover:bg-blue-50"><i class="fas fa-image"></i></button>
           <button class="p-2 rounded-full hover:bg-blue-50"><i class="fas fa-code"></i></button>
         </div>
-        <button id="fabSendBtn" class="bg-blue-500 text-white px-4 py-2 rounded-full font-medium hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+        <button id="fabSendBtn" class="text-white px-4 py-2 rounded-full font-medium disabled:opacity-50 disabled:cursor-not-allowed" 
+                style="background-color: #9999ff; hover:background-color: #7a7ae6;" disabled>
           Post
         </button>
       </div>
@@ -922,7 +924,7 @@
       const div = document.createElement("div");
       div.className = "thread-card bg-white rounded-lg border border-gray-200";
 
-      const colors = ['bg-blue-500','bg-red-500','bg-green-500','bg-purple-500','bg-pink-500','bg-yellow-500'];
+      const colors = ['#9999ff','#ff9999','#99ff99','#ff99ff','#ffcc99','#ffff99'];
       const colorIndex = Math.abs(hashCode(data.name || data.email || "")) % colors.length;
       const avatarColor = colors[colorIndex];
       const initial = (data.name || data.email || "").charAt(0).toUpperCase();
@@ -936,7 +938,7 @@
 
       div.innerHTML = `
         <div class="flex items-start gap-3">
-          <div class="avatar ${avatarColor}"><span>${initial}</span></div>
+          <div class="avatar" style="background-color: ${avatarColor};"><span>${initial}</span></div>
           <div class="flex-1 min-w-0">
             <div class="flex items-center gap-2 thread-meta">
               <p class="font-semibold text-gray-900 truncate">${escapeHtml(data.name || data.email)}</p>
@@ -959,7 +961,7 @@
             <div class="mt-4 space-y-3" id="replies-${id}"></div>
 
             <div class="reply-input-container">
-              <div class="avatar bg-gray-200" style="width:32px;height:32px;font-size:0.875rem;">
+              <div class="avatar" style="width:32px;height:32px;font-size:0.875rem; background-color: #9999ff;">
                 <span>${(currentProfile?.name?.charAt(0) || currentUser.email.charAt(0)).toUpperCase()}</span>
               </div>
               <input id="reply-${id}" type="text" placeholder="Tulis balasan..." class="reply-input">
@@ -1023,7 +1025,7 @@
 
       return `
         <div class="flex items-start gap-2">
-          <div class="avatar ${replyAvatarColor}" style="width:32px;height:32px;font-size:0.875rem;">
+          <div class="avatar" style="width:32px;height:32px;font-size:0.875rem; background-color: ${replyAvatarColor};">
             <span>${replyInitial}</span>
           </div>
           <div class="bg-gray-50 p-3 rounded-lg flex-1 min-w-0">

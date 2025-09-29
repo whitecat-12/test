@@ -12,6 +12,7 @@
             --primary: #38b2ac;
             --secondary: #0e7490;
             --accent: #f59e0b;
+            --logo-color: #9999ff; /* Warna baru untuk logo */
         }
         
         body {
@@ -80,7 +81,7 @@
         }
         
         .app-logo-icon {
-            background: #4f91f2;
+            background: var(--logo-color); /* Warna diubah ke #9999ff */
             color: white;
             width: 36px;
             height: 36px;
@@ -94,7 +95,7 @@
         .app-name {
             font-weight: 700;
             font-size: 1.25rem;
-            color: #4f91f2;
+            color: var(--logo-color); /* Warna diubah ke #9999ff */
         }
 
         /* Animasi untuk kartu */
@@ -229,7 +230,7 @@
                 <span>Beranda</span>
             </a>
             <a href="../soal harian/dashboard soal.html" class="nav-item">
-                <i class="fas fa-flask nav-icon"></i>
+                <i class="fas fa-flask nav-icon active"></i>
                 <span>Soal Harian</span>
             </a>
             <a href="../ai/nayra.html" class="nav-item">
@@ -237,7 +238,7 @@
                 <span>Nayra AI</span>
             </a>
             <a href="kategori materi.html" class="nav-item active">
-                <i class="fas fa-chalkboard-teacher nav-icon active"></i>
+                <i class="fas fa-chalkboard-teacher nav-icon"></i>
                 <span>Materi Harian</span>
             </a>
             <a href="../profil.html" class="nav-item">

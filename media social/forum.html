@@ -141,12 +141,17 @@
     }
     
     .send-reply-btn {
-      background: #3b82f6;
+      background: var(--logo-color); /* Warna diubah ke #9999ff */
       color: white;
       border: none;
       border-radius: 0.5rem;
       padding: 0.5rem 0.75rem;
       font-size: 0.875rem;
+      transition: all 0.3s ease;
+    }
+    
+    .send-reply-btn:hover {
+      background: #7a7ae6;
     }
     
     /* FAB Styles */
@@ -162,7 +167,7 @@
       width: 56px;
       height: 56px;
       border-radius: 50%;
-      background-color: #3b82f6;
+      background-color: var(--logo-color); /* Warna diubah ke #9999ff */
       color: white;
       display: flex;
       align-items: center;
@@ -173,7 +178,7 @@
     }
     
     .fab:hover {
-      background-color: #2563eb;
+      background-color: #7a7ae6;
       transform: scale(1.05);
       box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
     }
@@ -369,7 +374,7 @@
     }
     
     .pagination-btn.active {
-      background-color: #3b82f6;
+      background-color: var(--logo-color); /* Warna diubah ke #9999ff */
       color: white;
     }
     
@@ -391,7 +396,7 @@
       width: 20px;
       height: 20px;
       border: 2px solid #e2e8f0;
-      border-top: 2px solid #3b82f6;
+      border-top: 2px solid var(--logo-color); /* Warna diubah ke #9999ff */
       border-radius: 50%;
       animation: spin 1s linear infinite;
       margin-right: 0.5rem;
@@ -567,7 +572,7 @@
           <button class="p-2 rounded-full hover:bg-blue-50"><i class="fas fa-image"></i></button>
           <button class="p-2 rounded-full hover:bg-blue-50"><i class="fas fa-code"></i></button>
         </div>
-        <button id="fabSendBtn" class="bg-blue-500 text-white px-4 py-2 rounded-full font-medium hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+        <button id="fabSendBtn" class="bg-[#9999ff] text-white px-4 py-2 rounded-full font-medium hover:bg-[#7a7ae6] disabled:opacity-50 disabled:cursor-not-allowed" disabled>
           Post
         </button>
       </div>

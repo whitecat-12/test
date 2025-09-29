@@ -564,13 +564,13 @@
         id="fabMsgInput" 
         placeholder="Apa yang ingin Anda diskusikan? (bisa LaTeX: $x^2+y^2=z^2$)" 
         rows="4"
-        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#9999ff] focus:border-transparent resize-none"
       ></textarea>
       
       <div class="flex justify-between items-center mt-3">
-        <div class="flex space-x-2 text-blue-500">
-          <button class="p-2 rounded-full hover:bg-blue-50"><i class="fas fa-image"></i></button>
-          <button class="p-2 rounded-full hover:bg-blue-50"><i class="fas fa-code"></i></button>
+        <div class="flex space-x-2 text-[#9999ff]">
+          <button class="p-2 rounded-full hover:bg-[#f0f0ff]"><i class="fas fa-image"></i></button>
+          <button class="p-2 rounded-full hover:bg-[#f0f0ff]"><i class="fas fa-code"></i></button>
         </div>
         <button id="fabSendBtn" class="bg-[#9999ff] text-white px-4 py-2 rounded-full font-medium hover:bg-[#7a7ae6] disabled:opacity-50 disabled:cursor-not-allowed" disabled>
           Post
@@ -734,7 +734,7 @@
         fabUserName.textContent = currentProfile?.name || user.email;
         await loadThreads();
       }
-    });
+    }
 
     // Post thread baru dari FAB form
     fabSendBtn.addEventListener("click", async () => {

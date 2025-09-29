@@ -14,9 +14,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary: #38b2ac;
-      --secondary: #0e7490;
-      --logo-color: #9999ff; /* Warna baru untuk logo */
+      --primary: #9999ff;
+      --secondary: #7a7ae6;
     }
     
     body {
@@ -62,7 +61,7 @@
     }
     
     .app-logo-icon {
-      background: var(--logo-color); /* Warna diubah ke #9999ff */
+      background: linear-gradient(135deg, #9999ff, #7a7ae6);
       color: white;
       width: 36px;
       height: 36px;
@@ -76,7 +75,7 @@
     .app-name {
       font-weight: 700;
       font-size: 1.25rem;
-      color: var(--logo-color); /* Warna diubah ke #9999ff */
+      color: #9999ff;
     }
 
     /* Thread styles - IMPROVED FOR MOBILE */
@@ -141,17 +140,12 @@
     }
     
     .send-reply-btn {
-      background: var(--logo-color); /* Warna diubah ke #9999ff */
+      background: #9999ff;
       color: white;
       border: none;
       border-radius: 0.5rem;
       padding: 0.5rem 0.75rem;
       font-size: 0.875rem;
-      transition: all 0.3s ease;
-    }
-    
-    .send-reply-btn:hover {
-      background: #7a7ae6;
     }
     
     /* FAB Styles */
@@ -167,7 +161,7 @@
       width: 56px;
       height: 56px;
       border-radius: 50%;
-      background-color: var(--logo-color); /* Warna diubah ke #9999ff */
+      background-color: #9999ff;
       color: white;
       display: flex;
       align-items: center;
@@ -267,7 +261,7 @@
       width: 40px;
       height: 40px;
       border-radius: 50%;
-      background-color: var(--logo-color); /* Warna diubah ke #9999ff */
+      background-color: #9999ff;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -292,7 +286,7 @@
     .sidebar-title {
       font-size: 1.25rem;
       font-weight: 700;
-      color: var(--logo-color); /* Warna diubah ke #9999ff */
+      color: #9999ff;
     }
     
     .sidebar-content {
@@ -319,7 +313,7 @@
       width: 40px;
       height: 40px;
       border-radius: 50%;
-      background-color: var(--logo-color); /* Warna diubah ke #9999ff */
+      background-color: #9999ff;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -374,7 +368,7 @@
     }
     
     .pagination-btn.active {
-      background-color: var(--logo-color); /* Warna diubah ke #9999ff */
+      background-color: #9999ff;
       color: white;
     }
     
@@ -396,7 +390,7 @@
       width: 20px;
       height: 20px;
       border: 2px solid #e2e8f0;
-      border-top: 2px solid var(--logo-color); /* Warna diubah ke #9999ff */
+      border-top: 2px solid #9999ff;
       border-radius: 50%;
       animation: spin 1s linear infinite;
       margin-right: 0.5rem;
@@ -488,10 +482,10 @@
     <header class="bg-gradient-to-r from-primary to-secondary p-4 text-white">
       <div class="flex justify-between items-center">
         <div class="app-logo">
-          <div class="app-logo-icon">
+          <div class="app-logo-icon" style="background: #9999ff; color: white;">
             <i class="fas fa-atom"></i>
           </div>
-          <h1 class="app-name">TETA SAINS</h1>
+          <h1 class="app-name" style="color: #9999ff;">TETA SAINS</h1>
         </div>
         <div class="flex items-center space-x-3">
           <i class="fas fa-search"></i>
@@ -564,15 +558,15 @@
         id="fabMsgInput" 
         placeholder="Apa yang ingin Anda diskusikan? (bisa LaTeX: $x^2+y^2=z^2$)" 
         rows="4"
-        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#9999ff] focus:border-transparent resize-none"
+        class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
       ></textarea>
       
       <div class="flex justify-between items-center mt-3">
-        <div class="flex space-x-2 text-[#9999ff]">
-          <button class="p-2 rounded-full hover:bg-[#f0f0ff]"><i class="fas fa-image"></i></button>
-          <button class="p-2 rounded-full hover:bg-[#f0f0ff]"><i class="fas fa-code"></i></button>
+        <div class="flex space-x-2 text-blue-500">
+          <button class="p-2 rounded-full hover:bg-blue-50"><i class="fas fa-image"></i></button>
+          <button class="p-2 rounded-full hover:bg-blue-50"><i class="fas fa-code"></i></button>
         </div>
-        <button id="fabSendBtn" class="bg-[#9999ff] text-white px-4 py-2 rounded-full font-medium hover:bg-[#7a7ae6] disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+        <button id="fabSendBtn" class="bg-blue-500 text-white px-4 py-2 rounded-full font-medium hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed" disabled>
           Post
         </button>
       </div>
@@ -734,7 +728,7 @@
         fabUserName.textContent = currentProfile?.name || user.email;
         await loadThreads();
       }
-    }
+    });
 
     // Post thread baru dari FAB form
     fabSendBtn.addEventListener("click", async () => {

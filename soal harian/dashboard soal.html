@@ -112,6 +112,65 @@
             animation: float 2s ease-in-out infinite;
         }
 
+        /* Search Bar Styles */
+        .search-container {
+            position: relative;
+            margin: 16px 0;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 12px 16px 12px 44px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            background-color: #f8fafc;
+            font-family: 'Baloo 2', cursive;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(56, 178, 172, 0.1);
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+        }
+        
+        .clear-search {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            display: none;
+        }
+        
+        .clear-search:hover {
+            color: #64748b;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 40px 20px;
+            color: #64748b;
+        }
+        
+        .no-results i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            color: #cbd5e1;
+        }
+
         /* RESPONSIVE SAMA */
         @media (max-width: 414px) {
             .bottom-nav {
@@ -142,8 +201,24 @@
         <!-- Main Content Area -->
         <main class="pb-20">
             <div class="p-4">
+                <!-- Search Bar -->
+                <div class="search-container">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" id="searchInput" class="search-input" placeholder="Cari mata pelajaran...">
+                    <button id="clearSearch" class="clear-search">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
                 <!-- Container Rak -->
                 <div id="rakMapel" class="grid grid-cols-1 gap-5"></div>
+                
+                <!-- No Results Message -->
+                <div id="noResults" class="no-results hidden">
+                    <i class="fas fa-search"></i>
+                    <h3 class="text-lg font-semibold mb-2">Tidak ada hasil ditemukan</h3>
+                    <p>Coba gunakan kata kunci yang berbeda</p>
+                </div>
             </div>
         </main>
         
@@ -191,6 +266,11 @@
         const auth = getAuth(app);
 
         const rakMapel = document.getElementById("rakMapel");
+        const searchInput = document.getElementById("searchInput");
+        const clearSearch = document.getElementById("clearSearch");
+        const noResults = document.getElementById("noResults");
+
+        let allSubjects = [];
 
         onAuthStateChanged(auth, (user) => {
             if (!user) {
@@ -209,7 +289,18 @@
                 if (data.mapel) mapelSet.add(data.mapel);
             });
 
+            allSubjects = [...mapelSet];
+            renderSubjects(allSubjects);
+        }
+
+        function renderSubjects(subjects) {
             rakMapel.innerHTML = "";
+            noResults.classList.add("hidden");
+
+            if (subjects.length === 0) {
+                noResults.classList.remove("hidden");
+                return;
+            }
 
             // Warna-warna cerah dan ramah anak tanpa gradien
             const colorSchemes = [
@@ -223,7 +314,7 @@
             ];
 
             let i = 0;
-            [...mapelSet].forEach(mapel => {
+            subjects.forEach(mapel => {
                 const scheme = colorSchemes[i % colorSchemes.length];
                 i++;
 
@@ -249,17 +340,35 @@
 
                 rakMapel.appendChild(card);
             });
-
-            // Jika tidak ada mata pelajaran
-            if (rakMapel.innerHTML === "") {
-                rakMapel.innerHTML = `
-                    <div class="text-center py-10">
-                        <i class="fas fa-book-open text-5xl text-gray-300 mb-4"></i>
-                        <p class="text-gray-500">Belum ada mata pelajaran tersedia</p>
-                    </div>
-                `;
-            }
         }
+
+        // Fungsi pencarian
+        function searchSubjects(query) {
+            const filteredSubjects = allSubjects.filter(subject => 
+                subject.toLowerCase().includes(query.toLowerCase())
+            );
+            renderSubjects(filteredSubjects);
+        }
+
+        // Event listener untuk pencarian
+        searchInput.addEventListener("input", function() {
+            const query = this.value.trim();
+            
+            if (query.length > 0) {
+                clearSearch.style.display = "block";
+                searchSubjects(query);
+            } else {
+                clearSearch.style.display = "none";
+                renderSubjects(allSubjects);
+            }
+        });
+
+        // Event listener untuk tombol hapus pencarian
+        clearSearch.addEventListener("click", function() {
+            searchInput.value = "";
+            clearSearch.style.display = "none";
+            renderSubjects(allSubjects);
+        });
 
         // INTERAKSI NAVBAR YANG SUDAH DISAMAKAN
         document.addEventListener('DOMContentLoaded', function() {

@@ -16,6 +16,7 @@
     :root {
       --primary: #38b2ac;
       --secondary: #0e7490;
+      --logo-color: #9999ff; /* Warna baru untuk logo */
     }
     
     body {
@@ -61,7 +62,7 @@
     }
     
     .app-logo-icon {
-      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      background: var(--logo-color); /* Warna diubah ke #9999ff */
       color: white;
       width: 36px;
       height: 36px;
@@ -75,7 +76,7 @@
     .app-name {
       font-weight: 700;
       font-size: 1.25rem;
-      color: #60a5fa;
+      color: var(--logo-color); /* Warna diubah ke #9999ff */
     }
 
     /* Thread styles - IMPROVED FOR MOBILE */
@@ -261,7 +262,7 @@
       width: 40px;
       height: 40px;
       border-radius: 50%;
-      background-color: #4f91f2;
+      background-color: var(--logo-color); /* Warna diubah ke #9999ff */
       display: flex;
       align-items: center;
       justify-content: center;
@@ -271,7 +272,7 @@
     }
     
     .hamburger:hover {
-      background-color: #3a7bd5;
+      background-color: #7a7ae6;
       transform: scale(1.05);
     }
     
@@ -286,7 +287,7 @@
     .sidebar-title {
       font-size: 1.25rem;
       font-weight: 700;
-      color: #4f91f2;
+      color: var(--logo-color); /* Warna diubah ke #9999ff */
     }
     
     .sidebar-content {
@@ -313,7 +314,7 @@
       width: 40px;
       height: 40px;
       border-radius: 50%;
-      background-color: #4f91f2;
+      background-color: var(--logo-color); /* Warna diubah ke #9999ff */
       display: flex;
       align-items: center;
       justify-content: center;
@@ -482,10 +483,10 @@
     <header class="bg-gradient-to-r from-primary to-secondary p-4 text-white">
       <div class="flex justify-between items-center">
         <div class="app-logo">
-          <div class="app-logo-icon" style="background: #4f91f2; color: white;">
+          <div class="app-logo-icon">
             <i class="fas fa-atom"></i>
           </div>
-          <h1 class="app-name" style="color: #4f91f2;">TETA SAINS</h1>
+          <h1 class="app-name">TETA SAINS</h1>
         </div>
         <div class="flex items-center space-x-3">
           <i class="fas fa-search"></i>

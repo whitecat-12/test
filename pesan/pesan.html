@@ -10,8 +10,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
-      --primary: #38b2ac;
-      --secondary: #0e7490;
+      --primary: #9999ff;
+      --secondary: #7a7ae6;
     }
     
     body {
@@ -58,7 +58,7 @@
     }
     
     .app-logo-icon {
-      background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+      background: linear-gradient(135deg, #9999ff, #7a7ae6);
       color: white;
       width: 36px;
       height: 36px;
@@ -72,7 +72,7 @@
     .app-name {
       font-weight: 700;
       font-size: 1.25rem;
-      color: #60a5fa;
+      color: #9999ff;
     }
 
     /* Chat styles */
@@ -105,8 +105,8 @@
     }
     
     .search-input:focus {
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      border-color: #9999ff;
+      box-shadow: 0 0 0 3px rgba(153, 153, 255, 0.1);
     }
     
     .search-icon {
@@ -201,7 +201,7 @@
     }
     
     .message.sent .message-bubble {
-      background-color: #3b82f6;
+      background-color: #9999ff;
       color: white;
       border-bottom-right-radius: 0.25rem;
     }
@@ -244,14 +244,14 @@
     }
     
     .message-input:focus {
-      border-color: #3b82f6;
+      border-color: #9999ff;
     }
     
     .send-button {
       width: 40px;
       height: 40px;
       border-radius: 50%;
-      background-color: #3b82f6;
+      background-color: #9999ff;
       color: white;
       display: flex;
       align-items: center;
@@ -262,7 +262,7 @@
     }
     
     .send-button:hover {
-      background-color: #2563eb;
+      background-color: #7a7ae6;
     }
     
     .send-button:disabled {
@@ -282,7 +282,7 @@
       width: 20px;
       height: 20px;
       border: 2px solid #e2e8f0;
-      border-top: 2px solid #3b82f6;
+      border-top: 2px solid #9999ff;
       border-radius: 50%;
       animation: spin 1s linear infinite;
       margin-right: 0.5rem;
@@ -333,7 +333,7 @@
       width: 40px;
       height: 40px;
       border-radius: 50%;
-      background-color: #4f91f2;
+      background-color: #9999ff;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -343,7 +343,7 @@
     }
     
     .hamburger:hover {
-      background-color: #3a7bd5;
+      background-color: #7a7ae6;
       transform: scale(1.05);
     }
     
@@ -358,7 +358,7 @@
     .sidebar-title {
       font-size: 1.25rem;
       font-weight: 700;
-      color: #4f91f2;
+      color: #9999ff;
     }
     
     .sidebar-content {
@@ -387,7 +387,7 @@
       width: 40px;
       height: 40px;
       border-radius: 50%;
-      background-color: #4f91f2;
+      background-color: #9999ff;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -470,10 +470,10 @@
     <header class="bg-gradient-to-r from-primary to-secondary p-4 text-white">
       <div class="flex justify-between items-center">
         <div class="app-logo" id="backButton">
-          <div class="app-logo-icon" style="background: #4f91f2; color: white;">
+          <div class="app-logo-icon" style="background: #9999ff; color: white;">
             <i class="fas fa-comments"></i>
           </div>
-          <h1 class="app-name" style="color: #4f91f2;">CHAT PRIBADI</h1>
+          <h1 class="app-name" style="color: #9999ff;">CHAT PRIBADI</h1>
         </div>
         <div class="flex items-center space-x-3">
           <div class="hamburger" id="hamburgerButton">
@@ -808,7 +808,7 @@
 
     // Render user in the list
     function renderUser(userId, userData) {
-      const colors = ['bg-blue-500','bg-red-500','bg-green-500','bg-purple-500','bg-pink-500','bg-yellow-500'];
+      const colors = ['#9999ff','#ff9999','#99ff99','#ff99ff','#ffcc99','#ffff99'];
       const colorIndex = Math.abs(hashCode(userData.name || userData.email || "")) % colors.length;
       const avatarColor = colors[colorIndex];
       const initial = (userData.name || userData.email || "").charAt(0).toUpperCase();
@@ -818,7 +818,7 @@
       userItem.dataset.userId = userId;
       
       userItem.innerHTML = `
-        <div class="user-avatar ${avatarColor}">
+        <div class="user-avatar" style="background-color: ${avatarColor}">
           <span>${initial}</span>
         </div>
         <div class="user-info">

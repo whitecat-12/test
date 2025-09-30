@@ -607,8 +607,7 @@
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
     import {
       getFirestore, collection, addDoc, serverTimestamp,
-      query, orderBy, onSnapshot, doc, getDoc, getDocs,
-      where, deleteDoc, getDocsFromServer
+      query, orderBy, onSnapshot, doc, getDoc, getDocs
     } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     // Firebase Config
@@ -645,7 +644,6 @@
     let selectedUser = null;
     let messagesUnsubscribe = null;
     let allUsers = [];
-    let autoDeleteInterval = null;
 
     // Toggle sidebar
     function toggleSidebar() {
@@ -739,42 +737,6 @@
       } catch (err) {
         console.error("Error sending message:", err);
         alert("Gagal mengirim pesan: " + err.message);
-      }
-    }
-
-    // Fungsi untuk menghapus pesan yang sudah kedaluwarsa
-    async function cleanupExpiredMessages() {
-      try {
-        console.log("Memulai pembersihan pesan kedaluwarsa...");
-        const now = new Date();
-        
-        // Dapatkan semua chat
-        const chatsSnapshot = await getDocs(collection(db, "chats"));
-        
-        for (const chatDoc of chatsSnapshot.docs) {
-          const messagesRef = collection(db, "chats", chatDoc.id, "messages");
-          const messagesQuery = query(messagesRef);
-          const messagesSnapshot = await getDocs(messagesQuery);
-          
-          for (const messageDoc of messagesSnapshot.docs) {
-            const messageData = messageDoc.data();
-            
-            // Periksa apakah pesan memiliki expiresAt dan sudah kedaluwarsa
-            if (messageData.expiresAt) {
-              const expiresAt = messageData.expiresAt.toDate();
-              
-              if (expiresAt <= now) {
-                // Hapus pesan yang sudah kedaluwarsa
-                await deleteDoc(messageDoc.ref);
-                console.log("Pesan terhapus:", messageDoc.id);
-              }
-            }
-          }
-        }
-        
-        console.log("Pembersihan pesan selesai");
-      } catch (err) {
-        console.error("Error cleaning up expired messages:", err);
       }
     }
 
@@ -1075,14 +1037,8 @@
           currentProfile = await getUserProfile(user.uid);
           await loadUsers();
           
-          // Jalankan pembersihan pesan kedaluwarsa saat app dimulai
-          await cleanupExpiredMessages();
-          
-          // Set interval untuk pembersihan otomatis setiap 1 jam
-          if (autoDeleteInterval) {
-            clearInterval(autoDeleteInterval);
-          }
-          autoDeleteInterval = setInterval(cleanupExpiredMessages, 60 * 60 * 1000); // 1 jam
+          // HAPUS cleanupExpiredMessages() - tidak diperlukan di client side
+          console.log("Aplikasi chat siap. Pesan akan otomatis terhapus dalam 24 jam.");
           
         } catch (err) {
           console.error("Error during authentication:", err);
@@ -1140,9 +1096,6 @@
 
     // Cleanup ketika window ditutup
     window.addEventListener('beforeunload', () => {
-      if (autoDeleteInterval) {
-        clearInterval(autoDeleteInterval);
-      }
       if (messagesUnsubscribe) {
         messagesUnsubscribe();
       }

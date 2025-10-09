@@ -406,8 +406,11 @@
                 <div class="profile-avatar">
                     <i class="fas fa-user"></i>
                 </div>
-                <h1 class="profile-name" id="profile-name">Nama Siswa</h1>
+                <h1 class="profile-name" id="profile-name">Memuat...</h1>
                 <p class="profile-email" id="profile-email">email@siswa.com</p>
+                <div class="mt-2">
+                    <span class="bg-white text-primary px-3 py-1 rounded-full text-sm font-medium">Siswa</span>
+                </div>
             </div>
             
             <!-- Score Display -->
@@ -471,19 +474,19 @@
         
         <!-- BOTTOM NAVIGATION YANG SUDAH DIPERBAIKI - SAMA DENGAN FILE CONTOH -->
         <nav class="bottom-nav">
-            <a href="../dashboad siswa.html" class="nav-item">
+            <a href="dashboad siswa.html" class="nav-item">
                 <i class="fas fa-home nav-icon"></i>
                 <span>Beranda</span>
             </a>
-            <a href="../soal harian/dashboard soal.html" class="nav-item">
+            <a href="soal harian/dashboard soal.html" class="nav-item">
                 <i class="fas fa-flask nav-icon"></i>
                 <span>Soal Harian</span>
             </a>
-            <a href="../ai/index.html" class="nav-item">
+            <a href="ai/index.html" class="nav-item">
                 <i class="fas fa-robot nav-icon"></i>
                 <span>Nayra AI</span>
             </a>
-            <a href="../kategori/kategori materi.html" class="nav-item">
+            <a href="kategori/kategori materi.html" class="nav-item">
                 <i class="fas fa-chalkboard-teacher nav-icon"></i>
                 <span>Materi Harian</span>
             </a>
@@ -496,7 +499,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, getDocs, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, query, where, orderBy, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const firebaseConfig = {
@@ -524,6 +527,7 @@
 
         let currentUser = null;
         let userScores = [];
+        let userName = "";
 
         // 🔹 Logout
         logoutBtn.addEventListener("click", async () => {
@@ -532,23 +536,57 @@
         });
 
         // 🔹 Cek login user
-        onAuthStateChanged(auth, (user) => {
+        onAuthStateChanged(auth, async (user) => {
             if (!user) {
                 window.location.href = "login.html";
             } else {
                 currentUser = user;
-                loadUserProfile();
-                loadUserScores();
+                await loadUserProfile();
+                await loadUserScores();
             }
         });
 
-        // 🔹 Load profil user
-        function loadUserProfile() {
-            profileName.textContent = currentUser.displayName || "Siswa TETA SAINS";
-            profileEmail.textContent = currentUser.email;
+        // 🔹 Load profil user - DIPERBAIKI
+        async function loadUserProfile() {
+            try {
+                // Coba ambil dari Firestore collection 'users' dulu
+                const userDocRef = doc(db, "users", currentUser.uid);
+                const userDoc = await getDoc(userDocRef);
+                
+                if (userDoc.exists()) {
+                    const userData = userDoc.data();
+                    userName = userData.name || userData.displayName || currentUser.displayName || "Siswa TETA SAINS";
+                } else {
+                    // Jika tidak ada di users, coba ambil dari data nilai terbaru
+                    const scoresQuery = query(
+                        collection(db, "nilai"), 
+                        where("uid", "==", currentUser.uid),
+                        orderBy("createdAt", "desc"),
+                        limit(1)
+                    );
+                    
+                    const scoresSnapshot = await getDocs(scoresQuery);
+                    if (!scoresSnapshot.empty) {
+                        const latestScore = scoresSnapshot.docs[0].data();
+                        userName = latestScore.name || currentUser.displayName || "Siswa TETA SAINS";
+                    } else {
+                        // Fallback ke email atau default
+                        userName = currentUser.displayName || currentUser.email.split('@')[0] || "Siswa TETA SAINS";
+                    }
+                }
+                
+                profileName.textContent = userName;
+                profileEmail.textContent = currentUser.email;
+                
+            } catch (err) {
+                console.error("Error load profil:", err);
+                // Fallback jika semua gagal
+                profileName.textContent = currentUser.displayName || currentUser.email.split('@')[0] || "Siswa TETA SAINS";
+                profileEmail.textContent = currentUser.email;
+            }
         }
 
-        // 🔹 Load nilai user dari Firestore
+        // 🔹 Load nilai user dari Firestore - DIPERBAIKI untuk ambil nama juga
         async function loadUserScores() {
             try {
                 const q = query(
@@ -558,7 +596,19 @@
                 );
                 
                 const snapshot = await getDocs(q);
-                userScores = snapshot.docs.map(doc => doc.data());
+                userScores = snapshot.docs.map(doc => {
+                    const data = doc.data();
+                    return {
+                        ...data,
+                        id: doc.id
+                    };
+                });
+                
+                // Jika ada data nilai, ambil nama dari data terbaru
+                if (userScores.length > 0 && userScores[0].name) {
+                    userName = userScores[0].name;
+                    profileName.textContent = userName;
+                }
                 
                 updateProfileStats();
                 updateHistoryList();
@@ -599,16 +649,32 @@
             }
 
             historyList.innerHTML = userScores.map(score => {
-                const date = score.createdAt.toDate();
-                const formattedDate = date.toLocaleDateString('id-ID', {
-                    day: 'numeric',
-                    month: 'short',
-                    year: 'numeric'
-                });
+                let dateText = "Tanggal tidak tersedia";
+                
+                try {
+                    if (score.createdAt && typeof score.createdAt.toDate === 'function') {
+                        const date = score.createdAt.toDate();
+                        dateText = date.toLocaleDateString('id-ID', {
+                            day: 'numeric',
+                            month: 'short',
+                            year: 'numeric'
+                        });
+                    } else if (score.createdAt) {
+                        // Jika createdAt adalah string atau timestamp
+                        const date = new Date(score.createdAt);
+                        dateText = date.toLocaleDateString('id-ID', {
+                            day: 'numeric',
+                            month: 'short', 
+                            year: 'numeric'
+                        });
+                    }
+                } catch (err) {
+                    console.error("Error formatting date:", err);
+                }
                 
                 return `
                     <div class="history-item">
-                        <div class="history-date">${formattedDate}</div>
+                        <div class="history-date">${dateText}</div>
                         <div class="history-score">${score.score}</div>
                     </div>
                 `;

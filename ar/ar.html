@@ -1,563 +1,188 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AR Galaxy - TETA SAINS</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <style>
-        :root {
-            --primary: #38b2ac;
-            --secondary: #0e7490;
-            --accent: #f59e0b;
-            --astronomy: #ec4899;
-            --logo-color: #9999ff;
-        }
-        
-        body {
-            font-family: 'Baloo 2', cursive;
-            background-color: #f8fafc;
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden;
-        }
-        
-        .app-container {
-            max-width: 414px;
-            margin: 0 auto;
-            background: white;
-            min-height: 100vh;
-            position: relative;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
-            overflow-x: hidden;
-        }
-        
-        /* NAVBAR */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            max-width: 414px;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
-            background: white;
-            z-index: 10;
-            height: 70px;
-            display: flex;
-            align-items: center;
-        }
-        
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: #6b7280;
-            text-decoration: none;
-            flex: 1;
-            height: 100%;
-            padding: 0.5rem 0;
-            transition: all 0.3s ease;
-        }
-        
-        .nav-item.active {
-            color: var(--primary);
-        }
-        
-        .nav-icon.active {
-            transform: translateY(-5px);
-            color: var(--primary);
-        }
-        
-        /* AR Container */
-        #ar-container {
-            position: relative;
-            width: 100%;
-            height: 70vh;
-            overflow: hidden;
-            background: #000;
-        }
-        
-        #ar-view {
-            width: 100%;
-            height: 100%;
-        }
-        
-        .ar-controls {
-            position: absolute;
-            bottom: 80px;
-            left: 0;
-            right: 0;
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            padding: 10px;
-            z-index: 5;
-        }
-        
-        .ar-btn {
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 50px;
-            padding: 12px 24px;
-            font-family: 'Baloo 2', cursive;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-            z-index: 100;
-        }
-        
-        .ar-btn:hover {
-            background: var(--secondary);
-            transform: translateY(-2px);
-        }
-        
-        .ar-btn:disabled {
-            background: #9ca3af;
-            cursor: not-allowed;
-            transform: none;
-        }
-        
-        .info-panel {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            right: 10px;
-            background: rgba(255,255,255,0.95);
-            border-radius: 10px;
-            padding: 15px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            z-index: 5;
-        }
-        
-        .info-panel h3 {
-            margin: 0 0 10px 0;
-            color: var(--astronomy);
-            font-size: 1.1rem;
-        }
-        
-        .info-panel p {
-            margin: 0;
-            font-size: 0.9rem;
-            color: #4b5563;
-        }
-        
-        .loading {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 100;
-            color: white;
-            font-size: 1.2rem;
-        }
-        
-        .hidden {
-            display: none;
-        }
-        
-        .error-message {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: rgba(255,0,0,0.9);
-            color: white;
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-            z-index: 150;
-        }
-        
-        canvas {
-            display: block;
-            width: 100%;
-            height: 100%;
-        }
-    </style>
+  <meta charset="utf-8">
+  <title>AR Galaxy</title>
+  <style>
+    body { 
+      margin: 0; 
+      overflow: hidden; 
+      background-color: #000;
+    }
+    canvas { 
+      display: block; 
+    }
+    .loading {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      font-family: Arial, sans-serif;
+      font-size: 18px;
+    }
+  </style>
 </head>
 <body>
-    <div class="app-container">
-        <header class="bg-gradient-to-r from-primary to-secondary p-4 text-white">
-            <div class="flex justify-between items-center">
-                <div class="app-logo">
-                    <div class="app-logo-icon">
-                        <i class="fas fa-atom"></i>
-                    </div>
-                    <h1 class="app-name">TETA SAINS</h1>
-                </div>
-            </div>
-        </header>
-        
-        <main class="pb-20">
-            <div class="p-4">
-                <div class="bg-white rounded-lg p-6 shadow-md mb-4">
-                    <h2 class="text-xl font-bold text-center mb-4 text-gray-700">AR Galaxy Berputar</h2>
-                    <p class="text-gray-600 mb-4">Lihat galaksi Bima Sakti dalam Augmented Reality menggunakan teknologi WebXR! Fitur ini memungkinkan Anda menempatkan galaksi di dunia nyata.</p>
-                    <ul class="list-disc pl-5 text-gray-600 mb-4">
-                        <li>Gunakan tombol "Start AR" untuk memulai pengalaman AR</li>
-                        <li>Arahkan kamera ke permukaan datar untuk menempatkan galaksi</li>
-                        <li>Galaksi akan berputar otomatis</li>
-                        <li>Gerakkan perangkat untuk melihat dari berbagai sudut</li>
-                    </ul>
-                </div>
-                
-                <!-- AR Container -->
-                <div id="ar-container">
-                    <div id="loading" class="loading">
-                        <div class="text-center">
-                            <i class="fas fa-spinner fa-spin fa-2x mb-2"></i>
-                            <p>Mempersiapkan AR Galaxy...</p>
-                        </div>
-                    </div>
-                    
-                    <div id="error-message" class="error-message hidden"></div>
-                    
-                    <div id="ar-view"></div>
-                    
-                    <div class="info-panel">
-                        <h3><i class="fas fa-info-circle"></i> Galaksi Bima Sakti</h3>
-                        <p>Galaksi spiral dengan diameter 100.000 tahun cahaya, mengandung 100-400 miliar bintang.</p>
-                    </div>
-                    
-                    <div class="ar-controls">
-                        <button id="start-ar" class="ar-btn">
-                            <i class="fas fa-vr-cardboard"></i> Start AR
-                        </button>
-                    </div>
-                </div>
+  <div class="loading">Loading AR Galaxy...</div>
+<script type="module">
+  import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.165/build/three.module.js';
+  import { ARButton } from 'https://cdn.jsdelivr.net/npm/three@0.165/examples/jsm/webxr/ARButton.js';
 
-                <div class="bg-white rounded-lg p-6 shadow-md mt-4">
-                    <h3 class="text-lg font-bold mb-3 text-gray-800">Panduan Penggunaan:</h3>
-                    <div class="space-y-2 text-sm text-gray-600">
-                        <p><i class="fas fa-check-circle text-green-500 mr-2"></i> 
-                        Pastikan browser mendukung WebXR (Chrome, Firefox Reality)</p>
-                        <p><i class="fas fa-check-circle text-green-500 mr-2"></i> 
-                        Gunakan di perangkat dengan kamera dan sensor gerak</p>
-                        <p><i class="fas fa-check-circle text-green-500 mr-2"></i> 
-                        Cari permukaan datar untuk menempatkan galaksi</p>
-                    </div>
-                </div>
-            </div>
-        </main>
-        
-        <nav class="bottom-nav">
-            <a href="dashboard-siswa.html" class="nav-item">
-                <i class="fas fa-home nav-icon"></i>
-                <span>Beranda</span>
-            </a>
-            <a href="soal-harian/dashboard-soal.html" class="nav-item">
-                <i class="fas fa-flask nav-icon"></i>
-                <span>Soal Harian</span>
-            </a>
-            <a href="ai/index.html" class="nav-item">
-                <i class="fas fa-robot nav-icon"></i>
-                <span>Nayra AI</span>
-            </a>
-            <a href="kategori/kategori-materi.html" class="nav-item">
-                <i class="fas fa-chalkboard-teacher nav-icon"></i>
-                <span>Materi Harian</span>
-            </a>
-            <a href="profil.html" class="nav-item active">
-                <i class="fas fa-user nav-icon active"></i>
-                <span>Profil</span>
-            </a>
-        </nav>
-    </div>
+  // Scene + Camera
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera();
 
-    <!-- Three.js and WebXR Libraries -->
-    <script type="importmap">
-        {
-            "imports": {
-                "three": "https://cdn.jsdelivr.net/npm/three@0.165/build/three.module.js",
-                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.165/examples/jsm/"
-            }
-        }
-    </script>
+  // Renderer
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.xr.enabled = true;
+  document.body.appendChild(renderer.domElement);
 
-    <script type="module">
-        import * as THREE from 'three';
-        import { ARButton } from 'https://cdn.jsdelivr.net/npm/three@0.165/examples/jsm/webxr/ARButton.js';
+  // Remove loading text
+  document.querySelector('.loading').remove();
 
-        // Initialize the AR experience
-        document.addEventListener('DOMContentLoaded', function() {
-            initAR();
+  // AR Button
+  document.body.appendChild(ARButton.createButton(renderer, { requiredFeatures: ['hit-test'] }));
+
+  // Create galaxy elements
+  function createGalaxy() {
+    // === Central Star (Sun) ===
+    const sunGeometry = new THREE.SphereGeometry(0.15, 64, 64);
+    const sunMaterial = new THREE.MeshBasicMaterial({ 
+      color: 0xffcc00,
+      emissive: 0xffaa00,
+      emissiveIntensity: 0.8
+    });
+    const sun = new THREE.Mesh(sunGeometry, sunMaterial);
+    sun.position.set(0, 0, -0.8);
+    scene.add(sun);
+
+    // Add glow effect to sun
+    const sunGlowGeometry = new THREE.SphereGeometry(0.18, 32, 32);
+    const sunGlowMaterial = new THREE.MeshBasicMaterial({
+      color: 0xff9900,
+      transparent: true,
+      opacity: 0.3
+    });
+    const sunGlow = new THREE.Mesh(sunGlowGeometry, sunGlowMaterial);
+    sun.add(sunGlow);
+
+    // === Planets ===
+    const planets = [
+      { name: 'Mercury', radius: 0.03, distance: 0.25, color: 0x8c8c8c, speed: 0.02 },
+      { name: 'Venus', radius: 0.05, distance: 0.4, color: 0xe6b87e, speed: 0.015 },
+      { name: 'Earth', radius: 0.05, distance: 0.55, color: 0x6b93d6, speed: 0.01 },
+      { name: 'Mars', radius: 0.04, distance: 0.7, color: 0xc1440e, speed: 0.008 },
+      { name: 'Jupiter', radius: 0.1, distance: 0.9, color: 0xc19e6b, speed: 0.005 },
+      { name: 'Saturn', radius: 0.09, distance: 1.1, color: 0xe3d2a6, speed: 0.003 }
+    ];
+
+    const planetMeshes = [];
+    
+    planets.forEach(planet => {
+      const geometry = new THREE.SphereGeometry(planet.radius, 32, 32);
+      const material = new THREE.MeshStandardMaterial({ color: planet.color });
+      const mesh = new THREE.Mesh(geometry, material);
+      
+      // Position planet in orbit
+      mesh.position.x = planet.distance;
+      mesh.userData = { 
+        originalDistance: planet.distance,
+        speed: planet.speed,
+        angle: Math.random() * Math.PI * 2
+      };
+      
+      scene.add(mesh);
+      planetMeshes.push(mesh);
+      
+      // Add ring for Saturn
+      if (planet.name === 'Saturn') {
+        const ringGeometry = new THREE.RingGeometry(planet.radius * 1.3, planet.radius * 1.8, 32);
+        const ringMaterial = new THREE.MeshBasicMaterial({ 
+          color: 0xf0e6c3, 
+          side: THREE.DoubleSide,
+          transparent: true,
+          opacity: 0.7
         });
+        const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+        ring.rotation.x = Math.PI / 2;
+        mesh.add(ring);
+      }
+    });
 
-        async function initAR() {
-            const startButton = document.getElementById('start-ar');
-            const loadingElement = document.getElementById('loading');
-            const errorMessageElement = document.getElementById('error-message');
-            const arView = document.getElementById('ar-view');
-            
-            let scene, camera, renderer, controller, reticle;
-            let galaxy;
-            let hitTestSource = null;
-            let hitTestSourceRequested = false;
-            
-            // Check WebXR support
-            if (!navigator.xr) {
-                showError('WebXR tidak didukung di browser ini. Gunakan browser seperti Chrome untuk Android.');
-                return;
-            }
-            
-            function showError(message) {
-                errorMessageElement.innerHTML = `
-                    <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
-                    <h3 class="font-bold mb-2">Error</h3>
-                    <p>${message}</p>
-                `;
-                errorMessageElement.classList.remove('hidden');
-                startButton.disabled = true;
-            }
-            
-            function hideError() {
-                errorMessageElement.classList.add('hidden');
-            }
-            
-            // Initialize Three.js scene
-            async function initScene() {
-                // Scene
-                scene = new THREE.Scene();
-                
-                // Camera
-                camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 20);
-                
-                // Renderer
-                renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-                renderer.setSize(window.innerWidth, window.innerHeight);
-                renderer.setPixelRatio(window.devicePixelRatio);
-                renderer.xr.enabled = true;
-                arView.appendChild(renderer.domElement);
-                
-                // Lighting
-                const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-                scene.add(ambientLight);
-                
-                const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-                directionalLight.position.set(5, 5, 5);
-                scene.add(directionalLight);
-                
-                // Create galaxy
-                createGalaxy();
-                
-                // Create reticle for placement
-                reticle = new THREE.Mesh(
-                    new THREE.RingGeometry(0.05, 0.1, 32).rotateX(-Math.PI / 2),
-                    new THREE.MeshBasicMaterial({ color: 0xffffff })
-                );
-                reticle.matrixAutoUpdate = false;
-                reticle.visible = false;
-                scene.add(reticle);
-                
-                // Controller
-                controller = renderer.xr.getController(0);
-                controller.addEventListener('select', onSelect);
-                scene.add(controller);
-                
-                // Handle resize
-                window.addEventListener('resize', onWindowResize);
-                
-                // Hide loading
-                loadingElement.classList.add('hidden');
-                
-                // Start animation
-                renderer.setAnimationLoop(animate);
-            }
-            
-            // Create rotating galaxy
-            function createGalaxy() {
-                galaxy = new THREE.Group();
-                
-                // Galactic core
-                const coreGeometry = new THREE.SphereGeometry(0.1, 32, 32);
-                const coreMaterial = new THREE.MeshPhongMaterial({
-                    color: 0xffaa00,
-                    emissive: 0x442200,
-                    shininess: 100
-                });
-                const core = new THREE.Mesh(coreGeometry, coreMaterial);
-                galaxy.add(core);
-                
-                // Stars particles
-                const starsGeometry = new THREE.BufferGeometry();
-                const starCount = 2000;
-                const positions = new Float32Array(starCount * 3);
-                const colors = new Float32Array(starCount * 3);
-                
-                for (let i = 0; i < starCount; i++) {
-                    const i3 = i * 3;
-                    const radius = 0.15 + Math.random() * 0.3;
-                    const angle = Math.random() * Math.PI * 2;
-                    const spiral = radius * 0.8;
-                    
-                    // Spiral arm distribution
-                    const arm = Math.floor(Math.random() * 4);
-                    const armAngle = angle + (arm * Math.PI / 2) + spiral;
-                    
-                    positions[i3] = Math.cos(armAngle) * radius;
-                    positions[i3 + 1] = (Math.random() - 0.5) * 0.1;
-                    positions[i3 + 2] = Math.sin(armAngle) * radius;
-                    
-                    // Color based on distance
-                    const color = new THREE.Color();
-                    if (radius < 0.25) color.setHSL(0.1, 0.9, 0.7); // Yellow
-                    else if (radius < 0.35) color.setHSL(0.6, 0.9, 0.7); // Blue  
-                    else color.setHSL(0.0, 0.9, 0.7); // Red
-                    
-                    colors[i3] = color.r;
-                    colors[i3 + 1] = color.g;
-                    colors[i3 + 2] = color.b;
-                }
-                
-                starsGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-                starsGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-                
-                const starsMaterial = new THREE.PointsMaterial({
-                    size: 0.005,
-                    vertexColors: true,
-                    transparent: true,
-                    opacity: 0.9
-                });
-                
-                const stars = new THREE.Points(starsGeometry, starsMaterial);
-                galaxy.add(stars);
-                
-                // Add some larger stars
-                const largeStarsGeometry = new THREE.SphereGeometry(0.01, 16, 16);
-                const largeStarsMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
-                
-                for (let i = 0; i < 10; i++) {
-                    const radius = 0.2 + Math.random() * 0.2;
-                    const angle = Math.random() * Math.PI * 2;
-                    const height = (Math.random() - 0.5) * 0.05;
-                    
-                    const star = new THREE.Mesh(largeStarsGeometry, largeStarsMaterial);
-                    star.position.x = Math.cos(angle) * radius;
-                    star.position.y = height;
-                    star.position.z = Math.sin(angle) * radius;
-                    
-                    galaxy.add(star);
-                }
-                
-                // Initially not in the scene
-                galaxy.visible = false;
-            }
-            
-            // Handle controller selection
-            function onSelect() {
-                if (reticle.visible && !galaxy.visible) {
-                    const position = new THREE.Vector3();
-                    const rotation = new THREE.Quaternion();
-                    const scale = new THREE.Vector3();
-                    
-                    reticle.matrix.decompose(position, rotation, scale);
-                    
-                    // Place galaxy at reticle position
-                    galaxy.position.copy(position);
-                    galaxy.visible = true;
-                    scene.add(galaxy);
-                    
-                    // Update info panel
-                    const infoPanel = document.querySelector('.info-panel');
-                    infoPanel.innerHTML = `
-                        <h3><i class="fas fa-vr-cardboard"></i> Galaxy Telah Ditempatkan</h3>
-                        <p>Gerakkan perangkat untuk melihat galaxy dari berbagai sudut!</p>
-                    `;
-                }
-            }
-            
-            // Animation loop
-            function animate() {
-                // Rotate galaxy
-                if (galaxy && galaxy.visible) {
-                    galaxy.rotation.y += 0.005;
-                }
-                
-                // Handle hit test
-                if (controller) {
-                    const session = renderer.xr.getSession();
-                    
-                    if (session && !hitTestSourceRequested) {
-                        session.requestReferenceSpace('viewer').then((referenceSpace) => {
-                            session.requestHitTestSource({ space: referenceSpace }).then((source) => {
-                                hitTestSource = source;
-                            });
-                        });
-                        
-                        hitTestSourceRequested = true;
-                    }
-                    
-                    if (hitTestSource) {
-                        const hitTestResults = frame.getHitTestResults(hitTestSource);
-                        
-                        if (hitTestResults.length > 0 && !galaxy.visible) {
-                            const hit = hitTestResults[0];
-                            const pose = hit.getPose(referenceSpace);
-                            
-                            reticle.visible = true;
-                            reticle.matrix.fromArray(pose.transform.matrix);
-                        } else {
-                            reticle.visible = false;
-                        }
-                    }
-                }
-                
-                renderer.render(scene, camera);
-            }
-            
-            // Handle window resize
-            function onWindowResize() {
-                camera.aspect = window.innerWidth / window.innerHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(window.innerWidth, window.innerHeight);
-            }
-            
-            // Start AR experience
-            async function startAR() {
-                try {
-                    // Create AR button
-                    const button = ARButton.createButton(renderer, { 
-                        requiredFeatures: ['hit-test'],
-                        optionalFeatures: ['dom-overlay'],
-                        domOverlay: { root: document.body }
-                    });
-                    
-                    // Replace start button with AR button
-                    const startButton = document.getElementById('start-ar');
-                    startButton.parentNode.replaceChild(button, startButton);
-                    
-                    // Update info panel
-                    const infoPanel = document.querySelector('.info-panel');
-                    infoPanel.innerHTML = `
-                        <h3><i class="fas fa-vr-cardboard"></i> Mode AR Aktif</h3>
-                        <p>Cari permukaan datar dan tekan layar untuk menempatkan galaxy!</p>
-                    `;
-                    
-                } catch (error) {
-                    console.error('Error starting AR:', error);
-                    showError('Tidak dapat memulai AR. Pastikan perangkat mendukung WebXR.');
-                }
-            }
-            
-            // Event listeners
-            startButton.addEventListener('click', startAR);
-            
-            // Initialize the scene
-            await initScene();
-        }
-    </script>
+    // === Stars (Background) ===
+    const starGeometry = new THREE.BufferGeometry();
+    const starCount = 1000;
+    const positions = new Float32Array(starCount * 3);
+    
+    for (let i = 0; i < starCount * 3; i += 3) {
+      positions[i] = (Math.random() - 0.5) * 10;     // x
+      positions[i + 1] = (Math.random() - 0.5) * 10; // y
+      positions[i + 2] = (Math.random() - 0.5) * 10; // z
+    }
+    
+    starGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+    
+    const starMaterial = new THREE.PointsMaterial({
+      color: 0xffffff,
+      size: 0.02,
+      transparent: true
+    });
+    
+    const stars = new THREE.Points(starGeometry, starMaterial);
+    scene.add(stars);
+
+    // === Nebula Effect ===
+    const nebulaGeometry = new THREE.SphereGeometry(1.5, 32, 32);
+    const nebulaMaterial = new THREE.MeshBasicMaterial({
+      color: 0x4a0b7a,
+      transparent: true,
+      opacity: 0.1,
+      side: THREE.BackSide
+    });
+    const nebula = new THREE.Mesh(nebulaGeometry, nebulaMaterial);
+    scene.add(nebula);
+
+    return { sun, planetMeshes, stars };
+  }
+
+  // Lighting
+  const ambientLight = new THREE.AmbientLight(0x333333);
+  scene.add(ambientLight);
+
+  const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+  directionalLight.position.set(5, 3, 5);
+  scene.add(directionalLight);
+
+  // Create the galaxy
+  const galaxy = createGalaxy();
+
+  // Animation
+  renderer.setAnimationLoop(() => {
+    // Rotate sun
+    galaxy.sun.rotation.y += 0.005;
+    
+    // Animate planets in orbit
+    galaxy.planetMeshes.forEach(planet => {
+      planet.userData.angle += planet.userData.speed;
+      planet.position.x = Math.cos(planet.userData.angle) * planet.userData.originalDistance;
+      planet.position.z = Math.sin(planet.userData.angle) * planet.userData.originalDistance - 0.8;
+      planet.rotation.y += 0.01;
+    });
+    
+    // Rotate stars slowly
+    galaxy.stars.rotation.y += 0.0005;
+    
+    renderer.render(scene, camera);
+  });
+
+  // Handle window resize
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
+</script>
 </body>
 </html>

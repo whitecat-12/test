@@ -8,10 +8,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Three.js Libraries -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.min.js"></script>
-    
     <style>
         :root {
             --primary: #38b2ac;
@@ -172,38 +168,6 @@
             display: none;
         }
         
-        .camera-permission {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.9);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 200;
-            color: white;
-            text-align: center;
-            padding: 20px;
-        }
-        
-        .permission-btn {
-            background: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 50px;
-            padding: 12px 24px;
-            margin-top: 20px;
-            font-family: 'Baloo 2', cursive;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
         .error-message {
             position: absolute;
             top: 50%;
@@ -215,6 +179,12 @@
             border-radius: 10px;
             text-align: center;
             z-index: 150;
+        }
+        
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
         }
     </style>
 </head>
@@ -235,12 +205,12 @@
             <div class="p-4">
                 <div class="bg-white rounded-lg p-6 shadow-md mb-4">
                     <h2 class="text-xl font-bold text-center mb-4 text-gray-700">AR Galaxy Berputar</h2>
-                    <p class="text-gray-600 mb-4">Lihat galaksi Bima Sakti dalam Augmented Reality! Fitur ini menggunakan Three.js untuk menampilkan galaksi yang berputar.</p>
+                    <p class="text-gray-600 mb-4">Lihat galaksi Bima Sakti dalam Augmented Reality menggunakan teknologi WebXR! Fitur ini memungkinkan Anda menempatkan galaksi di dunia nyata.</p>
                     <ul class="list-disc pl-5 text-gray-600 mb-4">
-                        <li>Gunakan tombol "Start AR Camera" untuk mengaktifkan kamera</li>
-                        <li>Izinkan akses kamera ketika diminta</li>
-                        <li>Galaksi akan muncul dan berputar otomatis</li>
-                        <li>Gunakan tombol "Reset View" untuk mengulang</li>
+                        <li>Gunakan tombol "Start AR" untuk memulai pengalaman AR</li>
+                        <li>Arahkan kamera ke permukaan datar untuk menempatkan galaksi</li>
+                        <li>Galaksi akan berputar otomatis</li>
+                        <li>Gerakkan perangkat untuk melihat dari berbagai sudut</li>
                     </ul>
                 </div>
                 
@@ -251,15 +221,6 @@
                             <i class="fas fa-spinner fa-spin fa-2x mb-2"></i>
                             <p>Mempersiapkan AR Galaxy...</p>
                         </div>
-                    </div>
-                    
-                    <div id="camera-permission" class="camera-permission hidden">
-                        <i class="fas fa-camera fa-3x mb-4"></i>
-                        <h3 class="text-xl font-bold mb-2">Akses Kamera Diperlukan</h3>
-                        <p class="mb-4">Aplikasi memerlukan akses ke kamera Anda untuk menampilkan Augmented Reality.</p>
-                        <button id="request-camera" class="permission-btn">
-                            <i class="fas fa-camera"></i> Izinkan Akses Kamera
-                        </button>
                     </div>
                     
                     <div id="error-message" class="error-message hidden"></div>
@@ -273,10 +234,7 @@
                     
                     <div class="ar-controls">
                         <button id="start-ar" class="ar-btn">
-                            <i class="fas fa-camera"></i> Start AR Camera
-                        </button>
-                        <button id="reset-ar" class="ar-btn" disabled>
-                            <i class="fas fa-redo"></i> Reset View
+                            <i class="fas fa-vr-cardboard"></i> Start AR
                         </button>
                     </div>
                 </div>
@@ -285,11 +243,11 @@
                     <h3 class="text-lg font-bold mb-3 text-gray-800">Panduan Penggunaan:</h3>
                     <div class="space-y-2 text-sm text-gray-600">
                         <p><i class="fas fa-check-circle text-green-500 mr-2"></i> 
-                        Pastikan browser mendukung WebGL dan getUserMedia</p>
+                        Pastikan browser mendukung WebXR (Chrome, Firefox Reality)</p>
                         <p><i class="fas fa-check-circle text-green-500 mr-2"></i> 
-                        Izinkan akses kamera ketika diminta oleh browser</p>
+                        Gunakan di perangkat dengan kamera dan sensor gerak</p>
                         <p><i class="fas fa-check-circle text-green-500 mr-2"></i> 
-                        Gunakan di lingkungan dengan pencahayaan cukup</p>
+                        Cari permukaan datar untuk menempatkan galaksi</p>
                     </div>
                 </div>
             </div>
@@ -319,39 +277,40 @@
         </nav>
     </div>
 
-    <script>
-        // AR GALAXY IMPLEMENTATION YANG BENAR-BENAR BEKERJA
+    <!-- Three.js and WebXR Libraries -->
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.165/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.165/examples/jsm/"
+            }
+        }
+    </script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { ARButton } from 'https://cdn.jsdelivr.net/npm/three@0.165/examples/jsm/webxr/ARButton.js';
+
+        // Initialize the AR experience
         document.addEventListener('DOMContentLoaded', function() {
             initAR();
         });
 
-        function initAR() {
+        async function initAR() {
             const startButton = document.getElementById('start-ar');
-            const resetButton = document.getElementById('reset-ar');
             const loadingElement = document.getElementById('loading');
-            const cameraPermissionElement = document.getElementById('camera-permission');
-            const requestCameraButton = document.getElementById('request-camera');
             const errorMessageElement = document.getElementById('error-message');
             const arView = document.getElementById('ar-view');
             
-            let scene, camera, renderer, controls, galaxy;
-            let video, videoTexture;
-            let isARCameraActive = false;
-            let animationId;
+            let scene, camera, renderer, controller, reticle;
+            let galaxy;
+            let hitTestSource = null;
+            let hitTestSourceRequested = false;
             
-            // Check browser support
-            function checkBrowserSupport() {
-                if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                    showError('Browser Anda tidak mendukung akses kamera. Gunakan browser modern seperti Chrome, Firefox, atau Edge.');
-                    return false;
-                }
-                
-                if (!navigator.mediaDevices.getUserMedia) {
-                    showError('Fitur getUserMedia tidak didukung di browser ini.');
-                    return false;
-                }
-                
-                return true;
+            // Check WebXR support
+            if (!navigator.xr) {
+                showError('WebXR tidak didukung di browser ini. Gunakan browser seperti Chrome untuk Android.');
+                return;
             }
             
             function showError(message) {
@@ -369,28 +328,19 @@
             }
             
             // Initialize Three.js scene
-            function initScene() {
+            async function initScene() {
                 // Scene
                 scene = new THREE.Scene();
                 
                 // Camera
-                const container = document.getElementById('ar-container');
-                const width = container.clientWidth;
-                const height = container.clientHeight;
-                
-                camera = new THREE.PerspectiveCamera(75, width / height, 0.1, 1000);
-                camera.position.z = 10;
+                camera = new THREE.PerspectiveCamera(70, window.innerWidth / window.innerHeight, 0.01, 20);
                 
                 // Renderer
                 renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-                renderer.setSize(width, height);
-                renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                renderer.setPixelRatio(window.devicePixelRatio);
+                renderer.xr.enabled = true;
                 arView.appendChild(renderer.domElement);
-                
-                // Controls
-                controls = new THREE.OrbitControls(camera, renderer.domElement);
-                controls.enableDamping = true;
-                controls.dampingFactor = 0.05;
                 
                 // Lighting
                 const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
@@ -403,6 +353,20 @@
                 // Create galaxy
                 createGalaxy();
                 
+                // Create reticle for placement
+                reticle = new THREE.Mesh(
+                    new THREE.RingGeometry(0.05, 0.1, 32).rotateX(-Math.PI / 2),
+                    new THREE.MeshBasicMaterial({ color: 0xffffff })
+                );
+                reticle.matrixAutoUpdate = false;
+                reticle.visible = false;
+                scene.add(reticle);
+                
+                // Controller
+                controller = renderer.xr.getController(0);
+                controller.addEventListener('select', onSelect);
+                scene.add(controller);
+                
                 // Handle resize
                 window.addEventListener('resize', onWindowResize);
                 
@@ -410,16 +374,15 @@
                 loadingElement.classList.add('hidden');
                 
                 // Start animation
-                animate();
+                renderer.setAnimationLoop(animate);
             }
             
             // Create rotating galaxy
             function createGalaxy() {
                 galaxy = new THREE.Group();
-                scene.add(galaxy);
                 
                 // Galactic core
-                const coreGeometry = new THREE.SphereGeometry(1.5, 32, 32);
+                const coreGeometry = new THREE.SphereGeometry(0.1, 32, 32);
                 const coreMaterial = new THREE.MeshPhongMaterial({
                     color: 0xffaa00,
                     emissive: 0x442200,
@@ -430,13 +393,13 @@
                 
                 // Stars particles
                 const starsGeometry = new THREE.BufferGeometry();
-                const starCount = 5000;
+                const starCount = 2000;
                 const positions = new Float32Array(starCount * 3);
                 const colors = new Float32Array(starCount * 3);
                 
                 for (let i = 0; i < starCount; i++) {
                     const i3 = i * 3;
-                    const radius = 2 + Math.random() * 8;
+                    const radius = 0.15 + Math.random() * 0.3;
                     const angle = Math.random() * Math.PI * 2;
                     const spiral = radius * 0.8;
                     
@@ -445,13 +408,13 @@
                     const armAngle = angle + (arm * Math.PI / 2) + spiral;
                     
                     positions[i3] = Math.cos(armAngle) * radius;
-                    positions[i3 + 1] = (Math.random() - 0.5) * 0.5;
+                    positions[i3 + 1] = (Math.random() - 0.5) * 0.1;
                     positions[i3 + 2] = Math.sin(armAngle) * radius;
                     
                     // Color based on distance
                     const color = new THREE.Color();
-                    if (radius < 4) color.setHSL(0.1, 0.9, 0.7); // Yellow
-                    else if (radius < 7) color.setHSL(0.6, 0.9, 0.7); // Blue  
+                    if (radius < 0.25) color.setHSL(0.1, 0.9, 0.7); // Yellow
+                    else if (radius < 0.35) color.setHSL(0.6, 0.9, 0.7); // Blue  
                     else color.setHSL(0.0, 0.9, 0.7); // Red
                     
                     colors[i3] = color.r;
@@ -463,7 +426,7 @@
                 starsGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
                 
                 const starsMaterial = new THREE.PointsMaterial({
-                    size: 0.1,
+                    size: 0.005,
                     vertexColors: true,
                     transparent: true,
                     opacity: 0.9
@@ -473,13 +436,13 @@
                 galaxy.add(stars);
                 
                 // Add some larger stars
-                const largeStarsGeometry = new THREE.SphereGeometry(0.15, 16, 16);
+                const largeStarsGeometry = new THREE.SphereGeometry(0.01, 16, 16);
                 const largeStarsMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
                 
-                for (let i = 0; i < 15; i++) {
-                    const radius = 3 + Math.random() * 5;
+                for (let i = 0; i < 10; i++) {
+                    const radius = 0.2 + Math.random() * 0.2;
                     const angle = Math.random() * Math.PI * 2;
-                    const height = (Math.random() - 0.5) * 0.3;
+                    const height = (Math.random() - 0.5) * 0.05;
                     
                     const star = new THREE.Mesh(largeStarsGeometry, largeStarsMaterial);
                     star.position.x = Math.cos(angle) * radius;
@@ -488,140 +451,112 @@
                     
                     galaxy.add(star);
                 }
+                
+                // Initially not in the scene
+                galaxy.visible = false;
             }
             
-            // Start AR Camera
-            async function startARCamera() {
-                if (!checkBrowserSupport()) return;
-                
-                try {
-                    // Request camera access
-                    const stream = await navigator.mediaDevices.getUserMedia({ 
-                        video: { 
-                            facingMode: 'environment',
-                            width: { ideal: 1280 },
-                            height: { ideal: 720 }
-                        } 
-                    });
+            // Handle controller selection
+            function onSelect() {
+                if (reticle.visible && !galaxy.visible) {
+                    const position = new THREE.Vector3();
+                    const rotation = new THREE.Quaternion();
+                    const scale = new THREE.Vector3();
                     
-                    // Create video element
-                    video = document.createElement('video');
-                    video.srcObject = stream;
-                    video.play();
+                    reticle.matrix.decompose(position, rotation, scale);
                     
-                    // Wait for video to be ready
-                    video.addEventListener('loadeddata', function() {
-                        // Create video texture
-                        videoTexture = new THREE.VideoTexture(video);
-                        videoTexture.minFilter = THREE.LinearFilter;
-                        videoTexture.magFilter = THREE.LinearFilter;
-                        videoTexture.format = THREE.RGBFormat;
-                        
-                        // Create background plane with video texture
-                        const videoGeometry = new THREE.PlaneGeometry(16, 9);
-                        const videoMaterial = new THREE.MeshBasicMaterial({ 
-                            map: videoTexture,
-                            transparent: true,
-                            opacity: 0.8
-                        });
-                        
-                        const videoPlane = new THREE.Mesh(videoGeometry, videoMaterial);
-                        videoPlane.position.z = -15;
-                        scene.add(videoPlane);
-                        
-                        // Update info panel
-                        const infoPanel = document.querySelector('.info-panel');
-                        infoPanel.innerHTML = `
-                            <h3><i class="fas fa-vr-cardboard"></i> Mode AR Aktif</h3>
-                            <p>Gerakkan perangkat untuk melihat galaxy dari berbagai sudut!</p>
-                        `;
-                        
-                        // Enable reset button
-                        resetButton.disabled = false;
-                        
-                        // Hide permission UI
-                        cameraPermissionElement.classList.add('hidden');
-                        
-                        isARCameraActive = true;
-                    });
+                    // Place galaxy at reticle position
+                    galaxy.position.copy(position);
+                    galaxy.visible = true;
+                    scene.add(galaxy);
                     
-                } catch (error) {
-                    console.error('Error accessing camera:', error);
-                    showError('Tidak dapat mengakses kamera. Pastikan Anda memberikan izin akses kamera.');
+                    // Update info panel
+                    const infoPanel = document.querySelector('.info-panel');
+                    infoPanel.innerHTML = `
+                        <h3><i class="fas fa-vr-cardboard"></i> Galaxy Telah Ditempatkan</h3>
+                        <p>Gerakkan perangkat untuk melihat galaxy dari berbagai sudut!</p>
+                    `;
                 }
-            }
-            
-            // Reset AR view
-            function resetAR() {
-                if (video && video.srcObject) {
-                    const tracks = video.srcObject.getTracks();
-                    tracks.forEach(track => track.stop());
-                }
-                
-                if (videoTexture) {
-                    videoTexture.dispose();
-                }
-                
-                // Remove video plane from scene
-                scene.children = scene.children.filter(child => child.type !== 'Mesh' || !child.geometry || child.geometry.type !== 'PlaneGeometry');
-                
-                // Reset camera position
-                camera.position.set(0, 0, 10);
-                controls.reset();
-                
-                // Update info panel
-                const infoPanel = document.querySelector('.info-panel');
-                infoPanel.innerHTML = `
-                    <h3><i class="fas fa-info-circle"></i> Galaksi Bima Sakti</h3>
-                    <p>Galaksi spiral dengan diameter 100.000 tahun cahaya, mengandung 100-400 miliar bintang.</p>
-                `;
-                
-                // Disable reset button
-                resetButton.disabled = true;
-                
-                isARCameraActive = false;
             }
             
             // Animation loop
             function animate() {
-                animationId = requestAnimationFrame(animate);
-                
                 // Rotate galaxy
-                if (galaxy) {
-                    galaxy.rotation.y += 0.002;
+                if (galaxy && galaxy.visible) {
+                    galaxy.rotation.y += 0.005;
                 }
                 
-                // Update video texture
-                if (videoTexture && isARCameraActive) {
-                    videoTexture.needsUpdate = true;
+                // Handle hit test
+                if (controller) {
+                    const session = renderer.xr.getSession();
+                    
+                    if (session && !hitTestSourceRequested) {
+                        session.requestReferenceSpace('viewer').then((referenceSpace) => {
+                            session.requestHitTestSource({ space: referenceSpace }).then((source) => {
+                                hitTestSource = source;
+                            });
+                        });
+                        
+                        hitTestSourceRequested = true;
+                    }
+                    
+                    if (hitTestSource) {
+                        const hitTestResults = frame.getHitTestResults(hitTestSource);
+                        
+                        if (hitTestResults.length > 0 && !galaxy.visible) {
+                            const hit = hitTestResults[0];
+                            const pose = hit.getPose(referenceSpace);
+                            
+                            reticle.visible = true;
+                            reticle.matrix.fromArray(pose.transform.matrix);
+                        } else {
+                            reticle.visible = false;
+                        }
+                    }
                 }
                 
-                controls.update();
                 renderer.render(scene, camera);
             }
             
             // Handle window resize
             function onWindowResize() {
-                const container = document.getElementById('ar-container');
-                const width = container.clientWidth;
-                const height = container.clientHeight;
-                
-                camera.aspect = width / height;
+                camera.aspect = window.innerWidth / window.innerHeight;
                 camera.updateProjectionMatrix();
-                renderer.setSize(width, height);
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            }
+            
+            // Start AR experience
+            async function startAR() {
+                try {
+                    // Create AR button
+                    const button = ARButton.createButton(renderer, { 
+                        requiredFeatures: ['hit-test'],
+                        optionalFeatures: ['dom-overlay'],
+                        domOverlay: { root: document.body }
+                    });
+                    
+                    // Replace start button with AR button
+                    const startButton = document.getElementById('start-ar');
+                    startButton.parentNode.replaceChild(button, startButton);
+                    
+                    // Update info panel
+                    const infoPanel = document.querySelector('.info-panel');
+                    infoPanel.innerHTML = `
+                        <h3><i class="fas fa-vr-cardboard"></i> Mode AR Aktif</h3>
+                        <p>Cari permukaan datar dan tekan layar untuk menempatkan galaxy!</p>
+                    `;
+                    
+                } catch (error) {
+                    console.error('Error starting AR:', error);
+                    showError('Tidak dapat memulai AR. Pastikan perangkat mendukung WebXR.');
+                }
             }
             
             // Event listeners
-            startButton.addEventListener('click', function() {
-                cameraPermissionElement.classList.remove('hidden');
-            });
-            
-            requestCameraButton.addEventListener('click', startARCamera);
-            
-            resetButton.addEventListener('click', resetAR);
+            startButton.addEventListener('click', startAR);
             
             // Initialize the scene
-            initScene();
+            await initScene();
         }
     </script>
 </body>

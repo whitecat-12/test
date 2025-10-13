@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AR Galaxy - TETA SAINS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Three.js Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.min.js"></script>
+    
+    <!-- AR.js Libraries -->
+    <script src="https://cdn.jsdelivr.net/npm/@ar-js-org/ar.js@3.3.0-three/build/ar.js"></script>
+    
+    <style>
+        :root {
+            --primary: #38b2ac;
+            --secondary: #0e7490;
+            --accent: #f59e0b;
+            --physics: #3b82f6;
+            --chemistry: #10b981;
+            --biology: #8b5cf6;
+            --astronomy: #ec4899;
+            --logo-color: #9999ff;
+        }
+        
+        body {
+            font-family: 'Baloo 2', cursive;
+            background-color: #f8fafc;
+            margin: 0;
+            padding: 0;
+            /* PERBAIKAN: Hapus overflow: hidden agar bisa scroll */
+            overflow-x: hidden;
+        }
+        
+        .app-container {
+            max-width: 414px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            /* PERBAIKAN: Tambahkan overflow untuk container */
+            overflow-x: hidden;
+        }
+        
+        /* NAVBAR */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            max-width: 414px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            background: white;
+            z-index: 10;
+            height: 70px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+            text-decoration: none;
+            flex: 1;
+            height: 100%;
+            padding: 0.5rem 0;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item span {
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
+        
+        .nav-item.active {
+            color: var(--primary);
+        }
+        
+        .nav-icon {
+            transition: all 0.3s ease;
+            font-size: 1.25rem;
+        }
+        
+        .nav-icon.active {
+            transform: translateY(-5px);
+            color: var(--primary);
+        }
+        
+        .app-logo {
+            display: flex;
+            align-items: center;
+        }
+        
+        .app-logo-icon {
+            background: var(--logo-color);
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 8px;
+        }
+        
+        .app-name {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: var(--logo-color);
+        }
+        
+        .islamic-pattern {
+            background-image: radial-gradient(rgba(56, 178, 172, 0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        
+        /* AR Container */
+        #ar-container {
+            position: relative;
+            width: 100%;
+            height: 70vh;
+            overflow: hidden;
+        }
+        
+        #ar-view {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .ar-controls {
+            position: absolute;
+            bottom: 80px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            padding: 10px;
+            z-index: 5;
+        }
+        
+        .ar-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 10px 20px;
+            font-family: 'Baloo 2', cursive;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .ar-btn:hover {
+            background: var(--secondary);
+            transform: translateY(-2px);
+        }
+        
+        .info-panel {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            background: rgba(255,255,255,0.9);
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            z-index: 5;
+        }
+        
+        .info-panel h3 {
+            margin: 0 0 10px 0;
+            color: var(--astronomy);
+            font-size: 1.1rem;
+        }
+        
+        .info-panel p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: #4b5563;
+        }
+        
+        .loading {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            color: white;
+            font-size: 1.2rem;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        /* PERBAIKAN: Tambahkan konten tambahan untuk demo scroll */
+        .additional-content {
+            padding: 20px;
+            background: white;
+            margin-top: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        /* RESPONSIVE */
+        @media (max-width: 414px) {
+            .bottom-nav {
+                height: 65px;
+            }
+            
+            .nav-icon {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile App Container -->
+    <div class="app-container">
+        <!-- App Header -->
+        <header class="bg-gradient-to-r from-primary to-secondary p-4 text-white">
+            <div class="flex justify-between items-center">
+                <div class="app-logo">
+                    <div class="app-logo-icon">
+                        <i class="fas fa-atom"></i>
+                    </div>
+                    <h1 class="app-name">TETA SAINS</h1>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-search"></i>
+                    <i class="fas fa-user-circle text-xl"></i>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Main Content Area -->
+        <main class="pb-20 islamic-pattern">
+            <div class="p-4">
+                <div class="bg-white rounded-lg p-6 shadow-md mb-4">
+                    <h2 class="text-xl font-bold text-center mb-4 text-gray-700">AR Galaxy Berputar</h2>
+                    <p class="text-gray-600 mb-4">Lihat galaksi Bima Sakti dalam Augmented Reality! Fitur ini menggunakan Three.js dan WebAR untuk menampilkan galaksi yang berputar di dunia nyata.</p>
+                    <ul class="list-disc pl-5 text-gray-600 mb-4">
+                        <li>Gunakan tombol "Start AR" untuk memulai</li>
+                        <li>Arahkan kamera ke permukaan datar</li>
+                        <li>Galaksi akan muncul dan berputar otomatis</li>
+                        <li>Gunakan tombol "Reset" untuk mengulang</li>
+                    </ul>
+                </div>
+                
+                <!-- AR Container -->
+                <div id="ar-container">
+                    <div id="loading" class="loading">
+                        <div class="text-center">
+                            <i class="fas fa-spinner fa-spin fa-2x mb-2"></i>
+                            <p>Memuat AR Galaxy...</p>
+                        </div>
+                    </div>
+                    
+                    <div id="ar-view"></div>
+                    
+                    <div class="info-panel">
+                        <h3><i class="fas fa-info-circle"></i> Informasi Galaxy</h3>
+                        <p>Galaksi Bima Sakti adalah galaksi spiral yang mengandung sekitar 100-400 miliar bintang. Diameternya sekitar 100.000 tahun cahaya.</p>
+                    </div>
+                    
+                    <div class="ar-controls">
+                        <button id="start-ar" class="ar-btn">
+                            <i class="fas fa-play"></i> Start AR
+                        </button>
+                        <button id="reset-ar" class="ar-btn">
+                            <i class="fas fa-redo"></i> Reset
+                        </button>
+                    </div>
+                </div>
+
+                <!-- PERBAIKAN: Tambahkan konten tambahan agar bisa scroll -->
+                <div class="additional-content">
+                    <h3 class="text-lg font-bold mb-3 text-gray-800">Fitur Galaxy AR</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-start">
+                            <i class="fas fa-star text-yellow-500 mt-1 mr-3"></i>
+                            <div>
+                                <h4 class="font-semibold text-gray-700">Galaxy 3D Realistis</h4>
+                                <p class="text-gray-600 text-sm">Tampilan galaksi dengan inti terang dan lengan spiral yang detail</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <i class="fas fa-sync-alt text-blue-500 mt-1 mr-3"></i>
+                            <div>
+                                <h4 class="font-semibold text-gray-700">Animasi Berputar</h4>
+                                <p class="text-gray-600 text-sm">Galaksi berputar secara otomatis dengan efek visual yang menakjubkan</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start">
+                            <i class="fas fa-vr-cardboard text-purple-500 mt-1 mr-3"></i>
+                            <div>
+                                <h4 class="font-semibold text-gray-700">Mode AR</h4>
+                                <p class="text-gray-600 text-sm">Tampilkan galaksi di dunia nyata menggunakan teknologi Augmented Reality</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="additional-content mt-4">
+                    <h3 class="text-lg font-bold mb-3 text-gray-800">Fakta Menarik tentang Galaxy</h3>
+                    <div class="space-y-3">
+                        <div class="bg-blue-50 p-3 rounded-lg">
+                            <h4 class="font-semibold text-blue-800">Ukuran Luar Biasa</h4>
+                            <p class="text-blue-700 text-sm">Bima Sakti memiliki diameter sekitar 100.000 tahun cahaya</p>
+                        </div>
+                        
+                        <div class="bg-green-50 p-3 rounded-lg">
+                            <h4 class="font-semibold text-green-800">Jumlah Bintang</h4>
+                            <p class="text-green-700 text-sm">Terdapat 100-400 miliar bintang dalam galaksi kita</p>
+                        </div>
+                        
+                        <div class="bg-purple-50 p-3 rounded-lg">
+                            <h4 class="font-semibold text-purple-800">Struktur Spiral</h4>
+                            <p class="text-purple-700 text-sm">Bima Sakti adalah galaksi spiral dengan 4 lengan utama</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="additional-content mt-4">
+                    <h3 class="text-lg font-bold mb-3 text-gray-800">Cara Menggunakan</h3>
+                    <ol class="list-decimal pl-5 space-y-2 text-gray-600">
+                        <li>Klik tombol "Start AR" untuk mengaktifkan mode Augmented Reality</li>
+                        <li>Izinkan akses kamera ketika diminta</li>
+                        <li>Arahkan kamera ke permukaan datar seperti meja atau lantai</li>
+                        <li>Galaxy akan muncul secara otomatis di dunia nyata</li>
+                        <li>Gunakan tombol "Reset" untuk mengatur ulang posisi galaxy</li>
+                    </ol>
+                </div>
+
+                <!-- Spacer untuk memastikan konten tidak tertutup navbar -->
+                <div class="h-20"></div>
+            </div>
+        </main>
+        
+        <!-- BOTTOM NAVIGATION -->
+        <nav class="bottom-nav">
+            <a href="dashboad-siswa.html" class="nav-item">
+                <i class="fas fa-home nav-icon"></i>
+                <span>Beranda</span>
+            </a>
+            <a href="soal-harian/dashboard-soal.html" class="nav-item">
+                <i class="fas fa-flask nav-icon"></i>
+                <span>Soal Harian</span>
+            </a>
+            <a href="ai/index.html" class="nav-item">
+                <i class="fas fa-robot nav-icon"></i>
+                <span>Nayra AI</span>
+            </a>
+            <a href="kategori/kategori-materi.html" class="nav-item">
+                <i class="fas fa-chalkboard-teacher nav-icon"></i>
+                <span>Materi Harian</span>
+            </a>
+            <a href="profil.html" class="nav-item active">
+                <i class="fas fa-user nav-icon active"></i>
+                <span>Profil</span>
+            </a>
+        </nav>
+    </div>
+
+    <script>
+        // INTERAKSI NAVBAR
+        document.addEventListener('DOMContentLoaded', function() {
+            const navItems = document.querySelectorAll('.nav-item');
+            
+            navItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    navItems.forEach(nav => {
+                        nav.classList.remove('active');
+                        nav.querySelector('.nav-icon').classList.remove('active');
+                    });
+                    
+                    this.classList.add('active');
+                    this.querySelector('.nav-icon').classList.add('active');
+                });
+            });
+            
+            // AR Galaxy Implementation
+            initAR();
+        });
+
+        // AR GALAXY IMPLEMENTATION
+        function initAR() {
+            const startButton = document.getElementById('start-ar');
+            const resetButton = document.getElementById('reset-ar');
+            const loadingElement = document.getElementById('loading');
+            const arView = document.getElementById('ar-view');
+            
+            let scene, camera, renderer, controls;
+            let galaxy, stars;
+            let animationId;
+            
+            // Initialize AR
+            function init() {
+                // Create scene
+                scene = new THREE.Scene();
+                
+                // PERBAIKAN: Atur ukuran berdasarkan container, bukan window
+                const container = document.getElementById('ar-container');
+                const width = container.clientWidth;
+                const height = container.clientHeight;
+                
+                // Create camera
+                camera = new THREE.PerspectiveCamera(60, width / height, 0.1, 1000);
+                
+                // Create renderer
+                renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+                renderer.setSize(width, height);
+                renderer.setPixelRatio(window.devicePixelRatio);
+                arView.appendChild(renderer.domElement);
+                
+                // Add lighting
+                const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+                scene.add(ambientLight);
+                
+                const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+                directionalLight.position.set(5, 5, 5);
+                scene.add(directionalLight);
+                
+                // Create galaxy
+                createGalaxy();
+                
+                // Position camera
+                camera.position.z = 5;
+                
+                // Add orbit controls for non-AR mode
+                controls = new THREE.OrbitControls(camera, renderer.domElement);
+                controls.enableDamping = true;
+                controls.dampingFactor = 0.05;
+                
+                // Handle window resize
+                window.addEventListener('resize', onWindowResize);
+                
+                // Hide loading
+                loadingElement.classList.add('hidden');
+                
+                // Start animation
+                animate();
+            }
+            
+            // Create rotating galaxy
+            function createGalaxy() {
+                // Create galaxy group
+                galaxy = new THREE.Group();
+                scene.add(galaxy);
+                
+                // Create central bulge (core of the galaxy)
+                const coreGeometry = new THREE.SphereGeometry(0.5, 32, 32);
+                const coreMaterial = new THREE.MeshPhongMaterial({ 
+                    color: 0xffcc00,
+                    emissive: 0x442200,
+                    shininess: 100
+                });
+                const core = new THREE.Mesh(coreGeometry, coreMaterial);
+                galaxy.add(core);
+                
+                // Create spiral arms with particles
+                const particleCount = 5000;
+                const particles = new THREE.BufferGeometry();
+                const positions = new Float32Array(particleCount * 3);
+                const colors = new Float32Array(particleCount * 3);
+                
+                for (let i = 0; i < particleCount; i++) {
+                    // Spiral distribution
+                    const arm = Math.floor(Math.random() * 4); // 4 spiral arms
+                    const radius = 1 + Math.random() * 4;
+                    const angle = (arm * Math.PI / 2) + (radius * 0.5) + (Math.random() - 0.5) * 0.5;
+                    const height = (Math.random() - 0.5) * 0.5;
+                    
+                    const i3 = i * 3;
+                    positions[i3] = Math.cos(angle) * radius;
+                    positions[i3 + 1] = height;
+                    positions[i3 + 2] = Math.sin(angle) * radius;
+                    
+                    // Color based on distance from center
+                    const color = new THREE.Color();
+                    if (radius < 2) {
+                        color.setHSL(0.1, 0.8, 0.7); // Yellow/orange for inner stars
+                    } else if (radius < 3) {
+                        color.setHSL(0.6, 0.8, 0.7); // Blue for middle stars
+                    } else {
+                        color.setHSL(0.0, 0.8, 0.7); // Red for outer stars
+                    }
+                    
+                    colors[i3] = color.r;
+                    colors[i3 + 1] = color.g;
+                    colors[i3 + 2] = color.b;
+                }
+                
+                particles.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+                particles.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+                
+                const particleMaterial = new THREE.PointsMaterial({
+                    size: 0.05,
+                    vertexColors: true,
+                    transparent: true,
+                    opacity: 0.8
+                });
+                
+                stars = new THREE.Points(particles, particleMaterial);
+                galaxy.add(stars);
+                
+                // Add some larger stars
+                const largeStarsGeometry = new THREE.SphereGeometry(0.1, 16, 16);
+                const largeStarsMaterial = new THREE.MeshBasicMaterial({ color: 0xffffff });
+                
+                for (let i = 0; i < 20; i++) {
+                    const radius = 1.5 + Math.random() * 3;
+                    const angle = Math.random() * Math.PI * 2;
+                    const height = (Math.random() - 0.5) * 0.3;
+                    
+                    const star = new THREE.Mesh(largeStarsGeometry, largeStarsMaterial);
+                    star.position.x = Math.cos(angle) * radius;
+                    star.position.y = height;
+                    star.position.z = Math.sin(angle) * radius;
+                    
+                    galaxy.add(star);
+                }
+            }
+            
+            // Animation loop
+            function animate() {
+                animationId = requestAnimationFrame(animate);
+                
+                // Rotate galaxy
+                if (galaxy) {
+                    galaxy.rotation.y += 0.002;
+                }
+                
+                // Update controls
+                if (controls) {
+                    controls.update();
+                }
+                
+                renderer.render(scene, camera);
+            }
+            
+            // Handle window resize
+            function onWindowResize() {
+                const container = document.getElementById('ar-container');
+                const width = container.clientWidth;
+                const height = container.clientHeight;
+                
+                camera.aspect = width / height;
+                camera.updateProjectionMatrix();
+                renderer.setSize(width, height);
+            }
+            
+            // Start AR mode
+            function startAR() {
+                // In a real implementation, this would initialize AR.js
+                // For this demo, we'll just simulate AR by changing the camera position
+                camera.position.set(0, 0, 3);
+                
+                // Show message
+                const infoPanel = document.querySelector('.info-panel');
+                infoPanel.innerHTML = `
+                    <h3><i class="fas fa-vr-cardboard"></i> Mode AR Aktif</h3>
+                    <p>Arahkan kamera ke permukaan datar. Galaxy akan muncul di dunia nyata!</p>
+                `;
+            }
+            
+            // Reset AR
+            function resetAR() {
+                // Reset camera position
+                camera.position.set(0, 0, 5);
+                
+                // Reset info panel
+                const infoPanel = document.querySelector('.info-panel');
+                infoPanel.innerHTML = `
+                    <h3><i class="fas fa-info-circle"></i> Informasi Galaxy</h3>
+                    <p>Galaksi Bima Sakti adalah galaksi spiral yang mengandung sekitar 100-400 miliar bintang. Diameternya sekitar 100.000 tahun cahaya.</p>
+                `;
+            }
+            
+            // Event listeners
+            startButton.addEventListener('click', startAR);
+            resetButton.addEventListener('click', resetAR);
+            
+            // Initialize the scene
+            init();
+        }
+    </script>
+</body>
+</html>

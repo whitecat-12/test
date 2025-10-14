@@ -1,96 +1,149 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <title>AR Galaxy Hero</title>
-    <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/three.js/build/ar.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
-    <style>
-      body { margin: 0; overflow: hidden; background-color: black; }
-      canvas { display: block; }
-    </style>
-  </head>
-  <body>
-    <script>
-      // 1. Scene, Camera, Renderer
-      let scene = new THREE.Scene();
-      let camera = new THREE.Camera();
-      scene.add(camera);
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>WebAR Galaxy — Marker Hiro</title>
+  <!-- A-Frame + AR.js (AR on top of A-Frame) -->
+  <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.js"></script>
+  <style>
+    html,body{height:100%;margin:0;font-family:system-ui,Segoe UI,Roboto,Arial}
+    #hint{position:fixed;left:10px;top:10px;z-index:999;background:rgba(0,0,0,0.45);color:#fff;padding:8px 12px;border-radius:8px}
+    #hint a{color:#fff;text-decoration:underline}
+    #footer{position:fixed;left:10px;bottom:10px;z-index:999;color:#fff;background:rgba(0,0,0,0.25);padding:6px 10px;border-radius:8px}
+    .btn{background:#111;padding:6px 10px;border-radius:6px;color:#fff;border:none}
+  </style>
+</head>
+<body>
+  <div id="hint">Arahkan kamera ke <strong>Hiro marker</strong> (cetak atau tampilkan di layar). <a href="https://raw.githubusercontent.com/AR-js-org/AR.js/master/three.js/data/images/HIRO.jpg" target="_blank">Tampilkan marker</a></div>
+  <div id="footer">WebAR Galaxy — Marker: <strong>hiro</strong></div>
 
-      let renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      renderer.setPixelRatio(window.devicePixelRatio);
-      renderer.domElement.style.position = 'absolute';
-      renderer.domElement.style.top = '0px';
-      renderer.domElement.style.left = '0px';
-      document.body.appendChild(renderer.domElement);
+  <!-- A-Frame scene with AR.js activated -->
+  <a-scene embedded arjs='sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;'>
 
-      // 2. AR.js Setup
-      let arSource = new THREEx.ArToolkitSource({ sourceType: 'webcam' });
-      arSource.init(() => setTimeout(() => onResize(), 200));
+    <!-- Marker: preset hiro -->
+    <a-marker preset="hiro">
+      <!-- container entity that will hold the galaxy (created by our component) -->
+      <a-entity id="galaxy" galaxy></a-entity>
 
-      window.addEventListener('resize', () => onResize());
-      function onResize() {
-        arSource.onResize();
-        arSource.copySizeTo(renderer.domElement);
-        if (arContext.arController !== null) {
-          arSource.copySizeTo(arContext.arController.canvas);
+      <!-- optional axis / a simple indicator -->
+      <a-box position="0 0.1 0" depth="0.02" height="0.02" width="0.02" visible="false"></a-box>
+    </a-marker>
+
+    <!-- camera -->
+    <a-entity camera></a-entity>
+  </a-scene>
+
+  <script>
+    AFRAME.registerComponent('galaxy', {
+      schema: {
+        count: {type: 'int', default: 4000},
+        radius: {type: 'number', default: 0.8},
+        thickness: {type: 'number', default: 0.35},
+        speed: {type: 'number', default: 0.01}
+      },
+      init: function () {
+        const el = this.el;
+        const data = this.data;
+        const THREE = AFRAME.THREE;
+
+        // Create Points geometry
+        const geometry = new THREE.BufferGeometry();
+        const positions = new Float32Array(data.count * 3);
+        const colors = new Float32Array(data.count * 3);
+        const sizes = new Float32Array(data.count);
+
+        // helper to create spiral/disk galaxy distribution
+        for (let i = 0; i < data.count; i++) {
+          // radius with bias to pack more toward center
+          const r = Math.pow(Math.random(), 0.8) * data.radius;
+          const angle = r * 6.0 + (Math.random() - 0.5) * 0.6; // give spiral arms by angle ~ radius
+          const armOffset = (Math.random() - 0.5) * data.thickness * (1 - r / data.radius);
+
+          const x = Math.cos(angle) * r + armOffset * (Math.random() - 0.5);
+          const y = (Math.random() - 0.5) * data.thickness * 0.2; // thin disk
+          const z = Math.sin(angle) * r + armOffset * (Math.random() - 0.5);
+
+          positions[i * 3] = x;
+          positions[i * 3 + 1] = y;
+          positions[i * 3 + 2] = z;
+
+          // color gradient: center yellowish -> outer bluish
+          const t = Math.min(1, r / data.radius);
+          const c1 = new THREE.Color(0xffddaa); // warm center
+          const c2 = new THREE.Color(0x66aaff); // cool outer
+          const color = c1.clone().lerp(c2, t * 0.9 + Math.random() * 0.1);
+
+          colors[i * 3] = color.r;
+          colors[i * 3 + 1] = color.g;
+          colors[i * 3 + 2] = color.b;
+
+          sizes[i] = 1.0 + Math.random() * 2.2;
         }
+
+        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+
+        // Points material
+        const material = new THREE.PointsMaterial({
+          size: 0.01,
+          vertexColors: true,
+          transparent: true,
+          opacity: 0.95,
+          sizeAttenuation: true,
+          depthWrite: false
+        });
+
+        // Create the Points and attach to entity
+        this.points = new THREE.Points(geometry, material);
+
+        // scale up slightly so it's visible on marker
+        this.points.scale.set(1.6, 1.6, 1.6);
+
+        // store rotation speed and a rotation offset per particle group
+        this.rotationSpeed = data.speed;
+
+        el.object3D.add(this.points);
+
+        // add a subtle central glow (sprite)
+        const spriteMap = new THREE.TextureLoader().load('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAv0lEQVRYR+2WwQ2AIAwF5y3/3+2U8ZpWQe6kG2cQ2k7IBT2Awk2m5gk0mY9h5wJpWwQkQmYH7gM4D1gE7wQn9yQ0g8Q3QAZH2Y9sA8wZr2l3yVgI4wI0g2gM4gH7u5kQ0YbV2q1oQY4HcwH4gQwJm8NQY1xWgQ0g8wZkQYyQ8gA8wH2QG0l2yq6zZgAAAABJRU5ErkJggg==');
+        const spriteMaterial = new THREE.SpriteMaterial({map: spriteMap, color: 0xffeeaa, transparent: true, opacity: 0.8});
+        const sprite = new THREE.Sprite(spriteMaterial);
+        sprite.scale.set(0.35, 0.35, 0.35);
+        this.points.add(sprite);
+
+        // Remember original positions for rotation transform
+        this.originalPositions = positions;
+      },
+
+      tick: function (time, delta) {
+        if (!this.points) return;
+        const geometry = this.points.geometry;
+        const positions = geometry.attributes.position.array;
+        const count = positions.length / 3;
+
+        // rotate points slowly around Y axis to simulate galaxy spin
+        const angle = this.rotationSpeed * (delta / 16.6667); // delta normalized to ~60fps
+        const cosA = Math.cos(angle);
+        const sinA = Math.sin(angle);
+
+        for (let i = 0; i < count; i++) {
+          const ix = i * 3;
+          const x = positions[ix];
+          const z = positions[ix + 2];
+
+          // simple rotation in-place
+          positions[ix] = x * cosA - z * sinA;
+          positions[ix + 2] = x * sinA + z * cosA;
+        }
+
+        geometry.attributes.position.needsUpdate = true;
+
+        // also rotate whole points container slowly for nice effect
+        this.points.rotation.y += this.rotationSpeed * 0.12;
       }
-
-      let arContext = new THREEx.ArToolkitContext({
-        cameraParametersUrl: 'https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/three.js/data/camera_para.dat',
-        detectionMode: 'mono'
-      });
-
-      arContext.init(() => camera.projectionMatrix.copy(arContext.getProjectionMatrix()));
-
-      // 3. AR Marker
-      let markerRoot = new THREE.Group();
-      scene.add(markerRoot);
-      let arMarkerControls = new THREEx.ArMarkerControls(arContext, markerRoot, {
-        type: 'pattern',
-        patternUrl: 'https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/three.js/data/patt.hiro'
-      });
-
-      // 4. Hero object (contoh: cube)
-      let geometry = new THREE.BoxGeometry(1, 1, 1);
-      let material = new THREE.MeshStandardMaterial({ color: 0xff0000 });
-      let hero = new THREE.Mesh(geometry, material);
-      markerRoot.add(hero);
-
-      // 5. Galaxy particle effect
-      let particles = new THREE.Group();
-      let particleGeometry = new THREE.SphereGeometry(0.05, 8, 8);
-      let particleMaterial = new THREE.MeshBasicMaterial({ color: 0x00ffff });
-
-      for (let i = 0; i < 200; i++) {
-        let p = new THREE.Mesh(particleGeometry, particleMaterial);
-        p.position.set(
-          (Math.random() - 0.5) * 5,
-          (Math.random() - 0.5) * 5,
-          (Math.random() - 0.5) * 5
-        );
-        particles.add(p);
-      }
-      markerRoot.add(particles);
-
-      // 6. Light
-      let light = new THREE.PointLight(0xffffff, 1, 100);
-      light.position.set(5, 5, 5);
-      scene.add(light);
-
-      // 7. Animation Loop
-      function animate() {
-        requestAnimationFrame(animate);
-        if (arSource.ready) arContext.update(arSource.domElement);
-
-        hero.rotation.y += 0.01;
-        particles.rotation.y += 0.002;
-
-        renderer.render(scene, camera);
-      }
-      animate();
-    </script>
-  </body>
+    });
+  </script>
+</body>
 </html>

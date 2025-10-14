@@ -1,4 +1,4 @@
-aaaaaaa<!doctype html>
+<!doctype html>
 <html lang="id">
 <head>
   <meta charset="utf-8" />
@@ -156,7 +156,7 @@ aaaaaaa<!doctype html>
   <div id="ui">
     <h1>🌌 Tata Surya AR</h1>
     <p>Arahkan kamera ke <strong>Hiro marker</strong> untuk melihat model tata surya.</p>
-    <p>Tips: letakkan marker di meja, perlahan miringkan kamera untuk melihat planet.</p>
+    <p>Tips: letakkan marker di meja, perlahan miringkan kamera untuk melihat orbit.</p>
     <button id="toggleInfo">Info Planet</button>
   </div>
 
@@ -193,7 +193,6 @@ aaaaaaa<!doctype html>
         <a-entity id="mercuryOrbit" position="0 0 0">
           <a-entity class="orbitRot" animation="property: rotation; to: 0 360 0; loop: true; dur: 4000; easing: linear"></a-entity>
           <a-sphere radius="0.06" position="1 0 0" material="color: #8b7d6b" 
-                    animation="property: rotation; to: 0 360 0; loop: true; dur: 5000; easing: linear"
                     class="planet" data-name="Merkurius" 
                     data-desc="Planet terkecil dan terdekat dengan Matahari"
                     data-facts="Diameter: 4,879 km<br>Periode Orbit: 88 hari"></a-sphere>
@@ -203,7 +202,6 @@ aaaaaaa<!doctype html>
         <a-entity id="venusOrbit" position="0 0 0">
           <a-entity class="orbitRot" animation="property: rotation; to: 0 360 0; loop: true; dur: 7000; easing: linear"></a-entity>
           <a-sphere radius="0.09" position="1.45 0 0" material="color: #cfa27a" 
-                    animation="property: rotation; to: 0 360 0; loop: true; dur: 8000; easing: linear"
                     class="planet" data-name="Venus" 
                     data-desc="Planet terpanas di tata surya"
                     data-facts="Diameter: 12,104 km<br>Suhu Permukaan: 462°C"></a-sphere>
@@ -215,7 +213,6 @@ aaaaaaa<!doctype html>
 
           <a-sphere id="earth" radius="0.12" position="2 0 0" 
                     material="color: #2a66ff; metalness:0.1; roughness:0.8"
-                    animation="property: rotation; to: 0 360 0; loop: true; dur: 6000; easing: linear"
                     class="planet" data-name="Bumi" 
                     data-desc="Planet tempat tinggal kita"
                     data-facts="Diameter: 12,742 km<br>Satelit Alami: 1 (Bulan)">
@@ -228,7 +225,6 @@ aaaaaaa<!doctype html>
           <a-entity id="moonOrbit" position="2 0 0">
             <a-entity animation="property: rotation; to: 0 360 0; loop: true; dur: 1500; easing: linear"></a-entity>
             <a-sphere radius="0.035" position="0.25 0 0" material="color: #d9d9d9"
-                      animation="property: rotation; to: 0 360 0; loop: true; dur: 4000; easing: linear"
                       class="planet" data-name="Bulan" 
                       data-desc="Satelit alami Bumi"
                       data-facts="Diameter: 3,474 km<br>Jarak dari Bumi: 384,400 km"></a-sphere>
@@ -239,7 +235,6 @@ aaaaaaa<!doctype html>
         <a-entity id="marsOrbit" position="0 0 0">
           <a-entity class="orbitRot" animation="property: rotation; to: 0 360 0; loop: true; dur: 16000; easing: linear"></a-entity>
           <a-sphere radius="0.085" position="2.6 0 0" material="color: #d14b2a" 
-                    animation="property: rotation; to: 0 360 0; loop: true; dur: 7000; easing: linear"
                     class="planet" data-name="Mars" 
                     data-desc="Planet Merah"
                     data-facts="Diameter: 6,779 km<br>Satelit Alami: 2 (Phobos & Deimos)"></a-sphere>
@@ -249,7 +244,6 @@ aaaaaaa<!doctype html>
         <a-entity id="jupiterOrbit" position="0 0 0">
           <a-entity class="orbitRot" animation="property: rotation; to: 0 360 0; loop: true; dur: 30000; easing: linear"></a-entity>
           <a-sphere radius="0.25" position="3.5 0 0" material="color: #d8ca9d" 
-                    animation="property: rotation; to: 0 360 0; loop: true; dur: 5000; easing: linear"
                     class="planet" data-name="Jupiter" 
                     data-desc="Planet terbesar di tata surya"
                     data-facts="Diameter: 139,820 km<br>Satelit Alami: 79+"></a-sphere>
@@ -261,12 +255,31 @@ aaaaaaa<!doctype html>
           <a-entity position="4.5 0 0" class="planet" data-name="Saturnus" 
                     data-desc="Planet dengan cincin yang indah"
                     data-facts="Diameter: 116,460 km<br>Cincin: Es dan batuan">
-            <a-sphere radius="0.2" material="color: #e3d8b0"
-                      animation="property: rotation; to: 0 360 0; loop: true; dur: 6000; easing: linear"></a-sphere>
+            <a-sphere radius="0.2" material="color: #e3d8b0"></a-sphere>
             <!-- Saturn's rings -->
-            <a-torus radius="0.35" radius-tubular="0.02" rotation="30 0 0" material="color: #f0e6c3"
-                     animation="property: rotation; to: 0 360 0; loop: true; dur: 8000; easing: linear"></a-torus>
+            <a-torus radius="0.35" radius-tubular="0.02" rotation="30 0 0" material="color: #f0e6c3"></a-torus>
           </a-entity>
+        </a-entity>
+
+        <!-- Uranus -->
+        <a-entity id="uranusOrbit" position="0 0 0">
+          <a-entity class="orbitRot" animation="property: rotation; to: 0 360 0; loop: true; dur: 70000; easing: linear"></a-entity>
+          <a-entity position="5.5 0 0" class="planet" data-name="Uranus" 
+                    data-desc="Planet dengan sumbu rotasi miring"
+                    data-facts="Diameter: 50,724 km<br>Warna: Biru kehijauan">
+            <a-sphere radius="0.15" material="color: #4FD0E7"></a-sphere>
+            <!-- Uranus rings -->
+            <a-torus radius="0.25" radius-tubular="0.01" rotation="90 0 0" material="color: #FFFFFF"></a-torus>
+          </a-entity>
+        </a-entity>
+
+        <!-- Neptune -->
+        <a-entity id="neptuneOrbit" position="0 0 0">
+          <a-entity class="orbitRot" animation="property: rotation; to: 0 360 0; loop: true; dur: 90000; easing: linear"></a-entity>
+          <a-sphere radius="0.14" position="6.2 0 0" material="color: #4B70DD" 
+                    class="planet" data-name="Neptunus" 
+                    data-desc="Planet terjauh dari Matahari"
+                    data-facts="Diameter: 49,244 km<br>Angin tercepat di tata surya"></a-sphere>
         </a-entity>
 
       </a-entity>

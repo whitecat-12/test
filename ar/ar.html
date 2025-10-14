@@ -8,6 +8,7 @@
       margin: 0; 
       overflow: hidden; 
       background-color: #000;
+      font-family: Arial, sans-serif;
     }
     canvas { 
       display: block; 
@@ -18,20 +19,106 @@
       left: 50%;
       transform: translate(-50%, -50%);
       color: white;
-      font-family: Arial, sans-serif;
       font-size: 18px;
+      text-align: center;
+    }
+    
+    /* Button Container */
+    .button-container {
+      position: absolute;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      z-index: 1000;
+    }
+    
+    /* Custom Button Styles */
+    .mode-button {
+      background: #4a0b7a;
+      border: 2px solid #ffffff;
+      border-radius: 8px;
+      color: white;
+      padding: 12px 24px;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      text-decoration: none;
+      text-align: center;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s ease;
+      min-width: 200px;
+    }
+    
+    .mode-button:hover {
+      background: #6a1b9a;
+      transform: scale(1.05);
+    }
+    
+    .mode-button:active {
+      background: #38085e;
+      transform: scale(0.95);
+    }
+    
+    .ar-button {
+      background: #ffcc00;
+      color: #000;
+    }
+    
+    .non-ar-button {
+      background: #4a0b7a;
+      color: white;
+    }
+    
+    .info-panel {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 15px;
+      border-radius: 8px;
+      max-width: 250px;
+      font-size: 14px;
+      border: 1px solid #4a0b7a;
+      z-index: 1000;
+    }
+    
+    .info-panel h3 {
+      margin: 0 0 10px 0;
+      color: #ffcc00;
+    }
+    
+    .hidden {
+      display: none !important;
     }
   </style>
 </head>
 <body>
-  <div class="loading">Loading AR Galaxy...</div>
+  <div class="loading">Loading Galaxy Experience...</div>
+  
+  <div class="info-panel hidden">
+    <h3>🌌 Galaxy Explorer</h3>
+    <p id="mode-info">Select a mode to begin exploring the solar system!</p>
+  </div>
+  
+  <div class="button-container">
+    <button id="ar-button" class="mode-button ar-button">🚀 START AR EXPERIENCE</button>
+    <button id="non-ar-button" class="mode-button non-ar-button">🪐 START NON-AR EXPERIENCE</button>
+  </div>
+  
 <script type="module">
   import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.165/build/three.module.js';
   import { ARButton } from 'https://cdn.jsdelivr.net/npm/three@0.165/examples/jsm/webxr/ARButton.js';
 
   // Scene + Camera
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera();
+  const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+  
+  // Set initial camera position for non-AR mode
+  camera.position.set(0, 0.5, 2);
 
   // Renderer
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
@@ -39,11 +126,13 @@
   renderer.xr.enabled = true;
   document.body.appendChild(renderer.domElement);
 
-  // Remove loading text
+  // Remove loading text and show info panel
   document.querySelector('.loading').remove();
+  document.querySelector('.info-panel').classList.remove('hidden');
 
-  // AR Button
-  document.body.appendChild(ARButton.createButton(renderer, { requiredFeatures: ['hit-test'] }));
+  // Variables to track current mode
+  let currentMode = null;
+  let galaxy = null;
 
   // Create galaxy elements
   function createGalaxy() {
@@ -155,24 +244,144 @@
   directionalLight.position.set(5, 3, 5);
   scene.add(directionalLight);
 
-  // Create the galaxy
-  const galaxy = createGalaxy();
+  // Handle AR Mode
+  document.getElementById('ar-button').addEventListener('click', () => {
+    if (currentMode === 'ar') return;
+    
+    currentMode = 'ar';
+    document.getElementById('mode-info').textContent = 'AR Mode: Move your device to explore the solar system in augmented reality!';
+    
+    // Hide buttons
+    document.querySelector('.button-container').classList.add('hidden');
+    
+    // Enable XR
+    renderer.xr.enabled = true;
+    
+    // Create AR button without hit-test requirement
+    const arBtn = ARButton.createButton(renderer);
+    arBtn.classList.add('mode-button', 'ar-button');
+    arBtn.style.position = 'absolute';
+    arBtn.style.bottom = '20px';
+    arBtn.style.left = '50%';
+    arBtn.style.transform = 'translateX(-50%)';
+    document.body.appendChild(arBtn);
+    
+    // Create galaxy if not already created
+    if (!galaxy) {
+      galaxy = createGalaxy();
+    }
+  });
+
+  // Handle Non-AR Mode
+  document.getElementById('non-ar-button').addEventListener('click', () => {
+    if (currentMode === 'non-ar') return;
+    
+    currentMode = 'non-ar';
+    document.getElementById('mode-info').textContent = 'Non-AR Mode: Use touch/mouse to look around the solar system!';
+    
+    // Hide buttons
+    document.querySelector('.button-container').classList.add('hidden');
+    
+    // Disable XR for non-AR mode
+    renderer.xr.enabled = false;
+    
+    // Create galaxy if not already created
+    if (!galaxy) {
+      galaxy = createGalaxy();
+    }
+    
+    // Add simple orbit controls for non-AR mode
+    let isDragging = false;
+    let previousMousePosition = {
+      x: 0,
+      y: 0
+    };
+    
+    const onMouseDown = (e) => {
+      isDragging = true;
+    };
+    
+    const onMouseMove = (e) => {
+      if (!isDragging) return;
+      
+      const deltaMove = {
+        x: e.clientX - previousMousePosition.x,
+        y: e.clientY - previousMousePosition.y
+      };
+      
+      // Rotate camera based on mouse movement
+      camera.position.x -= deltaMove.x * 0.01;
+      camera.position.y += deltaMove.y * 0.01;
+      
+      // Make camera look at the center
+      camera.lookAt(0, 0, -0.8);
+      
+      previousMousePosition = {
+        x: e.clientX,
+        y: e.clientY
+      };
+    };
+    
+    const onMouseUp = () => {
+      isDragging = false;
+    };
+    
+    // Add event listeners for mouse controls
+    renderer.domElement.addEventListener('mousedown', onMouseDown);
+    renderer.domElement.addEventListener('mousemove', onMouseMove);
+    renderer.domElement.addEventListener('mouseup', onMouseUp);
+    
+    // Add touch controls for mobile
+    renderer.domElement.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      isDragging = true;
+      previousMousePosition = {
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY
+      };
+    });
+    
+    renderer.domElement.addEventListener('touchmove', (e) => {
+      e.preventDefault();
+      if (!isDragging) return;
+      
+      const deltaMove = {
+        x: e.touches[0].clientX - previousMousePosition.x,
+        y: e.touches[0].clientY - previousMousePosition.y
+      };
+      
+      camera.position.x -= deltaMove.x * 0.01;
+      camera.position.y += deltaMove.y * 0.01;
+      camera.lookAt(0, 0, -0.8);
+      
+      previousMousePosition = {
+        x: e.touches[0].clientX,
+        y: e.touches[0].clientY
+      };
+    });
+    
+    renderer.domElement.addEventListener('touchend', () => {
+      isDragging = false;
+    });
+  });
 
   // Animation
   renderer.setAnimationLoop(() => {
-    // Rotate sun
-    galaxy.sun.rotation.y += 0.005;
-    
-    // Animate planets in orbit
-    galaxy.planetMeshes.forEach(planet => {
-      planet.userData.angle += planet.userData.speed;
-      planet.position.x = Math.cos(planet.userData.angle) * planet.userData.originalDistance;
-      planet.position.z = Math.sin(planet.userData.angle) * planet.userData.originalDistance - 0.8;
-      planet.rotation.y += 0.01;
-    });
-    
-    // Rotate stars slowly
-    galaxy.stars.rotation.y += 0.0005;
+    if (galaxy) {
+      // Rotate sun
+      galaxy.sun.rotation.y += 0.005;
+      
+      // Animate planets in orbit
+      galaxy.planetMeshes.forEach(planet => {
+        planet.userData.angle += planet.userData.speed;
+        planet.position.x = Math.cos(planet.userData.angle) * planet.userData.originalDistance;
+        planet.position.z = Math.sin(planet.userData.angle) * planet.userData.originalDistance - 0.8;
+        planet.rotation.y += 0.01;
+      });
+      
+      // Rotate stars slowly
+      galaxy.stars.rotation.y += 0.0005;
+    }
     
     renderer.render(scene, camera);
   });

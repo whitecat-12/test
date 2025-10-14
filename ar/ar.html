@@ -23,72 +23,7 @@
       text-align: center;
     }
     
-    /* Mode Selection */
-    .mode-selection {
-      position: absolute;
-      top: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0, 0, 0, 0.8);
-      padding: 15px;
-      border-radius: 10px;
-      border: 2px solid #4a0b7a;
-      color: white;
-      text-align: center;
-      z-index: 1000;
-    }
-    
-    .mode-buttons {
-      display: flex;
-      gap: 10px;
-      margin-top: 10px;
-      justify-content: center;
-    }
-    
-    .mode-btn {
-      background: #4a0b7a;
-      border: 2px solid #ffffff;
-      border-radius: 6px;
-      color: white;
-      padding: 10px 15px;
-      font-size: 14px;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-    
-    .mode-btn:hover {
-      background: #6a1b9a;
-    }
-    
-    .mode-btn.active {
-      background: #ffcc00;
-      color: #000;
-    }
-    
-    /* Instructions */
-    .instructions {
-      position: absolute;
-      bottom: 80px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0, 0, 0, 0.8);
-      color: white;
-      padding: 15px;
-      border-radius: 8px;
-      max-width: 300px;
-      text-align: center;
-      border: 1px solid #4a0b7a;
-      display: none;
-    }
-    
-    .marker-image {
-      max-width: 150px;
-      margin: 10px auto;
-      display: block;
-      border: 2px solid white;
-    }
-    
-    /* AR Button Styles */
+    /* Custom AR Button Styles */
     .ar-button {
       position: absolute;
       bottom: 20px;
@@ -108,64 +43,253 @@
       transition: all 0.3s ease !important;
       z-index: 1000;
     }
+    
+    .ar-button:hover {
+      background: #6a1b9a !important;
+      transform: translateX(-50%) scale(1.05) !important;
+    }
+    
+    .ar-button:active {
+      background: #38085e !important;
+      transform: translateX(-50%) scale(0.95) !important;
+    }
+    
+    .mode-selector {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 15px;
+      border-radius: 8px;
+      border: 1px solid #4a0b7a;
+      z-index: 1000;
+    }
+    
+    .mode-buttons {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    
+    .mode-btn {
+      background: #4a0b7a;
+      border: 1px solid #ffffff;
+      border-radius: 4px;
+      color: white;
+      padding: 8px 16px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    
+    .mode-btn.active {
+      background: #6a1b9a;
+      border-color: #ffcc00;
+    }
+    
+    .info-panel {
+      position: absolute;
+      top: 80px;
+      left: 20px;
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 15px;
+      border-radius: 8px;
+      max-width: 250px;
+      font-size: 14px;
+      border: 1px solid #4a0b7a;
+    }
+    
+    .info-panel h3 {
+      margin: 0 0 10px 0;
+      color: #ffcc00;
+    }
+    
+    .marker-info {
+      position: absolute;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.8);
+      color: white;
+      padding: 15px;
+      border-radius: 8px;
+      text-align: center;
+      border: 1px solid #4a0b7a;
+      display: none;
+    }
   </style>
 </head>
 <body>
   <div class="loading">Loading AR Galaxy...</div>
   
-  <div class="mode-selection">
-    <h3 style="margin: 0 0 10px 0; color: #ffcc00;">AR Galaxy</h3>
-    <p style="margin: 0 0 10px 0;">Pilih Mode AR:</p>
+  <div class="mode-selector">
+    <div>Select AR Mode:</div>
     <div class="mode-buttons">
-      <button class="mode-btn" id="webxr-btn">WebXR (ARCore)</button>
-      <button class="mode-btn active" id="marker-btn">Marker (Hiro)</button>
+      <button class="mode-btn active" id="webxr-mode">WebXR (ARCore)</button>
+      <button class="mode-btn" id="marker-mode">Marker (Hiro)</button>
     </div>
   </div>
   
-  <div class="instructions" id="marker-instructions">
-    <h4 style="margin: 0 0 10px 0; color: #ffcc00;">Mode Marker</h4>
-    <p style="margin: 0 0 10px 0;">Arahkan kamera ke marker Hiro:</p>
-    <div style="background: white; padding: 10px; margin: 10px auto; max-width: 150px; border: 2px solid white;">
-      <div style="background: black; color: white; padding: 20px; text-align: center; font-weight: bold;">
-        HIRO MARKER
-      </div>
-    </div>
-    <p style="margin: 0; font-size: 12px;">Cetak pattern Hiro dari internet untuk pengalaman AR lengkap</p>
+  <div class="info-panel">
+    <h3>AR Galaxy</h3>
+    <p>Walk around to explore the solar system! The planets orbit the sun in real-time.</p>
   </div>
   
-  <div class="instructions" id="webxr-instructions" style="display: none;">
-    <h4 style="margin: 0 0 10px 0; color: #ffcc00;">Mode WebXR</h4>
-    <p style="margin: 0;">Gerakkan perangkat untuk menemukan permukaan datar, lalu ketuk untuk menempatkan galaksi.</p>
+  <div class="marker-info" id="marker-instructions">
+    <h3>Marker Mode</h3>
+    <p>Show the Hiro marker to your camera to display the galaxy.</p>
+    <p><a href="https://raw.githubusercontent.com/AR-js-org/AR.js/master/data/images/hiro.png" target="_blank" style="color: #ffcc00;">Download Hiro Marker</a></p>
   </div>
-
+  
 <script type="module">
-  // Import Three.js dengan path CDN yang benar
-  import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js';
-  import { ARButton } from 'https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/webxr/ARButton.js';
-  import { GLTFLoader } from 'https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/loaders/GLTFLoader.js';
+  import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.165/build/three.module.js';
+  import { ARButton } from 'https://cdn.jsdelivr.net/npm/three@0.165/examples/jsm/webxr/ARButton.js';
 
-  let currentMode = 'marker'; // Default mode
-  let scene, camera, renderer;
-  let galaxy;
-  
-  // Initialize Three.js
-  function initThreeJS() {
-    scene = new THREE.Scene();
-    camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.01, 20);
+  // Scene + Camera
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera();
+
+  // Renderer
+  const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.xr.enabled = true;
+  document.body.appendChild(renderer.domElement);
+
+  // Remove loading text
+  document.querySelector('.loading').remove();
+
+  // Mode selection
+  let currentMode = 'webxr';
+  let arButton = null;
+  let markerControls = null;
+
+  // WebXR Mode Setup
+  function setupWebXRMode() {
+    if (arButton) {
+      document.body.removeChild(arButton);
+    }
     
-    renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    renderer.setPixelRatio(window.devicePixelRatio);
-    document.body.appendChild(renderer.domElement);
+    // Enable XR
+    renderer.xr.enabled = true;
     
-    // Remove loading text
-    document.querySelector('.loading').remove();
+    // Create AR Button for WebXR
+    arButton = ARButton.createButton(renderer, { 
+      requiredFeatures: ['hit-test'],
+      domOverlay: {
+        root: document.body
+      }
+    });
+    
+    arButton.classList.add('ar-button');
+    arButton.textContent = '🚀 START AR GALAXY (WebXR)';
+    document.body.appendChild(arButton);
+    
+    // Hide marker instructions
+    document.getElementById('marker-instructions').style.display = 'none';
   }
-  
+
+  // Marker Mode Setup
+  async function setupMarkerMode() {
+    if (arButton) {
+      document.body.removeChild(arButton);
+    }
+    
+    // Disable XR for marker mode
+    renderer.xr.enabled = false;
+    
+    // Import AR.js for marker tracking
+    const { default: THREEx } = await import('https://cdn.jsdelivr.net/npm/@ar-js-org/ar.js@3.4.0/three.js/build/ar-threex-location-only.js');
+    
+    // Create video element for camera feed
+    const video = document.createElement('video');
+    video.setAttribute('autoplay', '');
+    video.setAttribute('playsinline', '');
+    video.style.display = 'none';
+    document.body.appendChild(video);
+    
+    // Get user media
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { 
+          facingMode: 'environment',
+          width: { ideal: 1280 },
+          height: { ideal: 720 }
+        } 
+      });
+      video.srcObject = stream;
+      
+      // Wait for video to be ready
+      await new Promise((resolve) => {
+        video.onloadedmetadata = () => {
+          video.play();
+          resolve();
+        };
+      });
+      
+      // Setup AR.js marker tracking
+      const arToolkitContext = new THREEx.ArToolkitContext({
+        cameraParametersUrl: 'https://cdn.jsdelivr.net/npm/@ar-js-org/ar.js@3.4.0/three.js/data/camera_para.dat',
+        detectionMode: 'mono',
+        maxDetectionRate: 30,
+        canvasWidth: video.videoWidth,
+        canvasHeight: video.videoHeight,
+      });
+      
+      arToolkitContext.init(() => {
+        // Copy projection matrix to camera
+        camera.projectionMatrix.copy(arToolkitContext.getProjectionMatrix());
+      });
+      
+      // Create marker controls
+      markerControls = new THREEx.ArMarkerControls(arToolkitContext, camera, {
+        type: 'pattern',
+        patternUrl: 'https://cdn.jsdelivr.net/npm/@ar-js-org/ar.js@3.4.0/three.js/data/patt.hiro',
+        changeMatrixMode: 'cameraTransformMatrix'
+      });
+      
+      // Update aspect ratio
+      camera.aspect = video.videoWidth / video.videoHeight;
+      camera.updateProjectionMatrix();
+      
+      // Show marker instructions
+      document.getElementById('marker-instructions').style.display = 'block';
+      
+      console.log('Marker mode initialized successfully');
+      
+    } catch (error) {
+      console.error('Error setting up marker mode:', error);
+      alert('Error accessing camera. Please make sure you have granted camera permissions.');
+      // Fallback to WebXR mode
+      switchToWebXRMode();
+    }
+  }
+
+  // Mode switching functions
+  function switchToWebXRMode() {
+    currentMode = 'webxr';
+    document.getElementById('webxr-mode').classList.add('active');
+    document.getElementById('marker-mode').classList.remove('active');
+    setupWebXRMode();
+  }
+
+  function switchToMarkerMode() {
+    currentMode = 'marker';
+    document.getElementById('marker-mode').classList.add('active');
+    document.getElementById('webxr-mode').classList.remove('active');
+    setupMarkerMode();
+  }
+
+  // Event listeners for mode buttons
+  document.getElementById('webxr-mode').addEventListener('click', switchToWebXRMode);
+  document.getElementById('marker-mode').addEventListener('click', switchToMarkerMode);
+
+  // Initialize with WebXR mode
+  setupWebXRMode();
+
   // Create galaxy elements
   function createGalaxy() {
-    const galaxyGroup = new THREE.Group();
-    
     // === Central Star (Sun) ===
     const sunGeometry = new THREE.SphereGeometry(0.15, 64, 64);
     const sunMaterial = new THREE.MeshBasicMaterial({ 
@@ -174,7 +298,8 @@
       emissiveIntensity: 0.8
     });
     const sun = new THREE.Mesh(sunGeometry, sunMaterial);
-    galaxyGroup.add(sun);
+    sun.position.set(0, 0, -0.5);
+    scene.add(sun);
 
     // Add glow effect to sun
     const sunGlowGeometry = new THREE.SphereGeometry(0.18, 32, 32);
@@ -211,7 +336,7 @@
         angle: Math.random() * Math.PI * 2
       };
       
-      galaxyGroup.add(mesh);
+      scene.add(mesh);
       planetMeshes.push(mesh);
       
       // Add ring for Saturn
@@ -235,9 +360,9 @@
     const positions = new Float32Array(starCount * 3);
     
     for (let i = 0; i < starCount * 3; i += 3) {
-      positions[i] = (Math.random() - 0.5) * 10;
-      positions[i + 1] = (Math.random() - 0.5) * 10;
-      positions[i + 2] = (Math.random() - 0.5) * 10;
+      positions[i] = (Math.random() - 0.5) * 10;     // x
+      positions[i + 1] = (Math.random() - 0.5) * 10; // y
+      positions[i + 2] = (Math.random() - 0.5) * 10; // z
     }
     
     starGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
@@ -249,214 +374,58 @@
     });
     
     const stars = new THREE.Points(starGeometry, starMaterial);
-    galaxyGroup.add(stars);
+    scene.add(stars);
 
-    // Lighting
-    const ambientLight = new THREE.AmbientLight(0x333333);
-    galaxyGroup.add(ambientLight);
+    // === Nebula Effect ===
+    const nebulaGeometry = new THREE.SphereGeometry(1.5, 32, 32);
+    const nebulaMaterial = new THREE.MeshBasicMaterial({
+      color: 0x4a0b7a,
+      transparent: true,
+      opacity: 0.1,
+      side: THREE.BackSide
+    });
+    const nebula = new THREE.Mesh(nebulaGeometry, nebulaMaterial);
+    scene.add(nebula);
 
-    const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-    directionalLight.position.set(5, 3, 5);
-    galaxyGroup.add(directionalLight);
-
-    return { 
-      group: galaxyGroup,
-      sun, 
-      planetMeshes, 
-      stars 
-    };
+    return { sun, planetMeshes, stars };
   }
 
-  // Initialize Marker-based AR (Simulation)
-  function initMarkerAR() {
-    console.log("Initializing Marker-based AR (Simulation)");
-    
-    // Create marker group
-    const markerGroup = new THREE.Group();
-    scene.add(markerGroup);
-    
-    // Create and add galaxy to marker group
-    galaxy = createGalaxy();
-    markerGroup.add(galaxy.group);
-    
-    // Position the galaxy in front of camera (simulated marker position)
-    markerGroup.position.set(0, 0, -1.5);
-    
-    // Show marker instructions
-    document.getElementById('marker-instructions').style.display = 'block';
-    document.getElementById('webxr-instructions').style.display = 'none';
-    
-    // Animation loop for marker mode
-    function animate() {
-      requestAnimationFrame(animate);
-      
-      if (galaxy) {
-        // Rotate sun
-        galaxy.sun.rotation.y += 0.005;
-        
-        // Animate planets in orbit
-        galaxy.planetMeshes.forEach(planet => {
-          planet.userData.angle += planet.userData.speed;
-          planet.position.x = Math.cos(planet.userData.angle) * planet.userData.originalDistance;
-          planet.position.z = Math.sin(planet.userData.angle) * planet.userData.originalDistance;
-          planet.rotation.y += 0.01;
-        });
-        
-        // Rotate stars slowly
-        galaxy.stars.rotation.y += 0.0005;
-      }
-      
-      renderer.render(scene, camera);
-    }
-    
-    animate();
-  }
+  // Lighting
+  const ambientLight = new THREE.AmbientLight(0x333333);
+  scene.add(ambientLight);
 
-  // Initialize WebXR AR
-  function initWebXR() {
-    console.log("Initializing WebXR AR");
+  const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+  directionalLight.position.set(5, 3, 5);
+  scene.add(directionalLight);
+
+  // Create the galaxy
+  const galaxy = createGalaxy();
+
+  // Animation
+  renderer.setAnimationLoop(() => {
+    // Rotate sun
+    galaxy.sun.rotation.y += 0.005;
     
-    renderer.xr.enabled = true;
-    
-    // Create AR button
-    const arButton = ARButton.createButton(renderer, { 
-      requiredFeatures: ['hit-test'],
-      optionalFeatures: ['dom-overlay'],
-      domOverlay: { root: document.body }
+    // Animate planets in orbit
+    galaxy.planetMeshes.forEach(planet => {
+      planet.userData.angle += planet.userData.speed;
+      planet.position.x = Math.cos(planet.userData.angle) * planet.userData.originalDistance;
+      planet.position.z = Math.sin(planet.userData.angle) * planet.userData.originalDistance - 0.5;
+      planet.rotation.y += 0.01;
     });
     
-    // Apply custom styles to AR button
-    arButton.classList.add('ar-button');
-    arButton.textContent = '🚀 START AR GALAXY';
-    document.body.appendChild(arButton);
+    // Rotate stars slowly
+    galaxy.stars.rotation.y += 0.0005;
     
-    // Show WebXR instructions
-    document.getElementById('webxr-instructions').style.display = 'block';
-    document.getElementById('marker-instructions').style.display = 'none';
-    
-    // Create galaxy
-    galaxy = createGalaxy();
-    scene.add(galaxy.group);
-    
-    // Start in front of camera initially
-    galaxy.group.position.set(0, 0, -1.5);
-    
-    // Hit test for placing content
-    let hitTestSource = null;
-    let hitTestSourceRequested = false;
-    
-    function onSelect() {
-      if (hitTestSource) {
-        const session = renderer.xr.getSession();
-        const referenceSpace = renderer.xr.getReferenceSpace();
-        
-        session.requestHitTestSource({ space: referenceSpace }).then((source) => {
-          hitTestSource = source;
-        });
-      }
-    }
-    
-    // Animation loop for WebXR
-    renderer.setAnimationLoop((time, frame) => {
-      if (frame) {
-        const referenceSpace = renderer.xr.getReferenceSpace();
-        const session = renderer.xr.getSession();
-        
-        if (hitTestSource) {
-          const hitTestResults = frame.getHitTestResults(hitTestSource);
-          if (hitTestResults.length > 0) {
-            const hit = hitTestResults[0];
-            const pose = hit.getPose(referenceSpace);
-            galaxy.group.position.set(
-              pose.transform.position.x,
-              pose.transform.position.y,
-              pose.transform.position.z
-            );
-          }
-        } else if (!hitTestSourceRequested) {
-          session.requestReferenceSpace('viewer').then((referenceSpace) => {
-            session.requestHitTestSource({ space: referenceSpace }).then((source) => {
-              hitTestSource = source;
-            });
-          });
-          hitTestSourceRequested = true;
-        }
-      }
-      
-      if (galaxy) {
-        // Rotate sun
-        galaxy.sun.rotation.y += 0.005;
-        
-        // Animate planets in orbit
-        galaxy.planetMeshes.forEach(planet => {
-          planet.userData.angle += planet.userData.speed;
-          planet.position.x = Math.cos(planet.userData.angle) * planet.userData.originalDistance;
-          planet.position.z = Math.sin(planet.userData.angle) * planet.userData.originalDistance;
-          planet.rotation.y += 0.01;
-        });
-        
-        // Rotate stars slowly
-        galaxy.stars.rotation.y += 0.0005;
-      }
-      
-      renderer.render(scene, camera);
-    });
-  }
+    renderer.render(scene, camera);
+  });
 
-  // Switch between modes
-  function switchMode(mode) {
-    currentMode = mode;
-    
-    // Update UI
-    document.getElementById('webxr-btn').classList.toggle('active', mode === 'webxr');
-    document.getElementById('marker-btn').classList.toggle('active', mode === 'marker');
-    
-    // Clean up previous mode
-    if (renderer.xr.enabled) {
-      renderer.xr.enabled = false;
-      renderer.setAnimationLoop(null);
-    }
-    
-    // Remove existing AR button
-    const existingButton = document.querySelector('.ar-button');
-    if (existingButton) {
-      existingButton.remove();
-    }
-    
-    // Clear scene
-    while(scene.children.length > 0) { 
-      scene.remove(scene.children[0]); 
-    }
-    
-    // Initialize new mode
-    if (mode === 'webxr') {
-      initWebXR();
-    } else {
-      initMarkerAR();
-    }
-  }
-
-  // Initialize the application
-  function init() {
-    initThreeJS();
-    
-    // Set up mode switching
-    document.getElementById('webxr-btn').addEventListener('click', () => switchMode('webxr'));
-    document.getElementById('marker-btn').addEventListener('click', () => switchMode('marker'));
-    
-    // Start with marker mode by default
-    switchMode('marker');
-    
-    // Handle window resize
-    window.addEventListener('resize', () => {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-    });
-  }
-
-  // Start the application
-  init();
+  // Handle window resize
+  window.addEventListener('resize', () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+  });
 </script>
 </body>
 </html>

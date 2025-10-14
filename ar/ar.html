@@ -1,148 +1,111 @@
 <!doctype html>
 <html lang="id">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>WebAR Galaxy — Marker Hiro</title>
-  <!-- A-Frame + AR.js (AR on top of A-Frame) -->
-  <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>Web AR Tata Surya — Hiro Marker</title>
+  <!-- A-Frame -->
+  <script src="https://aframe.io/releases/1.4.1/aframe.min.js"></script>
+  <!-- AR.js for A-Frame (marker-based) -->
   <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.js"></script>
   <style>
-    html,body{height:100%;margin:0;font-family:system-ui,Segoe UI,Roboto,Arial}
-    #hint{position:fixed;left:10px;top:10px;z-index:999;background:rgba(0,0,0,0.45);color:#fff;padding:8px 12px;border-radius:8px}
-    #hint a{color:#fff;text-decoration:underline}
-    #footer{position:fixed;left:10px;bottom:10px;z-index:999;color:#fff;background:rgba(0,0,0,0.25);padding:6px 10px;border-radius:8px}
-    .btn{background:#111;padding:6px 10px;border-radius:6px;color:#fff;border:none}
+    html,body{height:100%;margin:0;overflow:hidden;font-family:system-ui,Segoe UI,Roboto}
+    #ui{position:fixed;left:12px;top:12px;z-index:10;background:rgba(0,0,0,0.45);color:#fff;padding:10px;border-radius:8px}
+    #ui h1{font-size:16px;margin:0 0 6px}
+    #ui p{margin:4px 0;font-size:13px}
+    #ui button{margin-top:6px;padding:6px 8px;border-radius:6px;border:0;background:#1976d2;color:#fff}
   </style>
 </head>
 <body>
-  <div id="hint">Arahkan kamera ke <strong>Hiro marker</strong> (cetak atau tampilkan di layar). <a href="https://raw.githubusercontent.com/AR-js-org/AR.js/master/three.js/data/images/HIRO.jpg" target="_blank">Tampilkan marker</a></div>
-  <div id="footer">WebAR Galaxy — Marker: <strong>hiro</strong></div>
+  <div id="ui">
+    <h1>Web AR — Tata Surya (Hiro Marker)</h1>
+    <p>Arahkan kamera ke <strong>Hiro marker</strong> (pola AR) untuk melihat model tata surya.</p>
+    <p>Tips: letakkan marker di meja, perlahan miringkan kamera untuk melihat orbit.</p>
+    <button id="toggleOrbits">Toggle Orbit Lines</button>
+  </div>
 
-  <!-- A-Frame scene with AR.js activated -->
-  <a-scene embedded arjs='sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;'>
+  <!-- A-Frame scene with AR.js enabled -->
+  <a-scene vr-mode-ui="enabled: false" embedded arjs="sourceType: webcam; debugUIEnabled: false;">
 
-    <!-- Marker: preset hiro -->
+    <!-- Ambient + directional light -->
+    <a-entity light="type: ambient; intensity: 0.6"></a-entity>
+    <a-entity light="type: directional; intensity: 0.8" position="1 2 1"></a-entity>
+
+    <!-- Marker (Hiro) -->
     <a-marker preset="hiro">
-      <!-- container entity that will hold the galaxy (created by our component) -->
-      <a-entity id="galaxy" galaxy></a-entity>
+      <!-- Root of the solar system attached to the marker -->
+      <a-entity id="solarRoot" rotation="0 0 0">
 
-      <!-- optional axis / a simple indicator -->
-      <a-box position="0 0.1 0" depth="0.02" height="0.02" width="0.02" visible="false"></a-box>
+        <!-- Sun -->
+        <a-sphere id="sun" radius="0.6" position="0 0 0" material="shader: standard; emissive: #ffcc33; emissiveIntensity: 1; metalness: 0.2; roughness: 0.6"></a-sphere>
+
+        <!-- Mercury (small, close) -->
+        <a-entity id="mercuryOrbit" position="0 0 0">
+          <a-entity class="orbitRot" animation="property: rotation; to: 0 360 0; loop: true; dur: 4000; easing: linear"></a-entity>
+          <a-sphere radius="0.06" position="1 0 0" material="color: #8b7d6b"></a-sphere>
+        </a-entity>
+
+        <!-- Venus -->
+        <a-entity id="venusOrbit" position="0 0 0">
+          <a-entity class="orbitRot" animation="property: rotation; to: 0 360 0; loop: true; dur: 7000; easing: linear"></a-entity>
+          <a-sphere radius="0.09" position="1.45 0 0" material="color: #cfa27a"></a-sphere>
+        </a-entity>
+
+        <!-- Earth + Moon -->
+        <a-entity id="earthOrbit" position="0 0 0">
+          <a-entity class="orbitRot" animation="property: rotation; to: 0 360 0; loop: true; dur: 10000; easing: linear"></a-entity>
+
+          <a-sphere id="earth" radius="0.12" position="2 0 0" material="color: #2a66ff; metalness:0.1; roughness:0.8"></a-sphere>
+
+          <!-- Moon orbiting the Earth -->
+          <a-entity id="moonOrbit" position="2 0 0">
+            <a-entity animation="property: rotation; to: 0 360 0; loop: true; dur: 1500; easing: linear"></a-entity>
+            <a-sphere radius="0.035" position="0.25 0 0" material="color: #d9d9d9"></a-sphere>
+          </a-entity>
+        </a-entity>
+
+        <!-- Mars -->
+        <a-entity id="marsOrbit" position="0 0 0">
+          <a-entity class="orbitRot" animation="property: rotation; to: 0 360 0; loop: true; dur: 16000; easing: linear"></a-entity>
+          <a-sphere radius="0.085" position="2.6 0 0" material="color: #d14b2a"></a-sphere>
+        </a-entity>
+
+        <!-- Simple orbit rings (toggleable) -->
+        <a-ring id="ringMercury" radius-inner="0.98" radius-outer="1.02" rotation="-90 0 0" visible="true"></a-ring>
+        <a-ring id="ringVenus" radius-inner="1.43" radius-outer="1.47" rotation="-90 0 0" visible="true"></a-ring>
+        <a-ring id="ringEarth" radius-inner="1.98" radius-outer="2.02" rotation="-90 0 0" visible="true"></a-ring>
+        <a-ring id="ringMars" radius-inner="2.58" radius-outer="2.62" rotation="-90 0 0" visible="true"></a-ring>
+
+      </a-entity>
     </a-marker>
 
-    <!-- camera -->
+    <!-- Camera -->
     <a-entity camera></a-entity>
   </a-scene>
 
   <script>
-    AFRAME.registerComponent('galaxy', {
-      schema: {
-        count: {type: 'int', default: 4000},
-        radius: {type: 'number', default: 0.8},
-        thickness: {type: 'number', default: 0.35},
-        speed: {type: 'number', default: 0.01}
-      },
-      init: function () {
-        const el = this.el;
-        const data = this.data;
-        const THREE = AFRAME.THREE;
+    // Toggle orbit rings
+    const btn = document.getElementById('toggleOrbits');
+    btn.addEventListener('click', () => {
+      const rings = ['ringMercury','ringVenus','ringEarth','ringMars'];
+      rings.forEach(id => {
+        const el = document.getElementById(id);
+        el.setAttribute('visible', el.getAttribute('visible') === 'true' ? 'false' : 'true');
+      });
+    });
 
-        // Create Points geometry
-        const geometry = new THREE.BufferGeometry();
-        const positions = new Float32Array(data.count * 3);
-        const colors = new Float32Array(data.count * 3);
-        const sizes = new Float32Array(data.count);
+    // Scale the whole solar system for better marker fit on smaller markers
+    const solarRoot = document.getElementById('solarRoot');
+    // initial scale tuned for common hiro marker size
+    solarRoot.setAttribute('scale','0.5 0.5 0.5');
 
-        // helper to create spiral/disk galaxy distribution
-        for (let i = 0; i < data.count; i++) {
-          // radius with bias to pack more toward center
-          const r = Math.pow(Math.random(), 0.8) * data.radius;
-          const angle = r * 6.0 + (Math.random() - 0.5) * 0.6; // give spiral arms by angle ~ radius
-          const armOffset = (Math.random() - 0.5) * data.thickness * (1 - r / data.radius);
-
-          const x = Math.cos(angle) * r + armOffset * (Math.random() - 0.5);
-          const y = (Math.random() - 0.5) * data.thickness * 0.2; // thin disk
-          const z = Math.sin(angle) * r + armOffset * (Math.random() - 0.5);
-
-          positions[i * 3] = x;
-          positions[i * 3 + 1] = y;
-          positions[i * 3 + 2] = z;
-
-          // color gradient: center yellowish -> outer bluish
-          const t = Math.min(1, r / data.radius);
-          const c1 = new THREE.Color(0xffddaa); // warm center
-          const c2 = new THREE.Color(0x66aaff); // cool outer
-          const color = c1.clone().lerp(c2, t * 0.9 + Math.random() * 0.1);
-
-          colors[i * 3] = color.r;
-          colors[i * 3 + 1] = color.g;
-          colors[i * 3 + 2] = color.b;
-
-          sizes[i] = 1.0 + Math.random() * 2.2;
-        }
-
-        geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-        geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-
-        // Points material
-        const material = new THREE.PointsMaterial({
-          size: 0.01,
-          vertexColors: true,
-          transparent: true,
-          opacity: 0.95,
-          sizeAttenuation: true,
-          depthWrite: false
-        });
-
-        // Create the Points and attach to entity
-        this.points = new THREE.Points(geometry, material);
-
-        // scale up slightly so it's visible on marker
-        this.points.scale.set(1.6, 1.6, 1.6);
-
-        // store rotation speed and a rotation offset per particle group
-        this.rotationSpeed = data.speed;
-
-        el.object3D.add(this.points);
-
-        // add a subtle central glow (sprite)
-        const spriteMap = new THREE.TextureLoader().load('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAv0lEQVRYR+2WwQ2AIAwF5y3/3+2U8ZpWQe6kG2cQ2k7IBT2Awk2m5gk0mY9h5wJpWwQkQmYH7gM4D1gE7wQn9yQ0g8Q3QAZH2Y9sA8wZr2l3yVgI4wI0g2gM4gH7u5kQ0YbV2q1oQY4HcwH4gQwJm8NQY1xWgQ0g8wZkQYyQ8gA8wH2QG0l2yq6zZgAAAABJRU5ErkJggg==');
-        const spriteMaterial = new THREE.SpriteMaterial({map: spriteMap, color: 0xffeeaa, transparent: true, opacity: 0.8});
-        const sprite = new THREE.Sprite(spriteMaterial);
-        sprite.scale.set(0.35, 0.35, 0.35);
-        this.points.add(sprite);
-
-        // Remember original positions for rotation transform
-        this.originalPositions = positions;
-      },
-
-      tick: function (time, delta) {
-        if (!this.points) return;
-        const geometry = this.points.geometry;
-        const positions = geometry.attributes.position.array;
-        const count = positions.length / 3;
-
-        // rotate points slowly around Y axis to simulate galaxy spin
-        const angle = this.rotationSpeed * (delta / 16.6667); // delta normalized to ~60fps
-        const cosA = Math.cos(angle);
-        const sinA = Math.sin(angle);
-
-        for (let i = 0; i < count; i++) {
-          const ix = i * 3;
-          const x = positions[ix];
-          const z = positions[ix + 2];
-
-          // simple rotation in-place
-          positions[ix] = x * cosA - z * sinA;
-          positions[ix + 2] = x * sinA + z * cosA;
-        }
-
-        geometry.attributes.position.needsUpdate = true;
-
-        // also rotate whole points container slowly for nice effect
-        this.points.rotation.y += this.rotationSpeed * 0.12;
-      }
+    // Improve visibility when marker is lost/found
+    const marker = document.querySelector('a-marker');
+    marker.addEventListener('markerFound', () => {
+      document.getElementById('ui').style.display = 'none';
+    });
+    marker.addEventListener('markerLost', () => {
+      document.getElementById('ui').style.display = 'block';
     });
   </script>
 </body>

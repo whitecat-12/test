@@ -1,27 +1,73 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <title>AR Galaxy Marker</title>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.165/build/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/ar.js@3.4.1/aframe/build/aframe-ar.js"></script>
-  </head>
-  <body style="margin: 0; overflow: hidden;">
-    <a-scene embedded arjs>
-      <!-- Marker -->
-      <a-marker type="pattern" url="https://raw.githubusercontent.com/jeromeetienne/AR.js/master/three.js/data/patt.hiro">
-        
-        <!-- Matahari -->
-        <a-sphere position="0 0 0" radius="0.15" color="#ffcc00" emissive="#ffaa00"></a-sphere>
-        
-        <!-- Planet sederhana -->
-        <a-sphere position="0.3 0 0" radius="0.05" color="#6b93d6"></a-sphere>
-        <a-sphere position="0.5 0 0" radius="0.04" color="#c1440e"></a-sphere>
-        
-      </a-marker>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AR Galaxy Marker</title>
+  <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/ar.js@3.4.1/aframe/build/aframe-ar.js"></script>
+  <style>
+    body { margin: 0; overflow: hidden; }
+  </style>
+</head>
+<body>
+  <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
+    
+    <!-- Marker -->
+    <a-marker type="pattern" url="https://raw.githubusercontent.com/jeromeetienne/AR.js/master/three.js/data/patt.hiro">
 
-      <!-- Kamera AR -->
-      <a-entity camera></a-entity>
-    </a-scene>
-  </body>
+      <!-- Matahari -->
+      <a-sphere id="sun" position="0 0 0" radius="0.3" color="#ffcc00" emissive="#ffaa00"></a-sphere>
+      
+      <!-- Planet -->
+      <a-entity id="planets"></a-entity>
+      
+      <!-- Stars (point lights) -->
+      <a-entity light="type: ambient; color: #666"></a-entity>
+      <a-entity light="type: directional; color: #fff; intensity: 0.5" position="1 2 1"></a-entity>
+      
+    </a-marker>
+
+    <a-entity camera></a-entity>
+  </a-scene>
+
+  <script>
+    // Planet data
+    const planetsData = [
+      { name: 'Mercury', radius: 0.05, distance: 0.5, color: '#8c8c8c', speed: 0.03 },
+      { name: 'Venus', radius: 0.07, distance: 0.8, color: '#e6b87e', speed: 0.02 },
+      { name: 'Earth', radius: 0.07, distance: 1.1, color: '#6b93d6', speed: 0.015 },
+      { name: 'Mars', radius: 0.06, distance: 1.4, color: '#c1440e', speed: 0.01 }
+    ];
+
+    const planetsEntity = document.querySelector('#planets');
+
+    // Buat entity planet
+    planetsData.forEach(planet => {
+      const el = document.createElement('a-sphere');
+      el.setAttribute('radius', planet.radius);
+      el.setAttribute('color', planet.color);
+      el.setAttribute('position', `${planet.distance} 0 0`);
+      el.setAttribute('data-angle', Math.random() * 360);
+      el.setAttribute('data-speed', planet.speed);
+      planetsEntity.appendChild(el);
+    });
+
+    // Animasi orbit planet
+    function animatePlanets() {
+      const planetEls = planetsEntity.children;
+      for (let i = 0; i < planetEls.length; i++) {
+        const planet = planetEls[i];
+        let angle = parseFloat(planet.getAttribute('data-angle'));
+        const speed = parseFloat(planet.getAttribute('data-speed'));
+        angle += speed;
+        const dist = parseFloat(planet.getAttribute('position').x);
+        const rad = THREE.MathUtils.degToRad(angle);
+        planet.setAttribute('position', `${Math.cos(rad) * dist} 0 ${Math.sin(rad) * dist}`);
+        planet.setAttribute('data-angle', angle);
+      }
+      requestAnimationFrame(animatePlanets);
+    }
+    animatePlanets();
+  </script>
+</body>
 </html>

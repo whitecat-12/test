@@ -179,40 +179,24 @@
       <!-- Root of the earth-moon system attached to the marker -->
       <a-entity id="earthMoonRoot" rotation="0 0 0">
 
-        <!-- Earth with detailed material -->
+        <!-- Earth with your PNG texture -->
         <a-entity id="earth" position="0 0 0" 
                   class="planet" data-name="Bumi" 
                   data-desc="Planet tempat tinggal kita"
                   data-facts="Diameter: 12,742 km<br>Satelit Alami: 1 (Bulan)<br>Populasi: 8 Miliar+">
-          <!-- Earth sphere with detailed colors -->
+          <!-- Earth sphere with your PNG texture -->
           <a-sphere radius="0.4" 
-                    material="color: #2a66ff; 
-                              roughness: 0.7; 
-                              metalness: 0.1;
-                              src: #earthTexture"
+                    material="src: url(earth-texture.png);
+                              roughness: 0.8; 
+                              metalness: 0.1"
                     animation="property: rotation; to: 0 360 0; loop: true; dur: 10000; easing: linear">
-            <!-- Continent details using multiple colored spheres -->
-            <a-sphere radius="0.401" 
-                      material="color: #4CAF50; 
-                                transparent: true; 
-                                opacity: 0.4;
-                                roughness: 0.8"
-                      rotation="0 45 0">
-            </a-sphere>
-            <a-sphere radius="0.402" 
-                      material="color: #8BC34A; 
-                                transparent: true; 
-                                opacity: 0.3;
-                                roughness: 0.8"
-                      rotation="30 -30 0">
-            </a-sphere>
           </a-sphere>
           
-          <!-- Clouds for Earth -->
-          <a-sphere radius="0.41" 
+          <!-- Clouds for Earth (gunakan texture awan Anda jika ada) -->
+          <a-sphere radius="0.405" 
                     material="color: #ffffff; 
                               transparent: true; 
-                              opacity: 0.2;
+                              opacity: 0.3;
                               roughness: 0.9"
                     animation="property: rotation; to: 0 -360 0; loop: true; dur: 15000; easing: linear">
           </a-sphere>
@@ -221,28 +205,14 @@
         <!-- Moon orbiting the Earth -->
         <a-entity id="moonOrbit" animation="property: rotation; to: 0 360 0; loop: true; dur: 8000; easing: linear">
           <a-sphere radius="0.1" position="1.2 0 0" 
-                    material="color: #d9d9d9; 
+                    material="src: url(moon-texture.png);
                               roughness: 0.9; 
-                              metalness: 0.05;
-                              normalScale: 0.5 0.5"
+                              metalness: 0.05"
                     class="planet" data-name="Bulan" 
                     data-desc="Satelit alami Bumi"
                     data-facts="Diameter: 3,474 km<br>Jarak dari Bumi: 384,400 km<br>Gravitasi: 1/6 Bumi">
-            <!-- Moon craters effect -->
-            <a-sphere radius="0.101" 
-                      material="color: #bdbdbd; 
-                                transparent: true; 
-                                opacity: 0.3;
-                                roughness: 1.0"
-                      rotation="20 10 0">
-            </a-sphere>
           </a-sphere>
         </a-entity>
-
-        <!-- Simple orbit ring for visual reference -->
-        <a-ring radius-inner="1.18" radius-outer="1.22" rotation="-90 0 0" 
-                material="color: #4a90e2; opacity: 0.3; transparent: true" 
-                visible="true"></a-ring>
 
         <!-- Stars background (small white dots around) -->
         <a-entity id="stars">
@@ -259,49 +229,9 @@
 
     <!-- Camera -->
     <a-entity camera></a-entity>
-
-    <!-- Assets for textures -->
-    <a-assets>
-      <!-- Simple generated earth-like texture -->
-      <canvas id="earthTexture" width="512" height="256"></canvas>
-    </a-assets>
   </a-scene>
 
   <script>
-    // Generate simple earth texture
-    document.addEventListener('DOMContentLoaded', function() {
-      const canvas = document.getElementById('earthTexture');
-      const ctx = canvas.getContext('2d');
-      
-      // Blue ocean background
-      ctx.fillStyle = '#2a66ff';
-      ctx.fillRect(0, 0, 512, 256);
-      
-      // Green continents
-      ctx.fillStyle = '#4CAF50';
-      
-      // Continent shapes (simplified)
-      // Asia
-      ctx.beginPath();
-      ctx.ellipse(350, 80, 60, 40, 0, 0, 2 * Math.PI);
-      ctx.fill();
-      
-      // Americas
-      ctx.beginPath();
-      ctx.ellipse(100, 100, 50, 60, 0, 0, 2 * Math.PI);
-      ctx.fill();
-      
-      // Africa
-      ctx.beginPath();
-      ctx.ellipse(280, 120, 40, 50, 0, 0, 2 * Math.PI);
-      ctx.fill();
-      
-      // Australia
-      ctx.beginPath();
-      ctx.ellipse(400, 180, 30, 25, 0, 0, 2 * Math.PI);
-      ctx.fill();
-    });
-
     // Toggle planet info panel
     const toggleInfoBtn = document.getElementById('toggleInfo');
     const planetInfo = document.getElementById('planetInfo');

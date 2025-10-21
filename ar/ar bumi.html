@@ -154,7 +154,7 @@
 
   <!-- UI Panel -->
   <div id="ui">
-    <h1>🌍 Bumi dan Bulan AR</h1>
+    <h1>🌍 Bumi dan Bulan AR (2x Lebih Besar)</h1>
     <p>Arahkan kamera ke <strong>Hiro marker</strong> untuk melihat Bumi dan Bulan.</p>
     <p>Tips: letakkan marker di meja, perlahan miringkan kamera untuk melihat orbit.</p>
     <button id="toggleInfo">Info Bumi & Bulan</button>
@@ -184,16 +184,16 @@
                   class="planet" data-name="Bumi" 
                   data-desc="Planet tempat tinggal kita"
                   data-facts="Diameter: 12,742 km<br>Satelit Alami: 1 (Bulan)<br>Populasi: 8 Miliar+">
-          <!-- Earth sphere with your PNG texture -->
-          <a-sphere radius="0.4" 
+          <!-- Earth sphere with your PNG texture - DIPERBESAR 2x (dari 0.4 menjadi 0.8) -->
+          <a-sphere radius="0.8" 
                     material="src: url(earth-texture.png);
                               roughness: 0.8; 
                               metalness: 0.1"
                     animation="property: rotation; to: 0 360 0; loop: true; dur: 10000; easing: linear">
           </a-sphere>
           
-          <!-- Clouds for Earth (gunakan texture awan Anda jika ada) -->
-          <a-sphere radius="0.405" 
+          <!-- Clouds for Earth - DIPERBESAR 2x (dari 0.405 menjadi 0.81) -->
+          <a-sphere radius="0.81" 
                     material="color: #ffffff; 
                               transparent: true; 
                               opacity: 0.3;
@@ -204,7 +204,8 @@
 
         <!-- Moon orbiting the Earth -->
         <a-entity id="moonOrbit" animation="property: rotation; to: 0 360 0; loop: true; dur: 8000; easing: linear">
-          <a-sphere radius="0.1" position="1.2 0 0" 
+          <!-- Moon DIPERBESAR 2x (dari 0.1 menjadi 0.2) dan jarak orbit DIPERBESAR 2x (dari 1.2 menjadi 2.4) -->
+          <a-sphere radius="0.2" position="2.4 0 0" 
                     material="src: url(moon-texture.png);
                               roughness: 0.9; 
                               metalness: 0.05"
@@ -214,14 +215,14 @@
           </a-sphere>
         </a-entity>
 
-        <!-- Stars background (small white dots around) -->
+        <!-- Stars background (small white dots around) - juga diperbesar -->
         <a-entity id="stars">
           <!-- Multiple small spheres as stars -->
-          <a-sphere radius="0.01" position="1.5 0.8 0" material="color: white; emissive: white"></a-sphere>
-          <a-sphere radius="0.008" position="-1.2 0.6 0.5" material="color: white; emissive: white"></a-sphere>
-          <a-sphere radius="0.012" position="0.8 -0.7 -0.8" material="color: white; emissive: white"></a-sphere>
-          <a-sphere radius="0.009" position="-0.5 -0.9 0.3" material="color: white; emissive: white"></a-sphere>
-          <a-sphere radius="0.011" position="1.1 -0.3 0.9" material="color: white; emissive: white"></a-sphere>
+          <a-sphere radius="0.02" position="3.0 1.6 0" material="color: white; emissive: white"></a-sphere>
+          <a-sphere radius="0.016" position="-2.4 1.2 1.0" material="color: white; emissive: white"></a-sphere>
+          <a-sphere radius="0.024" position="1.6 -1.4 -1.6" material="color: white; emissive: white"></a-sphere>
+          <a-sphere radius="0.018" position="-1.0 -1.8 0.6" material="color: white; emissive: white"></a-sphere>
+          <a-sphere radius="0.022" position="2.2 -0.6 1.8" material="color: white; emissive: white"></a-sphere>
         </a-entity>
 
       </a-entity>
@@ -240,8 +241,9 @@
     });
 
     // Scale the earth-moon system for better marker fit
+    // Diubah menjadi scale yang lebih kecil (0.6) karena objek sudah 2x lebih besar
     const earthMoonRoot = document.getElementById('earthMoonRoot');
-    earthMoonRoot.setAttribute('scale','0.8 0.8 0.8');
+    earthMoonRoot.setAttribute('scale','0.6 0.6 0.6');
 
     // Improve visibility when marker is lost/found
     const marker = document.querySelector('a-marker');

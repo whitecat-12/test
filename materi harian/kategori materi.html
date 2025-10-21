@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teta Sains - Materi Harian</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #38b2ac;
+            --secondary: #0e7490;
+            --accent: #f59e0b;
+            --logo-color: #9999ff; /* Warna baru untuk logo */
+        }
+        
+        body {
+            font-family: 'Baloo 2', cursive;
+            background-color: #f8fafc;
+        }
+        
+        .app-container {
+            max-width: 414px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            position: relative;
+        }
+        
+        /* NAVBAR YANG SUDAH DISAMAKAN */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            max-width: 414px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            background: white;
+            z-index: 10;
+            height: 70px; /* TINGGI SAMA */
+            display: flex;
+            align-items: center;
+        }
+        
+        /* STYLE NAV ITEM YANG SAMA */
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+            text-decoration: none;
+            flex: 1;
+            height: 100%;
+            padding: 0.5rem 0;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item span {
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
+        
+        .nav-item.active {
+            color: var(--primary);
+        }
+        
+        .nav-icon {
+            transition: all 0.3s ease;
+            font-size: 1.25rem; /* UKURAN SAMA */
+        }
+        
+        .nav-icon.active {
+            transform: translateY(-5px); /* EFEK SAMA */
+            color: var(--primary);
+        }
+        
+        .app-logo {
+            display: flex;
+            align-items: center;
+        }
+        
+        .app-logo-icon {
+            background: var(--logo-color); /* Warna diubah ke #9999ff */
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 8px;
+        }
+        
+        .app-name {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: var(--logo-color); /* Warna diubah ke #9999ff */
+        }
+
+        /* Animasi untuk kartu */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+
+        .card-hover:hover {
+            animation: float 2s ease-in-out infinite;
+        }
+
+        /* Search Bar Styles */
+        .search-container {
+            position: relative;
+            margin: 16px 0;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 12px 16px 12px 44px;
+            border-radius: 12px;
+            border: 1px solid #e2e8f0;
+            background-color: #f8fafc;
+            font-family: 'Baloo 2', cursive;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(56, 178, 172, 0.1);
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94a3b8;
+        }
+        
+        .clear-search {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            display: none;
+        }
+        
+        .clear-search:hover {
+            color: #64748b;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 40px 20px;
+            color: #64748b;
+        }
+        
+        .no-results i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            color: #cbd5e1;
+        }
+
+        /* RESPONSIVE SAMA */
+        @media (max-width: 414px) {
+            .bottom-nav {
+                height: 65px;
+            }
+            
+            .nav-icon {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile App Container -->
+    <div class="app-container">
+        <!-- App Header -->
+        <header class="bg-white p-4 border-b border-gray-200">
+            <div class="flex justify-between items-center">
+                <div class="app-logo">
+                    <div class="app-logo-icon">
+                        <i class="fas fa-atom"></i>
+                    </div>
+                    <h1 class="app-name">TETA SAINS</h1>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Main Content Area -->
+        <main class="pb-20">
+            <div class="p-4">
+                <!-- Search Bar -->
+                <div class="search-container">
+                    <i class="fas fa-search search-icon"></i>
+                    <input type="text" id="searchInput" class="search-input" placeholder="Cari materi pelajaran...">
+                    <button id="clearSearch" class="clear-search">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <!-- Container Rak Materi -->
+                <div id="rakMapel" class="grid grid-cols-1 gap-5"></div>
+                
+                <!-- No Results Message -->
+                <div id="noResults" class="no-results hidden">
+                    <i class="fas fa-search"></i>
+                    <h3 class="text-lg font-semibold mb-2">Tidak ada hasil ditemukan</h3>
+                    <p>Coba gunakan kata kunci yang berbeda</p>
+                </div>
+            </div>
+        </main>
+        
+        <!-- BOTTOM NAVIGATION YANG SUDAH DISAMAKAN -->
+        <nav class="bottom-nav">
+            <a href="../dashboard siswa.html" class="nav-item">
+                <i class="fas fa-home nav-icon"></i>
+                <span>Beranda</span>
+            </a>
+            <a href="../soal harian/dashboard soal.html" class="nav-item">
+                <i class="fas fa-flask nav-icon"></i>
+                <span>Soal Harian</span>
+            </a>
+            <a href="../ai/nayra.html" class="nav-item">
+                <i class="fas fa-robot nav-icon"></i>
+                <span>Nayra AI</span>
+            </a>
+            <a href="kategori materi.html" class="nav-item active">
+                <i class="fas fa-chalkboard-teacher nav-icon active"></i>
+                <span>Materi Harian</span>
+            </a>
+            <a href="../profil.html" class="nav-item">
+                <i class="fas fa-user nav-icon"></i>
+                <span>Profil</span>
+            </a>
+        </nav>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAJ5I8k2MzAyDLt9fUcXHRNtRVjKB_ETLY",
+            authDomain: "projectid-81104.firebaseapp.com",
+            projectId: "projectid-81104",
+            storageBucket: "projectid-81104.appspot.com",
+            messagingSenderId: "554913260457",
+            appId: "1:554913260457:web:bf988867ebfd902c651ab8"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        const rakMapel = document.getElementById("rakMapel");
+        const searchInput = document.getElementById("searchInput");
+        const clearSearch = document.getElementById("clearSearch");
+        const noResults = document.getElementById("noResults");
+
+        let allSubjects = [];
+
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                window.location.href = "login.html";
+            } else {
+                loadRak();
+            }
+        });
+
+        async function loadRak() {
+            // Mengambil data dari koleksi "materi" bukan "soal"
+            const snapshot = await getDocs(collection(db, "materi"));
+            const mapelSet = new Set();
+
+            snapshot.forEach(docSnap => {
+                const data = docSnap.data();
+                if (data.mapel) mapelSet.add(data.mapel);
+            });
+
+            allSubjects = [...mapelSet];
+            renderSubjects(allSubjects);
+        }
+
+        function renderSubjects(subjects) {
+            rakMapel.innerHTML = "";
+            noResults.classList.add("hidden");
+
+            if (subjects.length === 0) {
+                noResults.classList.remove("hidden");
+                return;
+            }
+
+            // Warna-warna cerah dan ramah anak tanpa gradien
+            const colorSchemes = [
+                { bg: "bg-blue-100", border: "border-l-8 border-blue-400", text: "text-blue-800", icon: "book", iconColor: "text-blue-500" },
+                { bg: "bg-green-100", border: "border-l-8 border-green-400", text: "text-green-800", icon: "atom", iconColor: "text-green-500" },
+                { bg: "bg-yellow-100", border: "border-l-8 border-yellow-400", text: "text-yellow-800", icon: "lightbulb", iconColor: "text-yellow-500" },
+                { bg: "bg-red-100", border: "border-l-8 border-red-400", text: "text-red-800", icon: "dna", iconColor: "text-red-500" },
+                { bg: "bg-purple-100", border: "border-l-8 border-purple-400", text: "text-purple-800", icon: "calculator", iconColor: "text-purple-500" },
+                { bg: "bg-pink-100", border: "border-l-8 border-pink-400", text: "text-pink-800", icon: "star", iconColor: "text-pink-500" },
+                { bg: "bg-indigo-100", border: "border-l-8 border-indigo-400", text: "text-indigo-800", icon: "microscope", iconColor: "text-indigo-500" }
+            ];
+
+            let i = 0;
+            subjects.forEach(mapel => {
+                const scheme = colorSchemes[i % colorSchemes.length];
+                i++;
+
+                const card = document.createElement("div");
+                card.className = `flex items-center gap-5 ${scheme.bg} ${scheme.border} ${scheme.text} p-6 rounded-2xl shadow-md cursor-pointer card-hover`;
+
+                card.innerHTML = `
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-${scheme.icon} text-3xl ${scheme.iconColor}"></i>
+                    </div>
+                    <div class="flex-grow">
+                        <h2 class="text-xl font-bold mb-1">${mapel}</h2>
+                        <p class="text-sm opacity-80">Kumpulan materi ${mapel} yang menarik!</p>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-chevron-right opacity-60"></i>
+                    </div>
+                `;
+
+                card.addEventListener("click", () => {
+                    // Mengarahkan ke halaman materi, bukan quiz
+                    window.location.href = `materi.html?mapel=${encodeURIComponent(mapel)}`;
+                });
+
+                rakMapel.appendChild(card);
+            });
+        }
+
+        // Fungsi pencarian
+        function searchSubjects(query) {
+            const filteredSubjects = allSubjects.filter(subject => 
+                subject.toLowerCase().includes(query.toLowerCase())
+            );
+            renderSubjects(filteredSubjects);
+        }
+
+        // Event listener untuk pencarian
+        searchInput.addEventListener("input", function() {
+            const query = this.value.trim();
+            
+            if (query.length > 0) {
+                clearSearch.style.display = "block";
+                searchSubjects(query);
+            } else {
+                clearSearch.style.display = "none";
+                renderSubjects(allSubjects);
+            }
+        });
+
+        // Event listener untuk tombol hapus pencarian
+        clearSearch.addEventListener("click", function() {
+            searchInput.value = "";
+            clearSearch.style.display = "none";
+            renderSubjects(allSubjects);
+        });
+
+        // INTERAKSI NAVBAR YANG SUDAH DISAMAKAN
+        document.addEventListener('DOMContentLoaded', function() {
+            const navItems = document.querySelectorAll('.nav-item');
+            
+            navItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    navItems.forEach(nav => {
+                        nav.classList.remove('active');
+                        nav.querySelector('.nav-icon').classList.remove('active');
+                    });
+                    
+                    this.classList.add('active');
+                    this.querySelector('.nav-icon').classList.add('active');
+                });
+            });
+        });
+    </script>
+</body>
+</html>

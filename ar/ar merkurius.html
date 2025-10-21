@@ -163,8 +163,8 @@
   <!-- Planet Info Panel -->
   <div id="planetInfo">
     <h2 id="planetName">Merkurius</h2>
-    <p id="planetDesc">Planet terkecil dan terdekat dengan Matahari</p>
-    <p id="planetFacts">Diameter: 4.879 km<br>Satelit Alami: 0<br>Periode Rotasi: 59 hari Bumi</p>
+    <p id="planetDesc">Planet terkecil di Tata Surya</p>
+    <p id="planetFacts">Diameter: 4,879 km<br>Jarak dari Matahari: 57.9 juta km<br>Periode Orbit: 88 hari</p>
   </div>
 
   <!-- A-Frame scene with AR.js enabled -->
@@ -179,28 +179,41 @@
       <!-- Root of the mercury system attached to the marker -->
       <a-entity id="mercuryRoot" rotation="0 0 0">
 
-        <!-- Mercury with appropriate texture -->
+        <!-- Mercury planet -->
         <a-entity id="mercury" position="0 0 0" 
                   class="planet" data-name="Merkurius" 
-                  data-desc="Planet terkecil dan terdekat dengan Matahari"
-                  data-facts="Diameter: 4.879 km<br>Satelit Alami: 0<br>Periode Rotasi: 59 hari Bumi<br>Suhu: -173°C hingga 427°C">
-          <!-- Mercury sphere with appropriate texture -->
+                  data-desc="Planet terkecil di Tata Surya"
+                  data-facts="Diameter: 4,879 km<br>Jarak dari Matahari: 57.9 juta km<br>Periode Orbit: 88 hari<br>Suhu: -173°C hingga 427°C">
+          <!-- Mercury sphere dengan texture JPEG -->
           <a-sphere radius="0.3" 
-                    material="src: url(https://raw.githubusercontent.com/mrdoob/three.js/dev/examples/textures/planets/mercury.jpg);
+                    material="src: url(mercury-texture.jpg);
                               roughness: 0.9; 
-                              metalness: 0.2"
+                              metalness: 0.2;
+                              repeat: 1 1"
                     animation="property: rotation; to: 0 360 0; loop: true; dur: 15000; easing: linear">
           </a-sphere>
         </a-entity>
 
-        <!-- Stars background (small white dots around) -->
+        <!-- Orbit path (visual guide) -->
+        <a-ring id="orbitPath" radius-inner="0.5" radius-outer="0.52" 
+                rotation="-90 0 0" 
+                material="color: #444444; transparent: true; opacity: 0.3; side: double">
+        </a-ring>
+
+        <!-- Background stars -->
         <a-entity id="stars">
           <!-- Multiple small spheres as stars -->
-          <a-sphere radius="0.01" position="1.5 0.8 0" material="color: white; emissive: white"></a-sphere>
-          <a-sphere radius="0.008" position="-1.2 0.6 0.5" material="color: white; emissive: white"></a-sphere>
-          <a-sphere radius="0.012" position="0.8 -0.7 -0.8" material="color: white; emissive: white"></a-sphere>
-          <a-sphere radius="0.009" position="-0.5 -0.9 0.3" material="color: white; emissive: white"></a-sphere>
-          <a-sphere radius="0.011" position="1.1 -0.3 0.9" material="color: white; emissive: white"></a-sphere>
+          <a-sphere radius="0.008" position="1.0 0.8 0.5" material="color: white; emissive: white"></a-sphere>
+          <a-sphere radius="0.006" position="-0.8 0.6 0.7" material="color: white; emissive: white"></a-sphere>
+          <a-sphere radius="0.01" position="0.6 -0.5 -0.9" material="color: white; emissive: white"></a-sphere>
+          <a-sphere radius="0.007" position="-0.4 -0.7 0.4" material="color: white; emissive: white"></a-sphere>
+          <a-sphere radius="0.009" position="0.9 -0.3 0.8" material="color: white; emissive: white"></a-sphere>
+          <a-sphere radius="0.005" position="-0.9 0.4 -0.6" material="color: white; emissive: white"></a-sphere>
+        </a-entity>
+
+        <!-- Informasi label -->
+        <a-entity position="0 0.5 0" text="value: MERKURIUS; align: center; color: white; width: 3" 
+                 visible="false" class="label">
         </a-entity>
 
       </a-entity>
@@ -220,19 +233,28 @@
 
     // Scale the mercury system for better marker fit
     const mercuryRoot = document.getElementById('mercuryRoot');
-    mercuryRoot.setAttribute('scale','0.8 0.8 0.8');
+    mercuryRoot.setAttribute('scale','1.2 1.2 1.2');
 
     // Improve visibility when marker is lost/found
     const marker = document.querySelector('a-marker');
     marker.addEventListener('markerFound', () => {
       document.getElementById('ui').style.display = 'none';
       planetInfo.classList.remove('show');
+      
+      // Show label when marker found
+      const label = document.querySelector('.label');
+      label.setAttribute('visible', 'true');
     });
+    
     marker.addEventListener('markerLost', () => {
       document.getElementById('ui').style.display = 'block';
+      
+      // Hide label when marker lost
+      const label = document.querySelector('.label');
+      label.setAttribute('visible', 'false');
     });
 
-    // Add click events to planets for showing info
+    // Add click events to planet for showing info
     document.addEventListener('DOMContentLoaded', () => {
       const planets = document.querySelectorAll('.planet');
       const planetName = document.getElementById('planetName');
@@ -308,6 +330,14 @@
       touchStartX = touchEndX;
       touchStartY = touchEndY;
     });
+
+    // Auto-rotate mercury slowly
+    setInterval(() => {
+      const mercury = document.getElementById('mercury');
+      let rotation = mercury.getAttribute('rotation');
+      rotation.y += 0.1;
+      mercury.setAttribute('rotation', rotation);
+    }, 50);
   </script>
 </body>
 </html>

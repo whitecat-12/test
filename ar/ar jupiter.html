@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>AR Jupiter — Hiro Marker</title>
+  <!-- A-Frame -->
+  <script src="https://aframe.io/releases/1.4.1/aframe.min.js"></script>
+  <!-- AR.js for A-Frame (marker-based) -->
+  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.js"></script>
+  <style>
+    html,body{height:100%;margin:0;overflow:hidden;font-family:system-ui,Segoe UI,Roboto}
+    
+    /* UI Mobile-friendly */
+    #ui{
+      position:fixed;
+      left:0;
+      top:0;
+      right:0;
+      z-index:10;
+      background:rgba(0,0,0,0.75);
+      color:#fff;
+      padding:12px;
+      border-radius:0 0 12px 12px;
+      backdrop-filter: blur(5px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    
+    #ui h1{
+      font-size:18px;
+      margin:0 0 8px;
+      text-align:center;
+    }
+    
+    #ui p{
+      margin:6px 0;
+      font-size:14px;
+      line-height:1.4;
+      text-align:center;
+    }
+    
+    #ui button{
+      display:block;
+      width:100%;
+      margin-top:8px;
+      padding:10px;
+      border-radius:8px;
+      border:0;
+      background:#FF9800;
+      color:#fff;
+      font-weight:bold;
+      font-size:14px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    
+    #ui button:active{
+      background:#F57C00;
+      transform: translateY(1px);
+    }
+    
+    /* Planet info panel */
+    #planetInfo{
+      position:fixed;
+      bottom:0;
+      left:0;
+      right:0;
+      background:rgba(0,0,0,0.85);
+      color:#fff;
+      padding:12px;
+      border-radius:12px 12px 0 0;
+      backdrop-filter: blur(5px);
+      transform: translateY(100%);
+      transition: transform 0.3s ease;
+      z-index:9;
+    }
+    
+    #planetInfo.show{
+      transform: translateY(0);
+    }
+    
+    #planetInfo h2{
+      margin:0 0 8px;
+      font-size:16px;
+      text-align:center;
+    }
+    
+    #planetInfo p{
+      margin:4px 0;
+      font-size:13px;
+      line-height:1.4;
+    }
+    
+    /* Loading indicator */
+    #loading{
+      position:fixed;
+      top:0;
+      left:0;
+      width:100%;
+      height:100%;
+      background:#000;
+      color:#fff;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      align-items:center;
+      z-index:100;
+    }
+    
+    #loading.hide{
+      display:none;
+    }
+    
+    .spinner{
+      width:40px;
+      height:40px;
+      border:4px solid rgba(255,255,255,0.3);
+      border-radius:50%;
+      border-top-color:#FF9800;
+      animation:spin 1s linear infinite;
+      margin-bottom:15px;
+    }
+    
+    @keyframes spin{
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    /* Responsive adjustments */
+    @media (min-width: 768px) {
+      #ui{
+        left:12px;
+        top:12px;
+        right:auto;
+        width:280px;
+        border-radius:8px;
+      }
+      
+      #planetInfo{
+        left:12px;
+        bottom:12px;
+        right:auto;
+        width:280px;
+        border-radius:8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Loading screen -->
+  <div id="loading">
+    <div class="spinner"></div>
+    <p>Memuat Jupiter AR...</p>
+  </div>
+
+  <!-- UI Panel -->
+  <div id="ui">
+    <h1>♃ Jupiter AR</h1>
+    <p>Arahkan kamera ke <strong>Hiro marker</strong> untuk melihat Jupiter.</p>
+    <p>Tips: letakkan marker di meja, perlahan miringkan kamera untuk melihat detail.</p>
+    <button id="toggleInfo">Info Jupiter</button>
+  </div>
+
+  <!-- Planet Info Panel -->
+  <div id="planetInfo">
+    <h2 id="planetName">Jupiter</h2>
+    <p id="planetDesc">Raksasa Gas</p>
+    <p id="planetFacts">Diameter: 139,820 km<br>Jarak dari Matahari: 778 juta km<br>Periode Orbit: 12 tahun</p>
+  </div>
+
+  <!-- A-Frame scene with AR.js enabled -->
+  <a-scene vr-mode-ui="enabled: false" embedded arjs="sourceType: webcam; debugUIEnabled: false;">
+
+    <!-- Ambient + directional light -->
+    <a-entity light="type: ambient; intensity: 0.6"></a-entity>
+    <a-entity light="type: directional; intensity: 0.8" position="1 2 1"></a-entity>
+
+    <!-- Marker (Hiro) -->
+    <a-marker preset="hiro">
+      <!-- Root of the jupiter system attached to the marker -->
+      <a-entity id="jupiterRoot" rotation="0 0 0">
+
+        <!-- Jupiter planet -->
+        <a-entity id="jupiter" position="0 0 0" 
+                  class="planet" data-name="Jupiter" 
+                  data-desc="Raksasa Gas"
+                  data-facts="Diameter: 139,820 km<br>Jarak dari Matahari: 778 juta km<br>Periode Orbit: 12 tahun<br>Suhu: -145°C<br>Satelit: 95+ (termasuk Galilean Moons)">
+          <!-- Jupiter sphere - GANTI URL DI BAWAH DENGAN TEXTURE ANDA -->
+          <a-sphere radius="0.7" 
+                    material="color: #D8CA9D;
+                              roughness: 0.9; 
+                              metalness: 0.1;
+                              src: url(jupiter-texture.jpg);
+                              repeat: 1 1"
+                    animation="property: rotation; to: 0 360 0; loop: true; dur: 8000; easing: linear">
+          </a-sphere>
+          
+          <!-- Great Red Spot -->
+          <a-circle radius="0.15" position="0.55 0.2 0" 
+                   material="color: #B22222; side: double"
+                   rotation="0 90 0">
+          </a-circle>
+        </a-entity>
+
+        <!-- Bulan Jupiter - Io -->
+        <a-entity id="ioOrbit" animation="property: rotation; to: 0 360 0; loop: true; dur: 3000; easing: linear">
+          <a-sphere radius="0.06" position="1.5 0 0" 
+                    material="color: #F4A460; roughness: 1.0"
+                    class="moon" data-name="Io" 
+                    data-desc="Bulan vulkanik Jupiter"
+                    data-facts="Diameter: 3,643 km<br>Permukaan: Vulkanik aktif<br>Jarak: 421,700 km">
+          </a-sphere>
+        </a-entity>
+
+        <!-- Bulan Jupiter - Europa -->
+        <a-entity id="europaOrbit" animation="property: rotation; to: 0 -360 0; loop: true; dur: 5000; easing: linear">
+          <a-sphere radius="0.05" position="2.0 0 0" 
+                    material="color: #F5F5DC; roughness: 1.0"
+                    class="moon" data-name="Europa" 
+                    data-desc="Bulan es Jupiter"
+                    data-facts="Diameter: 3,122 km<br>Permukaan: Lapisan es<br>Jarak: 671,100 km">
+          </a-sphere>
+        </a-entity>
+
+        <!-- Bulan Jupiter - Ganymede -->
+        <a-entity id="ganymedeOrbit" animation="property: rotation; to: 0 360 0; loop: true; dur: 7000; easing: linear">
+          <a-sphere radius="0.08" position="2.5 0 0" 
+                    material="color: #A9A9A9; roughness: 1.0"
+                    class="moon" data-name="Ganymede" 
+                    data-desc="Bulan terbesar di Tata Surya"
+                    data-facts="Diameter: 5,262 km<br>Lebih besar dari Merkurius<br>Jarak: 1,070,400 km">
+          </a-sphere>
+        </a-entity>
+
+        <!-- Bulan Jupiter - Callisto -->
+        <a-entity id="callistoOrbit" animation="property: rotation; to: 0 -360 0; loop: true; dur: 10000; easing: linear">
+          <a-sphere radius="0.07" position="3.0 0 0" 
+                    material="color: #696969; roughness: 1.0"
+                    class="moon" data-name="Callisto" 
+                    data-desc="Bulan dengan kawah terbanyak"
+                    data-facts="Diameter: 4,821 km<br>Permukaan: Banyak kawah<br>Jarak: 1,882,700 km">
+          </a-sphere>
+        </a-entity>
+
+        <!-- Cincin Jupiter (sangat tipis) -->
+        <a-ring id="ring" radius-inner="0.9" radius-outer="1.2" 
+                rotation="-90 0 0" 
+                material="color: #8B7355; transparent: true; opacity: 0.2; side: double">
+        </a-ring>
+
+        <!-- Background stars -->
+        <a-entity id="stars">
+          <!-- Multiple small spheres as stars -->
+          <a-sphere radius="0.008" position="1.2 0.9 0.6" material="color: white; emissive: white"></a-sphere>
+          <a-sphere radius="0.006" position="-1.0 0.7 0.8" material="color: white; emissive: white"></a-sphere>
+          <a-sphere radius="0.01" position="0.8 -0.6 -1.1" material="color: white; emissive: white"></a-sphere>
+          <a-sphere radius="0.007" position="-0.6 -0.8 0.5" material="color: white; emissive: white"></a-sphere>
+          <a-sphere radius="0.009" position="1.1 -0.4 1.0" material="color: white; emissive: white"></a-sphere>
+          <a-sphere radius="0.005" position="-1.1 0.5 -0.7" material="color: white; emissive: white"></a-sphere>
+        </a-entity>
+
+        <!-- Informasi label -->
+        <a-entity position="0 1.0 0" text="value: JUPITER; align: center; color: #FF9800; width: 3" 
+                 visible="false" class="label">
+        </a-entity>
+
+      </a-entity>
+    </a-marker>
+
+    <!-- Camera -->
+    <a-entity camera></a-entity>
+  </a-scene>
+
+  <script>
+    // Toggle planet info panel
+    const toggleInfoBtn = document.getElementById('toggleInfo');
+    const planetInfo = document.getElementById('planetInfo');
+    toggleInfoBtn.addEventListener('click', () => {
+      planetInfo.classList.toggle('show');
+    });
+
+    // Scale the jupiter system for better marker fit
+    const jupiterRoot = document.getElementById('jupiterRoot');
+    jupiterRoot.setAttribute('scale','0.8 0.8 0.8');
+
+    // Improve visibility when marker is lost/found
+    const marker = document.querySelector('a-marker');
+    marker.addEventListener('markerFound', () => {
+      document.getElementById('ui').style.display = 'none';
+      planetInfo.classList.remove('show');
+      
+      // Show label when marker found
+      const label = document.querySelector('.label');
+      label.setAttribute('visible', 'true');
+    });
+    
+    marker.addEventListener('markerLost', () => {
+      document.getElementById('ui').style.display = 'block';
+      
+      // Hide label when marker lost
+      const label = document.querySelector('.label');
+      label.setAttribute('visible', 'false');
+    });
+
+    // Add click events to planet and moons for showing info
+    document.addEventListener('DOMContentLoaded', () => {
+      const planets = document.querySelectorAll('.planet, .moon');
+      const planetName = document.getElementById('planetName');
+      const planetDesc = document.getElementById('planetDesc');
+      const planetFacts = document.getElementById('planetFacts');
+      
+      planets.forEach(planet => {
+        planet.addEventListener('click', () => {
+          planetName.textContent = planet.getAttribute('data-name');
+          planetDesc.textContent = planet.getAttribute('data-desc');
+          planetFacts.innerHTML = planet.getAttribute('data-facts');
+          planetInfo.classList.add('show');
+        });
+      });
+    });
+
+    // Hide loading screen when scene is loaded
+    document.querySelector('a-scene').addEventListener('loaded', () => {
+      setTimeout(() => {
+        document.getElementById('loading').classList.add('hide');
+      }, 1500);
+    });
+
+    // Add keyboard controls for rotation (optional)
+    document.addEventListener('keydown', (e) => {
+      const jupiterRoot = document.getElementById('jupiterRoot');
+      let rotation = jupiterRoot.getAttribute('rotation');
+      
+      switch(e.key) {
+        case 'ArrowLeft':
+          rotation.y += 10;
+          break;
+        case 'ArrowRight':
+          rotation.y -= 10;
+          break;
+        case 'ArrowUp':
+          rotation.x += 10;
+          break;
+        case 'ArrowDown':
+          rotation.x -= 10;
+          break;
+      }
+      
+      jupiterRoot.setAttribute('rotation', rotation);
+    });
+
+    // Add touch controls for mobile
+    let touchStartX = 0;
+    let touchStartY = 0;
+    
+    document.addEventListener('touchstart', (e) => {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+    });
+    
+    document.addEventListener('touchmove', (e) => {
+      if (!touchStartX || !touchStartY) return;
+      
+      const touchEndX = e.touches[0].clientX;
+      const touchEndY = e.touches[0].clientY;
+      
+      const diffX = touchEndX - touchStartX;
+      const diffY = touchEndY - touchStartY;
+      
+      const jupiterRoot = document.getElementById('jupiterRoot');
+      let rotation = jupiterRoot.getAttribute('rotation');
+      
+      rotation.y += diffX * 0.5;
+      rotation.x += diffY * 0.5;
+      
+      jupiterRoot.setAttribute('rotation', rotation);
+      
+      touchStartX = touchEndX;
+      touchStartY = touchEndY;
+    });
+
+    // Auto-rotate jupiter slowly
+    setInterval(() => {
+      const jupiter = document.getElementById('jupiter');
+      let rotation = jupiter.getAttribute('rotation');
+      rotation.y += 0.08;
+      jupiter.setAttribute('rotation', rotation);
+    }, 50);
+  </script>
+</body>
+</html>

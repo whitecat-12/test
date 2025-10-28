@@ -163,8 +163,8 @@
   <!-- Planet Info Panel -->
   <div id="planetInfo">
     <h2 id="planetName">Saturnus</h2>
-    <p id="planetDesc">Raksasa Gas dengan Cincin</p>
-    <p id="planetFacts">Diameter: 116,460 km<br>Jarak dari Matahari: 1.4 miliar km<br>Periode Orbit: 29.5 tahun</p>
+    <p id="planetDesc">Raksasa Gas</p>
+    <p id="planetFacts">Diameter: 116,460 km<br>Jarak dari Matahari: 1.4 miliar km<br>Periode Orbit: 29 tahun</p>
   </div>
 
   <!-- A-Frame scene with AR.js enabled -->
@@ -182,11 +182,11 @@
         <!-- Saturnus planet -->
         <a-entity id="saturnus" position="0 0 0" 
                   class="planet" data-name="Saturnus" 
-                  data-desc="Raksasa Gas dengan Cincin"
-                  data-facts="Diameter: 116,460 km<br>Jarak dari Matahari: 1.4 miliar km<br>Periode Orbit: 29.5 tahun<br>Suhu: -178°C<br>Satelit: 82+ (termasuk Titan)">
+                  data-desc="Raksasa Gas"
+                  data-facts="Diameter: 116,460 km<br>Jarak dari Matahari: 1.4 miliar km<br>Periode Orbit: 29 tahun<br>Suhu: -178°C<br>Satelit: 146+ (termasuk Titan)">
           <!-- Saturnus sphere - GANTI URL DI BAWAH DENGAN TEXTURE ANDA -->
           <a-sphere radius="0.7" 
-                    material="color: #FAD5A5;
+                    material="color: #D8CA9D;
                               roughness: 0.9; 
                               metalness: 0.1;
                               src: url(saturnus-texture.png);
@@ -198,40 +198,40 @@
         <!-- Bulan Saturnus - Titan -->
         <a-entity id="titanOrbit" animation="property: rotation; to: 0 360 0; loop: true; dur: 3000; easing: linear">
           <a-sphere radius="0.06" position="1.5 0 0" 
-                    material="color: #D2B48C; roughness: 1.0"
+                    material="color: #F4A460; roughness: 1.0"
                     class="moon" data-name="Titan" 
                     data-desc="Bulan terbesar Saturnus"
-                    data-facts="Diameter: 5,150 km<br>Memiliki atmosfer tebal<br>Jarak: 1.2 juta km">
-          </a-sphere>
-        </a-entity>
-
-        <!-- Bulan Saturnus - Enceladus -->
-        <a-entity id="enceladusOrbit" animation="property: rotation; to: 0 -360 0; loop: true; dur: 5000; easing: linear">
-          <a-sphere radius="0.05" position="2.0 0 0" 
-                    material="color: #F5F5F5; roughness: 1.0"
-                    class="moon" data-name="Enceladus" 
-                    data-desc="Bulan es Saturnus"
-                    data-facts="Diameter: 504 km<br>Permukaan: Lapisan es<br>Memiliki geyser air">
+                    data-facts="Diameter: 5,151 km<br>Atmosfer: Nitrogen tebal<br>Jarak: 1,221,870 km">
           </a-sphere>
         </a-entity>
 
         <!-- Bulan Saturnus - Rhea -->
-        <a-entity id="rheaOrbit" animation="property: rotation; to: 0 360 0; loop: true; dur: 7000; easing: linear">
-          <a-sphere radius="0.08" position="2.5 0 0" 
-                    material="color: #A9A9A9; roughness: 1.0"
+        <a-entity id="rheaOrbit" animation="property: rotation; to: 0 -360 0; loop: true; dur: 5000; easing: linear">
+          <a-sphere radius="0.05" position="2.0 0 0" 
+                    material="color: #F5F5DC; roughness: 1.0"
                     class="moon" data-name="Rhea" 
-                    data-desc="Bulan kedua terbesar Saturnus"
-                    data-facts="Diameter: 1,527 km<br>Permukaan: Banyak kawah<br>Jarak: 527,000 km">
+                    data-desc="Bulan es Saturnus"
+                    data-facts="Diameter: 1,527 km<br>Permukaan: Kawah es<br>Jarak: 527,108 km">
           </a-sphere>
         </a-entity>
 
         <!-- Bulan Saturnus - Iapetus -->
-        <a-entity id="iapetusOrbit" animation="property: rotation; to: 0 -360 0; loop: true; dur: 10000; easing: linear">
+        <a-entity id="iapetusOrbit" animation="property: rotation; to: 0 360 0; loop: true; dur: 7000; easing: linear">
+          <a-sphere radius="0.08" position="2.5 0 0" 
+                    material="color: #A9A9A9; roughness: 1.0"
+                    class="moon" data-name="Iapetus" 
+                    data-desc="Bulan dua warna"
+                    data-facts="Diameter: 1,471 km<br>Ciri: Permukaan dua warna<br>Jarak: 3,560,820 km">
+          </a-sphere>
+        </a-entity>
+
+        <!-- Bulan Saturnus - Enceladus -->
+        <a-entity id="enceladusOrbit" animation="property: rotation; to: 0 -360 0; loop: true; dur: 10000; easing: linear">
           <a-sphere radius="0.07" position="3.0 0 0" 
                     material="color: #696969; roughness: 1.0"
-                    class="moon" data-name="Iapetus" 
-                    data-desc="Bulan dengan dua sisi berbeda"
-                    data-facts="Diameter: 1,471 km<br>Satu sisi gelap, satu terang<br>Jarak: 3.5 juta km">
+                    class="moon" data-name="Enceladus" 
+                    data-desc="Bulan dengan geyser es"
+                    data-facts="Diameter: 504 km<br>Aktif: Geyser es air<br>Jarak: 237,948 km">
           </a-sphere>
         </a-entity>
 

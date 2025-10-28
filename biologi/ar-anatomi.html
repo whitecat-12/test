@@ -179,20 +179,20 @@
       <!-- Root of the anatomy model attached to the marker -->
       <a-entity id="anatomyRoot" rotation="0 0 0">
 
-        <!-- Main anatomy model ONLY - 3x larger size -->
-        <a-entity id="anatomyModel" position="0 1.2 0" 
-                  class="clickable" data-name="Anatomi Tubuh Manusia" 
+        <!-- Main anatomy model - UKURAN 2x LEBIH BESAR -->
+        <a-entity id="anatomyModel" position="0 0.8 0" 
+                  class="anatomy" data-name="Anatomi Tubuh Manusia" 
                   data-desc="Struktur Dasar Tubuh"
                   data-facts="Tinggi: Rata-rata 160-180 cm<br>Organ: 78 organ utama<br>Sistem: 11 sistem organ<br>Kerangka: 206 tulang<br>Otot: 600+ otot">
-          <!-- GLB/GLTF model of human anatomy - 3x scale -->
+          <!-- GLB/GLTF model of human anatomy - SCALE 2x LEBIH BESAR -->
           <a-entity gltf-model="url(anatomy-model.glb)"
-                    scale="1.2 1.2 1.2"
+                    scale="0.8 0.8 0.8"
                     animation="property: rotation; to: 0 360 0; loop: true; dur: 30000; easing: linear">
           </a-entity>
         </a-entity>
 
         <!-- Informasi label -->
-        <a-entity position="0 2.2 0" text="value: ANATOMI TUBUH; align: center; color: #4169E1; width: 4" 
+        <a-entity position="0 1.8 0" text="value: ANATOMI TUBUH; align: center; color: #4169E1; width: 3" 
                  visible="false" class="label">
         </a-entity>
 
@@ -213,7 +213,7 @@
 
     // Scale the anatomy model for better marker fit
     const anatomyRoot = document.getElementById('anatomyRoot');
-    anatomyRoot.setAttribute('scale','1 1 1');
+    anatomyRoot.setAttribute('scale','0.8 0.8 0.8');
 
     // Improve visibility when marker is lost/found
     const marker = document.querySelector('a-marker');

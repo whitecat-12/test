@@ -1,0 +1,438 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>AR Anatomi Tubuh — Hiro Marker</title>
+  <!-- A-Frame -->
+  <script src="https://aframe.io/releases/1.4.1/aframe.min.js"></script>
+  <!-- AR.js for A-Frame (marker-based) -->
+  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.js"></script>
+  <style>
+    html,body{height:100%;margin:0;overflow:hidden;font-family:system-ui,Segoe UI,Roboto}
+    
+    /* UI Mobile-friendly */
+    #ui{
+      position:fixed;
+      left:0;
+      top:0;
+      right:0;
+      z-index:10;
+      background:rgba(0,0,0,0.75);
+      color:#fff;
+      padding:12px;
+      border-radius:0 0 12px 12px;
+      backdrop-filter: blur(5px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    
+    #ui h1{
+      font-size:18px;
+      margin:0 0 8px;
+      text-align:center;
+    }
+    
+    #ui p{
+      margin:6px 0;
+      font-size:14px;
+      line-height:1.4;
+      text-align:center;
+    }
+    
+    #ui button{
+      display:block;
+      width:100%;
+      margin-top:8px;
+      padding:10px;
+      border-radius:8px;
+      border:0;
+      background:#4169E1;
+      color:#fff;
+      font-weight:bold;
+      font-size:14px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    
+    #ui button:active{
+      background:#3159D1;
+      transform: translateY(1px);
+    }
+    
+    /* Anatomy info panel */
+    #anatomyInfo{
+      position:fixed;
+      bottom:0;
+      left:0;
+      right:0;
+      background:rgba(0,0,0,0.85);
+      color:#fff;
+      padding:12px;
+      border-radius:12px 12px 0 0;
+      backdrop-filter: blur(5px);
+      transform: translateY(100%);
+      transition: transform 0.3s ease;
+      z-index:9;
+    }
+    
+    #anatomyInfo.show{
+      transform: translateY(0);
+    }
+    
+    #anatomyInfo h2{
+      margin:0 0 8px;
+      font-size:16px;
+      text-align:center;
+    }
+    
+    #anatomyInfo p{
+      margin:4px 0;
+      font-size:13px;
+      line-height:1.4;
+    }
+    
+    /* Loading indicator */
+    #loading{
+      position:fixed;
+      top:0;
+      left:0;
+      width:100%;
+      height:100%;
+      background:#000;
+      color:#fff;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      align-items:center;
+      z-index:100;
+    }
+    
+    #loading.hide{
+      display:none;
+    }
+    
+    .spinner{
+      width:40px;
+      height:40px;
+      border:4px solid rgba(255,255,255,0.3);
+      border-radius:50%;
+      border-top-color:#4169E1;
+      animation:spin 1s linear infinite;
+      margin-bottom:15px;
+    }
+    
+    @keyframes spin{
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    /* Responsive adjustments */
+    @media (min-width: 768px) {
+      #ui{
+        left:12px;
+        top:12px;
+        right:auto;
+        width:280px;
+        border-radius:8px;
+      }
+      
+      #anatomyInfo{
+        left:12px;
+        bottom:12px;
+        right:auto;
+        width:280px;
+        border-radius:8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Loading screen -->
+  <div id="loading">
+    <div class="spinner"></div>
+    <p>Memuat Model Anatomi Tubuh...</p>
+  </div>
+
+  <!-- UI Panel -->
+  <div id="ui">
+    <h1>🧍 Anatomi Tubuh AR</h1>
+    <p>Arahkan kamera ke <strong>Hiro marker</strong> untuk melihat model anatomi tubuh.</p>
+    <p>Tips: letakkan marker di meja, perlahan miringkan kamera untuk melihat detail.</p>
+    <button id="toggleInfo">Info Anatomi Tubuh</button>
+  </div>
+
+  <!-- Anatomy Info Panel -->
+  <div id="anatomyInfo">
+    <h2 id="anatomyName">Anatomi Tubuh Manusia</h2>
+    <p id="anatomyDesc">Struktur Dasar Tubuh</p>
+    <p id="anatomyFacts">Tinggi: Rata-rata 160-180 cm<br>Organ: 78 organ utama<br>Sistem: 11 sistem organ</p>
+  </div>
+
+  <!-- A-Frame scene with AR.js enabled -->
+  <a-scene vr-mode-ui="enabled: false" embedded arjs="sourceType: webcam; debugUIEnabled: false;">
+
+    <!-- Ambient + directional light -->
+    <a-entity light="type: ambient; intensity: 0.6"></a-entity>
+    <a-entity light="type: directional; intensity: 0.8" position="1 2 1"></a-entity>
+
+    <!-- Marker (Hiro) -->
+    <a-marker preset="hiro">
+      <!-- Root of the anatomy model attached to the marker -->
+      <a-entity id="anatomyRoot" rotation="0 0 0">
+
+        <!-- Main anatomy model -->
+        <a-entity id="anatomyModel" position="0 0.8 0" 
+                  class="anatomy" data-name="Anatomi Tubuh Manusia" 
+                  data-desc="Struktur Dasar Tubuh"
+                  data-facts="Tinggi: Rata-rata 160-180 cm<br>Organ: 78 organ utama<br>Sistem: 11 sistem organ<br>Kerangka: 206 tulang<br>Otot: 600+ otot">
+          <!-- GLB/GLTF model of human anatomy -->
+          <a-entity gltf-model="url(anatomy-model.glb)"
+                    scale="0.4 0.4 0.4"
+                    animation="property: rotation; to: 0 360 0; loop: true; dur: 30000; easing: linear">
+          </a-entity>
+        </a-entity>
+
+        <!-- Head/Brain -->
+        <a-entity id="head" position="0 1.5 0" 
+                  class="body-part" data-name="Kepala & Otak" 
+                  data-desc="Pusat Kendali Tubuh"
+                  data-facts="Otak: 1.4 kg, 86 miliar neuron<br>Tengkorak: 22 tulang<br>Fungsi: Pemrosesan, sensorik<br>Organ: Mata, telinga, hidung, mulut">
+          <a-sphere radius="0.15" 
+                    color="#F5DEB3"
+                    opacity="0.9"
+                    position="0 0 0">
+          </a-sphere>
+        </a-entity>
+
+        <!-- Thorax/Chest -->
+        <a-entity id="thorax" position="0 1.1 0" 
+                  class="body-part" data-name="Rongga Dada" 
+                  data-desc="Ruang Organ Vital"
+                  data-facts="Isi: Jantung, paru-paru<br>Tulang rusuk: 24 tulang<br>Fungsi: Perlindungan organ<br>Sistem: Kardiovaskular, pernapasan">
+          <a-box width="0.4" height="0.3" depth="0.2" 
+                 color="#DC143C"
+                 opacity="0.7"
+                 position="0 0 0">
+          </a-box>
+        </a-entity>
+
+        <!-- Abdomen -->
+        <a-entity id="abdomen" position="0 0.8 0" 
+                  class="body-part" data-name="Rongga Perut" 
+                  data-desc="Sistem Pencernaan"
+                  data-facts="Isi: Lambung, hati, usus<br>Fungsi: Pencernaan, metabolisme<br>Organ: 10+ organ pencernaan<br>Sistem: Digestif, ekskresi">
+          <a-box width="0.45" height="0.4" depth="0.25" 
+                 color="#CD853F"
+                 opacity="0.7"
+                 position="0 0 0">
+          </a-box>
+        </a-entity>
+
+        <!-- Arms -->
+        <a-entity id="arms" position="0.3 1.0 0" 
+                  class="body-part" data-name="Lengan" 
+                  data-desc="Alat Gerak Atas"
+                  data-facts="Tulang: Humerus, radius, ulna<br>Sendi: Bahu, siku, pergelangan<br>Otot: 30+ otot per lengan<br>Fungsi: Manipulasi, gerakan">
+          <a-cylinder radius="0.03" height="0.6" 
+                      color="#F5DEB3"
+                      position="0 -0.3 0"
+                      rotation="0 0 20">
+          </a-cylinder>
+        </a-entity>
+
+        <!-- Legs -->
+        <a-entity id="legs" position="0.15 0.4 0" 
+                  class="body-part" data-name="Kaki" 
+                  data-desc="Alat Gerak Bawah"
+                  data-facts="Tulang: Femur, tibia, fibula<br>Sendi: Pinggul, lutut, pergelangan<br>Otot: 40+ otot per kaki<br>Fungsi: Berdiri, berjalan, berlari">
+          <a-cylinder radius="0.04" height="0.7" 
+                      color="#F5DEB3"
+                      position="0 -0.35 0"
+                      rotation="0 0 10">
+          </a-cylinder>
+        </a-entity>
+
+        <!-- Skeletal System -->
+        <a-entity id="skeleton" position="-0.3 1.0 0" 
+                  class="system" data-name="Sistem Rangka" 
+                  data-desc="Penopang Tubuh"
+                  data-facts="Jumlah tulang: 206<br>Fungsi: Struktur, perlindungan<br>Produksi: Sel darah di sumsum<br>Penyimpanan: Kalsium, mineral">
+          <a-torus radius="0.1" arc="180" radius-tubular="0.01" 
+                   color="#FFFFFF"
+                   rotation="90 0 0">
+          </a-torus>
+        </a-entity>
+
+        <!-- Muscular System -->
+        <a-entity id="muscles" position="-0.3 0.7 0" 
+                  class="system" data-name="Sistem Otot" 
+                  data-desc="Penggerak Tubuh"
+                  data-facts="Jumlah otot: 600+<br>Jenis: Lurik, polos, jantung<br>Fungsi: Gerakan, postur, panas<br>Energi: Konsumen ATP utama">
+          <a-cone radius-bottom="0.05" radius-top="0.02" height="0.1" 
+                  color="#FF6347"
+                  position="0 0 0">
+          </a-cone>
+        </a-entity>
+
+        <!-- Nervous System -->
+        <a-entity id="nerves" position="-0.3 0.4 0" 
+                  class="system" data-name="Sistem Saraf" 
+                  data-desc="Jaringan Komunikasi"
+                  data-facts="Sel saraf: 86 miliar neuron<br>Kecepatan: 120 m/detik<br>Fungsi: Koordinasi, sensasi<br>Pusat: Otak & sumsum tulang">
+          <a-sphere radius="0.03" 
+                    color="#9370DB"
+                    position="0 0 0">
+          </a-sphere>
+        </a-entity>
+
+        <!-- Circulatory System -->
+        <a-entity id="circulation" position="0.3 0.7 0" 
+                  class="system" data-name="Sistem Sirkulasi" 
+                  data-desc="Jaringan Transportasi"
+                  data-facts="Jantung: 4 ruang, pompa ganda<br>Pembuluh darah: 100.000 km<br>Darah: 5-6 liter<br>Fungsi: Oksigen, nutrisi, hormon">
+          <a-torus radius="0.08" arc="360" radius-tubular="0.008" 
+                   color="#DC143C"
+                   rotation="0 0 0">
+          </a-torus>
+        </a-entity>
+
+        <!-- Respiratory System -->
+        <a-entity id="respiration" position="0.3 0.4 0" 
+                  class="system" data-name="Sistem Pernapasan" 
+                  data-desc="Pertukaran Gas"
+                  data-facts="Organ: Paru-paru, trakea<br>Kapasitas: 4-6 liter udara<br>Pertukaran: Oksigen & CO2<br>Fungsi: Respirasi seluler">
+          <a-sphere radius="0.04" 
+                    color="#87CEEB"
+                    position="0 0 0">
+          </a-sphere>
+        </a-entity>
+
+        <!-- Informasi label -->
+        <a-entity position="0 1.8 0" text="value: ANATOMI TUBUH; align: center; color: #4169E1; width: 3" 
+                 visible="false" class="label">
+        </a-entity>
+
+      </a-entity>
+    </a-marker>
+
+    <!-- Camera -->
+    <a-entity camera></a-entity>
+  </a-scene>
+
+  <script>
+    // Toggle anatomy info panel
+    const toggleInfoBtn = document.getElementById('toggleInfo');
+    const anatomyInfo = document.getElementById('anatomyInfo');
+    toggleInfoBtn.addEventListener('click', () => {
+      anatomyInfo.classList.toggle('show');
+    });
+
+    // Scale the anatomy model for better marker fit
+    const anatomyRoot = document.getElementById('anatomyRoot');
+    anatomyRoot.setAttribute('scale','0.8 0.8 0.8');
+
+    // Improve visibility when marker is lost/found
+    const marker = document.querySelector('a-marker');
+    marker.addEventListener('markerFound', () => {
+      document.getElementById('ui').style.display = 'none';
+      anatomyInfo.classList.remove('show');
+      
+      // Show label when marker found
+      const label = document.querySelector('.label');
+      label.setAttribute('visible', 'true');
+    });
+    
+    marker.addEventListener('markerLost', () => {
+      document.getElementById('ui').style.display = 'block';
+      
+      // Hide label when marker lost
+      const label = document.querySelector('.label');
+      label.setAttribute('visible', 'false');
+    });
+
+    // Add click events to anatomy parts and systems for showing info
+    document.addEventListener('DOMContentLoaded', () => {
+      const anatomyElements = document.querySelectorAll('.anatomy, .body-part, .system');
+      const anatomyName = document.getElementById('anatomyName');
+      const anatomyDesc = document.getElementById('anatomyDesc');
+      const anatomyFacts = document.getElementById('anatomyFacts');
+      
+      anatomyElements.forEach(element => {
+        element.addEventListener('click', () => {
+          anatomyName.textContent = element.getAttribute('data-name');
+          anatomyDesc.textContent = element.getAttribute('data-desc');
+          anatomyFacts.innerHTML = element.getAttribute('data-facts');
+          anatomyInfo.classList.add('show');
+        });
+      });
+    });
+
+    // Hide loading screen when scene is loaded
+    document.querySelector('a-scene').addEventListener('loaded', () => {
+      setTimeout(() => {
+        document.getElementById('loading').classList.add('hide');
+      }, 1500);
+    });
+
+    // Add keyboard controls for rotation (optional)
+    document.addEventListener('keydown', (e) => {
+      const anatomyRoot = document.getElementById('anatomyRoot');
+      let rotation = anatomyRoot.getAttribute('rotation');
+      
+      switch(e.key) {
+        case 'ArrowLeft':
+          rotation.y += 10;
+          break;
+        case 'ArrowRight':
+          rotation.y -= 10;
+          break;
+        case 'ArrowUp':
+          rotation.x += 10;
+          break;
+        case 'ArrowDown':
+          rotation.x -= 10;
+          break;
+      }
+      
+      anatomyRoot.setAttribute('rotation', rotation);
+    });
+
+    // Add touch controls for mobile
+    let touchStartX = 0;
+    let touchStartY = 0;
+    
+    document.addEventListener('touchstart', (e) => {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+    });
+    
+    document.addEventListener('touchmove', (e) => {
+      if (!touchStartX || !touchStartY) return;
+      
+      const touchEndX = e.touches[0].clientX;
+      const touchEndY = e.touches[0].clientY;
+      
+      const diffX = touchEndX - touchStartX;
+      const diffY = touchEndY - touchStartY;
+      
+      const anatomyRoot = document.getElementById('anatomyRoot');
+      let rotation = anatomyRoot.getAttribute('rotation');
+      
+      rotation.y += diffX * 0.5;
+      rotation.x += diffY * 0.5;
+      
+      anatomyRoot.setAttribute('rotation', rotation);
+      
+      touchStartX = touchEndX;
+      touchStartY = touchEndY;
+    });
+
+    // Auto-rotate anatomy model slowly
+    setInterval(() => {
+      const anatomyModel = document.getElementById('anatomyModel');
+      let rotation = anatomyModel.getAttribute('rotation');
+      rotation.y += 0.08;
+      anatomyModel.setAttribute('rotation', rotation);
+    }, 50);
+  </script>
+</body>
+</html>

@@ -179,135 +179,20 @@
       <!-- Root of the anatomy model attached to the marker -->
       <a-entity id="anatomyRoot" rotation="0 0 0">
 
-        <!-- Main anatomy model -->
-        <a-entity id="anatomyModel" position="0 0.8 0" 
-                  class="anatomy" data-name="Anatomi Tubuh Manusia" 
+        <!-- Main anatomy model ONLY - 3x larger size -->
+        <a-entity id="anatomyModel" position="0 1.2 0" 
+                  class="clickable" data-name="Anatomi Tubuh Manusia" 
                   data-desc="Struktur Dasar Tubuh"
                   data-facts="Tinggi: Rata-rata 160-180 cm<br>Organ: 78 organ utama<br>Sistem: 11 sistem organ<br>Kerangka: 206 tulang<br>Otot: 600+ otot">
-          <!-- GLB/GLTF model of human anatomy -->
+          <!-- GLB/GLTF model of human anatomy - 3x scale -->
           <a-entity gltf-model="url(anatomy-model.glb)"
-                    scale="0.4 0.4 0.4"
+                    scale="1.2 1.2 1.2"
                     animation="property: rotation; to: 0 360 0; loop: true; dur: 30000; easing: linear">
           </a-entity>
         </a-entity>
 
-        <!-- Head/Brain -->
-        <a-entity id="head" position="0 1.5 0" 
-                  class="body-part" data-name="Kepala & Otak" 
-                  data-desc="Pusat Kendali Tubuh"
-                  data-facts="Otak: 1.4 kg, 86 miliar neuron<br>Tengkorak: 22 tulang<br>Fungsi: Pemrosesan, sensorik<br>Organ: Mata, telinga, hidung, mulut">
-          <a-sphere radius="0.15" 
-                    color="#F5DEB3"
-                    opacity="0.9"
-                    position="0 0 0">
-          </a-sphere>
-        </a-entity>
-
-        <!-- Thorax/Chest -->
-        <a-entity id="thorax" position="0 1.1 0" 
-                  class="body-part" data-name="Rongga Dada" 
-                  data-desc="Ruang Organ Vital"
-                  data-facts="Isi: Jantung, paru-paru<br>Tulang rusuk: 24 tulang<br>Fungsi: Perlindungan organ<br>Sistem: Kardiovaskular, pernapasan">
-          <a-box width="0.4" height="0.3" depth="0.2" 
-                 color="#DC143C"
-                 opacity="0.7"
-                 position="0 0 0">
-          </a-box>
-        </a-entity>
-
-        <!-- Abdomen -->
-        <a-entity id="abdomen" position="0 0.8 0" 
-                  class="body-part" data-name="Rongga Perut" 
-                  data-desc="Sistem Pencernaan"
-                  data-facts="Isi: Lambung, hati, usus<br>Fungsi: Pencernaan, metabolisme<br>Organ: 10+ organ pencernaan<br>Sistem: Digestif, ekskresi">
-          <a-box width="0.45" height="0.4" depth="0.25" 
-                 color="#CD853F"
-                 opacity="0.7"
-                 position="0 0 0">
-          </a-box>
-        </a-entity>
-
-        <!-- Arms -->
-        <a-entity id="arms" position="0.3 1.0 0" 
-                  class="body-part" data-name="Lengan" 
-                  data-desc="Alat Gerak Atas"
-                  data-facts="Tulang: Humerus, radius, ulna<br>Sendi: Bahu, siku, pergelangan<br>Otot: 30+ otot per lengan<br>Fungsi: Manipulasi, gerakan">
-          <a-cylinder radius="0.03" height="0.6" 
-                      color="#F5DEB3"
-                      position="0 -0.3 0"
-                      rotation="0 0 20">
-          </a-cylinder>
-        </a-entity>
-
-        <!-- Legs -->
-        <a-entity id="legs" position="0.15 0.4 0" 
-                  class="body-part" data-name="Kaki" 
-                  data-desc="Alat Gerak Bawah"
-                  data-facts="Tulang: Femur, tibia, fibula<br>Sendi: Pinggul, lutut, pergelangan<br>Otot: 40+ otot per kaki<br>Fungsi: Berdiri, berjalan, berlari">
-          <a-cylinder radius="0.04" height="0.7" 
-                      color="#F5DEB3"
-                      position="0 -0.35 0"
-                      rotation="0 0 10">
-          </a-cylinder>
-        </a-entity>
-
-        <!-- Skeletal System -->
-        <a-entity id="skeleton" position="-0.3 1.0 0" 
-                  class="system" data-name="Sistem Rangka" 
-                  data-desc="Penopang Tubuh"
-                  data-facts="Jumlah tulang: 206<br>Fungsi: Struktur, perlindungan<br>Produksi: Sel darah di sumsum<br>Penyimpanan: Kalsium, mineral">
-          <a-torus radius="0.1" arc="180" radius-tubular="0.01" 
-                   color="#FFFFFF"
-                   rotation="90 0 0">
-          </a-torus>
-        </a-entity>
-
-        <!-- Muscular System -->
-        <a-entity id="muscles" position="-0.3 0.7 0" 
-                  class="system" data-name="Sistem Otot" 
-                  data-desc="Penggerak Tubuh"
-                  data-facts="Jumlah otot: 600+<br>Jenis: Lurik, polos, jantung<br>Fungsi: Gerakan, postur, panas<br>Energi: Konsumen ATP utama">
-          <a-cone radius-bottom="0.05" radius-top="0.02" height="0.1" 
-                  color="#FF6347"
-                  position="0 0 0">
-          </a-cone>
-        </a-entity>
-
-        <!-- Nervous System -->
-        <a-entity id="nerves" position="-0.3 0.4 0" 
-                  class="system" data-name="Sistem Saraf" 
-                  data-desc="Jaringan Komunikasi"
-                  data-facts="Sel saraf: 86 miliar neuron<br>Kecepatan: 120 m/detik<br>Fungsi: Koordinasi, sensasi<br>Pusat: Otak & sumsum tulang">
-          <a-sphere radius="0.03" 
-                    color="#9370DB"
-                    position="0 0 0">
-          </a-sphere>
-        </a-entity>
-
-        <!-- Circulatory System -->
-        <a-entity id="circulation" position="0.3 0.7 0" 
-                  class="system" data-name="Sistem Sirkulasi" 
-                  data-desc="Jaringan Transportasi"
-                  data-facts="Jantung: 4 ruang, pompa ganda<br>Pembuluh darah: 100.000 km<br>Darah: 5-6 liter<br>Fungsi: Oksigen, nutrisi, hormon">
-          <a-torus radius="0.08" arc="360" radius-tubular="0.008" 
-                   color="#DC143C"
-                   rotation="0 0 0">
-          </a-torus>
-        </a-entity>
-
-        <!-- Respiratory System -->
-        <a-entity id="respiration" position="0.3 0.4 0" 
-                  class="system" data-name="Sistem Pernapasan" 
-                  data-desc="Pertukaran Gas"
-                  data-facts="Organ: Paru-paru, trakea<br>Kapasitas: 4-6 liter udara<br>Pertukaran: Oksigen & CO2<br>Fungsi: Respirasi seluler">
-          <a-sphere radius="0.04" 
-                    color="#87CEEB"
-                    position="0 0 0">
-          </a-sphere>
-        </a-entity>
-
         <!-- Informasi label -->
-        <a-entity position="0 1.8 0" text="value: ANATOMI TUBUH; align: center; color: #4169E1; width: 3" 
+        <a-entity position="0 2.2 0" text="value: ANATOMI TUBUH; align: center; color: #4169E1; width: 4" 
                  visible="false" class="label">
         </a-entity>
 
@@ -328,7 +213,7 @@
 
     // Scale the anatomy model for better marker fit
     const anatomyRoot = document.getElementById('anatomyRoot');
-    anatomyRoot.setAttribute('scale','0.8 0.8 0.8');
+    anatomyRoot.setAttribute('scale','1 1 1');
 
     // Improve visibility when marker is lost/found
     const marker = document.querySelector('a-marker');
@@ -349,20 +234,18 @@
       label.setAttribute('visible', 'false');
     });
 
-    // Add click events to anatomy parts and systems for showing info
+    // Add click events to anatomy model for showing info
     document.addEventListener('DOMContentLoaded', () => {
-      const anatomyElements = document.querySelectorAll('.anatomy, .body-part, .system');
+      const anatomyModel = document.getElementById('anatomyModel');
       const anatomyName = document.getElementById('anatomyName');
       const anatomyDesc = document.getElementById('anatomyDesc');
       const anatomyFacts = document.getElementById('anatomyFacts');
       
-      anatomyElements.forEach(element => {
-        element.addEventListener('click', () => {
-          anatomyName.textContent = element.getAttribute('data-name');
-          anatomyDesc.textContent = element.getAttribute('data-desc');
-          anatomyFacts.innerHTML = element.getAttribute('data-facts');
-          anatomyInfo.classList.add('show');
-        });
+      anatomyModel.addEventListener('click', () => {
+        anatomyName.textContent = anatomyModel.getAttribute('data-name');
+        anatomyDesc.textContent = anatomyModel.getAttribute('data-desc');
+        anatomyFacts.innerHTML = anatomyModel.getAttribute('data-facts');
+        anatomyInfo.classList.add('show');
       });
     });
 

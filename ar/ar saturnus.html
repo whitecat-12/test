@@ -176,69 +176,62 @@
 
     <!-- Marker (Hiro) -->
     <a-marker preset="hiro">
-      <!-- Root of the saturn system attached to the marker -->
-      <a-entity id="saturnRoot" rotation="0 0 0">
+      <!-- Root of the saturnus system attached to the marker -->
+      <a-entity id="saturnusRoot" rotation="0 0 0">
 
-        <!-- Saturn planet -->
-        <a-entity id="saturn" position="0 0 0" 
+        <!-- Saturnus planet -->
+        <a-entity id="saturnus" position="0 0 0" 
                   class="planet" data-name="Saturnus" 
                   data-desc="Raksasa Gas dengan Cincin"
-                  data-facts="Diameter: 116,460 km<br>Jarak dari Matahari: 1.4 miliar km<br>Periode Orbit: 29.5 tahun<br>Suhu: -178°C<br>Satelit: 146+ (termasuk Titan)">
-          <!-- Saturn sphere dengan texture saturnus-texture.jpg -->
-          <a-sphere radius="0.6" 
-                    material="color: #FFFFFF;
+                  data-facts="Diameter: 116,460 km<br>Jarak dari Matahari: 1.4 miliar km<br>Periode Orbit: 29.5 tahun<br>Suhu: -178°C<br>Satelit: 82+ (termasuk Titan)">
+          <!-- Saturnus sphere - GANTI URL DI BAWAH DENGAN TEXTURE ANDA -->
+          <a-sphere radius="0.7" 
+                    material="color: #FAD5A5;
                               roughness: 0.9; 
                               metalness: 0.1;
-                              src: url(saturnus-texture.jpg);
+                              src: url(saturnus-texture.png);
                               repeat: 1 1"
-                    animation="property: rotation; to: 0 360 0; loop: true; dur: 10000; easing: linear">
+                    animation="property: rotation; to: 0 360 0; loop: true; dur: 8000; easing: linear">
           </a-sphere>
-          
-          <!-- Cincin Saturnus - SATU SAJA, SUPER PIPIH DAN TIPIS -->
-          <a-torus radius="1.2" radius-tubular="0.01" arc="360" 
-                   rotation="0 0 65"
-                   material="color: #F4D03F; side: double; transparent: true; opacity: 0.9"
-                   animation="property: rotation; to: 0 360 0; loop: true; dur: 15000; easing: linear">
-          </a-torus>
         </a-entity>
 
         <!-- Bulan Saturnus - Titan -->
-        <a-entity id="titanOrbit" animation="property: rotation; to: 0 360 0; loop: true; dur: 4000; easing: linear">
-          <a-sphere radius="0.08" position="1.8 0 0" 
-                    material="color: #A9A9A9; roughness: 1.0"
+        <a-entity id="titanOrbit" animation="property: rotation; to: 0 360 0; loop: true; dur: 3000; easing: linear">
+          <a-sphere radius="0.06" position="1.5 0 0" 
+                    material="color: #D2B48C; roughness: 1.0"
                     class="moon" data-name="Titan" 
                     data-desc="Bulan terbesar Saturnus"
-                    data-facts="Diameter: 5,150 km<br>Satu-satunya bulan dengan atmosfer<br>Jarak: 1.2 juta km">
+                    data-facts="Diameter: 5,150 km<br>Memiliki atmosfer tebal<br>Jarak: 1.2 juta km">
           </a-sphere>
         </a-entity>
 
         <!-- Bulan Saturnus - Enceladus -->
-        <a-entity id="enceladusOrbit" animation="property: rotation; to: 0 -360 0; loop: true; dur: 6000; easing: linear">
-          <a-sphere radius="0.04" position="2.3 0 0" 
+        <a-entity id="enceladusOrbit" animation="property: rotation; to: 0 -360 0; loop: true; dur: 5000; easing: linear">
+          <a-sphere radius="0.05" position="2.0 0 0" 
                     material="color: #F5F5F5; roughness: 1.0"
                     class="moon" data-name="Enceladus" 
-                    data-desc="Bulan es dengan geyser"
-                    data-facts="Diameter: 504 km<br>Permukaan: Es bersih<br>Jarak: 238,000 km">
-          </a-sphere>
-        </a-entity>
-
-        <!-- Bulan Saturnus - Mimas -->
-        <a-entity id="mimasOrbit" animation="property: rotation; to: 0 360 0; loop: true; dur: 8000; easing: linear">
-          <a-sphere radius="0.03" position="2.8 0 0" 
-                    material="color: #C0C0C0; roughness: 1.0"
-                    class="moon" data-name="Mimas" 
-                    data-desc="Bulan dengan kawah besar"
-                    data-facts="Diameter: 396 km<br>Dijuluki 'Death Star'<br>Jarak: 185,000 km">
+                    data-desc="Bulan es Saturnus"
+                    data-facts="Diameter: 504 km<br>Permukaan: Lapisan es<br>Memiliki geyser air">
           </a-sphere>
         </a-entity>
 
         <!-- Bulan Saturnus - Rhea -->
-        <a-entity id="rheaOrbit" animation="property: rotation; to: 0 -360 0; loop: true; dur: 12000; easing: linear">
-          <a-sphere radius="0.06" position="3.3 0 0" 
-                    material="color: #D3D3D3; roughness: 1.0"
+        <a-entity id="rheaOrbit" animation="property: rotation; to: 0 360 0; loop: true; dur: 7000; easing: linear">
+          <a-sphere radius="0.08" position="2.5 0 0" 
+                    material="color: #A9A9A9; roughness: 1.0"
                     class="moon" data-name="Rhea" 
-                    data-desc="Bulan es kedua terbesar Saturnus"
-                    data-facts="Diameter: 1,528 km<br>Permukaan: Es dan batuan<br>Jarak: 527,000 km">
+                    data-desc="Bulan kedua terbesar Saturnus"
+                    data-facts="Diameter: 1,527 km<br>Permukaan: Banyak kawah<br>Jarak: 527,000 km">
+          </a-sphere>
+        </a-entity>
+
+        <!-- Bulan Saturnus - Iapetus -->
+        <a-entity id="iapetusOrbit" animation="property: rotation; to: 0 -360 0; loop: true; dur: 10000; easing: linear">
+          <a-sphere radius="0.07" position="3.0 0 0" 
+                    material="color: #696969; roughness: 1.0"
+                    class="moon" data-name="Iapetus" 
+                    data-desc="Bulan dengan dua sisi berbeda"
+                    data-facts="Diameter: 1,471 km<br>Satu sisi gelap, satu terang<br>Jarak: 3.5 juta km">
           </a-sphere>
         </a-entity>
 
@@ -254,7 +247,7 @@
         </a-entity>
 
         <!-- Informasi label -->
-        <a-entity position="0 1.5 0" text="value: SATURNUS; align: center; color: #FF9800; width: 3" 
+        <a-entity position="0 1.0 0" text="value: SATURNUS; align: center; color: #FF9800; width: 3" 
                  visible="false" class="label">
         </a-entity>
 
@@ -273,9 +266,9 @@
       planetInfo.classList.toggle('show');
     });
 
-    // Scale the saturn system for better marker fit
-    const saturnRoot = document.getElementById('saturnRoot');
-    saturnRoot.setAttribute('scale','0.8 0.8 0.8');
+    // Scale the saturnus system for better marker fit
+    const saturnusRoot = document.getElementById('saturnusRoot');
+    saturnusRoot.setAttribute('scale','0.8 0.8 0.8');
 
     // Improve visibility when marker is lost/found
     const marker = document.querySelector('a-marker');
@@ -322,8 +315,8 @@
 
     // Add keyboard controls for rotation (optional)
     document.addEventListener('keydown', (e) => {
-      const saturnRoot = document.getElementById('saturnRoot');
-      let rotation = saturnRoot.getAttribute('rotation');
+      const saturnusRoot = document.getElementById('saturnusRoot');
+      let rotation = saturnusRoot.getAttribute('rotation');
       
       switch(e.key) {
         case 'ArrowLeft':
@@ -340,7 +333,7 @@
           break;
       }
       
-      saturnRoot.setAttribute('rotation', rotation);
+      saturnusRoot.setAttribute('rotation', rotation);
     });
 
     // Add touch controls for mobile
@@ -361,24 +354,24 @@
       const diffX = touchEndX - touchStartX;
       const diffY = touchEndY - touchStartY;
       
-      const saturnRoot = document.getElementById('saturnRoot');
-      let rotation = saturnRoot.getAttribute('rotation');
+      const saturnusRoot = document.getElementById('saturnusRoot');
+      let rotation = saturnusRoot.getAttribute('rotation');
       
       rotation.y += diffX * 0.5;
       rotation.x += diffY * 0.5;
       
-      saturnRoot.setAttribute('rotation', rotation);
+      saturnusRoot.setAttribute('rotation', rotation);
       
       touchStartX = touchEndX;
       touchStartY = touchEndY;
     });
 
-    // Auto-rotate saturn slowly
+    // Auto-rotate saturnus slowly
     setInterval(() => {
-      const saturn = document.getElementById('saturn');
-      let rotation = saturn.getAttribute('rotation');
+      const saturnus = document.getElementById('saturnus');
+      let rotation = saturnus.getAttribute('rotation');
       rotation.y += 0.08;
-      saturn.setAttribute('rotation', rotation);
+      saturnus.setAttribute('rotation', rotation);
     }, 50);
   </script>
 </body>

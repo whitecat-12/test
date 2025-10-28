@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>AR Uranus — Hiro Marker</title>
+  <!-- A-Frame -->
+  <script src="https://aframe.io/releases/1.4.1/aframe.min.js"></script>
+  <!-- AR.js for A-Frame (marker-based) -->
+  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.js"></script>
+  <style>
+    html,body{height:100%;margin:0;overflow:hidden;font-family:system-ui,Segoe UI,Roboto}
+    
+    /* UI Mobile-friendly */
+    #ui{
+      position:fixed;
+      left:0;
+      top:0;
+      right:0;
+      z-index:10;
+      background:rgba(0,0,0,0.75);
+      color:#fff;
+      padding:12px;
+      border-radius:0 0 12px 12px;
+      backdrop-filter: blur(5px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+    
+    #ui h1{
+      font-size:18px;
+      margin:0 0 8px;
+      text-align:center;
+    }
+    
+    #ui p{
+      margin:6px 0;
+      font-size:14px;
+      line-height:1.4;
+      text-align:center;
+    }
+    
+    #ui button{
+      display:block;
+      width:100%;
+      margin-top:8px;
+      padding:10px;
+      border-radius:8px;
+      border:0;
+      background:#4A90E2;
+      color:#fff;
+      font-weight:bold;
+      font-size:14px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    
+    #ui button:active{
+      background:#3A7BC8;
+      transform: translateY(1px);
+    }
+    
+    /* Planet info panel */
+    #planetInfo{
+      position:fixed;
+      bottom:0;
+      left:0;
+      right:0;
+      background:rgba(0,0,0,0.85);
+      color:#fff;
+      padding:12px;
+      border-radius:12px 12px 0 0;
+      backdrop-filter: blur(5px);
+      transform: translateY(100%);
+      transition: transform 0.3s ease;
+      z-index:9;
+    }
+    
+    #planetInfo.show{
+      transform: translateY(0);
+    }
+    
+    #planetInfo h2{
+      margin:0 0 8px;
+      font-size:16px;
+      text-align:center;
+    }
+    
+    #planetInfo p{
+      margin:4px 0;
+      font-size:13px;
+      line-height:1.4;
+    }
+    
+    /* Loading indicator */
+    #loading{
+      position:fixed;
+      top:0;
+      left:0;
+      width:100%;
+      height:100%;
+      background:#000;
+      color:#fff;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      align-items:center;
+      z-index:100;
+    }
+    
+    #loading.hide{
+      display:none;
+    }
+    
+    .spinner{
+      width:40px;
+      height:40px;
+      border:4px solid rgba(255,255,255,0.3);
+      border-radius:50%;
+      border-top-color:#4A90E2;
+      animation:spin 1s linear infinite;
+      margin-bottom:15px;
+    }
+    
+    @keyframes spin{
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    /* Responsive adjustments */
+    @media (min-width: 768px) {
+      #ui{
+        left:12px;
+        top:12px;
+        right:auto;
+        width:280px;
+        border-radius:8px;
+      }
+      
+      #planetInfo{
+        left:12px;
+        bottom:12px;
+        right:auto;
+        width:280px;
+        border-radius:8px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Loading screen -->
+  <div id="loading">
+    <div class="spinner"></div>
+    <p>Memuat Uranus AR...</p>
+  </div>
+
+  <!-- UI Panel -->
+  <div id="ui">
+    <h1>♅ Uranus AR</h1>
+    <p>Arahkan kamera ke <strong>Hiro marker</strong> untuk melihat Uranus.</p>
+    <p>Tips: letakkan marker di meja, perlahan miringkan kamera untuk melihat detail.</p>
+    <button id="toggleInfo">Info Uranus</button>
+  </div>
+
+  <!-- Planet Info Panel -->
+  <div id="planetInfo">
+    <h2 id="planetName">Uranus</h2>
+    <p id="planetDesc">Raksasa Es</p>
+    <p id="planetFacts">Diameter: 50,724 km<br>Jarak dari Matahari: 2.9 miliar km<br>Periode Orbit: 84 tahun</p>
+  </div>
+
+  <!-- A-Frame scene with AR.js enabled -->
+  <a-scene vr-mode-ui="enabled: false" embedded arjs="sourceType: webcam; debugUIEnabled: false;">
+
+    <!-- Ambient + directional light -->
+    <a-entity light="type: ambient; intensity: 0.6"></a-entity>
+    <a-entity light="type: directional; intensity: 0.8" position="1 2 1"></a-entity>
+
+    <!-- Marker (Hiro) -->
+    <a-marker preset="hiro">
+      <!-- Root of the uranus system attached to the marker -->
+      <a-entity id="uranusRoot" rotation="0 0 0">
+
+        <!-- Uranus planet -->
+        <a-entity id="uranus" position="0 0 0" 
+                  class="planet" data-name="Uranus" 
+                  data-desc="Raksasa Es"
+                  data-facts="Diameter: 50,724 km<br>Jarak dari Matahari: 2.9 miliar km<br>Periode Orbit: 84 tahun<br>Suhu: -224°C<br>Satelit: 27+ (termasuk 5 bulan utama)">
+          <!-- Uranus sphere dengan texture uranus-texture.jpg -->
+          <a-sphere radius="0.7" 
+                    material="color: #4FD0E7;
+                              roughness: 0.9; 
+                              metalness: 0.1;
+                              src: url(uranus-texture.jpg);
+                              repeat: 1 1"
+                    animation="property: rotation; to: 0 360 0; loop: true; dur: 10000; easing: linear">
+          </a-sphere>
+          
+          <!-- Cincin Uranus -->
+          <a-torus radius="1.1" radius-tubular="0.02" 
+                   rotation="90 0 0"
+                   material="color: #A0D2E7; side: double">
+          </a-torus>
+        </a-entity>
+
+        <!-- Bulan Uranus - Titania -->
+        <a-entity id="titaniaOrbit" animation="property: rotation; to: 0 360 0; loop: true; dur: 4000; easing: linear">
+          <a-sphere radius="0.06" position="1.5 0 0" 
+                    material="color: #B0C4DE; roughness: 1.0"
+                    class="moon" data-name="Titania" 
+                    data-desc="Bulan terbesar Uranus"
+                    data-facts="Diameter: 1,578 km<br>Permukaan: Es dan batuan<br>Jarak: 436,300 km">
+          </a-sphere>
+        </a-entity>
+
+        <!-- Bulan Uranus - Oberon -->
+        <a-entity id="oberonOrbit" animation="property: rotation; to: 0 -360 0; loop: true; dur: 6000; easing: linear">
+          <a-sphere radius="0.055" position="2.0 0 0" 
+                    material="color: #A9A9A9; roughness: 1.0"
+                    class="moon" data-name="Oberon" 
+                    data-desc="Bulan terluar Uranus"
+                    data-facts="Diameter: 1,522 km<br>Permukaan: Banyak kawah<br>Jarak: 583,500 km">
+          </a-sphere>
+        </a-entity>
+
+        <!-- Bulan Uranus - Umbriel -->
+        <a-entity id="umbrielOrbit" animation="property: rotation; to: 0 360 0; loop: true; dur: 5000; easing: linear">
+          <a-sphere radius="0.05" position="2.5 0 0" 
+                    material="color: #696969; roughness: 1.0"
+                    class="moon" data-name="Umbriel" 
+                    data-desc="Bulan gelap Uranus"
+                    data-facts="Diameter: 1,169 km<br>Permukaan: Gelap dan kawah<br>Jarak: 266,000 km">
+          </a-sphere>
+        </a-entity>
+
+        <!-- Bulan Uranus - Ariel -->
+        <a-entity id="arielOrbit" animation="property: rotation; to: 0 -360 0; loop: true; dur: 3000; easing: linear">
+          <a-sphere radius="0.045" position="3.0 0 0" 
+                    material="color: #E6E6FA; roughness: 1.0"
+                    class="moon" data-name="Ariel" 
+                    data-desc="Bulan termuda Uranus"
+                    data-facts="Diameter: 1,158 km<br>Permukaan: Terang dan aktif<br>Jarak: 190,900 km">
+          </a-sphere>
+        </a-entity>
+
+        <!-- Background stars -->
+        <a-entity id="stars">
+          <!-- Multiple small spheres as stars -->
+          <a-sphere radius="0.008" position="1.2 0.9 0.6" material="color: white; emissive: white"></a-sphere>
+          <a-sphere radius="0.006" position="-1.0 0.7 0.8" material="color: white; emissive: white"></a-sphere>
+          <a-sphere radius="0.01" position="0.8 -0.6 -1.1" material="color: white; emissive: white"></a-sphere>
+          <a-sphere radius="0.007" position="-0.6 -0.8 0.5" material="color: white; emissive: white"></a-sphere>
+          <a-sphere radius="0.009" position="1.1 -0.4 1.0" material="color: white; emissive: white"></a-sphere>
+          <a-sphere radius="0.005" position="-1.1 0.5 -0.7" material="color: white; emissive: white"></a-sphere>
+        </a-entity>
+
+        <!-- Informasi label -->
+        <a-entity position="0 1.0 0" text="value: URANUS; align: center; color: #4A90E2; width: 3" 
+                 visible="false" class="label">
+        </a-entity>
+
+      </a-entity>
+    </a-marker>
+
+    <!-- Camera -->
+    <a-entity camera></a-entity>
+  </a-scene>
+
+  <script>
+    // Toggle planet info panel
+    const toggleInfoBtn = document.getElementById('toggleInfo');
+    const planetInfo = document.getElementById('planetInfo');
+    toggleInfoBtn.addEventListener('click', () => {
+      planetInfo.classList.toggle('show');
+    });
+
+    // Scale the uranus system for better marker fit
+    const uranusRoot = document.getElementById('uranusRoot');
+    uranusRoot.setAttribute('scale','0.8 0.8 0.8');
+
+    // Improve visibility when marker is lost/found
+    const marker = document.querySelector('a-marker');
+    marker.addEventListener('markerFound', () => {
+      document.getElementById('ui').style.display = 'none';
+      planetInfo.classList.remove('show');
+      
+      // Show label when marker found
+      const label = document.querySelector('.label');
+      label.setAttribute('visible', 'true');
+    });
+    
+    marker.addEventListener('markerLost', () => {
+      document.getElementById('ui').style.display = 'block';
+      
+      // Hide label when marker lost
+      const label = document.querySelector('.label');
+      label.setAttribute('visible', 'false');
+    });
+
+    // Add click events to planet and moons for showing info
+    document.addEventListener('DOMContentLoaded', () => {
+      const planets = document.querySelectorAll('.planet, .moon');
+      const planetName = document.getElementById('planetName');
+      const planetDesc = document.getElementById('planetDesc');
+      const planetFacts = document.getElementById('planetFacts');
+      
+      planets.forEach(planet => {
+        planet.addEventListener('click', () => {
+          planetName.textContent = planet.getAttribute('data-name');
+          planetDesc.textContent = planet.getAttribute('data-desc');
+          planetFacts.innerHTML = planet.getAttribute('data-facts');
+          planetInfo.classList.add('show');
+        });
+      });
+    });
+
+    // Hide loading screen when scene is loaded
+    document.querySelector('a-scene').addEventListener('loaded', () => {
+      setTimeout(() => {
+        document.getElementById('loading').classList.add('hide');
+      }, 1500);
+    });
+
+    // Add keyboard controls for rotation (optional)
+    document.addEventListener('keydown', (e) => {
+      const uranusRoot = document.getElementById('uranusRoot');
+      let rotation = uranusRoot.getAttribute('rotation');
+      
+      switch(e.key) {
+        case 'ArrowLeft':
+          rotation.y += 10;
+          break;
+        case 'ArrowRight':
+          rotation.y -= 10;
+          break;
+        case 'ArrowUp':
+          rotation.x += 10;
+          break;
+        case 'ArrowDown':
+          rotation.x -= 10;
+          break;
+      }
+      
+      uranusRoot.setAttribute('rotation', rotation);
+    });
+
+    // Add touch controls for mobile
+    let touchStartX = 0;
+    let touchStartY = 0;
+    
+    document.addEventListener('touchstart', (e) => {
+      touchStartX = e.touches[0].clientX;
+      touchStartY = e.touches[0].clientY;
+    });
+    
+    document.addEventListener('touchmove', (e) => {
+      if (!touchStartX || !touchStartY) return;
+      
+      const touchEndX = e.touches[0].clientX;
+      const touchEndY = e.touches[0].clientY;
+      
+      const diffX = touchEndX - touchStartX;
+      const diffY = touchEndY - touchStartY;
+      
+      const uranusRoot = document.getElementById('uranusRoot');
+      let rotation = uranusRoot.getAttribute('rotation');
+      
+      rotation.y += diffX * 0.5;
+      rotation.x += diffY * 0.5;
+      
+      uranusRoot.setAttribute('rotation', rotation);
+      
+      touchStartX = touchEndX;
+      touchStartY = touchEndY;
+    });
+
+    // Auto-rotate uranus slowly
+    setInterval(() => {
+      const uranus = document.getElementById('uranus');
+      let rotation = uranus.getAttribute('rotation');
+      rotation.y += 0.08;
+      uranus.setAttribute('rotation', rotation);
+    }, 50);
+  </script>
+</body>
+</html>

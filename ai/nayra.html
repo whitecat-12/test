@@ -38,25 +38,22 @@
 
     .overlay {
       position: absolute;
-      bottom: 1.5rem;
+      bottom: 2rem;
       left: 50%;
       transform: translateX(-50%);
       z-index: 2;
       display: flex;
-      gap: 1rem;
-      width: 90%;
-      max-width: 400px;
-      justify-content: center;
+      gap: 1.5rem;
     }
 
     .mic-button {
       background: linear-gradient(to bottom right, #00ff9d, #00c76d);
       color: white;
       border: none;
-      padding: 0.8rem;
-      width: 80px;
-      height: 80px;
-      font-size: 0.8rem;
+      padding: 1.2rem;
+      width: 120px;
+      height: 120px;
+      font-size: 1rem;
       border-radius: 50%;
       cursor: pointer;
       box-shadow: 0 0 15px rgba(0, 255, 127, 0.6);
@@ -66,17 +63,16 @@
       justify-content: center;
       transition: all 0.3s ease;
       text-align: center;
-      touch-action: manipulation;
     }
 
     .mic-button i {
-      font-size: 1.4rem;
-      margin-bottom: 0.2rem;
+      font-size: 1.8rem;
+      margin-bottom: 0.3rem;
     }
 
-    .mic-button:active {
-      transform: scale(0.95);
-      box-shadow: 0 0 20px rgba(0, 255, 127, 0.8);
+    .mic-button:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 25px rgba(0, 255, 127, 0.9);
     }
 
     .cancel-button {
@@ -84,45 +80,9 @@
       box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
     }
 
-    .cancel-button:active {
-      transform: scale(0.95);
-      box-shadow: 0 0 20px rgba(255, 0, 0, 0.7);
-    }
-
-    /* Media queries untuk responsive design */
-    @media (max-width: 480px) {
-      .overlay {
-        bottom: 1rem;
-        gap: 0.8rem;
-      }
-      
-      .mic-button {
-        width: 70px;
-        height: 70px;
-        font-size: 0.75rem;
-      }
-      
-      .mic-button i {
-        font-size: 1.2rem;
-      }
-    }
-
-    @media (min-width: 768px) {
-      .mic-button {
-        width: 90px;
-        height: 90px;
-        font-size: 0.85rem;
-      }
-      
-      .mic-button i {
-        font-size: 1.5rem;
-      }
-    }
-
-    /* Loading state */
-    .loading {
-      background: linear-gradient(to bottom right, #ffa500, #ff8c00) !important;
-      box-shadow: 0 0 15px rgba(255, 165, 0, 0.6) !important;
+    .cancel-button:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 25px rgba(255, 0, 0, 0.9);
     }
   </style>
 </head>
@@ -161,16 +121,8 @@
 
 <script>
 const GROQ_KEYS = [
-  "Bearer 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, // API KEY 1
-  "Bearer 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"  // API KEY 2
-];
-
-// Model yang tersedia di Groq (pilih salah satu)
-const AVAILABLE_MODELS = [
-  "llama-3.1-8b-instant",  // Model yang recommended untuk mengganti llama3-8b-8192
-  "llama-3.1-70b-versatile",
-  "mixtral-8x7b-32768",
-  "gemma2-9b-it"
+  "Bearer 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",
+  "Bearer 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"
 ];
 
 const idle = document.getElementById("idle");
@@ -224,11 +176,6 @@ async function mulaiRekam() {
     return;
   }
 
-  // Set loading state
-  const micButton = document.getElementById("micButton");
-  micButton.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Mendengarkan...';
-  micButton.classList.add('loading');
-
   recognition = new SpeechRecognition();
   recognition.lang = 'id-ID';
   recognition.interimResults = false;
@@ -237,10 +184,6 @@ async function mulaiRekam() {
     const teks = event.results[0][0].transcript.trim();
     recognition.stop();
     recognition = null;
-    
-    // Reset button state
-    micButton.innerHTML = '<i class="fas fa-microphone"></i> Bicara';
-    micButton.classList.remove('loading');
 
     if (/dance|nari|menari/i.test(teks)) {
       mulaiDance();
@@ -264,22 +207,6 @@ async function mulaiRekam() {
     console.error("Error:", event.error);
     recognition.stop();
     recognition = null;
-    
-    // Reset button state
-    micButton.innerHTML = '<i class="fas fa-microphone"></i> Bicara';
-    micButton.classList.remove('loading');
-    
-    if (event.error === 'not-allowed') {
-      alert("Izin mikrofon diperlukan. Silakan berikan izin mikrofon di browser settings.");
-    }
-  };
-
-  recognition.onend = function() {
-    // Reset button state jika recognition berakhir tanpa error
-    if (micButton.classList.contains('loading')) {
-      micButton.innerHTML = '<i class="fas fa-microphone"></i> Bicara';
-      micButton.classList.remove('loading');
-    }
   };
 
   recognition.start();
@@ -299,7 +226,7 @@ async function cobaGroqDenganBanyakKey(body) {
 
       if (!res.ok) {
         const err = await res.json();
-        console.warn("Gagal dengan key:", key.substring(0, 20) + "...", err.error?.message);
+        console.warn("Gagal dengan key:", key, err.error?.message);
         continue;
       }
 
@@ -309,7 +236,7 @@ async function cobaGroqDenganBanyakKey(body) {
     }
   }
 
-  return { error: { message: "Semua API gagal dihubungi. Coba lagi nanti." } };
+  return { error: { message: "Semua API gagal dihubungi." } };
 }
 
 async function tanyaAI(teks) {
@@ -320,31 +247,23 @@ async function tanyaAI(teks) {
 
   history.push({ role: "user", content: teks });
 
-  // Coba berbagai model yang tersedia
-  for (const model of AVAILABLE_MODELS) {
-    const body = {
-      model: model,
-      messages: [{ role: "system", content: systemPrompt }, ...history],
-      temperature: 0.7,
-      max_tokens: 1024
-    };
+  const body = {
+    model: "llama3-8b-8192",
+    messages: [{ role: "system", content: systemPrompt }, ...history],
+    temperature: 0.7
+  };
 
-    console.log(`Mencoba model: ${model}`);
-    const data = await cobaGroqDenganBanyakKey(body);
+  const data = await cobaGroqDenganBanyakKey(body);
 
-    if (data.error) {
-      console.warn(`Model ${model} gagal:`, data.error.message);
-      continue; // Coba model berikutnya
-    }
-
-    const reply = data.choices?.[0]?.message?.content || "Maaf, tidak ada jawaban.";
-    history.push({ role: "assistant", content: reply });
-    simpanRiwayat();
-
-    return reply;
+  if (data.error) {
+    return "⚠️ Error: " + data.error.message;
   }
 
-  return "⚠️ Maaf, semua model AI sedang tidak tersedia. Silakan coba lagi nanti.";
+  const reply = data.choices?.[0]?.message?.content || "Maaf, tidak ada jawaban.";
+  history.push({ role: "assistant", content: reply });
+  simpanRiwayat();
+
+  return reply;
 }
 
 // ====== Video & Suara ======
@@ -362,18 +281,6 @@ function bicara(teks) {
 
   ucap = new SpeechSynthesisUtterance(teks);
   ucap.lang = "id-ID";
-  ucap.rate = 1.0;
-  ucap.pitch = 1.0;
-  
-  // Cari voice Indonesia jika tersedia
-  const voices = speechSynthesis.getVoices();
-  const indonesianVoice = voices.find(voice => 
-    voice.lang.includes('id') || voice.lang.includes('ID')
-  );
-  if (indonesianVoice) {
-    ucap.voice = indonesianVoice;
-  }
-  
   speechSynthesis.speak(ucap);
 
   ucap.onend = () => {
@@ -387,11 +294,6 @@ function cancelSemua() {
   if (recognition) recognition.abort();
   if (speechSynthesis.speaking || speechSynthesis.pending) speechSynthesis.cancel();
 
-  // Reset button state
-  const micButton = document.getElementById("micButton");
-  micButton.innerHTML = '<i class="fas fa-microphone"></i> Bicara';
-  micButton.classList.remove('loading');
-
   idle.pause(); avatar.pause(); dance.pause();
   show(idle);
   idle.currentTime = 0;
@@ -404,22 +306,10 @@ function resetKonteks() {
 }
 
 // ====== Tombol ======
-document.getElementById("micButton").addEventListener('click', mulaiRekam);
-document.getElementById("cancelButton").addEventListener('click', cancelSemua);
-document.getElementById("resetButton").addEventListener('click', resetKonteks);
-
-// Tambahkan touch events untuk mobile
-document.getElementById("micButton").addEventListener('touchend', function(e) {
-  e.preventDefault();
-  mulaiRekam();
-});
-
-// Inisialisasi voices untuk speech synthesis
-if (speechSynthesis.onvoiceschanged !== undefined) {
-  speechSynthesis.onvoiceschanged = function() {
-    console.log("Voices loaded:", speechSynthesis.getVoices().length);
-  };
-}
+document.getElementById("micButton").onclick = mulaiRekam;
+document.getElementById("cancelButton").onclick = cancelSemua;
+document.getElementById("resetButton").addEventListener("click", resetKonteks);
 </script>
+
 </body>
 </html>

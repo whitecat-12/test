@@ -3,22 +3,16 @@
 <head>
   <meta charset="UTF-8" />
   <title>Nayra - AI Pintar</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <style>
-    * {
-      box-sizing: border-box;
-    }
-    
     html, body {
       margin: 0;
       padding: 0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      font-family: 'Segoe UI', sans-serif;
       height: 100%;
       background: black;
       overflow: hidden;
-      touch-action: manipulation;
-      -webkit-tap-highlight-color: transparent;
     }
 
     video {
@@ -26,8 +20,8 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      min-width: 100%;
-      min-height: 100%;
+      max-width: 100vw;
+      max-height: 100vh;
       width: auto;
       height: auto;
       background: black;
@@ -43,121 +37,111 @@
     }
 
     .overlay {
-      position: fixed;
-      bottom: 20px;
-      left: 0;
-      right: 0;
+      position: absolute;
+      bottom: 1.5rem;
+      left: 50%;
+      transform: translateX(-50%);
       z-index: 2;
       display: flex;
+      gap: 1rem;
+      width: 90%;
+      max-width: 400px;
       justify-content: center;
-      gap: 15px;
-      padding: 0 20px;
     }
 
     .mic-button {
       background: linear-gradient(to bottom right, #00ff9d, #00c76d);
       color: white;
       border: none;
-      width: 70px;
-      height: 70px;
-      font-size: 12px;
+      padding: 0.8rem;
+      width: 80px;
+      height: 80px;
+      font-size: 0.8rem;
       border-radius: 50%;
       cursor: pointer;
-      box-shadow: 0 4px 15px rgba(0, 255, 127, 0.6);
+      box-shadow: 0 0 15px rgba(0, 255, 127, 0.6);
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      transition: all 0.2s ease;
+      transition: all 0.3s ease;
       text-align: center;
       touch-action: manipulation;
     }
 
     .mic-button i {
-      font-size: 20px;
-      margin-bottom: 2px;
+      font-size: 1.4rem;
+      margin-bottom: 0.2rem;
     }
 
     .mic-button:active {
       transform: scale(0.95);
-      box-shadow: 0 2px 10px rgba(0, 255, 127, 0.8);
+      box-shadow: 0 0 20px rgba(0, 255, 127, 0.8);
     }
 
     .cancel-button {
       background: linear-gradient(to bottom right, #ff4d4d, #a00000);
-      box-shadow: 0 4px 15px rgba(255, 0, 0, 0.5);
+      box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
     }
 
     .cancel-button:active {
       transform: scale(0.95);
-      box-shadow: 0 2px 10px rgba(255, 0, 0, 0.7);
+      box-shadow: 0 0 20px rgba(255, 0, 0, 0.7);
+    }
+
+    /* Media queries untuk responsive design */
+    @media (max-width: 480px) {
+      .overlay {
+        bottom: 1rem;
+        gap: 0.8rem;
+      }
+      
+      .mic-button {
+        width: 70px;
+        height: 70px;
+        font-size: 0.75rem;
+      }
+      
+      .mic-button i {
+        font-size: 1.2rem;
+      }
+    }
+
+    @media (min-width: 768px) {
+      .mic-button {
+        width: 90px;
+        height: 90px;
+        font-size: 0.85rem;
+      }
+      
+      .mic-button i {
+        font-size: 1.5rem;
+      }
     }
 
     /* Loading state */
     .loading {
       background: linear-gradient(to bottom right, #ffa500, #ff8c00) !important;
-      box-shadow: 0 4px 15px rgba(255, 165, 0, 0.6) !important;
-    }
-
-    /* Status message */
-    .status {
-      position: fixed;
-      top: 20px;
-      left: 0;
-      right: 0;
-      text-align: center;
-      color: white;
-      font-size: 14px;
-      z-index: 3;
-      background: rgba(0,0,0,0.7);
-      padding: 10px;
-      margin: 0 20px;
-      border-radius: 10px;
-      display: none;
-    }
-
-    .status.show {
-      display: block;
-    }
-
-    /* Untuk tablet */
-    @media (min-width: 768px) {
-      .mic-button {
-        width: 90px;
-        height: 90px;
-        font-size: 14px;
-      }
-      
-      .mic-button i {
-        font-size: 24px;
-      }
-      
-      .overlay {
-        gap: 20px;
-        bottom: 30px;
-      }
+      box-shadow: 0 0 15px rgba(255, 165, 0, 0.6) !important;
     }
   </style>
 </head>
 <body>
 
 <!-- Video Idle -->
-<video id="idle" class="show" autoplay muted loop playsinline webkit-playsinline>
+<video id="idle" class="show" autoplay muted loop playsinline>
   <source src="media/idle.mp4" type="video/mp4" />
 </video>
 
 <!-- Video Avatar (bicara) -->
-<video id="avatar" muted loop playsinline webkit-playsinline>
+<video id="avatar" muted loop playsinline>
   <source src="media/avatar.mp4" type="video/mp4" />
 </video>
 
 <!-- Video Dance (separate file) -->
-<video id="dance" muted playsinline webkit-playsinline>
+<video id="dance" muted playsinline>
   <source src="media/dance.mp4" type="video/mp4" />
 </video>
-
-<!-- Status Message -->
-<div id="status" class="status"></div>
 
 <!-- Tombol UI -->
 <div class="overlay">
@@ -176,29 +160,26 @@
 </div>
 
 <script>
-// Sembunyikan API keys untuk security
 const GROQ_KEYS = [
-  "Bearer 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",
-  "Bearer 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"
+  "Bearer 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", // API KEY 1
+  "Bearer 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"  // API KEY 2
+];
+
+// Model yang tersedia di Groq (pilih salah satu)
+const AVAILABLE_MODELS = [
+  "llama-3.1-8b-instant",  // Model yang recommended untuk mengganti llama3-8b-8192
+  "llama-3.1-70b-versatile",
+  "mixtral-8x7b-32768",
+  "gemma2-9b-it"
 ];
 
 const idle = document.getElementById("idle");
 const avatar = document.getElementById("avatar");
 const dance = document.getElementById("dance");
-const statusEl = document.getElementById("status");
 
 let recognition = null;
 let ucap = null;
 let history = ambilRiwayat();
-
-// ====== Utility Functions ======
-function showStatus(message, duration = 3000) {
-  statusEl.textContent = message;
-  statusEl.classList.add('show');
-  setTimeout(() => {
-    statusEl.classList.remove('show');
-  }, duration);
-}
 
 // ====== LocalStorage ======
 function getNamaPengguna() {
@@ -235,46 +216,31 @@ function bersihkanMarkdown(teks) {
   return teks.replace(/\*\*(.*?)\*\*/g, '$1').replace(/\*(.*?)\*/g, '$1');
 }
 
-// ====== Speech Recognition dengan Error Handling ======
+// ====== Speech dan AI ======
 async function mulaiRekam() {
-  // Cek support speech recognition
-  if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-    showStatus("Browser tidak mendukung speech recognition");
-    return;
-  }
-
-  // Request permission terlebih dahulu
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    // Stop stream immediately setelah dapat permission
-    stream.getTracks().forEach(track => track.stop());
-  } catch (err) {
-    showStatus("Izin mikrofon diperlukan. Silakan berikan izin mikrofon.");
-    return;
-  }
-
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  
-  // Setup button loading state
+  if (!SpeechRecognition) {
+    alert("Perangkat tidak mendukung speech recognition.");
+    return;
+  }
+
+  // Set loading state
   const micButton = document.getElementById("micButton");
-  micButton.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Dengarkan';
+  micButton.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Mendengarkan...';
   micButton.classList.add('loading');
 
   recognition = new SpeechRecognition();
-  recognition.continuous = false;
-  recognition.interimResults = false;
   recognition.lang = 'id-ID';
-  recognition.maxAlternatives = 1;
-
-  recognition.onstart = function() {
-    showStatus("Mendengarkan...");
-  };
+  recognition.interimResults = false;
 
   recognition.onresult = async function(event) {
     const teks = event.results[0][0].transcript.trim();
-    showStatus(`Anda berkata: "${teks}"`);
+    recognition.stop();
+    recognition = null;
     
-    resetButtonState();
+    // Reset button state
+    micButton.innerHTML = '<i class="fas fa-microphone"></i> Bicara';
+    micButton.classList.remove('loading');
 
     if (/dance|nari|menari/i.test(teks)) {
       mulaiDance();
@@ -290,226 +256,170 @@ async function mulaiRekam() {
       return;
     }
 
-    showStatus("Memproses...");
     const jawaban = await tanyaAI(teks);
     bicara(bersihkanMarkdown(jawaban));
   };
 
   recognition.onerror = function(event) {
-    console.error("Speech Recognition Error:", event.error);
-    let errorMsg = "Error speech recognition";
+    console.error("Error:", event.error);
+    recognition.stop();
+    recognition = null;
     
-    switch(event.error) {
-      case 'not-allowed':
-      case 'permission-denied':
-        errorMsg = "Izin mikrofon ditolak. Silakan berikan izin mikrofon.";
-        break;
-      case 'network':
-        errorMsg = "Error jaringan. Periksa koneksi internet.";
-        break;
-      case 'no-speech':
-        errorMsg = "Tidak ada suara terdeteksi. Coba lagi.";
-        break;
-      default:
-        errorMsg = `Error: ${event.error}`;
+    // Reset button state
+    micButton.innerHTML = '<i class="fas fa-microphone"></i> Bicara';
+    micButton.classList.remove('loading');
+    
+    if (event.error === 'not-allowed') {
+      alert("Izin mikrofon diperlukan. Silakan berikan izin mikrofon di browser settings.");
     }
-    
-    showStatus(errorMsg);
-    resetButtonState();
   };
 
   recognition.onend = function() {
-    resetButtonState();
+    // Reset button state jika recognition berakhir tanpa error
+    if (micButton.classList.contains('loading')) {
+      micButton.innerHTML = '<i class="fas fa-microphone"></i> Bicara';
+      micButton.classList.remove('loading');
+    }
   };
 
-  try {
-    recognition.start();
-  } catch (err) {
-    showStatus("Gagal memulai speech recognition");
-    resetButtonState();
-  }
+  recognition.start();
 }
 
-function resetButtonState() {
-  const micButton = document.getElementById("micButton");
-  micButton.innerHTML = '<i class="fas fa-microphone"></i> Bicara';
-  micButton.classList.remove('loading');
-}
-
-// ====== AI Functions ======
 async function cobaGroqDenganBanyakKey(body) {
   for (const key of GROQ_KEYS) {
     try {
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 detik timeout
-      
       const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
         method: "POST",
         headers: {
           "Authorization": key,
           "Content-Type": "application/json"
         },
-        body: JSON.stringify(body),
-        signal: controller.signal
+        body: JSON.stringify(body)
       });
-
-      clearTimeout(timeoutId);
 
       if (!res.ok) {
         const err = await res.json();
-        console.warn("Gagal dengan key:", err.error?.message);
+        console.warn("Gagal dengan key:", key.substring(0, 20) + "...", err.error?.message);
         continue;
       }
 
       return await res.json();
     } catch (err) {
-      if (err.name === 'AbortError') {
-        console.warn("Request timeout");
-      } else {
-        console.error("Fetch error:", err);
-      }
+      console.error("Fetch error:", err);
     }
   }
-  return { error: { message: "Semua API gagal dihubungi. Cek koneksi internet." } };
+
+  return { error: { message: "Semua API gagal dihubungi. Coba lagi nanti." } };
 }
 
 async function tanyaAI(teks) {
   const nama = getNamaPengguna();
   const systemPrompt = `Kamu adalah Nayra AI, asisten pintar dari teta.education. ${
     nama ? `Nama pengguna adalah ${nama}.` : ""
-  } Jawablah dengan ramah, sopan, dan mudah dimengerti oleh pengguna dari Indonesia.`;
+  } Kamu memiliki tubuh virtual yang dapat dilihat oleh pengguna dalam bentuk 3d model. Kamu bisa berbicara, menari, dan melakukan gerakan tertentu. Jawablah dengan ramah, sopan, dan mudah dimengerti oleh pengguna dari Indonesia.`;
 
   history.push({ role: "user", content: teks });
 
-  const body = {
-    model: "llama3-8b-8192",
-    messages: [{ role: "system", content: systemPrompt }, ...history],
-    temperature: 0.7,
-    max_tokens: 500
-  };
+  // Coba berbagai model yang tersedia
+  for (const model of AVAILABLE_MODELS) {
+    const body = {
+      model: model,
+      messages: [{ role: "system", content: systemPrompt }, ...history],
+      temperature: 0.7,
+      max_tokens: 1024
+    };
 
-  const data = await cobaGroqDenganBanyakKey(body);
+    console.log(`Mencoba model: ${model}`);
+    const data = await cobaGroqDenganBanyakKey(body);
 
-  if (data.error) {
-    return "Maaf, terjadi error: " + data.error.message;
+    if (data.error) {
+      console.warn(`Model ${model} gagal:`, data.error.message);
+      continue; // Coba model berikutnya
+    }
+
+    const reply = data.choices?.[0]?.message?.content || "Maaf, tidak ada jawaban.";
+    history.push({ role: "assistant", content: reply });
+    simpanRiwayat();
+
+    return reply;
   }
 
-  const reply = data.choices?.[0]?.message?.content || "Maaf, tidak ada jawaban.";
-  history.push({ role: "assistant", content: reply });
-  simpanRiwayat();
-
-  return reply;
+  return "⚠️ Maaf, semua model AI sedang tidak tersedia. Silakan coba lagi nanti.";
 }
 
 // ====== Video & Suara ======
 function mulaiDance() {
   show(dance);
   dance.currentTime = 0;
-  dance.play().catch(err => {
-    console.warn("Video dance gagal:", err);
-    showStatus("Video dance tidak dapat diputar");
-  });
+  dance.play().catch(err => console.warn("Video dance gagal:", err));
   dance.onended = () => show(idle);
 }
 
 function bicara(teks) {
   show(avatar);
   avatar.currentTime = 0;
-  avatar.play().catch(err => {
-    console.warn("Video avatar gagal:", err);
-  });
-
-  // Stop any ongoing speech
-  if (speechSynthesis.speaking) {
-    speechSynthesis.cancel();
-  }
+  avatar.play().catch(err => console.warn("Video gagal:", err));
 
   ucap = new SpeechSynthesisUtterance(teks);
   ucap.lang = "id-ID";
   ucap.rate = 1.0;
   ucap.pitch = 1.0;
   
-  ucap.onstart = () => {
-    showStatus("Nayra sedang berbicara...");
-  };
+  // Cari voice Indonesia jika tersedia
+  const voices = speechSynthesis.getVoices();
+  const indonesianVoice = voices.find(voice => 
+    voice.lang.includes('id') || voice.lang.includes('ID')
+  );
+  if (indonesianVoice) {
+    ucap.voice = indonesianVoice;
+  }
   
+  speechSynthesis.speak(ucap);
+
   ucap.onend = () => {
     avatar.pause();
     show(idle);
     ucap = null;
-    showStatus("");
   };
-  
-  ucap.onerror = (event) => {
-    console.error("Speech synthesis error:", event);
-    showStatus("Error text-to-speech");
-    avatar.pause();
-    show(idle);
-  };
-
-  speechSynthesis.speak(ucap);
 }
 
 function cancelSemua() {
-  if (recognition) {
-    recognition.stop();
-    recognition = null;
-  }
-  
-  if (speechSynthesis.speaking || speechSynthesis.pending) {
-    speechSynthesis.cancel();
-  }
+  if (recognition) recognition.abort();
+  if (speechSynthesis.speaking || speechSynthesis.pending) speechSynthesis.cancel();
 
-  resetButtonState();
-  
-  idle.pause(); 
-  avatar.pause(); 
-  dance.pause();
-  
+  // Reset button state
+  const micButton = document.getElementById("micButton");
+  micButton.innerHTML = '<i class="fas fa-microphone"></i> Bicara';
+  micButton.classList.remove('loading');
+
+  idle.pause(); avatar.pause(); dance.pause();
   show(idle);
   idle.currentTime = 0;
-  idle.play().catch(err => console.warn("Idle video error:", err));
-  
-  showStatus("");
+  idle.play().catch(err => console.warn("Idle gagal jalan:", err));
 }
 
 function resetKonteks() {
   hapusRiwayat();
-  localStorage.removeItem("namaPengguna");
   bicara("Konteks telah dihapus. Kita bisa mulai percakapan baru.");
 }
 
-// ====== Event Listeners ======
-document.getElementById("micButton").addEventListener("click", mulaiRekam);
-document.getElementById("cancelButton").addEventListener("click", cancelSemua);
-document.getElementById("resetButton").addEventListener("click", resetKonteks);
+// ====== Tombol ======
+document.getElementById("micButton").addEventListener('click', mulaiRekam);
+document.getElementById("cancelButton").addEventListener('click', cancelSemua);
+document.getElementById("resetButton").addEventListener('click', resetKonteks);
 
-// Touch events untuk mobile
-document.getElementById("micButton").addEventListener("touchend", function(e) {
+// Tambahkan touch events untuk mobile
+document.getElementById("micButton").addEventListener('touchend', function(e) {
   e.preventDefault();
   mulaiRekam();
 });
 
-// Prevent double tap zoom
-document.addEventListener('touchstart', function(e) {
-  if (e.touches.length > 1) {
-    e.preventDefault();
-  }
-}, { passive: false });
-
-let lastTouchEnd = 0;
-document.addEventListener('touchend', function(e) {
-  const now = (new Date()).getTime();
-  if (now - lastTouchEnd <= 300) {
-    e.preventDefault();
-  }
-  lastTouchEnd = now;
-}, false);
-
-// Auto-play video handling
-document.addEventListener('DOMContentLoaded', function() {
-  idle.play().catch(e => console.log('Auto-play prevented:', e));
-});
+// Inisialisasi voices untuk speech synthesis
+if (speechSynthesis.onvoiceschanged !== undefined) {
+  speechSynthesis.onvoiceschanged = function() {
+    console.log("Voices loaded:", speechSynthesis.getVoices().length);
+  };
+}
 </script>
 </body>
 </html>

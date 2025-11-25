@@ -3,168 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulasi Tata Surya - TETA SAINS</title>
+    <title>Simulasi Tata Surya - Keajaiban Antariksa</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary: #38b2ac;
-            --secondary: #0e7490;
-            --accent: #f59e0b;
-            --physics: #3b82f6;
-            --chemistry: #10b981;
-            --biology: #8b5cf6;
-            --astronomy: #ec4899;
-            --light-bg: #f8fafc;
-            --card-bg: #ffffff;
-            --text-primary: #1f2937;
-            --text-secondary: #6b7280;
-            --highlight: #9999ff;
-        }
-        
-        body {
-            font-family: 'Baloo 2', cursive;
-            background-color: var(--light-bg);
-            color: var(--text-primary);
+        /* CSS yang sama seperti sebelumnya */
+        * {
             margin: 0;
             padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #0a0e29;
+            --secondary: #1a1f4b;
+            --accent: #4a5fc1;
+            --text: #e6e6ff;
+            --highlight: #6d83f2;
+        }
+
+        body {
+            background-color: var(--primary);
+            color: var(--text);
             overflow-x: hidden;
-        }
-        
-        .app-container {
-            max-width: 100%;
-            margin: 0 auto;
-            background: white;
             min-height: 100vh;
-            position: relative;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
         }
-        
+
         /* Header */
-        .app-header {
-            background: white;
-            padding: 15px 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 15px 5%;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid #e5e7eb;
-            position: relative;
-            z-index: 101;
+            background: rgba(10, 14, 41, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            transition: all 0.5s ease;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
-        
-        .app-logo {
-            display: flex;
-            align-items: center;
-        }
-        
-        .app-logo-icon {
-            background: var(--highlight);
-            color: white;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 8px;
-        }
-        
-        .app-name {
+
+        .logo {
+            font-size: 1.8rem;
             font-weight: 700;
-            font-size: 1.25rem;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+        }
+
+        .logo i {
             color: var(--highlight);
+            margin-right: 10px;
         }
-        
-        /* Bottom Navigation */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            max-width: 100%;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
-            background: white;
-            z-index: 100;
-            height: 70px;
-            display: flex;
-            align-items: center;
-        }
-        
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: #6b7280;
-            text-decoration: none;
-            flex: 1;
-            height: 100%;
-            padding: 0.5rem 0;
+
+        /* Menu Button */
+        .menu-btn {
+            background: none;
+            border: none;
+            color: var(--text);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 5px;
             transition: all 0.3s ease;
-            font-size: 0.7rem;
         }
-        
-        .nav-item span {
-            font-size: 0.7rem;
-            margin-top: 0.25rem;
+
+        .menu-btn:hover {
+            background: rgba(106, 131, 242, 0.3);
         }
-        
-        .nav-item.active {
-            color: var(--primary);
-        }
-        
-        .nav-icon {
-            transition: all 0.3s ease;
-            font-size: 1.1rem;
-        }
-        
-        .nav-icon.active {
-            transform: translateY(-5px);
-            color: var(--primary);
-        }
-        
-        /* Main Content */
-        .main-content {
-            padding-bottom: 80px;
-            background: var(--light-bg);
-        }
-        
-        /* Canvas Container */
-        #canvas-container {
-            position: relative;
-            width: 100%;
-            height: 60vh;
-            background: linear-gradient(to bottom, #1e3a8a, #0f172a);
-            border-radius: 0 0 20px 20px;
-            overflow: hidden;
-        }
-        
+
         /* Side Panel */
         #side-panel {
             position: fixed;
             top: 0;
-            right: -100%;
-            width: 100%;
+            right: -400px;
+            width: 380px;
             height: 100vh;
-            background: white;
-            z-index: 99;
+            background: rgba(10, 14, 41, 0.98);
+            backdrop-filter: blur(15px);
+            z-index: 999;
             transition: right 0.4s ease;
-            padding: 80px 20px 25px;
+            padding: 80px 25px 25px;
             overflow-y: auto;
-            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
         }
-        
+
         #side-panel.open {
             right: 0;
         }
-        
+
         .panel-section {
             margin-bottom: 30px;
             padding-bottom: 20px;
-            border-bottom: 1px solid #e5e7eb;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
-        
+
         .panel-section h2 {
             font-size: 1.3rem;
             margin-bottom: 15px;
@@ -173,78 +108,75 @@
             align-items: center;
             gap: 10px;
         }
-        
+
         .panel-section h2 i {
             font-size: 1.1rem;
         }
-        
+
         /* Planet Selector */
         .planet-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: 1fr 1fr;
             gap: 10px;
             margin-bottom: 15px;
         }
-        
+
         .planet-option {
-            background: white;
-            color: var(--text-primary);
-            border: 2px solid #e5e7eb;
+            background: rgba(26, 31, 75, 0.7);
+            color: white;
+            border: 2px solid transparent;
             padding: 12px 8px;
             border-radius: 8px;
             cursor: pointer;
             font-size: 14px;
             transition: all 0.3s ease;
             text-align: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         }
-        
+
         .planet-option:hover {
-            background: rgba(153, 153, 255, 0.1);
+            background: rgba(106, 131, 242, 0.3);
             border-color: var(--highlight);
         }
-        
+
         .planet-option.active {
-            background: rgba(153, 153, 255, 0.2);
+            background: rgba(106, 131, 242, 0.7);
             border-color: var(--highlight);
-            color: var(--highlight);
         }
-        
+
         /* Controls */
         .control-group {
             margin-bottom: 20px;
         }
-        
+
         .control-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 8px;
         }
-        
+
         .control-header label {
             font-size: 14px;
             font-weight: 500;
-            color: var(--text-primary);
         }
-        
+
         .control-value {
             font-size: 12px;
             color: var(--highlight);
-            background: rgba(153, 153, 255, 0.1);
+            background: rgba(106, 131, 242, 0.2);
             padding: 2px 8px;
             border-radius: 10px;
         }
-        
+
         input[type="range"] {
             width: 100%;
             height: 6px;
-            background: #e5e7eb;
+            background: rgba(255, 255, 255, 0.1);
             border-radius: 3px;
             outline: none;
             -webkit-appearance: none;
         }
-        
+
         input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
             width: 18px;
@@ -253,77 +185,71 @@
             border-radius: 50%;
             cursor: pointer;
         }
-        
+
         .checkbox-group {
             display: flex;
             align-items: center;
             gap: 10px;
             margin-top: 15px;
         }
-        
+
         input[type="checkbox"] {
             width: 18px;
             height: 18px;
             accent-color: var(--highlight);
         }
-        
-        .checkbox-group label {
-            color: var(--text-primary);
-        }
-        
+
         /* Info Section */
         .info-content h3 {
             font-size: 1.1rem;
             margin-bottom: 10px;
-            color: var(--highlight);
+            color: #ff9900;
         }
-        
+
         .info-content p {
             font-size: 14px;
             line-height: 1.6;
             margin-bottom: 12px;
-            color: var(--text-secondary);
+            opacity: 0.9;
         }
-        
+
         .planet-stats {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: 1fr 1fr;
             gap: 10px;
             margin-top: 15px;
         }
-        
+
         .stat-item {
-            background: white;
+            background: rgba(26, 31, 75, 0.5);
             padding: 10px;
             border-radius: 6px;
             text-align: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            border: 1px solid #e5e7eb;
         }
-        
+
         .stat-value {
             font-size: 16px;
             font-weight: bold;
             color: var(--highlight);
         }
-        
+
         .stat-label {
             font-size: 12px;
-            color: var(--text-secondary);
+            opacity: 0.8;
         }
-        
+
         /* Navigation Buttons */
         .nav-buttons {
             display: flex;
             gap: 10px;
             margin-top: 20px;
         }
-        
+
         .nav-btn {
             flex: 1;
-            background: white;
-            color: var(--text-primary);
-            border: 1px solid #e5e7eb;
+            background: rgba(26, 31, 75, 0.7);
+            color: white;
+            border: none;
             padding: 10px;
             border-radius: 8px;
             cursor: pointer;
@@ -334,24 +260,23 @@
             justify-content: center;
             gap: 8px;
         }
-        
+
         .nav-btn:hover {
-            background: rgba(153, 153, 255, 0.1);
-            border-color: var(--highlight);
+            background: rgba(106, 131, 242, 0.7);
         }
-        
+
         /* View Buttons */
         .view-buttons {
             display: flex;
             gap: 10px;
             margin-bottom: 15px;
         }
-        
+
         .view-btn {
             flex: 1;
-            background: white;
-            color: var(--text-primary);
-            border: 1px solid #e5e7eb;
+            background: rgba(26, 31, 75, 0.7);
+            color: white;
+            border: none;
             padding: 8px;
             border-radius: 6px;
             cursor: pointer;
@@ -359,33 +284,34 @@
             transition: all 0.3s ease;
             text-align: center;
         }
-        
+
         .view-btn:hover {
-            background: rgba(153, 153, 255, 0.1);
+            background: rgba(106, 131, 242, 0.3);
         }
-        
+
         .view-btn.active {
-            background: rgba(153, 153, 255, 0.2);
-            border-color: var(--highlight);
-            color: var(--highlight);
+            background: rgba(106, 131, 242, 0.7);
         }
-        
-        /* Menu Button */
-        .menu-btn {
-            background: none;
-            border: none;
-            color: var(--text-primary);
-            font-size: 1.5rem;
-            cursor: pointer;
-            padding: 5px 10px;
-            border-radius: 5px;
-            transition: all 0.3s ease;
+
+        /* Canvas Container */
+        #canvas-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
         }
-        
-        .menu-btn:hover {
-            background: rgba(153, 153, 255, 0.1);
+
+        #loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 20px;
+            color: #ff9900;
+            z-index: 100;
         }
-        
+
         /* Overlay */
         #overlay {
             position: fixed;
@@ -394,101 +320,61 @@
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.5);
-            z-index: 98;
+            z-index: 998;
             opacity: 0;
             visibility: hidden;
             transition: all 0.3s ease;
         }
-        
+
         #overlay.active {
             opacity: 1;
             visibility: visible;
         }
-        
+
         /* Planet Labels */
         .planet-label {
             position: absolute;
-            background: rgba(255, 255, 255, 0.9);
-            color: var(--text-primary);
+            background: rgba(10, 14, 41, 0.9);
+            color: white;
             padding: 5px 10px;
             border-radius: 15px;
             font-size: 12px;
             font-weight: bold;
             pointer-events: none;
             z-index: 10;
-            border: 1px solid var(--highlight);
+            border: 1px solid rgba(106, 131, 242, 0.5);
             backdrop-filter: blur(5px);
             transform: translate(-50%, -100%);
             white-space: nowrap;
         }
-        
-        /* Loading */
-        #loading {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 20px;
-            color: var(--highlight);
-            z-index: 100;
-            background: rgba(255, 255, 255, 0.8);
-            padding: 15px 25px;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-        
-        /* Content Title */
-        .content-title {
-            padding: 20px;
-            text-align: center;
-        }
-        
-        .content-title h1 {
-            font-size: 1.5rem;
-            color: var(--text-primary);
-            margin-bottom: 10px;
-        }
-        
-        .content-title p {
-            color: var(--text-secondary);
-            font-size: 14px;
-        }
-        
-        /* Close Button */
-        .close-panel {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            color: var(--text-primary);
-            cursor: pointer;
-            z-index: 102;
-        }
-        
+
         /* Scrollbar */
         ::-webkit-scrollbar {
             width: 8px;
         }
-        
+
         ::-webkit-scrollbar-track {
-            background: #f1f1f1;
+            background: var(--primary);
         }
-        
+
         ::-webkit-scrollbar-thumb {
-            background: var(--highlight);
+            background: var(--accent);
             border-radius: 4px;
         }
-        
+
         ::-webkit-scrollbar-thumb:hover {
-            background: #7c7cff;
+            background: var(--highlight);
         }
-        
+
         /* Responsive */
-        @media (max-width: 480px) {
+        @media (max-width: 768px) {
+            #side-panel {
+                width: 100%;
+                right: -100%;
+            }
+            
             .planet-grid {
-                grid-template-columns: repeat(2, 1fr);
+                grid-template-columns: 1fr;
             }
             
             .planet-stats {
@@ -499,245 +385,160 @@
                 font-size: 10px;
                 padding: 3px 8px;
             }
-            
-            .nav-item {
-                font-size: 0.65rem;
-            }
-            
-            .nav-item span {
-                font-size: 0.65rem;
-            }
-            
-            .nav-icon {
-                font-size: 1rem;
-            }
-            
-            .content-title h1 {
-                font-size: 1.3rem;
-            }
-            
-            .content-title p {
-                font-size: 13px;
-            }
-        }
-        
-        @media (max-width: 360px) {
-            .planet-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .view-buttons {
-                flex-direction: column;
-            }
-            
-            .nav-buttons {
-                flex-direction: column;
-            }
-            
-            .nav-item {
-                font-size: 0.6rem;
-            }
-            
-            .nav-item span {
-                font-size: 0.6rem;
-            }
         }
     </style>
 </head>
 <body>
-    <!-- Mobile App Container -->
-    <div class="app-container">
-        <!-- App Header -->
-        <header class="app-header">
-            <div class="app-logo">
-                <div class="app-logo-icon">
-                    <i class="fas fa-atom"></i>
-                </div>
-                <h1 class="app-name">TETA SAINS</h1>
-            </div>
-            <div class="flex items-center space-x-3">
-                <button class="menu-btn" id="menu-toggle">
-                    <i class="fas fa-bars"></i>
+    <!-- Header -->
+    <header>
+        <div class="logo">
+            <i class="fas fa-solar-system"></i>
+            <span>Simulasi Tata Surya</span>
+        </div>
+        <button class="menu-btn" id="menu-toggle">
+            <i class="fas fa-bars"></i>
+        </button>
+    </header>
+
+    <!-- Overlay -->
+    <div id="overlay"></div>
+
+    <!-- Side Panel -->
+    <div id="side-panel">
+        <div class="panel-section">
+            <h2><i class="fas fa-globe"></i> Pilih Tampilan</h2>
+            <div class="view-buttons">
+                <button class="view-btn active" data-view="overview">
+                    <i class="fas fa-binoculars"></i><br>Seluruh Tata Surya
+                </button>
+                <button class="view-btn" data-view="planet">
+                    <i class="fas fa-globe"></i><br>Fokus Planet
                 </button>
             </div>
-        </header>
-        
-        <!-- Main Content Area -->
-        <main class="main-content">
-            <!-- Content Title -->
-            <div class="content-title">
-                <h1>Simulasi Tata Surya</h1>
-                <p>Jelajahi keajaiban antariksa dengan simulasi interaktif</p>
-            </div>
             
-            <!-- Canvas Container -->
-            <div id="canvas-container">
-                <div id="loading">Memuat Simulasi Tata Surya...</div>
-            </div>
-            
-            <!-- Overlay -->
-            <div id="overlay"></div>
-
-            <!-- Side Panel -->
-            <div id="side-panel">
-                <button class="close-panel" id="close-panel">
-                    <i class="fas fa-times"></i>
+            <h2 style="margin-top: 20px;"><i class="fas fa-globe"></i> Pilih Planet</h2>
+            <div class="planet-grid">
+                <button class="planet-option" data-planet="sun">
+                    <i class="fas fa-sun"></i><br>Matahari
                 </button>
-                <div class="panel-section">
-                    <h2><i class="fas fa-globe"></i> Pilih Tampilan</h2>
-                    <div class="view-buttons">
-                        <button class="view-btn active" data-view="overview">
-                            <i class="fas fa-binoculars"></i><br>Seluruh Tata Surya
-                        </button>
-                        <button class="view-btn" data-view="planet">
-                            <i class="fas fa-globe"></i><br>Fokus Planet
-                        </button>
-                    </div>
-                    
-                    <h2 style="margin-top: 20px;"><i class="fas fa-globe"></i> Pilih Planet</h2>
-                    <div class="planet-grid">
-                        <button class="planet-option" data-planet="sun">
-                            <i class="fas fa-sun"></i><br>Matahari
-                        </button>
-                        <button class="planet-option" data-planet="mercury">
-                            <i class="fas fa-circle"></i><br>Merkurius
-                        </button>
-                        <button class="planet-option" data-planet="venus">
-                            <i class="fas fa-circle"></i><br>Venus
-                        </button>
-                        <button class="planet-option" data-planet="earth">
-                            <i class="fas fa-globe-americas"></i><br>Bumi
-                        </button>
-                        <button class="planet-option" data-planet="mars">
-                            <i class="fas fa-circle"></i><br>Mars
-                        </button>
-                        <button class="planet-option" data-planet="jupiter">
-                            <i class="fas fa-circle"></i><br>Jupiter
-                        </button>
-                        <button class="planet-option" data-planet="saturn">
-                            <i class="fas fa-ring"></i><br>Saturnus
-                        </button>
-                        <button class="planet-option" data-planet="uranus">
-                            <i class="fas fa-circle"></i><br>Uranus
-                        </button>
-                        <button class="planet-option" data-planet="neptune">
-                            <i class="fas fa-circle"></i><br>Neptunus
-                        </button>
-                    </div>
-                    <div class="nav-buttons">
-                        <button class="nav-btn" id="prev-planet">
-                            <i class="fas fa-chevron-left"></i> Sebelumnya
-                        </button>
-                        <button class="nav-btn" id="next-planet">
-                            Selanjutnya <i class="fas fa-chevron-right"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="panel-section">
-                    <h2><i class="fas fa-sliders-h"></i> Pengaturan Simulasi</h2>
-                    <div class="control-group">
-                        <div class="control-header">
-                            <label for="rotationSpeed">Kecepatan Rotasi</label>
-                            <span class="control-value" id="rotationSpeedValue">1.0</span>
-                        </div>
-                        <input type="range" id="rotationSpeed" min="0" max="3" step="0.1" value="1">
-                    </div>
-                    <div class="control-group">
-                        <div class="control-header">
-                            <label for="orbitSpeed">Kecepatan Orbit</label>
-                            <span class="control-value" id="orbitSpeedValue">1.0</span>
-                        </div>
-                        <input type="range" id="orbitSpeed" min="0" max="3" step="0.1" value="1">
-                    </div>
-                    <div class="checkbox-group">
-                        <input type="checkbox" id="showOrbits" checked>
-                        <label for="showOrbits">Tampilkan Orbit</label>
-                    </div>
-                    <div class="checkbox-group">
-                        <input type="checkbox" id="showLabels" checked>
-                        <label for="showLabels">Tampilkan Label Planet</label>
-                    </div>
-                    <div class="checkbox-group">
-                        <input type="checkbox" id="autoRotate" checked>
-                        <label for="autoRotate">Rotasi Otomatis</label>
-                    </div>
-                </div>
-
-                <div class="panel-section">
-                    <h2><i class="fas fa-info-circle"></i> Informasi</h2>
-                    <div class="info-content">
-                        <h3 id="view-name">Seluruh Tata Surya</h3>
-                        <p id="view-description">Lihat keseluruhan tata surya dengan semua planet yang mengorbit Matahari.</p>
-                        
-                        <div class="planet-stats" id="overview-stats">
-                            <div class="stat-item">
-                                <div class="stat-value">8 Planet</div>
-                                <div class="stat-label">Jumlah Planet</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-value">~4.6 Miliar Tahun</div>
-                                <div class="stat-label">Usia Tata Surya</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-value">Matahari</div>
-                                <div class="stat-label">Pusat Sistem</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-value">Neptunus</div>
-                                <div class="stat-label">Planet Terjauh</div>
-                            </div>
-                        </div>
-                        
-                        <div class="planet-stats" id="planet-stats" style="display: none;">
-                            <div class="stat-item">
-                                <div class="stat-value" id="stat-diameter">-</div>
-                                <div class="stat-label">Diameter</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-value" id="stat-mass">-</div>
-                                <div class="stat-label">Massa</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-value" id="stat-temp">-</div>
-                                <div class="stat-label">Suhu Permukaan</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-value" id="stat-period">-</div>
-                                <div class="stat-label">Periode Rotasi</div>
-                            </div>
-                        </div>
-                        
-                        <p style="margin-top: 15px;"><strong>Tips:</strong> Gunakan mouse untuk menggerakkan kamera, scroll untuk zoom, dan geser di layar untuk navigasi.</p>
-                    </div>
-                </div>
+                <button class="planet-option" data-planet="mercury">
+                    <i class="fas fa-circle"></i><br>Merkurius
+                </button>
+                <button class="planet-option" data-planet="venus">
+                    <i class="fas fa-circle"></i><br>Venus
+                </button>
+                <button class="planet-option" data-planet="earth">
+                    <i class="fas fa-globe-americas"></i><br>Bumi
+                </button>
+                <button class="planet-option" data-planet="mars">
+                    <i class="fas fa-circle"></i><br>Mars
+                </button>
+                <button class="planet-option" data-planet="jupiter">
+                    <i class="fas fa-circle"></i><br>Jupiter
+                </button>
+                <button class="planet-option" data-planet="saturn">
+                    <i class="fas fa-ring"></i><br>Saturnus
+                </button>
+                <button class="planet-option" data-planet="uranus">
+                    <i class="fas fa-circle"></i><br>Uranus
+                </button>
+                <button class="planet-option" data-planet="neptune">
+                    <i class="fas fa-circle"></i><br>Neptunus
+                </button>
             </div>
-        </main>
-        
-        <!-- Bottom Navigation -->
-        <nav class="bottom-nav">
-            <a href="dashboad siswa.html" class="nav-item">
-                <i class="fas fa-home nav-icon"></i>
-                <span>Beranda</span>
-            </a>
-            <a href="soal harian/dashboard soal.html" class="nav-item">
-                <i class="fas fa-flask nav-icon"></i>
-                <span>Soal Harian</span>
-            </a>
-            <a href="ai/nayra.html" class="nav-item">
-                <i class="fas fa-robot nav-icon"></i>
-                <span>Nayra AI</span>
-            </a>
-            <a href="materi harian/kategori materi.html" class="nav-item">
-                <i class="fas fa-chalkboard-teacher nav-icon"></i>
-                <span>Materi Harian</span>
-            </a>
-            <a href="profil/profil.html" class="nav-item">
-                <i class="fas fa-user nav-icon"></i>
-                <span>Profil</span>
-            </a>
-        </nav>
+            <div class="nav-buttons">
+                <button class="nav-btn" id="prev-planet">
+                    <i class="fas fa-chevron-left"></i> Sebelumnya
+                </button>
+                <button class="nav-btn" id="next-planet">
+                    Selanjutnya <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="panel-section">
+            <h2><i class="fas fa-sliders-h"></i> Pengaturan Simulasi</h2>
+            <div class="control-group">
+                <div class="control-header">
+                    <label for="rotationSpeed">Kecepatan Rotasi</label>
+                    <span class="control-value" id="rotationSpeedValue">1.0</span>
+                </div>
+                <input type="range" id="rotationSpeed" min="0" max="3" step="0.1" value="1">
+            </div>
+            <div class="control-group">
+                <div class="control-header">
+                    <label for="orbitSpeed">Kecepatan Orbit</label>
+                    <span class="control-value" id="orbitSpeedValue">1.0</span>
+                </div>
+                <input type="range" id="orbitSpeed" min="0" max="3" step="0.1" value="1">
+            </div>
+            <div class="checkbox-group">
+                <input type="checkbox" id="showOrbits" checked>
+                <label for="showOrbits">Tampilkan Orbit</label>
+            </div>
+            <div class="checkbox-group">
+                <input type="checkbox" id="showLabels" checked>
+                <label for="showLabels">Tampilkan Label Planet</label>
+            </div>
+            <div class="checkbox-group">
+                <input type="checkbox" id="autoRotate" checked>
+                <label for="autoRotate">Rotasi Otomatis</label>
+            </div>
+        </div>
+
+        <div class="panel-section">
+            <h2><i class="fas fa-info-circle"></i> Informasi</h2>
+            <div class="info-content">
+                <h3 id="view-name">Seluruh Tata Surya</h3>
+                <p id="view-description">Lihat keseluruhan tata surya dengan semua planet yang mengorbit Matahari.</p>
+                
+                <div class="planet-stats" id="overview-stats">
+                    <div class="stat-item">
+                        <div class="stat-value">8 Planet</div>
+                        <div class="stat-label">Jumlah Planet</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">~4.6 Miliar Tahun</div>
+                        <div class="stat-label">Usia Tata Surya</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">Matahari</div>
+                        <div class="stat-label">Pusat Sistem</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">Neptunus</div>
+                        <div class="stat-label">Planet Terjauh</div>
+                    </div>
+                </div>
+                
+                <div class="planet-stats" id="planet-stats" style="display: none;">
+                    <div class="stat-item">
+                        <div class="stat-value" id="stat-diameter">-</div>
+                        <div class="stat-label">Diameter</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="stat-mass">-</div>
+                        <div class="stat-label">Massa</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="stat-temp">-</div>
+                        <div class="stat-label">Suhu Permukaan</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="stat-period">-</div>
+                        <div class="stat-label">Periode Rotasi</div>
+                    </div>
+                </div>
+                
+                <p style="margin-top: 15px;"><strong>Tips:</strong> Gunakan mouse untuk menggerakkan kamera, scroll untuk zoom, dan geser di layar untuk navigasi.</p>
+            </div>
+        </div>
     </div>
+
+    <!-- Canvas Container -->
+    <div id="canvas-container"></div>
+    
+    <div id="loading">Memuat Simulasi Tata Surya...</div>
 
     <!-- Three.js Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -917,7 +718,6 @@
             const menuToggle = document.getElementById('menu-toggle');
             const sidePanel = document.getElementById('side-panel');
             const overlay = document.getElementById('overlay');
-            const closePanel = document.getElementById('close-panel');
 
             // Toggle panel
             menuToggle.addEventListener('click', () => {
@@ -927,12 +727,6 @@
 
             // Close panel when clicking overlay
             overlay.addEventListener('click', () => {
-                sidePanel.classList.remove('open');
-                overlay.classList.remove('active');
-            });
-
-            // Close panel when clicking close button
-            closePanel.addEventListener('click', () => {
                 sidePanel.classList.remove('open');
                 overlay.classList.remove('active');
             });
@@ -1366,6 +1160,18 @@
             renderer.setSize(window.innerWidth, window.innerHeight);
         });
 
+        // Efek transparan header saat scroll
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('header');
+            if (window.scrollY > 100) {
+                header.style.background = 'rgba(10, 14, 41, 0.98)';
+                header.style.padding = '10px 5%';
+            } else {
+                header.style.background = 'rgba(10, 14, 41, 0.95)';
+                header.style.padding = '15px 5%';
+            }
+        });
+
         // Swipe functionality untuk mobile
         let touchStartX = 0;
         let touchEndX = 0;
@@ -1400,23 +1206,6 @@
             } else if (e.key === 'ArrowRight') {
                 nextPlanet();
             }
-        });
-
-        // Simple interaction for bottom nav
-        document.addEventListener('DOMContentLoaded', function() {
-            const navItems = document.querySelectorAll('.nav-item');
-            
-            navItems.forEach(item => {
-                item.addEventListener('click', function() {
-                    navItems.forEach(nav => {
-                        nav.classList.remove('active');
-                        nav.querySelector('.nav-icon').classList.remove('active');
-                    });
-                    
-                    this.classList.add('active');
-                    this.querySelector('.nav-icon').classList.add('active');
-                });
-            });
         });
     </script>
 </body>

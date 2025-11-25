@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulasi Bintang - Keajaiban Antariksa</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        :root {
+            --primary: #0a0e29;
+            --secondary: #1a1f4b;
+            --accent: #4a5fc1;
+            --text: #e6e6ff;
+            --highlight: #6d83f2;
+        }
+
+        body {
+            background-color: var(--primary);
+            color: var(--text);
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            padding: 15px 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(10, 14, 41, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            transition: all 0.5s ease;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+        }
+
+        .logo i {
+            color: var(--highlight);
+            margin-right: 10px;
+        }
+
+        /* Menu Button */
+        .menu-btn {
+            background: none;
+            border: none;
+            color: var(--text);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .menu-btn:hover {
+            background: rgba(106, 131, 242, 0.3);
+        }
+
+        /* Side Panel */
+        #side-panel {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 380px;
+            height: 100vh;
+            background: rgba(10, 14, 41, 0.98);
+            backdrop-filter: blur(15px);
+            z-index: 999;
+            transition: right 0.4s ease;
+            padding: 80px 25px 25px;
+            overflow-y: auto;
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        #side-panel.open {
+            right: 0;
+        }
+
+        .panel-section {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .panel-section h2 {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            color: var(--highlight);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .panel-section h2 i {
+            font-size: 1.1rem;
+        }
+
+        /* Star Selector */
+        .star-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .star-option {
+            background: rgba(26, 31, 75, 0.7);
+            color: white;
+            border: 2px solid transparent;
+            padding: 12px 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .star-option:hover {
+            background: rgba(106, 131, 242, 0.3);
+            border-color: var(--highlight);
+        }
+
+        .star-option.active {
+            background: rgba(106, 131, 242, 0.7);
+            border-color: var(--highlight);
+        }
+
+        /* Controls */
+        .control-group {
+            margin-bottom: 20px;
+        }
+
+        .control-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .control-header label {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .control-value {
+            font-size: 12px;
+            color: var(--highlight);
+            background: rgba(106, 131, 242, 0.2);
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--highlight);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--highlight);
+        }
+
+        /* Info Section */
+        .info-content h3 {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            color: #ff9900;
+        }
+
+        .info-content p {
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 12px;
+            opacity: 0.9;
+        }
+
+        /* Navigation Buttons */
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .nav-btn {
+            flex: 1;
+            background: rgba(26, 31, 75, 0.7);
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .nav-btn:hover {
+            background: rgba(106, 131, 242, 0.7);
+        }
+
+        /* Canvas Container */
+        #canvas-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        #loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 20px;
+            color: #ff9900;
+            z-index: 100;
+        }
+
+        /* Overlay */
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 998;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        #overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--primary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--highlight);
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            #side-panel {
+                width: 100%;
+                right: -100%;
+            }
+            
+            .star-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="logo">
+            <i class="fas fa-stars"></i>
+            <span>Simulasi Bintang</span>
+        </div>
+        <button class="menu-btn" id="menu-toggle">
+            <i class="fas fa-bars"></i>
+        </button>
+    </header>
+
+    <!-- Overlay -->
+    <div id="overlay"></div>
+
+    <!-- Side Panel -->
+    <div id="side-panel">
+        <div class="panel-section">
+            <h2><i class="fas fa-star"></i> Pilih Bintang</h2>
+            <div class="star-grid">
+                <button class="star-option active" data-star="sun">
+                    <i class="fas fa-sun"></i><br>Matahari
+                </button>
+                <button class="star-option" data-star="red-giant">
+                    <i class="fas fa-fire"></i><br>Raksasa Merah
+                </button>
+                <button class="star-option" data-star="blue-giant">
+                    <i class="fas fa-meteor"></i><br>Raksasa Biru
+                </button>
+                <button class="star-option" data-star="neutron">
+                    <i class="fas fa-compress"></i><br>Bintang Neutron
+                </button>
+            </div>
+            <div class="nav-buttons">
+                <button class="nav-btn" id="prev-star">
+                    <i class="fas fa-chevron-left"></i> Sebelumnya
+                </button>
+                <button class="nav-btn" id="next-star">
+                    Selanjutnya <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+
+        <div class="panel-section">
+            <h2><i class="fas fa-sliders-h"></i> Pengaturan Simulasi</h2>
+            <div class="control-group">
+                <div class="control-header">
+                    <label for="waveSpeed">Kecepatan Gelombang</label>
+                    <span class="control-value" id="waveSpeedValue">1.0</span>
+                </div>
+                <input type="range" id="waveSpeed" min="0.1" max="2" step="0.1" value="1">
+            </div>
+            <div class="control-group">
+                <div class="control-header">
+                    <label for="waveAmplitude">Amplitudo Gelombang</label>
+                    <span class="control-value" id="waveAmplitudeValue">1.0</span>
+                </div>
+                <input type="range" id="waveAmplitude" min="0.1" max="2" step="0.1" value="1">
+            </div>
+            <div class="control-group">
+                <div class="control-header">
+                    <label for="waveFrequency">Frekuensi Gelombang</label>
+                    <span class="control-value" id="waveFrequencyValue">1.0</span>
+                </div>
+                <input type="range" id="waveFrequency" min="0.1" max="2" step="0.1" value="1">
+            </div>
+            <div class="control-group">
+                <div class="control-header">
+                    <label for="starBrightness">Kecerahan Bintang</label>
+                    <span class="control-value" id="starBrightnessValue">1.0</span>
+                </div>
+                <input type="range" id="starBrightness" min="0.5" max="2" step="0.1" value="1">
+            </div>
+            <div class="checkbox-group">
+                <input type="checkbox" id="autoRotate" checked>
+                <label for="autoRotate">Rotasi Otomatis</label>
+            </div>
+        </div>
+
+        <div class="panel-section">
+            <h2><i class="fas fa-info-circle"></i> Informasi Bintang</h2>
+            <div class="info-content">
+                <h3 id="star-name">Matahari</h3>
+                <p id="star-description">Bintang deret utama tipe G, sumber energi bagi kehidupan di Bumi. Memiliki suhu permukaan sekitar 5.500°C dan merupakan pusat tata surya kita.</p>
+                <p><strong>Tips:</strong> Gunakan mouse untuk menggerakkan kamera, scroll untuk zoom, dan geser di layar untuk mengganti bintang.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Canvas Container -->
+    <div id="canvas-container"></div>
+    
+    <div id="loading">Memuat Simulasi Bintang...</div>
+
+    <!-- Three.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.min.js"></script>
+    
+    <script>
+        // Inisialisasi scene, camera, dan renderer
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        document.getElementById('canvas-container').appendChild(renderer.domElement);
+        
+        // Kontrol orbit
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        
+        // Posisi kamera
+        camera.position.z = 5;
+        
+        // Sembunyikan loading screen
+        document.getElementById('loading').style.display = 'none';
+        
+        // Variabel untuk menyimpan objek bintang
+        let currentStar;
+        let corona;
+        
+        // Data untuk berbagai jenis bintang
+        const starData = {
+            'sun': {
+                name: 'Matahari',
+                radius: 2,
+                colors: {
+                    inner: '#ff9900',
+                    middle: '#ff6600',
+                    outer: '#cc3300'
+                },
+                description: 'Bintang deret utama tipe G, sumber energi bagi kehidupan di Bumi. Memiliki suhu permukaan sekitar 5.500°C dan merupakan pusat tata surya kita.'
+            },
+            'red-giant': {
+                name: 'Raksasa Merah',
+                radius: 3,
+                colors: {
+                    inner: '#ff4500',
+                    middle: '#cc3300',
+                    outer: '#8b0000'
+                },
+                description: 'Bintang yang telah berevolusi dari deret utama, dengan ukuran besar dan suhu permukaan rendah. Contoh: Betelgeuse di rasi Orion.'
+            },
+            'blue-giant': {
+                name: 'Raksasa Biru',
+                radius: 2.5,
+                colors: {
+                    inner: '#87ceeb',
+                    middle: '#4682b4',
+                    outer: '#0000cd'
+                },
+                description: 'Bintang masif dan panas dengan suhu permukaan sangat tinggi, berwarna biru terang. Memiliki masa hidup yang singkat.'
+            },
+            'neutron': {
+                name: 'Bintang Neutron',
+                radius: 1,
+                colors: {
+                    inner: '#ffffff',
+                    middle: '#d3d3d3',
+                    outer: '#a9a9a9'
+                },
+                description: 'Sisa inti bintang masif setelah supernova, sangat padat dengan medan magnet kuat. Satu sendok teh materi bintang neutron memiliki massa miliaran ton.'
+            }
+        };
+
+        // Panel control functions
+        function setupPanelControls() {
+            const menuToggle = document.getElementById('menu-toggle');
+            const sidePanel = document.getElementById('side-panel');
+            const overlay = document.getElementById('overlay');
+
+            // Toggle panel
+            menuToggle.addEventListener('click', () => {
+                sidePanel.classList.toggle('open');
+                overlay.classList.toggle('active');
+            });
+
+            // Close panel when clicking overlay
+            overlay.addEventListener('click', () => {
+                sidePanel.classList.remove('open');
+                overlay.classList.remove('active');
+            });
+
+            // Update control values display
+            document.getElementById('waveSpeed').addEventListener('input', function(e) {
+                document.getElementById('waveSpeedValue').textContent = e.target.value;
+            });
+
+            document.getElementById('waveAmplitude').addEventListener('input', function(e) {
+                document.getElementById('waveAmplitudeValue').textContent = e.target.value;
+            });
+
+            document.getElementById('waveFrequency').addEventListener('input', function(e) {
+                document.getElementById('waveFrequencyValue').textContent = e.target.value;
+            });
+
+            document.getElementById('starBrightness').addEventListener('input', function(e) {
+                document.getElementById('starBrightnessValue').textContent = e.target.value;
+            });
+
+            // Navigation buttons
+            document.getElementById('next-star').addEventListener('click', nextStar);
+            document.getElementById('prev-star').addEventListener('click', prevStar);
+        }
+
+        // Buat tekstur bintang
+        function createStarTexture(colors) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 512;
+            const context = canvas.getContext('2d');
+            
+            const gradient = context.createRadialGradient(256, 256, 0, 256, 256, 256);
+            gradient.addColorStop(0, colors.inner);
+            gradient.addColorStop(0.5, colors.middle);
+            gradient.addColorStop(1, colors.outer);
+            
+            context.fillStyle = gradient;
+            context.fillRect(0, 0, 512, 512);
+            
+            const imageData = context.getImageData(0, 0, 512, 512);
+            const data = imageData.data;
+            
+            for (let i = 0; i < data.length; i += 4) {
+                const noise = Math.random() * 20;
+                data[i] = Math.min(255, data[i] + noise);
+                data[i + 1] = Math.min(255, data[i + 1] + noise * 0.8);
+                data[i + 2] = Math.min(255, data[i + 2] + noise * 0.5);
+            }
+            
+            context.putImageData(imageData, 0, 0);
+            
+            return new THREE.CanvasTexture(canvas);
+        }
+        
+        // Buat material bintang dengan efek gelombang
+        function createStarMaterial(colors) {
+            const vertexShader = `
+                uniform float time;
+                uniform float waveAmplitude;
+                uniform float waveFrequency;
+                uniform float waveSpeed;
+                
+                varying vec2 vUv;
+                varying vec3 vNormal;
+                varying float vDisplacement;
+                
+                void main() {
+                    vUv = uv;
+                    vNormal = normal;
+                    
+                    float displacement = sin(position.x * waveFrequency + time * waveSpeed) * 
+                                        sin(position.y * waveFrequency + time * waveSpeed) * 
+                                        sin(position.z * waveFrequency + time * waveSpeed) * 
+                                        waveAmplitude * 0.1;
+                    
+                    vDisplacement = displacement;
+                    
+                    vec3 newPosition = position + normal * displacement;
+                    gl_Position = projectionMatrix * modelViewMatrix * vec4(newPosition, 1.0);
+                }
+            `;
+            
+            const fragmentShader = `
+                uniform float time;
+                uniform float brightness;
+                uniform sampler2D starTexture;
+                
+                varying vec2 vUv;
+                varying vec3 vNormal;
+                varying float vDisplacement;
+                
+                void main() {
+                    vec4 texColor = texture2D(starTexture, vUv);
+                    float intensity = 1.0 + vDisplacement * 5.0;
+                    vec3 color = texColor.rgb * intensity * brightness;
+                    color += texColor.rgb * vDisplacement * 2.0;
+                    gl_FragColor = vec4(color, 1.0);
+                }
+            `;
+            
+            return new THREE.ShaderMaterial({
+                uniforms: {
+                    time: { value: 0.0 },
+                    waveAmplitude: { value: 1.0 },
+                    waveFrequency: { value: 1.0 },
+                    waveSpeed: { value: 1.0 },
+                    brightness: { value: 1.0 },
+                    starTexture: { value: createStarTexture(colors) }
+                },
+                vertexShader: vertexShader,
+                fragmentShader: fragmentShader
+            });
+        }
+        
+        // Buat partikel untuk efek korona bintang
+        function createCorona(radius, color) {
+            const particleCount = 5000;
+            const particles = new THREE.BufferGeometry();
+            const positions = new Float32Array(particleCount * 3);
+            const colors = new Float32Array(particleCount * 3);
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particleRadius = radius + Math.random() * radius * 0.75;
+                const theta = Math.random() * Math.PI * 2;
+                const phi = Math.acos(2 * Math.random() - 1);
+                
+                const i3 = i * 3;
+                positions[i3] = particleRadius * Math.sin(phi) * Math.cos(theta);
+                positions[i3 + 1] = particleRadius * Math.sin(phi) * Math.sin(theta);
+                positions[i3 + 2] = particleRadius * Math.cos(phi);
+                
+                colors[i3] = color.r;
+                colors[i3 + 1] = color.g;
+                colors[i3 + 2] = color.b;
+            }
+            
+            particles.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            particles.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+            
+            const particleMaterial = new THREE.PointsMaterial({
+                size: 0.02,
+                vertexColors: true,
+                transparent: true,
+                opacity: 0.6
+            });
+            
+            const particleSystem = new THREE.Points(particles, particleMaterial);
+            scene.add(particleSystem);
+            
+            return particleSystem;
+        }
+        
+        // Buat objek bintang
+        function createStar(starType) {
+            if (currentStar) scene.remove(currentStar);
+            if (corona) scene.remove(corona);
+            
+            const data = starData[starType];
+            const geometry = new THREE.SphereGeometry(data.radius, 64, 64);
+            const material = createStarMaterial(data.colors);
+            
+            currentStar = new THREE.Mesh(geometry, material);
+            scene.add(currentStar);
+            
+            const starLight = new THREE.PointLight(
+                new THREE.Color(data.colors.inner).getHex(), 
+                2, 
+                10
+            );
+            currentStar.add(starLight);
+            
+            const color = new THREE.Color(data.colors.middle);
+            corona = createCorona(data.radius, color);
+            
+            // Update UI
+            document.getElementById('star-name').textContent = data.name;
+            document.getElementById('star-description').textContent = data.description;
+            
+            // Update active button
+            document.querySelectorAll('.star-option').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`.star-option[data-star="${starType}"]`).classList.add('active');
+            
+            return currentStar;
+        }
+        
+        // Inisialisasi scene dengan matahari
+        createStar('sun');
+        
+        // Tambahkan ambient light
+        const ambientLight = new THREE.AmbientLight(0x333333);
+        scene.add(ambientLight);
+        
+        // Setup panel controls
+        setupPanelControls();
+        
+        // Variabel untuk animasi
+        let time = 0;
+        
+        // Event listener untuk kontrol
+        document.getElementById('waveSpeed').addEventListener('input', function(e) {
+            if (currentStar) {
+                currentStar.material.uniforms.waveSpeed.value = parseFloat(e.target.value);
+            }
+        });
+        
+        document.getElementById('waveAmplitude').addEventListener('input', function(e) {
+            if (currentStar) {
+                currentStar.material.uniforms.waveAmplitude.value = parseFloat(e.target.value);
+            }
+        });
+        
+        document.getElementById('waveFrequency').addEventListener('input', function(e) {
+            if (currentStar) {
+                currentStar.material.uniforms.waveFrequency.value = parseFloat(e.target.value);
+            }
+        });
+        
+        document.getElementById('starBrightness').addEventListener('input', function(e) {
+            if (currentStar) {
+                currentStar.material.uniforms.brightness.value = parseFloat(e.target.value);
+            }
+        });
+        
+        // Event listener untuk pemilih bintang
+        document.querySelectorAll('.star-option').forEach(button => {
+            button.addEventListener('click', function() {
+                const starType = this.getAttribute('data-star');
+                createStar(starType);
+            });
+        });
+        
+        // Fungsi navigasi bintang
+        function nextStar() {
+            const buttons = document.querySelectorAll('.star-option');
+            const current = document.querySelector('.star-option.active');
+            let nextIndex = Array.from(buttons).indexOf(current) + 1;
+            if (nextIndex >= buttons.length) nextIndex = 0;
+            buttons[nextIndex].click();
+        }
+
+        function prevStar() {
+            const buttons = document.querySelectorAll('.star-option');
+            const current = document.querySelector('.star-option.active');
+            let prevIndex = Array.from(buttons).indexOf(current) - 1;
+            if (prevIndex < 0) prevIndex = buttons.length - 1;
+            buttons[prevIndex].click();
+        }
+        
+        // Fungsi animasi
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            time += 0.01;
+            
+            if (currentStar) {
+                currentStar.material.uniforms.time.value = time;
+                
+                if (document.getElementById('autoRotate').checked) {
+                    currentStar.rotation.y += 0.002;
+                }
+            }
+            
+            if (corona) {
+                corona.rotation.y += 0.001;
+                corona.rotation.x += 0.0005;
+            }
+            
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        
+        animate();
+        
+        // Handle resize window
+        window.addEventListener('resize', function() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Efek transparan header saat scroll
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('header');
+            if (window.scrollY > 100) {
+                header.style.background = 'rgba(10, 14, 41, 0.98)';
+                header.style.padding = '10px 5%';
+            } else {
+                header.style.background = 'rgba(10, 14, 41, 0.95)';
+                header.style.padding = '15px 5%';
+            }
+        });
+
+        // Swipe functionality untuk mobile
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        document.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+
+        document.addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        });
+
+        function handleSwipe() {
+            const swipeThreshold = 50;
+            
+            if (touchEndX < touchStartX - swipeThreshold) {
+                nextStar();
+            }
+            
+            if (touchEndX > touchStartX + swipeThreshold) {
+                prevStar();
+            }
+        }
+
+        // Navigasi bintang dengan keyboard
+        document.addEventListener('keydown', e => {
+            if (e.key === 'ArrowLeft') {
+                prevStar();
+            } else if (e.key === 'ArrowRight') {
+                nextStar();
+            }
+        });
+    </script>
+</body>
+</html>

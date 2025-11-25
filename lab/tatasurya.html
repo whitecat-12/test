@@ -1,0 +1,1380 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulasi Tata Surya - TETA SAINS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #38b2ac;
+            --secondary: #0e7490;
+            --accent: #f59e0b;
+            --physics: #3b82f6;
+            --chemistry: #10b981;
+            --biology: #8b5cf6;
+            --astronomy: #ec4899;
+            --light-bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --highlight: #9999ff;
+        }
+        
+        body {
+            font-family: 'Baloo 2', cursive;
+            background-color: var(--light-bg);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+        
+        .app-container {
+            max-width: 414px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        /* Header */
+        .app-header {
+            background: white;
+            padding: 15px 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #e5e7eb;
+            position: relative;
+            z-index: 101;
+        }
+        
+        .app-logo {
+            display: flex;
+            align-items: center;
+        }
+        
+        .app-logo-icon {
+            background: var(--highlight);
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 8px;
+        }
+        
+        .app-name {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: var(--highlight);
+        }
+        
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            max-width: 414px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            background: white;
+            z-index: 100;
+            height: 70px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+            text-decoration: none;
+            flex: 1;
+            height: 100%;
+            padding: 0.5rem 0;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item span {
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
+        
+        .nav-item.active {
+            color: var(--primary);
+        }
+        
+        .nav-icon {
+            transition: all 0.3s ease;
+            font-size: 1.25rem;
+        }
+        
+        .nav-icon.active {
+            transform: translateY(-5px);
+            color: var(--primary);
+        }
+        
+        /* Main Content */
+        .main-content {
+            padding-bottom: 80px;
+            background: var(--light-bg);
+        }
+        
+        /* Canvas Container */
+        #canvas-container {
+            position: relative;
+            width: 100%;
+            height: 60vh;
+            background: linear-gradient(to bottom, #1e3a8a, #0f172a);
+            border-radius: 0 0 20px 20px;
+            overflow: hidden;
+        }
+        
+        /* Side Panel */
+        #side-panel {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 100%;
+            height: 100vh;
+            background: white;
+            z-index: 99;
+            transition: right 0.4s ease;
+            padding: 80px 20px 25px;
+            overflow-y: auto;
+            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+        }
+        
+        #side-panel.open {
+            right: 0;
+        }
+        
+        .panel-section {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .panel-section h2 {
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            color: var(--highlight);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .panel-section h2 i {
+            font-size: 1.1rem;
+        }
+        
+        /* Planet Selector */
+        .planet-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .planet-option {
+            background: white;
+            color: var(--text-primary);
+            border: 2px solid #e5e7eb;
+            padding: 12px 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        
+        .planet-option:hover {
+            background: rgba(153, 153, 255, 0.1);
+            border-color: var(--highlight);
+        }
+        
+        .planet-option.active {
+            background: rgba(153, 153, 255, 0.2);
+            border-color: var(--highlight);
+            color: var(--highlight);
+        }
+        
+        /* Controls */
+        .control-group {
+            margin-bottom: 20px;
+        }
+        
+        .control-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .control-header label {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+        
+        .control-value {
+            font-size: 12px;
+            color: var(--highlight);
+            background: rgba(153, 153, 255, 0.1);
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            height: 6px;
+            background: #e5e7eb;
+            border-radius: 3px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 18px;
+            height: 18px;
+            background: var(--highlight);
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--highlight);
+        }
+        
+        .checkbox-group label {
+            color: var(--text-primary);
+        }
+        
+        /* Info Section */
+        .info-content h3 {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            color: var(--highlight);
+        }
+        
+        .info-content p {
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 12px;
+            color: var(--text-secondary);
+        }
+        
+        .planet-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .stat-item {
+            background: white;
+            padding: 10px;
+            border-radius: 6px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            border: 1px solid #e5e7eb;
+        }
+        
+        .stat-value {
+            font-size: 16px;
+            font-weight: bold;
+            color: var(--highlight);
+        }
+        
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        
+        /* Navigation Buttons */
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .nav-btn {
+            flex: 1;
+            background: white;
+            color: var(--text-primary);
+            border: 1px solid #e5e7eb;
+            padding: 10px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .nav-btn:hover {
+            background: rgba(153, 153, 255, 0.1);
+            border-color: var(--highlight);
+        }
+        
+        /* View Buttons */
+        .view-buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .view-btn {
+            flex: 1;
+            background: white;
+            color: var(--text-primary);
+            border: 1px solid #e5e7eb;
+            padding: 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+        
+        .view-btn:hover {
+            background: rgba(153, 153, 255, 0.1);
+        }
+        
+        .view-btn.active {
+            background: rgba(153, 153, 255, 0.2);
+            border-color: var(--highlight);
+            color: var(--highlight);
+        }
+        
+        /* Menu Button */
+        .menu-btn {
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .menu-btn:hover {
+            background: rgba(153, 153, 255, 0.1);
+        }
+        
+        /* Overlay */
+        #overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 98;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        #overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        /* Planet Labels */
+        .planet-label {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--text-primary);
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: bold;
+            pointer-events: none;
+            z-index: 10;
+            border: 1px solid var(--highlight);
+            backdrop-filter: blur(5px);
+            transform: translate(-50%, -100%);
+            white-space: nowrap;
+        }
+        
+        /* Loading */
+        #loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 20px;
+            color: var(--highlight);
+            z-index: 100;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 15px 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        /* Content Title */
+        .content-title {
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .content-title h1 {
+            font-size: 1.5rem;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+        }
+        
+        .content-title p {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+        
+        /* Close Button */
+        .close-panel {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--text-primary);
+            cursor: pointer;
+            z-index: 102;
+        }
+        
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--highlight);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #7c7cff;
+        }
+        
+        /* Responsive */
+        @media (max-width: 414px) {
+            .planet-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .planet-stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .planet-label {
+                font-size: 10px;
+                padding: 3px 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile App Container -->
+    <div class="app-container">
+        <!-- App Header -->
+        <header class="app-header">
+            <div class="app-logo">
+                <div class="app-logo-icon">
+                    <i class="fas fa-atom"></i>
+                </div>
+                <h1 class="app-name">TETA SAINS</h1>
+            </div>
+            <div class="flex items-center space-x-3">
+                <button class="menu-btn" id="menu-toggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </header>
+        
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Content Title -->
+            <div class="content-title">
+                <h1>Simulasi Tata Surya</h1>
+                <p>Jelajahi keajaiban antariksa dengan simulasi interaktif</p>
+            </div>
+            
+            <!-- Canvas Container -->
+            <div id="canvas-container">
+                <div id="loading">Memuat Simulasi Tata Surya...</div>
+            </div>
+            
+            <!-- Overlay -->
+            <div id="overlay"></div>
+
+            <!-- Side Panel -->
+            <div id="side-panel">
+                <button class="close-panel" id="close-panel">
+                    <i class="fas fa-times"></i>
+                </button>
+                <div class="panel-section">
+                    <h2><i class="fas fa-globe"></i> Pilih Tampilan</h2>
+                    <div class="view-buttons">
+                        <button class="view-btn active" data-view="overview">
+                            <i class="fas fa-binoculars"></i><br>Seluruh Tata Surya
+                        </button>
+                        <button class="view-btn" data-view="planet">
+                            <i class="fas fa-globe"></i><br>Fokus Planet
+                        </button>
+                    </div>
+                    
+                    <h2 style="margin-top: 20px;"><i class="fas fa-globe"></i> Pilih Planet</h2>
+                    <div class="planet-grid">
+                        <button class="planet-option" data-planet="sun">
+                            <i class="fas fa-sun"></i><br>Matahari
+                        </button>
+                        <button class="planet-option" data-planet="mercury">
+                            <i class="fas fa-circle"></i><br>Merkurius
+                        </button>
+                        <button class="planet-option" data-planet="venus">
+                            <i class="fas fa-circle"></i><br>Venus
+                        </button>
+                        <button class="planet-option" data-planet="earth">
+                            <i class="fas fa-globe-americas"></i><br>Bumi
+                        </button>
+                        <button class="planet-option" data-planet="mars">
+                            <i class="fas fa-circle"></i><br>Mars
+                        </button>
+                        <button class="planet-option" data-planet="jupiter">
+                            <i class="fas fa-circle"></i><br>Jupiter
+                        </button>
+                        <button class="planet-option" data-planet="saturn">
+                            <i class="fas fa-ring"></i><br>Saturnus
+                        </button>
+                        <button class="planet-option" data-planet="uranus">
+                            <i class="fas fa-circle"></i><br>Uranus
+                        </button>
+                        <button class="planet-option" data-planet="neptune">
+                            <i class="fas fa-circle"></i><br>Neptunus
+                        </button>
+                    </div>
+                    <div class="nav-buttons">
+                        <button class="nav-btn" id="prev-planet">
+                            <i class="fas fa-chevron-left"></i> Sebelumnya
+                        </button>
+                        <button class="nav-btn" id="next-planet">
+                            Selanjutnya <i class="fas fa-chevron-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h2><i class="fas fa-sliders-h"></i> Pengaturan Simulasi</h2>
+                    <div class="control-group">
+                        <div class="control-header">
+                            <label for="rotationSpeed">Kecepatan Rotasi</label>
+                            <span class="control-value" id="rotationSpeedValue">1.0</span>
+                        </div>
+                        <input type="range" id="rotationSpeed" min="0" max="3" step="0.1" value="1">
+                    </div>
+                    <div class="control-group">
+                        <div class="control-header">
+                            <label for="orbitSpeed">Kecepatan Orbit</label>
+                            <span class="control-value" id="orbitSpeedValue">1.0</span>
+                        </div>
+                        <input type="range" id="orbitSpeed" min="0" max="3" step="0.1" value="1">
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="showOrbits" checked>
+                        <label for="showOrbits">Tampilkan Orbit</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="showLabels" checked>
+                        <label for="showLabels">Tampilkan Label Planet</label>
+                    </div>
+                    <div class="checkbox-group">
+                        <input type="checkbox" id="autoRotate" checked>
+                        <label for="autoRotate">Rotasi Otomatis</label>
+                    </div>
+                </div>
+
+                <div class="panel-section">
+                    <h2><i class="fas fa-info-circle"></i> Informasi</h2>
+                    <div class="info-content">
+                        <h3 id="view-name">Seluruh Tata Surya</h3>
+                        <p id="view-description">Lihat keseluruhan tata surya dengan semua planet yang mengorbit Matahari.</p>
+                        
+                        <div class="planet-stats" id="overview-stats">
+                            <div class="stat-item">
+                                <div class="stat-value">8 Planet</div>
+                                <div class="stat-label">Jumlah Planet</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">~4.6 Miliar Tahun</div>
+                                <div class="stat-label">Usia Tata Surya</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">Matahari</div>
+                                <div class="stat-label">Pusat Sistem</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value">Neptunus</div>
+                                <div class="stat-label">Planet Terjauh</div>
+                            </div>
+                        </div>
+                        
+                        <div class="planet-stats" id="planet-stats" style="display: none;">
+                            <div class="stat-item">
+                                <div class="stat-value" id="stat-diameter">-</div>
+                                <div class="stat-label">Diameter</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" id="stat-mass">-</div>
+                                <div class="stat-label">Massa</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" id="stat-temp">-</div>
+                                <div class="stat-label">Suhu Permukaan</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-value" id="stat-period">-</div>
+                                <div class="stat-label">Periode Rotasi</div>
+                            </div>
+                        </div>
+                        
+                        <p style="margin-top: 15px;"><strong>Tips:</strong> Gunakan mouse untuk menggerakkan kamera, scroll untuk zoom, dan geser di layar untuk navigasi.</p>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <a href="dashboad siswa.html" class="nav-item">
+                <i class="fas fa-home nav-icon"></i>
+                <span>Beranda</span>
+            </a>
+            <a href="soal harian/dashboard soal.html" class="nav-item">
+                <i class="fas fa-flask nav-icon"></i>
+                <span>Soal Harian</span>
+            </a>
+            <a href="ai/nayra.html" class="nav-item">
+                <i class="fas fa-robot nav-icon"></i>
+                <span>Nayra AI</span>
+            </a>
+            <a href="materi harian/kategori materi.html" class="nav-item">
+                <i class="fas fa-chalkboard-teacher nav-icon"></i>
+                <span>Materi Harian</span>
+            </a>
+            <a href="profil/profil.html" class="nav-item">
+                <i class="fas fa-user nav-icon"></i>
+                <span>Profil</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Three.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+    
+    <script>
+        // Inisialisasi scene, camera, dan renderer
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 5000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(window.devicePixelRatio);
+        document.getElementById('canvas-container').appendChild(renderer.domElement);
+        
+        // Kontrol orbit
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = 0.05;
+        controls.minDistance = 50;
+        controls.maxDistance = 2000;
+        
+        // Posisi kamera awal - melihat keseluruhan tata surya
+        camera.position.set(0, 300, 500);
+        controls.target.set(0, 0, 0);
+        
+        // Sembunyikan loading screen setelah beberapa detik
+        setTimeout(() => {
+            document.getElementById('loading').style.display = 'none';
+        }, 3000);
+        
+        // Variabel untuk menyimpan objek tata surya
+        let solarSystem = {
+            sun: null,
+            planets: {},
+            orbits: {},
+            labels: {}
+        };
+
+        // Variabel untuk mode tampilan
+        let currentView = 'overview';
+        let cameraTarget = null;
+        let isFollowingPlanet = false;
+        
+        // Data untuk planet-planet dengan URL tekstur lokal
+        const planetData = {
+            'sun': {
+                name: 'Matahari',
+                radius: 40,
+                textureUrl: 'textures/sun.jpg', // Ganti dengan path ke file JPG Anda
+                description: 'Bintang di pusat tata surya kita, sumber energi bagi kehidupan di Bumi. Terdiri dari 99.86% massa total tata surya.',
+                stats: {
+                    diameter: '1.392.700 km',
+                    mass: '1.989 × 10³⁰ kg',
+                    temp: '5.500°C',
+                    period: '25-35 hari'
+                }
+            },
+            'mercury': {
+                name: 'Merkurius',
+                radius: 3,
+                textureUrl: 'textures/mercury.jpg', // Ganti dengan path ke file JPG Anda
+                distance: 100,
+                speed: 4.1,
+                description: 'Planet terkecil dan terdekat dengan Matahari. Tidak memiliki satelit alami dan atmosfer yang signifikan.',
+                stats: {
+                    diameter: '4.879 km',
+                    mass: '3.301 × 10²³ kg',
+                    temp: '167°C',
+                    period: '59 hari'
+                }
+            },
+            'venus': {
+                name: 'Venus',
+                radius: 5,
+                textureUrl: 'textures/venus.jpg', // Ganti dengan path ke file JPG Anda
+                distance: 130,
+                speed: 3.0,
+                description: 'Planet terdekat kedua dari Matahari, sering disebut "bintang kejora". Memiliki atmosfer tebal beracun.',
+                stats: {
+                    diameter: '12.104 km',
+                    mass: '4.867 × 10²⁴ kg',
+                    temp: '462°C',
+                    period: '243 hari'
+                }
+            },
+            'earth': {
+                name: 'Bumi',
+                radius: 5.2,
+                textureUrl: 'textures/earth.jpg', // Ganti dengan path ke file JPG Anda
+                distance: 170,
+                speed: 2.5,
+                description: 'Planet ketiga dari Matahari, satu-satunya planet yang diketahui mendukung kehidupan. Memiliki satu satelit alami, Bulan.',
+                stats: {
+                    diameter: '12.742 km',
+                    mass: '5.972 × 10²⁴ kg',
+                    temp: '15°C',
+                    period: '1 hari'
+                }
+            },
+            'mars': {
+                name: 'Mars',
+                radius: 3.5,
+                textureUrl: 'textures/mars.jpg', // Ganti dengan path ke file JPG Anda
+                distance: 210,
+                speed: 2.0,
+                description: 'Planet keempat dari Matahari, sering disebut "planet merah" karena warna permukaannya yang kemerahan.',
+                stats: {
+                    diameter: '6.779 km',
+                    mass: '6.39 × 10²³ kg',
+                    temp: '-65°C',
+                    period: '1.03 hari'
+                }
+            },
+            'jupiter': {
+                name: 'Jupiter',
+                radius: 12,
+                textureUrl: 'textures/jupiter.jpg', // Ganti dengan path ke file JPG Anda
+                distance: 280,
+                speed: 1.3,
+                description: 'Planet terbesar dalam tata surya, planet gas raksasa dengan ciri khas Bintik Merah Besar.',
+                stats: {
+                    diameter: '139.820 km',
+                    mass: '1.898 × 10²⁷ kg',
+                    temp: '-110°C',
+                    period: '0.41 hari'
+                }
+            },
+            'saturn': {
+                name: 'Saturnus',
+                radius: 10,
+                textureUrl: 'textures/saturn.jpg', // Ganti dengan path ke file JPG Anda
+                glbUrl: 'models/saturn.glb', // Ganti dengan path ke file GLB Anda
+                distance: 350,
+                speed: 1.0,
+                description: 'Planet keenam dari Matahari, terkenal dengan sistem cincinnya yang menakjubkan.',
+                stats: {
+                    diameter: '116.460 km',
+                    mass: '5.683 × 10²⁶ kg',
+                    temp: '-140°C',
+                    period: '0.45 hari'
+                }
+            },
+            'uranus': {
+                name: 'Uranus',
+                radius: 7,
+                textureUrl: 'textures/uranus.jpg', // Ganti dengan path ke file JPG Anda
+                distance: 420,
+                speed: 0.7,
+                description: 'Planet ketujuh dari Matahari, planet es raksasa dengan sumbu rotasi yang sangat miring.',
+                stats: {
+                    diameter: '50.724 km',
+                    mass: '8.681 × 10²⁵ kg',
+                    temp: '-195°C',
+                    period: '0.72 hari'
+                }
+            },
+            'neptune': {
+                name: 'Neptunus',
+                radius: 6.8,
+                textureUrl: 'textures/neptune.jpg', // Ganti dengan path ke file JPG Anda
+                distance: 490,
+                speed: 0.5,
+                description: 'Planet terjauh dari Matahari, planet es raksasa dengan angin terkuat dalam tata surya.',
+                stats: {
+                    diameter: '49.244 km',
+                    mass: '1.024 × 10²⁶ kg',
+                    temp: '-200°C',
+                    period: '0.67 hari'
+                }
+            }
+        };
+
+        // Panel control functions
+        function setupPanelControls() {
+            const menuToggle = document.getElementById('menu-toggle');
+            const sidePanel = document.getElementById('side-panel');
+            const overlay = document.getElementById('overlay');
+            const closePanel = document.getElementById('close-panel');
+
+            // Toggle panel
+            menuToggle.addEventListener('click', () => {
+                sidePanel.classList.toggle('open');
+                overlay.classList.toggle('active');
+            });
+
+            // Close panel when clicking overlay
+            overlay.addEventListener('click', () => {
+                sidePanel.classList.remove('open');
+                overlay.classList.remove('active');
+            });
+
+            // Close panel when clicking close button
+            closePanel.addEventListener('click', () => {
+                sidePanel.classList.remove('open');
+                overlay.classList.remove('active');
+            });
+
+            // Update control values display
+            document.getElementById('rotationSpeed').addEventListener('input', function(e) {
+                document.getElementById('rotationSpeedValue').textContent = e.target.value;
+            });
+
+            document.getElementById('orbitSpeed').addEventListener('input', function(e) {
+                document.getElementById('orbitSpeedValue').textContent = e.target.value;
+            });
+
+            // Navigation buttons
+            document.getElementById('next-planet').addEventListener('click', nextPlanet);
+            document.getElementById('prev-planet').addEventListener('click', prevPlanet);
+
+            // Toggle orbits
+            document.getElementById('showOrbits').addEventListener('change', function(e) {
+                Object.values(solarSystem.orbits).forEach(orbit => {
+                    orbit.visible = e.target.checked;
+                });
+            });
+
+            // Toggle labels
+            document.getElementById('showLabels').addEventListener('change', function(e) {
+                Object.values(solarSystem.labels).forEach(label => {
+                    label.element.style.display = e.target.checked ? 'block' : 'none';
+                });
+            });
+
+            // View buttons
+            document.querySelectorAll('.view-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    const viewType = this.getAttribute('data-view');
+                    switchView(viewType);
+                });
+            });
+        }
+
+        // Buat material planet dengan tekstur
+        function createPlanetMaterial(textureUrl, emissive = false) {
+            const textureLoader = new THREE.TextureLoader();
+            
+            // Fallback jika tekstur gagal dimuat
+            const fallbackColor = emissive ? 0xff9900 : 0x888888;
+            
+            try {
+                const texture = textureLoader.load(textureUrl, undefined, undefined, function(err) {
+                    console.warn('Gagal memuat tekstur:', textureUrl, err);
+                });
+                
+                if (emissive) {
+                    // Material untuk matahari dengan emisi
+                    return new THREE.MeshBasicMaterial({ 
+                        map: texture,
+                        emissive: 0xff6600,
+                        emissiveIntensity: 1.5
+                    });
+                } else {
+                    // Material untuk planet - gunakan BasicMaterial agar lebih terang
+                    return new THREE.MeshBasicMaterial({ 
+                        map: texture
+                    });
+                }
+            } catch (error) {
+                console.warn('Menggunakan material fallback untuk:', textureUrl);
+                return new THREE.MeshBasicMaterial({ 
+                    color: fallbackColor
+                });
+            }
+        }
+
+        // Buat orbit
+        function createOrbit(radius, color = 0x444444) {
+            const orbitGeometry = new THREE.RingGeometry(radius - 0.5, radius + 0.5, 128);
+            const orbitMaterial = new THREE.MeshBasicMaterial({ 
+                color: color, 
+                side: THREE.DoubleSide,
+                transparent: true,
+                opacity: 0.2
+            });
+            const orbit = new THREE.Mesh(orbitGeometry, orbitMaterial);
+            orbit.rotation.x = Math.PI / 2;
+            return orbit;
+        }
+
+        // Buat label untuk planet
+        function createPlanetLabel(planetName, planet) {
+            const label = document.createElement('div');
+            label.className = 'planet-label';
+            label.textContent = planetName;
+            label.style.display = document.getElementById('showLabels').checked ? 'block' : 'none';
+            document.body.appendChild(label);
+            
+            return {
+                element: label,
+                update: function() {
+                    // Update posisi label berdasarkan posisi planet di layar
+                    const vector = new THREE.Vector3();
+                    planet.mesh.getWorldPosition(vector);
+                    vector.project(camera);
+                    
+                    const x = (vector.x * 0.5 + 0.5) * window.innerWidth;
+                    const y = (-(vector.y * 0.5) + 0.5) * window.innerHeight;
+                    
+                    // Tampilkan label hanya jika planet terlihat di layar
+                    if (vector.z < 1 && 
+                        x > -50 && x < window.innerWidth + 50 && 
+                        y > -50 && y < window.innerHeight + 50) {
+                        this.element.style.left = x + 'px';
+                        this.element.style.top = (y - 20) + 'px';
+                        this.element.style.display = document.getElementById('showLabels').checked ? 'block' : 'none';
+                    } else {
+                        this.element.style.display = 'none';
+                    }
+                }
+            };
+        }
+
+        // Load model GLB untuk Saturnus
+        function loadGLBModel(url, callback) {
+            const loader = new THREE.GLTFLoader();
+            loader.load(url, function(gltf) {
+                callback(gltf.scene);
+            }, undefined, function(error) {
+                console.error('Gagal memuat model GLB:', error);
+                // Fallback ke sphere jika model GLB gagal dimuat
+                const fallbackGeometry = new THREE.SphereGeometry(planetData.saturn.radius, 32, 32);
+                const fallbackMaterial = createPlanetMaterial(planetData.saturn.textureUrl);
+                const fallbackMesh = new THREE.Mesh(fallbackGeometry, fallbackMaterial);
+                callback(fallbackMesh);
+            });
+        }
+
+        // Buat tata surya
+        function createSolarSystem() {
+            // Buat matahari dengan tekstur
+            const sunGeometry = new THREE.SphereGeometry(planetData.sun.radius, 64, 64);
+            const sunMaterial = createPlanetMaterial(planetData.sun.textureUrl, true);
+            solarSystem.sun = new THREE.Mesh(sunGeometry, sunMaterial);
+            scene.add(solarSystem.sun);
+
+            // Buat label untuk matahari
+            solarSystem.labels.sun = createPlanetLabel('Matahari', { mesh: solarSystem.sun });
+
+            // Tambahkan point light untuk matahari
+            const sunLight = new THREE.PointLight(0xff9900, 5, 4000);
+            solarSystem.sun.add(sunLight);
+
+            // Tambahkan ambient light untuk pencahayaan planet
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+            scene.add(ambientLight);
+
+            // Tambahkan directional light untuk pencahayaan yang lebih baik
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1.0);
+            directionalLight.position.set(5, 3, 5);
+            scene.add(directionalLight);
+
+            // Buat planet-planet
+            Object.keys(planetData).forEach(planetKey => {
+                if (planetKey === 'sun') return;
+                
+                const data = planetData[planetKey];
+                
+                // Buat orbit
+                const orbit = createOrbit(data.distance);
+                scene.add(orbit);
+                solarSystem.orbits[planetKey] = orbit;
+                
+                // Untuk Saturnus, gunakan model GLB jika tersedia
+                if (planetKey === 'saturn' && data.glbUrl) {
+                    loadGLBModel(data.glbUrl, function(model) {
+                        // Skala model agar sesuai dengan ukuran planet - PERBAIKAN SKALA DI SINI
+                        // Hitung bounding box untuk mendapatkan ukuran asli model
+                        const box = new THREE.Box3().setFromObject(model);
+                        const size = box.getSize(new THREE.Vector3());
+                        const maxSize = Math.max(size.x, size.y, size.z);
+                        
+                        // Skala model agar sesuai dengan radius yang ditentukan
+                        const targetSize = data.radius * 2; // Diameter = radius * 2
+                        const scale = targetSize / maxSize * 1.5; // Faktor tambahan untuk menyesuaikan
+                        
+                        model.scale.set(scale, scale, scale);
+                        
+                        // Posisi awal planet
+                        const angle = Math.random() * Math.PI * 2;
+                        model.position.x = Math.cos(angle) * data.distance;
+                        model.position.z = Math.sin(angle) * data.distance;
+                        
+                        // Simpan informasi planet key di userData untuk referensi
+                        model.userData.planetKey = planetKey;
+                        
+                        scene.add(model);
+                        solarSystem.planets[planetKey] = {
+                            mesh: model,
+                            data: data,
+                            angle: angle
+                        };
+                        
+                        // Buat label untuk planet
+                        solarSystem.labels[planetKey] = createPlanetLabel(data.name, solarSystem.planets[planetKey]);
+                    });
+                } else {
+                    // Untuk planet lain, gunakan sphere biasa
+                    const planetGeometry = new THREE.SphereGeometry(data.radius, 32, 32);
+                    const planetMaterial = createPlanetMaterial(data.textureUrl);
+                    const planet = new THREE.Mesh(planetGeometry, planetMaterial);
+                    
+                    // Posisi awal planet
+                    const angle = Math.random() * Math.PI * 2;
+                    planet.position.x = Math.cos(angle) * data.distance;
+                    planet.position.z = Math.sin(angle) * data.distance;
+                    
+                    // Simpan informasi planet key di userData untuk referensi
+                    planet.userData.planetKey = planetKey;
+                    
+                    scene.add(planet);
+                    solarSystem.planets[planetKey] = {
+                        mesh: planet,
+                        data: data,
+                        angle: angle
+                    };
+                    
+                    // Buat label untuk planet
+                    solarSystem.labels[planetKey] = createPlanetLabel(data.name, solarSystem.planets[planetKey]);
+                }
+            });
+        }
+
+        // Switch antara tampilan overview dan fokus planet
+        function switchView(viewType) {
+            currentView = viewType;
+            
+            // Update tombol aktif
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`.view-btn[data-view="${viewType}"]`).classList.add('active');
+            
+            if (viewType === 'overview') {
+                // Kembali ke tampilan keseluruhan
+                camera.position.set(0, 400, 600);
+                controls.target.set(0, 0, 0);
+                cameraTarget = null;
+                isFollowingPlanet = false;
+                
+                // Update info
+                document.getElementById('view-name').textContent = 'Seluruh Tata Surya';
+                document.getElementById('view-description').textContent = 'Lihat keseluruhan tata surya dengan semua planet yang mengorbit Matahari.';
+                document.getElementById('overview-stats').style.display = 'grid';
+                document.getElementById('planet-stats').style.display = 'none';
+                
+                // Nonaktifkan tombol planet
+                document.querySelectorAll('.planet-option').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+            } else {
+                // Aktifkan mode fokus planet
+                document.getElementById('view-name').textContent = 'Fokus Planet';
+                document.getElementById('view-description').textContent = 'Pilih planet untuk melihat detail dan informasi spesifik.';
+                document.getElementById('overview-stats').style.display = 'none';
+                document.getElementById('planet-stats').style.display = 'grid';
+            }
+        }
+
+        // Fokus ke planet dengan kamera mengikuti
+        function focusOnPlanet(planetKey) {
+            if (currentView !== 'planet') {
+                switchView('planet');
+            }
+            
+            if (planetKey === 'sun') {
+                // Untuk matahari, posisikan kamera dengan jarak yang sesuai
+                camera.position.set(0, 80, 160);
+                controls.target.set(0, 0, 0);
+                cameraTarget = null;
+                isFollowingPlanet = false;
+            } else {
+                const planet = solarSystem.planets[planetKey];
+                if (planet) {
+                    // Set target untuk kamera mengikuti
+                    cameraTarget = planet.mesh;
+                    isFollowingPlanet = true;
+                    
+                    // Posisikan kamera di dekat planet
+                    const planetPosition = planet.mesh.position.clone();
+                    const cameraDistance = planet.data.radius * 8;
+                    
+                    // Posisi kamera di samping planet
+                    camera.position.copy(planetPosition);
+                    camera.position.x += cameraDistance;
+                    camera.position.y += cameraDistance * 0.5;
+                    
+                    controls.target.copy(planetPosition);
+                }
+            }
+            
+            // Update informasi planet
+            const data = planetData[planetKey];
+            document.getElementById('view-name').textContent = data.name;
+            document.getElementById('view-description').textContent = data.description;
+            
+            document.getElementById('stat-diameter').textContent = data.stats.diameter;
+            document.getElementById('stat-mass').textContent = data.stats.mass;
+            document.getElementById('stat-temp').textContent = data.stats.temp;
+            document.getElementById('stat-period').textContent = data.stats.period;
+            
+            // Update active button
+            document.querySelectorAll('.planet-option').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`.planet-option[data-planet="${planetKey}"]`).classList.add('active');
+        }
+
+        // Inisialisasi tata surya
+        createSolarSystem();
+        
+        // Setup panel controls
+        setupPanelControls();
+        
+        // Variabel untuk animasi
+        let time = 0;
+        
+        // Event listener untuk kontrol
+        document.getElementById('rotationSpeed').addEventListener('input', function(e) {
+            // Akan digunakan dalam animasi
+        });
+        
+        document.getElementById('orbitSpeed').addEventListener('input', function(e) {
+            // Akan digunakan dalam animasi
+        });
+        
+        // Event listener untuk pemilih planet
+        document.querySelectorAll('.planet-option').forEach(button => {
+            button.addEventListener('click', function() {
+                const planetKey = this.getAttribute('data-planet');
+                focusOnPlanet(planetKey);
+            });
+        });
+        
+        // Fungsi navigasi planet
+        function nextPlanet() {
+            if (currentView !== 'planet') return;
+            
+            const buttons = document.querySelectorAll('.planet-option');
+            const current = document.querySelector('.planet-option.active');
+            let nextIndex = Array.from(buttons).indexOf(current) + 1;
+            if (nextIndex >= buttons.length) nextIndex = 0;
+            const planetKey = buttons[nextIndex].getAttribute('data-planet');
+            focusOnPlanet(planetKey);
+        }
+
+        function prevPlanet() {
+            if (currentView !== 'planet') return;
+            
+            const buttons = document.querySelectorAll('.planet-option');
+            const current = document.querySelector('.planet-option.active');
+            let prevIndex = Array.from(buttons).indexOf(current) - 1;
+            if (prevIndex < 0) prevIndex = buttons.length - 1;
+            const planetKey = buttons[prevIndex].getAttribute('data-planet');
+            focusOnPlanet(planetKey);
+        }
+        
+        // Fungsi animasi dengan kamera mengikuti planet
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            time += 0.01;
+            
+            const rotationSpeed = parseFloat(document.getElementById('rotationSpeed').value);
+            const orbitSpeed = parseFloat(document.getElementById('orbitSpeed').value);
+            
+            // Rotasi matahari
+            if (solarSystem.sun && document.getElementById('autoRotate').checked) {
+                solarSystem.sun.rotation.y += 0.002 * rotationSpeed;
+            }
+            
+            // Gerakan planet
+            Object.keys(solarSystem.planets).forEach(planetKey => {
+                const planet = solarSystem.planets[planetKey];
+                if (planet) {
+                    const data = planet.data;
+                    
+                    // Update orbit
+                    planet.angle += (data.speed / 100) * orbitSpeed;
+                    
+                    // Posisi planet
+                    const distance = data.distance;
+                    planet.mesh.position.x = Math.cos(planet.angle) * distance;
+                    planet.mesh.position.z = Math.sin(planet.angle) * distance;
+                    
+                    // Rotasi planet
+                    if (document.getElementById('autoRotate').checked) {
+                        planet.mesh.rotation.y += 0.01 * rotationSpeed;
+                    }
+                }
+            });
+            
+            // Jika kamera sedang mengikuti planet, update posisi kamera
+            if (isFollowingPlanet && cameraTarget) {
+                const planetPosition = cameraTarget.position.clone();
+                const planetKey = cameraTarget.userData?.planetKey;
+                const cameraDistance = planetData[planetKey]?.radius * 8 || 40;
+                
+                // Hitung posisi kamera yang mengikuti planet
+                camera.position.copy(planetPosition);
+                camera.position.x += cameraDistance;
+                camera.position.y += cameraDistance * 0.5;
+                
+                controls.target.copy(planetPosition);
+            }
+            
+            // Update posisi semua label
+            Object.values(solarSystem.labels).forEach(label => {
+                if (label && label.update) {
+                    label.update();
+                }
+            });
+            
+            controls.update();
+            renderer.render(scene, camera);
+        }
+        
+        animate();
+        
+        // Handle resize window
+        window.addEventListener('resize', function() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        // Swipe functionality untuk mobile
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        document.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+
+        document.addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        });
+
+        function handleSwipe() {
+            const swipeThreshold = 50;
+            
+            if (touchEndX < touchStartX - swipeThreshold && currentView === 'planet') {
+                nextPlanet();
+            }
+            
+            if (touchEndX > touchStartX + swipeThreshold && currentView === 'planet') {
+                prevPlanet();
+            }
+        }
+
+        // Navigasi planet dengan keyboard
+        document.addEventListener('keydown', e => {
+            if (currentView !== 'planet') return;
+            
+            if (e.key === 'ArrowLeft') {
+                prevPlanet();
+            } else if (e.key === 'ArrowRight') {
+                nextPlanet();
+            }
+        });
+
+        // Simple interaction for bottom nav
+        document.addEventListener('DOMContentLoaded', function() {
+            const navItems = document.querySelectorAll('.nav-item');
+            
+            navItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    navItems.forEach(nav => {
+                        nav.classList.remove('active');
+                        nav.querySelector('.nav-icon').classList.remove('active');
+                    });
+                    
+                    this.classList.add('active');
+                    this.querySelector('.nav-icon').classList.add('active');
+                });
+            });
+        });
+    </script>
+</body>
+</html>

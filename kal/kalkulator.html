@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator Ilmiah - TETA SAINS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #38b2ac;
+            --secondary: #0e7490;
+            --accent: #f59e0b;
+            --physics: #3b82f6;
+            --chemistry: #10b981;
+            --biology: #8b5cf6;
+            --astronomy: #ec4899;
+        }
+        
+        body {
+            font-family: 'Baloo 2', cursive;
+            background-color: #f8fafc;
+        }
+        
+        .app-container {
+            max-width: 414px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            max-width: 414px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            background: white;
+            z-index: 10;
+            height: 70px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+            text-decoration: none;
+            flex: 1;
+            height: 100%;
+            padding: 0.5rem 0;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item span {
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
+        
+        .nav-item.active {
+            color: var(--primary);
+        }
+        
+        .nav-icon {
+            transition: all 0.3s ease;
+            font-size: 1.25rem;
+        }
+        
+        .nav-icon.active {
+            transform: translateY(-5px);
+            color: var(--primary);
+        }
+        
+        .app-logo {
+            display: flex;
+            align-items: center;
+        }
+        
+        .app-logo-icon {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 8px;
+        }
+        
+        .app-name {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: #60a5fa;
+        }
+
+        /* Kalkulator Styles */
+        .calc-container {
+            padding: 1rem;
+            background: white;
+        }
+        
+        .calc {
+            width: 100%;
+            background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 8px 30px rgba(2, 6, 23, 0.15);
+            border: 1px solid #e2e8f0;
+        }
+        
+        .display {
+            background: rgba(255,255,255,0.03);
+            padding: 14px;
+            border-radius: 8px;
+            min-height: 64px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 6px;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 1rem;
+        }
+        
+        .expr {
+            font-size: 14px;
+            color: #64748b;
+            word-break: break-all;
+        }
+        
+        .out {
+            font-size: 22px;
+            font-weight: 600;
+        }
+        
+        .row {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .calc-btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 8px;
+            border: 0;
+            background: #f1f5f9;
+            color: #334155;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.2s;
+            font-family: 'Baloo 2', cursive;
+        }
+        
+        .calc-btn:hover {
+            background: #e2e8f0;
+        }
+        
+        .calc-btn:active {
+            transform: translateY(1px);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        .calc-btn.wide {
+            flex: 2;
+        }
+        
+        .calc-btn.orange {
+            background: linear-gradient(180deg, #ff9f43, #ff7a18);
+            color: #06121a;
+        }
+        
+        .calc-btn.gray {
+            background: #f8fafc;
+            color: #64748b;
+        }
+        
+        .small {
+            font-size: 12px;
+            padding: 8px;
+        }
+        
+        .top-controls {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+        
+        .toggle {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+        }
+        
+        .hint {
+            font-size: 12px;
+            color: #94a3b8;
+            margin-top: 8px;
+            text-align: center;
+        }
+        
+        @media (max-width: 420px) {
+            .calc {
+                width: 100%;
+            }
+        }
+        
+        /* Switch styling */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 20px;
+        }
+        
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #cbd5e1;
+            transition: .4s;
+            border-radius: 20px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: #38b2ac;
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile App Container -->
+    <div class="app-container">
+        <!-- App Header -->
+        <header class="bg-gradient-to-r from-blue-100 to-blue-50 p-4 text-white">
+            <div class="flex justify-between items-center">
+                <div class="app-logo">
+                    <div class="app-logo-icon" style="background: #9999ff; color: white;">
+                        <i class="fas fa-atom"></i>
+                    </div>
+                    <h1 class="app-name" style="color: #9999ff;">TETA SAINS</h1>
+                </div>
+                
+            </div>
+        </header>
+        
+        <!-- Main Content Area -->
+        <main class="pb-20">
+            <div class="calc-container">
+                <div class="calc" role="application" aria-label="Kalkulator Ilmiah">
+                    <div class="top-controls">
+                        <div class="toggle">
+                            <label for="deg">Deg</label>
+                            <label class="switch">
+                                <input id="deg" type="checkbox" title="Gunakan derajat (deg). Jika mati -> radian" />
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div style="margin-left:auto;display:flex;gap:6px">
+                            <button id="mc" class="calc-btn small gray">MC</button>
+                            <button id="mr" class="calc-btn small gray">MR</button>
+                            <button id="mplus" class="calc-btn small gray">M+</button>
+                            <button id="mminus" class="calc-btn small gray">M-</button>
+                        </div>
+                    </div>
+
+                    <div class="display">
+                        <div id="expr" class="expr">0</div>
+                        <div id="out" class="out">0</div>
+                    </div>
+
+                    <div class="row">
+                        <button class="calc-btn gray" data-fn="clear">C</button>
+                        <button class="calc-btn gray" data-fn="back">⌫</button>
+                        <button class="calc-btn gray" data-in="(">(</button>
+                        <button class="calc-btn gray" data-in=")">)</button>
+                    </div>
+
+                    <div class="row">
+                        <button class="calc-btn" data-fn="func" data-val="sin">sin</button>
+                        <button class="calc-btn" data-fn="func" data-val="cos">cos</button>
+                        <button class="calc-btn" data-fn="func" data-val="tan">tan</button>
+                        <button class="calc-btn" data-fn="op" data-val="^">xʸ</button>
+                    </div>
+
+                    <div class="row">
+                        <button class="calc-btn" data-fn="func" data-val="asin">asin</button>
+                        <button class="calc-btn" data-fn="func" data-val="acos">acos</button>
+                        <button class="calc-btn" data-fn="func" data-val="atan">atan</button>
+                        <button class="calc-btn" data-fn="func" data-val="sqrt">√</button>
+                    </div>
+
+                    <div class="row">
+                        <button class="calc-btn" data-in="7">7</button>
+                        <button class="calc-btn" data-in="8">8</button>
+                        <button class="calc-btn" data-in="9">9</button>
+                        <button class="calc-btn" data-fn="op" data-val="/">÷</button>
+                    </div>
+
+                    <div class="row">
+                        <button class="calc-btn" data-in="4">4</button>
+                        <button class="calc-btn" data-in="5">5</button>
+                        <button class="calc-btn" data-in="6">6</button>
+                        <button class="calc-btn" data-fn="op" data-val="*">×</button>
+                    </div>
+
+                    <div class="row">
+                        <button class="calc-btn" data-in="1">1</button>
+                        <button class="calc-btn" data-in="2">2</button>
+                        <button class="calc-btn" data-in="3">3</button>
+                        <button class="calc-btn" data-fn="op" data-val="-">−</button>
+                    </div>
+
+                    <div class="row">
+                        <button class="calc-btn" data-in="0">0</button>
+                        <button class="calc-btn" data-in=".">.</button>
+                        <button class="calc-btn" data-fn="factorial">n!</button>
+                        <button class="calc-btn orange" data-fn="op" data-val="+">+</button>
+                    </div>
+
+                    <div class="row">
+                        <button class="calc-btn" data-fn="const" data-val="pi">π</button>
+                        <button class="calc-btn" data-fn="const" data-val="e">e</button>
+                        <button class="calc-btn" data-fn="log">log</button>
+                        <button id="equals" class="calc-btn wide orange">=</button>
+                    </div>
+
+                    <div class="hint">Keyboard: angka, + - * / ( ) .  Enter = evaluate  Backspace delete</div>
+                </div>
+            </div>
+        </main>
+        
+        <!-- BOTTOM NAVIGATION -->
+        <nav class="bottom-nav">
+            <a href="dashboad siswa.html" class="nav-item">
+                <i class="fas fa-home nav-icon"></i>
+                <span>Beranda</span>
+            </a>
+            <a href="soal harian/dashboard soal.html" class="nav-item">
+                <i class="fas fa-flask nav-icon"></i>
+                <span>Soal Harian</span>
+            </a>
+            <a href="ai/nayra.html" class="nav-item">
+                <i class="fas fa-robot nav-icon"></i>
+                <span>Nayra AI</span>
+            </a>
+            <a href="materi harian/kategori materi.html" class="nav-item">
+                <i class="fas fa-chalkboard-teacher nav-icon"></i>
+                <span>Materi Harian</span>
+            </a>
+            <a href="profil/profil.html" class="nav-item">
+                <i class="fas fa-user nav-icon"></i>
+                <span>Profil</span>
+            </a>
+        </nav>
+    </div>
+
+    <script>
+        (function(){
+            const exprEl = document.getElementById('expr');
+            const outEl = document.getElementById('out');
+            const degToggle = document.getElementById('deg');
+            let expr = '';
+            let memory = 0;
+
+            function updateDisplay(){
+                exprEl.textContent = expr || '0';
+            }
+
+            function safeFactorial(n){
+                n = Math.floor(n);
+                if(n < 0) return NaN;
+                if(n > 170) return Infinity; // avoid overflow
+                let r = 1;
+                for(let i=2;i<=n;i++) r *= i;
+                return r;
+            }
+
+            function applyFactorials(s){
+                // Replace occurrences like 5! or (3+2)! with factorial applied.
+                // We will handle simple numbers and parenthesis by evaluating inner and replacing conservatively.
+                // This is a simple approach and may not cover nested complex cases.
+                return s.replace(/(\([^()]+\)|\d+(?:\.\d+)?)(!+)/g, (m, a, bangs)=>{
+                    let val;
+                    try{ val = evaluateExpression(a); }catch(e){ return m; }
+                    for(let i=0;i<bangs.length;i++) val = safeFactorial(val);
+                    return '('+String(val)+')';
+                });
+            }
+
+            function toJS(s){
+                // convert ^ -> **, functions -> Math equivalents, log base10 etc.
+                s = s.replace(/\^/g,'**');
+                // add Math. for common functions, but trig functions handled separately to support deg toggle
+                s = s.replace(/\blog\b(?!10)/g,'__log__');
+                s = s.replace(/\blog10\b/g,'Math.log10');
+                s = s.replace(/\bln\b/g,'Math.log');
+                s = s.replace(/\be\b/g,'Math.E');
+                s = s.replace(/\bpi\b/g,'Math.PI');
+                s = s.replace(/\bsqrt\(/g,'Math.sqrt(');
+                s = s.replace(/\bexp\b/g,'Math.exp');
+                return s;
+            }
+
+            function wrapTrig(s){
+                // wrap sin,cos,tan,asin,acos,atan to convert deg->rad if needed
+                const isDeg = degToggle.checked;
+                const trig = ['sin','cos','tan','asin','acos','atan'];
+                trig.forEach(fn=>{
+                    const re = new RegExp(fn + '\\(','g');
+                    s = s.replace(re, (m)=> {
+                        if(isDeg && (fn.startsWith('a')===false)){
+                            // sin(x) -> Math.sin((x)*Math.PI/180)
+                            return `__${fn}__(`;
+                        } else if(isDeg && fn.startsWith('a')){
+                            // asin -> Math.asin(...) then convert to deg after
+                            return `__${fn}__(`;
+                        } else {
+                            return `__${fn}__(`;
+                        }
+                    });
+                });
+                return s;
+            }
+
+            function evaluateExpression(s){
+                if(!s) return 0;
+                // handle constants like pi and e
+                s = s.replace(/π/g,'pi');
+                s = s.replace(/×/g,'*').replace(/÷/g,'/').replace(/−/g,'-');
+                s = applyFactorials(s);
+                s = toJS(s);
+                s = wrapTrig(s);
+
+                // replace our placeholders with actual JS Math calls that consider degrees
+                const isDeg = degToggle.checked;
+                const map = {
+                    '__sin__': isDeg ? '(x=>Math.sin((x)*Math.PI/180))' : 'Math.sin',
+                    '__cos__': isDeg ? '(x=>Math.cos((x)*Math.PI/180))' : 'Math.cos',
+                    '__tan__': isDeg ? '(x=>Math.tan((x)*Math.PI/180))' : 'Math.tan',
+                    '__asin__': isDeg ? '(x=>Math.asin(x)*180/Math.PI)' : 'Math.asin',
+                    '__acos__': isDeg ? '(x=>Math.acos(x)*180/Math.PI)' : 'Math.acos',
+                    '__atan__': isDeg ? '(x=>Math.atan(x)*180/Math.PI)' : 'Math.atan',
+                    '__log__': 'Math.log10'
+                };
+
+                Object.keys(map).forEach(k=>{
+                    s = s.replace(new RegExp(k,'g'), map[k]);
+                });
+
+                // at this point s should be a JS expression safe enough for Function
+                // Limit characters to allowed set for safety
+                if(!/^[0-9+\-*/()., MathPIEaxen*^\*\w%]*$/.test(s)){
+                    // allow letters from Math and our placeholders
+                }
+
+                // Evaluate
+                try{
+                    // Use Function to evaluate
+                    // also replace any accidental repeated commas
+                    const fn = new Function('return (' + s + ')');
+                    const res = fn();
+                    if(typeof res === 'number' && !isFinite(res)) return res;
+                    return Number(res);
+                }catch(e){
+                    throw e;
+                }
+            }
+
+            // Button handling
+            document.querySelectorAll('.calc-btn').forEach(btn=>{
+                btn.addEventListener('click', ()=>{
+                    const fin = btn.dataset.fn;
+                    const val = btn.dataset.val;
+                    const inp = btn.dataset.in;
+                    if(fin === 'clear') { expr = ''; outEl.textContent = '0'; updateDisplay(); return; }
+                    if(fin === 'back') { expr = expr.slice(0,-1); updateDisplay(); return; }
+                    if(fin === 'op') { expr += val; updateDisplay(); return; }
+                    if(fin === 'func') { expr += val + '('; updateDisplay(); return; }
+                    if(fin === 'const') { if(val==='pi') expr += 'pi'; else expr += 'e'; updateDisplay(); return; }
+                    if(fin === 'factorial') { expr += '!'; updateDisplay(); return; }
+                    if(fin === 'log') { expr += 'log('; updateDisplay(); return; }
+                    if(fin === 'mplus'){ try{ memory += Number(evaluateExpression(expr || outEl.textContent)); }catch(e){}; return; }
+                    if(fin === 'mminus'){ try{ memory -= Number(evaluateExpression(expr || outEl.textContent)); }catch(e){}; return; }
+                    if(btn.id === 'mr'){ expr = String(memory); updateDisplay(); return; }
+                    if(btn.id === 'mc'){ memory = 0; return; }
+                    if(btn.id === 'equals'){ try{ const r = evaluateExpression(expr); outEl.textContent = String(r); expr = String(r); updateDisplay(); }catch(e){ outEl.textContent = 'Error'; } return; }
+                    if(inp !== undefined){ expr += inp; updateDisplay(); return; }
+                });
+            });
+
+            // Keyboard support
+            window.addEventListener('keydown', (e)=>{
+                if(e.key.match(/[0-9\.\(\)\+\-\*\/]/)) { expr += e.key; updateDisplay(); }
+                else if(e.key === 'Enter' || e.key === '=') { document.getElementById('equals').click(); }
+                else if(e.key === 'Backspace') { expr = expr.slice(0,-1); updateDisplay(); }
+                else if(e.key === '^') { expr += '^'; updateDisplay(); }
+            });
+
+            updateDisplay();
+        })();
+
+        // Simple interaction for bottom nav
+        document.addEventListener('DOMContentLoaded', function() {
+            const navItems = document.querySelectorAll('.nav-item');
+            
+            navItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    navItems.forEach(nav => {
+                        nav.classList.remove('active');
+                        nav.querySelector('.nav-icon').classList.remove('active');
+                    });
+                    
+                    this.classList.add('active');
+                    this.querySelector('.nav-icon').classList.add('active');
+                });
+            });
+        });
+    </script>
+</body>
+</html>

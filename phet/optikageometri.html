@@ -1,0 +1,1210 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Simulator Sinar Optik - Fisika Interaktif</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            background: #f8fafc;
+            color: #1e293b;
+            min-height: 100vh;
+            padding: 10px;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            width: 100%;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 15px;
+            padding: 15px 10px;
+            background: #3b82f6;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            color: white;
+        }
+        
+        h1 {
+            font-size: 1.6rem;
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+        
+        .subtitle {
+            font-size: 0.95rem;
+            opacity: 0.9;
+            line-height: 1.4;
+        }
+        
+        .content {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .panel {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
+            border: 1px solid #e2e8f0;
+            width: 100%;
+        }
+        
+        .simulation-panel {
+            height: 350px;
+            position: relative;
+            overflow: hidden;
+            order: 1;
+        }
+        
+        #simulation-container {
+            width: 100%;
+            height: 100%;
+            border-radius: 8px;
+            background: #0f172a;
+            border: 1px solid #334155;
+        }
+        
+        .controls-panel {
+            order: 2;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 15px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 12px 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            color: #475569;
+            font-size: 0.95rem;
+            touch-action: manipulation;
+            border-right: 1px solid #e2e8f0;
+        }
+        
+        .tab:last-child {
+            border-right: none;
+        }
+        
+        .tab.active {
+            background: #3b82f6;
+            color: white;
+            font-weight: 600;
+        }
+        
+        .control-group {
+            margin-bottom: 18px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #475569;
+            font-size: 0.95rem;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            margin-bottom: 5px;
+            height: 32px;
+            -webkit-appearance: none;
+            background: #e2e8f0;
+            border-radius: 16px;
+            outline: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #3b82f6;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        
+        .value-display {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: #64748b;
+            margin-top: 3px;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            flex-direction: column;
+        }
+        
+        button {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            background: #3b82f6;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            font-size: 1rem;
+            touch-action: manipulation;
+        }
+        
+        button:hover, button:active {
+            background: #2563eb;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+        }
+        
+        button.reset {
+            background: #ef4444;
+        }
+        
+        button.reset:hover, button.reset:active {
+            background: #dc2626;
+        }
+        
+        .data-panel {
+            order: 3;
+            margin-top: 0;
+        }
+        
+        .data-panel h2 {
+            font-size: 1.3rem;
+            margin-bottom: 12px;
+            color: #1e293b;
+        }
+        
+        .optical-components {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .component-btn {
+            padding: 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            background: white;
+            color: #475569;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            font-size: 0.9rem;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+        
+        .component-btn:hover, .component-btn.active {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+        
+        .charts {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .chart-container {
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 12px;
+            height: 250px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+        
+        .data-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 15px;
+            align-items: stretch;
+        }
+        
+        .data-controls div {
+            display: flex;
+            justify-content: center;
+        }
+        
+        .info-display {
+            font-weight: 600;
+            color: #3b82f6;
+            font-size: 1rem;
+            text-align: center;
+            padding: 8px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .instructions {
+            margin-top: 20px;
+            padding: 12px;
+            background: #f8fafc;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .instructions h3 {
+            margin-bottom: 8px;
+            color: #3b82f6;
+            font-size: 1rem;
+        }
+        
+        .instructions ul {
+            margin-left: 18px;
+        }
+        
+        .instructions li {
+            margin-bottom: 6px;
+        }
+        
+        /* Responsive improvements */
+        @media (min-width: 768px) {
+            body {
+                padding: 15px;
+            }
+            
+            .simulation-panel {
+                height: 400px;
+            }
+            
+            .buttons {
+                flex-direction: row;
+            }
+            
+            .data-controls {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+            
+            .optical-components {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .content {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 20px;
+            }
+            
+            .simulation-panel {
+                grid-column: 1;
+                height: 500px;
+            }
+            
+            .controls-panel {
+                grid-column: 2;
+            }
+            
+            .data-panel {
+                grid-column: 1 / -1;
+            }
+            
+            .charts {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 20px;
+            }
+        }
+        
+        /* Touch-friendly improvements */
+        .slider-container {
+            padding: 5px 0;
+        }
+        
+        /* Mobile landscape optimization */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .simulation-panel {
+                height: 250px;
+            }
+            
+            .chart-container {
+                height: 200px;
+            }
+            
+            .buttons {
+                flex-direction: row;
+            }
+        }
+        
+        .ray-info {
+            background: #f1f5f9;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            line-height: 1.4;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .ray-info div {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+        }
+        
+        .ray-info span:first-child {
+            font-weight: 600;
+            color: #475569;
+        }
+        
+        .ray-info span:last-child {
+            color: #3b82f6;
+            font-weight: 600;
+        }
+        
+        .data-controls button {
+            background: #10b981;
+        }
+        
+        .data-controls button:hover {
+            background: #059669;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Simulator Sinar Optik Interaktif</h1>
+            <p class="subtitle">Visualisasi Pembiasan, Pemantulan, dan Lensa</p>
+        </header>
+        
+        <div class="content">
+            <div class="panel simulation-panel">
+                <div id="simulation-container"></div>
+            </div>
+            
+            <div class="panel controls-panel">
+                <div class="tabs">
+                    <div class="tab active" data-type="single">Sinar Tunggal</div>
+                    <div class="tab" data-type="multiple">Sinar Ganda</div>
+                    <div class="tab" data-type="prism">Prisma</div>
+                </div>
+                
+                <div class="control-group">
+                    <label for="incidence-angle">Sudut Datang (derajat):</label>
+                    <div class="slider-container">
+                        <input type="range" id="incidence-angle" min="0" max="90" value="45" step="1">
+                    </div>
+                    <div class="value-display">
+                        <span>0°</span>
+                        <span id="incidence-angle-value">45°</span>
+                        <span>90°</span>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <label for="refractive-index">Indeks Bias Medium 2:</label>
+                    <div class="slider-container">
+                        <input type="range" id="refractive-index" min="1.0" max="2.5" value="1.5" step="0.1">
+                    </div>
+                    <div class="value-display">
+                        <span>1.0</span>
+                        <span id="refractive-index-value">1.5</span>
+                        <span>2.5</span>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <label for="wavelength">Panjang Gelombang (nm):</label>
+                    <div class="slider-container">
+                        <input type="range" id="wavelength" min="380" max="780" value="550" step="10">
+                    </div>
+                    <div class="value-display">
+                        <span>380</span>
+                        <span id="wavelength-value">550 nm</span>
+                        <span>780</span>
+                    </div>
+                </div>
+                
+                <div class="buttons">
+                    <button id="trace-btn">Jalankan Sinar</button>
+                    <button id="reset-btn" class="reset">Reset</button>
+                </div>
+                
+                <div class="ray-info">
+                    <div>
+                        <span>Sudut Datang:</span>
+                        <span id="info-incidence-angle">45°</span>
+                    </div>
+                    <div>
+                        <span>Sudut Bias:</span>
+                        <span id="info-refraction-angle">28.1°</span>
+                    </div>
+                    <div>
+                        <span>Sudut Pantul:</span>
+                        <span id="info-reflection-angle">45°</span>
+                    </div>
+                    <div>
+                        <span>Koef. Refleksi:</span>
+                        <span id="info-reflection-coef">4.3%</span>
+                    </div>
+                </div>
+                
+                <div class="instructions">
+                    <h3>Petunjuk Penggunaan:</h3>
+                    <ul>
+                        <li>Pilih jenis simulasi (Sinar Tunggal, Sinar Ganda, atau Prisma)</li>
+                        <li>Atur sudut datang, indeks bias, dan panjang gelombang</li>
+                        <li>Klik "Jalankan Sinar" untuk memvisualisasikan jalur sinar</li>
+                        <li>Untuk mengubah sudut pandang: sentuh dan seret untuk memutar, cubit untuk zoom</li>
+                        <li>Tambahkan komponen optik dengan menekan tombol di bawah</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="panel data-panel">
+                <h2>Komponen Optik</h2>
+                
+                <div class="optical-components">
+                    <button class="component-btn" data-component="lens">Lensa Cembung</button>
+                    <button class="component-btn" data-component="concave-lens">Lensa Cekung</button>
+                    <button class="component-btn" data-component="mirror">Cermin Datar</button>
+                    <button class="component-btn" data-component="concave-mirror">Cermin Cekung</button>
+                    <button class="component-btn" data-component="convex-mirror">Cermin Cembung</button>
+                    <button class="component-btn" data-component="prism">Prisma</button>
+                    <button class="component-btn" data-component="filter">Filter Warna</button>
+                    <button class="component-btn" data-component="remove">Hapus Komponen</button>
+                </div>
+                
+                <h2>Grafik Intensitas</h2>
+                <div class="charts">
+                    <div class="chart-container">
+                        <canvas id="intensity-chart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="spectrum-chart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="data-controls">
+                    <div>
+                        <button id="download-btn">Unduh Data CSV</button>
+                    </div>
+                    <div class="info-display">
+                        <span id="status-display">Siap menjalankan sinar</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variabel global
+        let scene, camera, renderer, lightRay, boundary, opticalComponents = [];
+        let isTracing = false;
+        let incidenceAngle, refractiveIndex, wavelength;
+        let intensityData = [], spectrumData = [];
+        let intensityChart, spectrumChart;
+        
+        // Konstanta fisika
+        const SPEED_OF_LIGHT = 3e8; // m/s
+        const REFRACTIVE_INDEX_AIR = 1.0;
+        
+        // Inisialisasi Three.js
+        function initThreeJS() {
+            const container = document.getElementById('simulation-container');
+            
+            // Buat scene dengan latar belakang gelap
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x0f172a);
+            
+            // Buat kamera
+            camera = new THREE.PerspectiveCamera(60, container.clientWidth / container.clientHeight, 0.1, 1000);
+            camera.position.set(0, 5, 15);
+            camera.lookAt(0, 0, 0);
+            
+            // Buat renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            container.appendChild(renderer.domElement);
+            
+            // Tambahkan pencahayaan
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(10, 20, 5);
+            scene.add(directionalLight);
+            
+            // Buat bidang batas (interface antara dua medium)
+            const boundaryGeometry = new THREE.PlaneGeometry(20, 0.1);
+            const boundaryMaterial = new THREE.MeshBasicMaterial({ 
+                color: 0x3b82f6,
+                transparent: true,
+                opacity: 0.5
+            });
+            boundary = new THREE.Mesh(boundaryGeometry, boundaryMaterial);
+            boundary.rotation.x = Math.PI / 2;
+            boundary.position.y = 0;
+            scene.add(boundary);
+            
+            // Tambahkan grid untuk referensi
+            const gridHelper = new THREE.GridHelper(20, 20, 0x334155, 0x475569);
+            gridHelper.material.opacity = 0.3;
+            gridHelper.material.transparent = true;
+            scene.add(gridHelper);
+            
+            // Tambahkan sumbu koordinat
+            const axesHelper = new THREE.AxesHelper(5);
+            scene.add(axesHelper);
+            
+            // Label untuk medium
+            addTextLabel("Medium 1 (Udara)", -8, 2, 0, 0xffffff);
+            addTextLabel("Medium 2", -8, -2, 0, 0xffffff);
+            
+            // Kontrol sentuh untuk mobile
+            setupTouchControls();
+            
+            // Handle resize window
+            window.addEventListener('resize', () => {
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
+            });
+        }
+        
+        // Fungsi untuk menambahkan label teks
+        function addTextLabel(text, x, y, z, color = 0xffffff) {
+            const canvas = document.createElement('canvas');
+            const context = canvas.getContext('2d');
+            canvas.width = 256;
+            canvas.height = 128;
+            
+            context.fillStyle = 'rgba(0, 0, 0, 0)';
+            context.fillRect(0, 0, canvas.width, canvas.height);
+            
+            context.font = '24px Arial';
+            context.fillStyle = `rgb(${color >> 16}, ${(color >> 8) & 0xff}, ${color & 0xff})`;
+            context.textAlign = 'center';
+            context.fillText(text, canvas.width / 2, canvas.height / 2);
+            
+            const texture = new THREE.CanvasTexture(canvas);
+            const material = new THREE.SpriteMaterial({ map: texture });
+            const sprite = new THREE.Sprite(material);
+            sprite.position.set(x, y, z);
+            sprite.scale.set(4, 2, 1);
+            scene.add(sprite);
+        }
+        
+        // Setup kontrol sentuh
+        function setupTouchControls() {
+            let isTouching = false;
+            let previousTouchPosition = { x: 0, y: 0 };
+            
+            renderer.domElement.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                isTouching = true;
+                previousTouchPosition = {
+                    x: e.touches[0].clientX,
+                    y: e.touches[0].clientY
+                };
+            }, { passive: false });
+            
+            renderer.domElement.addEventListener('touchend', () => {
+                isTouching = false;
+            });
+            
+            renderer.domElement.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                if (!isTouching) return;
+                
+                const deltaMove = {
+                    x: e.touches[0].clientX - previousTouchPosition.x,
+                    y: e.touches[0].clientY - previousTouchPosition.y
+                };
+                
+                // Rotasi kamera
+                camera.position.x -= deltaMove.x * 0.02;
+                camera.position.y += deltaMove.y * 0.02;
+                camera.lookAt(0, 0, 0);
+                
+                previousTouchPosition = {
+                    x: e.touches[0].clientX,
+                    y: e.touches[0].clientY
+                };
+            }, { passive: false });
+        }
+        
+        // Inisialisasi grafik
+        function initCharts() {
+            // Grafik intensitas
+            const intensityCtx = document.getElementById('intensity-chart').getContext('2d');
+            intensityChart = new Chart(intensityCtx, {
+                type: 'line',
+                data: {
+                    labels: Array.from({length: 100}, (_, i) => i),
+                    datasets: [{
+                        label: 'Intensitas Sinar',
+                        data: Array(100).fill(0),
+                        borderColor: '#ef4444',
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Posisi',
+                                color: '#475569'
+                            },
+                            grid: { color: 'rgba(71, 85, 105, 0.1)' },
+                            ticks: { color: '#475569', maxTicksLimit: 8 }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Intensitas',
+                                color: '#475569'
+                            },
+                            grid: { color: 'rgba(71, 85, 105, 0.1)' },
+                            ticks: { color: '#475569', maxTicksLimit: 6 }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: { color: '#475569', font: { size: 12 } }
+                        }
+                    }
+                }
+            });
+            
+            // Grafik spektrum
+            const spectrumCtx = document.getElementById('spectrum-chart').getContext('2d');
+            spectrumChart = new Chart(spectrumCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['Merah', 'Jingga', 'Kuning', 'Hijau', 'Biru', 'Nila', 'Ungu'],
+                    datasets: [{
+                        label: 'Intensitas Spektrum',
+                        data: [70, 60, 80, 100, 85, 65, 50],
+                        backgroundColor: [
+                            '#ef4444', '#f97316', '#eab308', '#22c55e', 
+                            '#3b82f6', '#6366f1', '#a855f7'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Intensitas',
+                                color: '#475569'
+                            },
+                            grid: { color: 'rgba(71, 85, 105, 0.1)' },
+                            ticks: { color: '#475569' }
+                        },
+                        x: {
+                            ticks: { color: '#475569' }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: { color: '#475569', font: { size: 12 } }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Fungsi untuk menghitung warna dari panjang gelombang
+        function wavelengthToColor(wavelength) {
+            let r, g, b;
+            
+            if (wavelength >= 380 && wavelength < 440) {
+                r = -(wavelength - 440) / (440 - 380);
+                g = 0.0;
+                b = 1.0;
+            } else if (wavelength >= 440 && wavelength < 490) {
+                r = 0.0;
+                g = (wavelength - 440) / (490 - 440);
+                b = 1.0;
+            } else if (wavelength >= 490 && wavelength < 510) {
+                r = 0.0;
+                g = 1.0;
+                b = -(wavelength - 510) / (510 - 490);
+            } else if (wavelength >= 510 && wavelength < 580) {
+                r = (wavelength - 510) / (580 - 510);
+                g = 1.0;
+                b = 0.0;
+            } else if (wavelength >= 580 && wavelength < 645) {
+                r = 1.0;
+                g = -(wavelength - 645) / (645 - 580);
+                b = 0.0;
+            } else if (wavelength >= 645 && wavelength <= 780) {
+                r = 1.0;
+                g = 0.0;
+                b = 0.0;
+            } else {
+                r = 1.0;
+                g = 1.0;
+                b = 1.0;
+            }
+            
+            // Kurangi intensitas di dekat ujung spektrum
+            let factor;
+            if (wavelength >= 380 && wavelength < 420) {
+                factor = 0.3 + 0.7 * (wavelength - 380) / (420 - 380);
+            } else if (wavelength >= 420 && wavelength < 700) {
+                factor = 1.0;
+            } else if (wavelength >= 700 && wavelength <= 780) {
+                factor = 0.3 + 0.7 * (780 - wavelength) / (780 - 700);
+            } else {
+                factor = 1.0;
+            }
+            
+            return new THREE.Color(r * factor, g * factor, b * factor);
+        }
+        
+        // Fungsi untuk membuat sinar cahaya
+        function createLightRay() {
+            // Hapus sinar lama jika ada
+            if (lightRay) {
+                scene.remove(lightRay);
+            }
+            
+            // Buat material sinar dengan warna berdasarkan panjang gelombang
+            const rayColor = wavelengthToColor(wavelength);
+            const rayMaterial = new THREE.LineBasicMaterial({ 
+                color: rayColor,
+                linewidth: 3,
+                transparent: true,
+                opacity: 0.8
+            });
+            
+            // Hitung arah sinar berdasarkan sudut datang
+            const angleRad = incidenceAngle * Math.PI / 180;
+            const direction = new THREE.Vector3(
+                Math.sin(angleRad),
+                -Math.cos(angleRad),
+                0
+            );
+            
+            // Titik awal sinar
+            const startPoint = new THREE.Vector3(-8, 4, 0);
+            
+            // Titik di bidang batas
+            const t = -startPoint.y / direction.y;
+            const intersectionPoint = new THREE.Vector3(
+                startPoint.x + direction.x * t,
+                0,
+                0
+            );
+            
+            // Hitung sudut bias menggunakan hukum Snell
+            const sinTheta2 = (REFRACTIVE_INDEX_AIR / refractiveIndex) * Math.sin(angleRad);
+            let refractionAngle;
+            
+            if (Math.abs(sinTheta2) <= 1) {
+                refractionAngle = Math.asin(sinTheta2);
+            } else {
+                refractionAngle = Math.PI / 2; // Total internal reflection
+            }
+            
+            // Arah sinar bias
+            const refractedDirection = new THREE.Vector3(
+                Math.sin(refractionAngle),
+                -Math.cos(refractionAngle),
+                0
+            );
+            
+            // Buat geometri untuk sinar datang
+            const incidentGeometry = new THREE.BufferGeometry().setFromPoints([
+                startPoint,
+                intersectionPoint
+            ]);
+            
+            const incidentRay = new THREE.Line(incidentGeometry, rayMaterial);
+            
+            // Buat geometri untuk sinar pantul
+            const reflectedDirection = new THREE.Vector3(
+                Math.sin(angleRad),
+                Math.cos(angleRad),
+                0
+            );
+            
+            const reflectionGeometry = new THREE.BufferGeometry().setFromPoints([
+                intersectionPoint,
+                new THREE.Vector3(
+                    intersectionPoint.x + reflectedDirection.x * 5,
+                    intersectionPoint.y + reflectedDirection.y * 5,
+                    0
+                )
+            ]);
+            
+            const reflectedRay = new THREE.Line(reflectionGeometry, rayMaterial.clone());
+            reflectedRay.material.opacity = 0.5;
+            
+            // Buat geometri untuk sinar bias (jika tidak terjadi refleksi total)
+            let refractedRay = null;
+            if (Math.abs(sinTheta2) <= 1) {
+                const refractionGeometry = new THREE.BufferGeometry().setFromPoints([
+                    intersectionPoint,
+                    new THREE.Vector3(
+                        intersectionPoint.x + refractedDirection.x * 5,
+                        intersectionPoint.y + refractedDirection.y * 5,
+                        0
+                    )
+                ]);
+                
+                refractedRay = new THREE.Line(refractionGeometry, rayMaterial.clone());
+                refractedRay.material.opacity = 0.7;
+            }
+            
+            // Buat group untuk semua sinar
+            lightRay = new THREE.Group();
+            lightRay.add(incidentRay);
+            lightRay.add(reflectedRay);
+            if (refractedRay) lightRay.add(refractedRay);
+            
+            scene.add(lightRay);
+            
+            // Update informasi sudut
+            updateAngleInfo(refractionAngle);
+            
+            // Update grafik
+            updateIntensityChart();
+        }
+        
+        // Update informasi sudut
+        function updateAngleInfo(refractionAngle) {
+            document.getElementById('info-incidence-angle').textContent = incidenceAngle.toFixed(1) + '°';
+            
+            if (refractionAngle !== undefined) {
+                const refractionAngleDeg = refractionAngle * 180 / Math.PI;
+                document.getElementById('info-refraction-angle').textContent = refractionAngleDeg.toFixed(1) + '°';
+                
+                // Hitung koefisien refleksi Fresnel
+                const n1 = REFRACTIVE_INDEX_AIR;
+                const n2 = refractiveIndex;
+                const theta1 = incidenceAngle * Math.PI / 180;
+                const theta2 = refractionAngle;
+                
+                const Rs = Math.pow((n1 * Math.cos(theta1) - n2 * Math.cos(theta2)) / 
+                                  (n1 * Math.cos(theta1) + n2 * Math.cos(theta2)), 2);
+                const Rp = Math.pow((n1 * Math.cos(theta2) - n2 * Math.cos(theta1)) / 
+                                  (n1 * Math.cos(theta2) + n2 * Math.cos(theta1)), 2);
+                const R = (Rs + Rp) / 2;
+                
+                document.getElementById('info-reflection-coef').textContent = (R * 100).toFixed(1) + '%';
+            } else {
+                document.getElementById('info-refraction-angle').textContent = 'Refl. Total';
+                document.getElementById('info-reflection-coef').textContent = '100%';
+            }
+            
+            document.getElementById('info-reflection-angle').textContent = incidenceAngle.toFixed(1) + '°';
+        }
+        
+        // Update grafik intensitas
+        function updateIntensityChart() {
+            // Generate data intensitas sinusoidal
+            const newData = Array.from({length: 100}, (_, i) => {
+                return Math.sin(i / 5 + Date.now() / 1000) * 50 + 50;
+            });
+            
+            intensityChart.data.datasets[0].data = newData;
+            intensityChart.update('none');
+        }
+        
+        // Reset simulasi
+        function resetSimulation() {
+            isTracing = false;
+            
+            // Hapus semua sinar
+            if (lightRay) {
+                scene.remove(lightRay);
+                lightRay = null;
+            }
+            
+            // Hapus komponen optik
+            opticalComponents.forEach(component => {
+                scene.remove(component);
+            });
+            opticalComponents = [];
+            
+            // Reset grafik
+            intensityChart.data.datasets[0].data = Array(100).fill(0);
+            intensityChart.update();
+            
+            document.getElementById('status-display').textContent = 'Siap menjalankan sinar';
+        }
+        
+        // Tambahkan komponen optik
+        function addOpticalComponent(type) {
+            let component;
+            
+            switch(type) {
+                case 'lens':
+                    // Lensa cembung
+                    const lensGeometry = new THREE.CircleGeometry(2, 32);
+                    const lensMaterial = new THREE.MeshBasicMaterial({ 
+                        color: 0x3b82f6,
+                        transparent: true,
+                        opacity: 0.3
+                    });
+                    component = new THREE.Mesh(lensGeometry, lensMaterial);
+                    component.position.set(5, 0, 0);
+                    component.userData = { type: 'lens', focalLength: 5 };
+                    break;
+                    
+                case 'concave-lens':
+                    // Lensa cekung
+                    const concaveLensGeometry = new THREE.RingGeometry(1.5, 2, 32);
+                    const concaveLensMaterial = new THREE.MeshBasicMaterial({ 
+                        color: 0xef4444,
+                        transparent: true,
+                        opacity: 0.3,
+                        side: THREE.DoubleSide
+                    });
+                    component = new THREE.Mesh(concaveLensGeometry, concaveLensMaterial);
+                    component.position.set(5, 0, 0);
+                    component.userData = { type: 'concave-lens', focalLength: -5 };
+                    break;
+                    
+                case 'mirror':
+                    // Cermin datar
+                    const mirrorGeometry = new THREE.PlaneGeometry(4, 4);
+                    const mirrorMaterial = new THREE.MeshBasicMaterial({ 
+                        color: 0x94a3b8,
+                        side: THREE.DoubleSide,
+                        metalness: 0.8,
+                        roughness: 0.2
+                    });
+                    component = new THREE.Mesh(mirrorGeometry, mirrorMaterial);
+                    component.position.set(3, 0, 0);
+                    component.rotation.y = Math.PI / 4;
+                    component.userData = { type: 'mirror' };
+                    break;
+                    
+                case 'prism':
+                    // Prisma
+                    const prismGeometry = new THREE.ConeGeometry(2, 3, 3);
+                    const prismMaterial = new THREE.MeshPhysicalMaterial({ 
+                        color: 0x22c55e,
+                        transparent: true,
+                        opacity: 0.7,
+                        refractionRatio: 0.67
+                    });
+                    component = new THREE.Mesh(prismGeometry, prismMaterial);
+                    component.position.set(0, -2, 0);
+                    component.userData = { type: 'prism' };
+                    break;
+                    
+                default:
+                    return;
+            }
+            
+            scene.add(component);
+            opticalComponents.push(component);
+            document.getElementById('status-display').textContent = `Ditambahkan: ${type}`;
+        }
+        
+        // Fungsi animasi
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            // Animasikan komponen optik jika ada
+            opticalComponents.forEach(component => {
+                if (component.userData.type === 'prism') {
+                    component.rotation.y += 0.01;
+                }
+            });
+            
+            renderer.render(scene, camera);
+        }
+        
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            // Inisialisasi
+            initThreeJS();
+            initCharts();
+            animate();
+            
+            // Update nilai slider
+            const updateSliderValue = (sliderId, displayId, unit) => {
+                const slider = document.getElementById(sliderId);
+                const display = document.getElementById(displayId);
+                
+                slider.addEventListener('input', function() {
+                    display.textContent = this.value + unit;
+                });
+                
+                display.textContent = slider.value + unit;
+            };
+            
+            updateSliderValue('incidence-angle', 'incidence-angle-value', '°');
+            updateSliderValue('refractive-index', 'refractive-index-value', '');
+            updateSliderValue('wavelength', 'wavelength-value', ' nm');
+            
+            // Tombol jalankan sinar
+            document.getElementById('trace-btn').addEventListener('click', function() {
+                // Ambil nilai dari slider
+                incidenceAngle = parseFloat(document.getElementById('incidence-angle').value);
+                refractiveIndex = parseFloat(document.getElementById('refractive-index').value);
+                wavelength = parseFloat(document.getElementById('wavelength').value);
+                
+                // Buat sinar
+                createLightRay();
+                
+                // Update status
+                document.getElementById('status-display').textContent = 'Sinar sedang berjalan...';
+                isTracing = true;
+                
+                // Update spektrum berdasarkan panjang gelombang
+                updateSpectrumChart();
+            });
+            
+            // Tombol reset
+            document.getElementById('reset-btn').addEventListener('click', resetSimulation);
+            
+            // Tab jenis simulasi
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Reset dan update UI berdasarkan jenis simulasi
+                    resetSimulation();
+                    document.getElementById('status-display').textContent = 
+                        `Mode: ${this.dataset.type.toUpperCase()}`;
+                });
+            });
+            
+            // Tombol komponen optik
+            document.querySelectorAll('.component-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const componentType = this.dataset.component;
+                    
+                    if (componentType === 'remove') {
+                        // Hapus semua komponen
+                        opticalComponents.forEach(component => {
+                            scene.remove(component);
+                        });
+                        opticalComponents = [];
+                        document.getElementById('status-display').textContent = 'Semua komponen dihapus';
+                    } else {
+                        // Tambahkan komponen
+                        addOpticalComponent(componentType);
+                    }
+                    
+                    // Highlight tombol aktif
+                    document.querySelectorAll('.component-btn').forEach(b => b.classList.remove('active'));
+                    if (componentType !== 'remove') {
+                        this.classList.add('active');
+                    }
+                });
+            });
+            
+            // Update spektrum chart berdasarkan panjang gelombang
+            function updateSpectrumChart() {
+                const colors = ['Merah', 'Jingga', 'Kuning', 'Hijau', 'Biru', 'Nila', 'Ungu'];
+                const wavelengthRanges = [[620, 780], [590, 620], [570, 590], 
+                                          [495, 570], [450, 495], [425, 450], [380, 425]];
+                
+                const newData = wavelengthRanges.map(range => {
+                    if (wavelength >= range[0] && wavelength <= range[1]) {
+                        return 100 - Math.abs(wavelength - (range[0] + range[1]) / 2) * 0.5;
+                    }
+                    return Math.random() * 30 + 20;
+                });
+                
+                spectrumChart.data.datasets[0].data = newData;
+                spectrumChart.update('none');
+            }
+            
+            // Tombol unduh data
+            document.getElementById('download-btn').addEventListener('click', function() {
+                // Buat data CSV sederhana
+                let csvContent = "Parameter,Nilai\n";
+                csvContent += `Sudut Datang,${incidenceAngle}°\n`;
+                csvContent += `Indeks Bias,${refractiveIndex}\n`;
+                csvContent += `Panjang Gelombang,${wavelength} nm\n`;
+                csvContent += `Sudut Bias,${document.getElementById('info-refraction-angle').textContent}\n`;
+                csvContent += `Koef. Refleksi,${document.getElementById('info-reflection-coef').textContent}\n`;
+                
+                const blob = new Blob([csvContent], { type: 'text/csv' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'data_optik.csv';
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                document.getElementById('status-display').textContent = 'Data berhasil diunduh';
+            });
+            
+            // Prevent default behavior untuk slider pada mobile
+            document.querySelectorAll('input[type="range"]').forEach(slider => {
+                slider.addEventListener('touchstart', function(e) {
+                    e.stopPropagation();
+                });
+            });
+            
+            // Set nilai default untuk informasi
+            document.getElementById('info-incidence-angle').textContent = '45.0°';
+            document.getElementById('info-refraction-angle').textContent = '28.1°';
+            document.getElementById('info-reflection-angle').textContent = '45.0°';
+            document.getElementById('info-reflection-coef').textContent = '4.3%';
+        });
+    </script>
+</body>
+</html>

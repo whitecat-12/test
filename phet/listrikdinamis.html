@@ -1,0 +1,1206 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Simulator Listrik Dinamis - Fisika Interaktif</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            background: #ffffff;
+            color: #333;
+            min-height: 100vh;
+            padding: 10px;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            width: 100%;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 15px;
+            padding: 15px 10px;
+            background: linear-gradient(135deg, #4CAF50, #2E7D32);
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            color: white;
+        }
+        
+        h1 {
+            font-size: 1.6rem;
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+        
+        .subtitle {
+            font-size: 0.95rem;
+            opacity: 0.9;
+            line-height: 1.4;
+        }
+        
+        .content {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .panel {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border: 1px solid #eaeaea;
+            width: 100%;
+        }
+        
+        .simulation-panel {
+            height: 300px;
+            position: relative;
+            overflow: hidden;
+            order: 1;
+        }
+        
+        #simulation-container {
+            width: 100%;
+            height: 100%;
+            border-radius: 8px;
+            background: #f8f9fa;
+            border: 1px solid #eaeaea;
+        }
+        
+        .controls-panel {
+            order: 2;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 15px;
+            background: #f1f3f5;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 12px 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #495057;
+            font-size: 0.95rem;
+            touch-action: manipulation;
+        }
+        
+        .tab.active {
+            background: #4CAF50;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .control-group {
+            margin-bottom: 18px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #495057;
+            font-size: 0.95rem;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            margin-bottom: 5px;
+            height: 32px;
+            -webkit-appearance: none;
+            background: #e9ecef;
+            border-radius: 16px;
+            outline: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #4CAF50;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .value-display {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin-top: 3px;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            flex-direction: column;
+        }
+        
+        button {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            background: #4CAF50;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            font-size: 1rem;
+            touch-action: manipulation;
+        }
+        
+        button:hover, button:active {
+            background: #2E7D32;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        button.reset {
+            background: #f44336;
+        }
+        
+        button.reset:hover, button.reset:active {
+            background: #d32f2f;
+        }
+        
+        .data-panel {
+            order: 3;
+            margin-top: 0;
+        }
+        
+        .data-panel h2 {
+            font-size: 1.3rem;
+            margin-bottom: 12px;
+        }
+        
+        .charts {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .chart-container {
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 12px;
+            height: 250px;
+            border: 1px solid #eaeaea;
+        }
+        
+        canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+        
+        .data-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 15px;
+            align-items: stretch;
+        }
+        
+        .data-controls div {
+            display: flex;
+            justify-content: center;
+        }
+        
+        .time-display {
+            font-weight: bold;
+            color: #4CAF50;
+            font-size: 1.1rem;
+            text-align: center;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .circuit-info {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+            padding: 10px;
+            background: #f0f7f0;
+            border-radius: 8px;
+            border: 1px solid #c8e6c9;
+        }
+        
+        .info-item {
+            text-align: center;
+            flex: 1;
+        }
+        
+        .info-label {
+            font-size: 0.8rem;
+            color: #2E7D32;
+            font-weight: 500;
+        }
+        
+        .info-value {
+            font-size: 1.1rem;
+            color: #1B5E20;
+            font-weight: bold;
+        }
+        
+        .instructions {
+            margin-top: 20px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            color: #495057;
+            border: 1px solid #eaeaea;
+        }
+        
+        .instructions h3 {
+            margin-bottom: 8px;
+            color: #4CAF50;
+            font-size: 1rem;
+        }
+        
+        .instructions ul {
+            margin-left: 18px;
+        }
+        
+        .instructions li {
+            margin-bottom: 6px;
+        }
+        
+        .electron {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: #2196F3;
+            border-radius: 50%;
+            box-shadow: 0 0 8px rgba(33, 150, 243, 0.8);
+        }
+        
+        .current-direction {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            color: #f44336;
+            font-weight: bold;
+            font-size: 18px;
+            text-align: center;
+            line-height: 20px;
+        }
+        
+        /* Responsive improvements */
+        @media (min-width: 768px) {
+            body {
+                padding: 15px;
+            }
+            
+            .simulation-panel {
+                height: 350px;
+            }
+            
+            .buttons {
+                flex-direction: row;
+            }
+            
+            .data-controls {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .content {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 20px;
+            }
+            
+            .simulation-panel {
+                grid-column: 1;
+                height: 400px;
+            }
+            
+            .controls-panel {
+                grid-column: 2;
+            }
+            
+            .data-panel {
+                grid-column: 1 / -1;
+            }
+            
+            .charts {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 20px;
+            }
+        }
+        
+        /* Touch-friendly improvements */
+        .slider-container {
+            padding: 5px 0;
+        }
+        
+        /* Mobile landscape optimization */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .simulation-panel {
+                height: 250px;
+            }
+            
+            .chart-container {
+                height: 200px;
+            }
+            
+            .buttons {
+                flex-direction: row;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Simulator Listrik Dinamis</h1>
+            <p class="subtitle">Visualisasi Rangkaian Listrik, Arus, dan Tegangan</p>
+        </header>
+        
+        <div class="content">
+            <div class="panel simulation-panel">
+                <div id="simulation-container"></div>
+                <div id="electron-container"></div>
+            </div>
+            
+            <div class="panel controls-panel">
+                <div class="tabs">
+                    <div class="tab active" data-type="dc">Rangkaian DC</div>
+                    <div class="tab" data-type="ac">Rangkaian AC</div>
+                </div>
+                
+                <div class="control-group">
+                    <label for="voltage">Tegangan (V):</label>
+                    <div class="slider-container">
+                        <input type="range" id="voltage" min="1" max="50" value="12" step="1">
+                    </div>
+                    <div class="value-display">
+                        <span>1 V</span>
+                        <span id="voltage-value">12 V</span>
+                        <span>50 V</span>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <label for="resistance">Resistansi (Ω):</label>
+                    <div class="slider-container">
+                        <input type="range" id="resistance" min="1" max="100" value="20" step="1">
+                    </div>
+                    <div class="value-display">
+                        <span>1 Ω</span>
+                        <span id="resistance-value">20 Ω</span>
+                        <span>100 Ω</span>
+                    </div>
+                </div>
+                
+                <div class="control-group ac-control" style="display: none;">
+                    <label for="frequency">Frekuensi AC (Hz):</label>
+                    <div class="slider-container">
+                        <input type="range" id="frequency" min="0.1" max="10" value="1" step="0.1">
+                    </div>
+                    <div class="value-display">
+                        <span>0.1 Hz</span>
+                        <span id="frequency-value">1 Hz</span>
+                        <span>10 Hz</span>
+                    </div>
+                </div>
+                
+                <div class="buttons">
+                    <button id="start-btn">Mulai Simulasi</button>
+                    <button id="reset-btn" class="reset">Reset</button>
+                </div>
+                
+                <div class="circuit-info">
+                    <div class="info-item">
+                        <div class="info-label">Arus (I)</div>
+                        <div class="info-value" id="current-value">0.00 A</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Daya (P)</div>
+                        <div class="info-value" id="power-value">0.00 W</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label">Energi</div>
+                        <div class="info-value" id="energy-value">0.00 J</div>
+                    </div>
+                </div>
+                
+                <div class="instructions">
+                    <h3>Petunjuk Penggunaan:</h3>
+                    <ul>
+                        <li>Pilih jenis rangkaian (DC atau AC) dengan mengklik tab</li>
+                        <li>Atur parameter tegangan, resistansi, dan frekuensi (untuk AC)</li>
+                        <li>Klik "Mulai Simulasi" untuk menjalankan simulasi</li>
+                        <li>Hukum Ohm: V = I × R, Daya: P = V × I</li>
+                        <li>Untuk mengubah sudut pandang: sentuh dan seret untuk memutar, cubit untuk zoom</li>
+                        <li>Data simulasi dapat diunduh dalam format CSV</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="panel data-panel">
+                <h2>Data dan Grafik</h2>
+                
+                <div class="data-controls">
+                    <div>
+                        <button id="download-btn">Unduh Data CSV</button>
+                    </div>
+                    <div>
+                        <span>Waktu: <span id="time-display" class="time-display">0.00</span> s</span>
+                    </div>
+                </div>
+                
+                <div class="charts">
+                    <div class="chart-container">
+                        <canvas id="current-chart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="voltage-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variabel global
+        let scene, camera, renderer;
+        let isAnimating = false;
+        let startTime, currentTime;
+        let voltage, resistance, frequency;
+        let currentData = [], voltageData = [], timeData = [];
+        let currentChart, voltageChart;
+        let electrons = [];
+        let currentDirectionArrows = [];
+        
+        // Inisialisasi Three.js
+        function initThreeJS() {
+            const container = document.getElementById('simulation-container');
+            
+            // Buat scene
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0xf8f9fa);
+            
+            // Buat kamera dengan viewport yang lebih sesuai untuk mobile
+            camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+            camera.position.set(0, 5, 10);
+            camera.lookAt(0, 0, 0);
+            
+            // Buat renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            container.appendChild(renderer.domElement);
+            
+            // Tambahkan pencahayaan
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(10, 20, 5);
+            scene.add(directionalLight);
+            
+            // Buat komponen rangkaian
+            createCircuit();
+            
+            // Kontrol sentuh (touch) untuk mobile
+            let isTouching = false;
+            let previousTouchPosition = {
+                x: 0,
+                y: 0
+            };
+            
+            renderer.domElement.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                isTouching = true;
+                previousTouchPosition = {
+                    x: e.touches[0].clientX,
+                    y: e.touches[0].clientY
+                };
+            }, { passive: false });
+            
+            renderer.domElement.addEventListener('touchend', () => {
+                isTouching = false;
+            });
+            
+            renderer.domElement.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                if (!isTouching) return;
+                
+                const deltaMove = {
+                    x: e.touches[0].clientX - previousTouchPosition.x,
+                    y: e.touches[0].clientY - previousTouchPosition.y
+                };
+                
+                // Rotasi kamera berdasarkan pergerakan sentuhan
+                camera.position.x -= deltaMove.x * 0.02;
+                camera.position.y += deltaMove.y * 0.02;
+                
+                // Pastikan kamera tetap melihat ke pusat scene
+                camera.lookAt(0, 0, 0);
+                
+                previousTouchPosition = {
+                    x: e.touches[0].clientX,
+                    y: e.touches[0].clientY
+                };
+            }, { passive: false });
+            
+            // Zoom dengan pinch gesture (sederhana)
+            let initialDistance = 0;
+            renderer.domElement.addEventListener('touchstart', (e) => {
+                if (e.touches.length >= 2) {
+                    initialDistance = Math.hypot(
+                        e.touches[0].clientX - e.touches[1].clientX,
+                        e.touches[0].clientY - e.touches[1].clientY
+                    );
+                }
+            });
+            
+            renderer.domElement.addEventListener('touchmove', (e) => {
+                if (e.touches.length >= 2) {
+                    const currentDistance = Math.hypot(
+                        e.touches[0].clientX - e.touches[1].clientX,
+                        e.touches[0].clientY - e.touches[1].clientY
+                    );
+                    
+                    const delta = currentDistance - initialDistance;
+                    camera.position.z += delta * 0.05;
+                    camera.lookAt(0, 0, 0);
+                    
+                    initialDistance = currentDistance;
+                }
+            });
+            
+            // Handle resize window untuk mobile
+            window.addEventListener('resize', () => {
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
+            });
+            
+            // Optimasi untuk performa mobile
+            renderer.setPixelRatio(window.devicePixelRatio);
+        }
+        
+        // Buat komponen rangkaian listrik
+        function createCircuit() {
+            // Bersihkan scene terlebih dahulu
+            while(scene.children.length > 0) { 
+                scene.remove(scene.children[0]); 
+            }
+            
+            // Tambahkan pencahayaan ulang
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(10, 20, 5);
+            scene.add(directionalLight);
+            
+            // Buat sumber tegangan (baterai)
+            const batteryGeometry = new THREE.BoxGeometry(1, 2, 0.5);
+            const batteryMaterial = new THREE.MeshLambertMaterial({ 
+                color: 0x4CAF50 
+            });
+            const battery = new THREE.Mesh(batteryGeometry, batteryMaterial);
+            battery.position.set(-4, 1, 0);
+            scene.add(battery);
+            
+            // Tambahkan tanda + dan - pada baterai
+            const plusGeometry = new THREE.BoxGeometry(0.3, 0.1, 0.1);
+            const plusMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff });
+            const plus1 = new THREE.Mesh(plusGeometry, plusMaterial);
+            const plus2 = new THREE.Mesh(plusGeometry, plusMaterial);
+            plus1.position.set(-4, 1.5, 0.3);
+            plus2.position.set(-4, 1.5, 0.3);
+            plus2.rotation.z = Math.PI / 2;
+            battery.add(plus1);
+            battery.add(plus2);
+            
+            const minusGeometry = new THREE.BoxGeometry(0.3, 0.1, 0.1);
+            const minusMaterial = new THREE.MeshLambertMaterial({ color: 0xffffff });
+            const minus = new THREE.Mesh(minusGeometry, minusMaterial);
+            minus.position.set(-4, 0.5, 0.3);
+            battery.add(minus);
+            
+            // Buat resistor
+            const resistorGeometry = new THREE.CylinderGeometry(0.3, 0.3, 2, 32);
+            const resistorMaterial = new THREE.MeshLambertMaterial({ 
+                color: 0xFF9800 
+            });
+            const resistor = new THREE.Mesh(resistorGeometry, resistorMaterial);
+            resistor.position.set(2, 1, 0);
+            resistor.rotation.z = Math.PI / 2;
+            scene.add(resistor);
+            
+            // Tambahkan garis-garis pada resistor
+            for(let i = -0.8; i <= 0.8; i += 0.4) {
+                const lineGeometry = new THREE.CylinderGeometry(0.35, 0.35, 0.1, 32);
+                const lineMaterial = new THREE.MeshLambertMaterial({ color: 0x795548 });
+                const line = new THREE.Mesh(lineGeometry, lineMaterial);
+                line.position.set(2 + i, 1, 0);
+                line.rotation.z = Math.PI / 2;
+                scene.add(line);
+            }
+            
+            // Buat kabel penghubung
+            const wireRadius = 0.05;
+            const wireMaterial = new THREE.MeshLambertMaterial({ color: 0x757575 });
+            
+            // Kabel dari baterai ke resistor (bawah)
+            const wire1Geometry = new THREE.CylinderGeometry(wireRadius, wireRadius, 6, 8);
+            const wire1 = new THREE.Mesh(wire1Geometry, wireMaterial);
+            wire1.position.set(-1, 0.5, 0);
+            wire1.rotation.z = Math.PI / 2;
+            scene.add(wire1);
+            
+            // Kabel dari resistor ke baterai (atas)
+            const wire2Geometry = new THREE.CylinderGeometry(wireRadius, wireRadius, 6, 8);
+            const wire2 = new THREE.Mesh(wire2Geometry, wireMaterial);
+            wire2.position.set(-1, 1.5, 0);
+            wire2.rotation.z = Math.PI / 2;
+            scene.add(wire2);
+            
+            // Kabel vertikal di baterai
+            const wire3Geometry = new THREE.CylinderGeometry(wireRadius, wireRadius, 1, 8);
+            const wire3 = new THREE.Mesh(wire3Geometry, wireMaterial);
+            wire3.position.set(-4, 1, 0);
+            scene.add(wire3);
+            
+            // Kabel vertikal di resistor
+            const wire4Geometry = new THREE.CylinderGeometry(wireRadius, wireRadius, 1, 8);
+            const wire4 = new THREE.Mesh(wire4Geometry, wireMaterial);
+            wire4.position.set(2, 1, 0);
+            scene.add(wire4);
+            
+            // Buat tanah
+            const groundGeometry = new THREE.PlaneGeometry(20, 20);
+            const groundMaterial = new THREE.MeshLambertMaterial({ 
+                color: 0xE8F5E9,
+                side: THREE.DoubleSide
+            });
+            const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+            ground.rotation.x = Math.PI / 2;
+            ground.position.y = -0.5;
+            scene.add(ground);
+            
+            // Tambahkan grid helper
+            const gridHelper = new THREE.GridHelper(20, 20, 0x4CAF50, 0xC8E6C9);
+            gridHelper.material.opacity = 0.3;
+            gridHelper.material.transparent = true;
+            gridHelper.position.y = -0.49;
+            scene.add(gridHelper);
+            
+            // Buat elektron
+            createElectrons();
+            
+            // Buat panah arah arus
+            createCurrentDirectionArrows();
+        }
+        
+        // Buat elektron yang bergerak
+        function createElectrons() {
+            const electronContainer = document.getElementById('electron-container');
+            electronContainer.innerHTML = '';
+            electrons = [];
+            
+            // Buat 20 elektron
+            for (let i = 0; i < 20; i++) {
+                const electron = document.createElement('div');
+                electron.className = 'electron';
+                electronContainer.appendChild(electron);
+                
+                // Posisi awal acak di sepanjang kabel
+                const wireLength = 600; // panjang kabel dalam piksel
+                const startPos = Math.random() * wireLength;
+                
+                electrons.push({
+                    element: electron,
+                    position: startPos,
+                    speed: 0.1 + Math.random() * 0.2
+                });
+            }
+        }
+        
+        // Buat panah arah arus
+        function createCurrentDirectionArrows() {
+            const electronContainer = document.getElementById('electron-container');
+            currentDirectionArrows = [];
+            
+            // Tambahkan 4 panah arah arus
+            for (let i = 0; i < 4; i++) {
+                const arrow = document.createElement('div');
+                arrow.className = 'current-direction';
+                arrow.innerHTML = '→';
+                electronContainer.appendChild(arrow);
+                
+                currentDirectionArrows.push({
+                    element: arrow,
+                    position: i * 150 // Posisi merata di sepanjang kabel
+                });
+            }
+        }
+        
+        // Update posisi elektron dan panah
+        function updateElectrons(current) {
+            const circuitType = document.querySelector('.tab.active').dataset.type;
+            const electronContainer = document.getElementById('electron-container');
+            const containerRect = electronContainer.getBoundingClientRect();
+            
+            // Kecepatan elektron proporsional dengan arus
+            const baseSpeed = current * 10;
+            
+            electrons.forEach(electron => {
+                // Untuk AC, elektron bergerak bolak-balik
+                if (circuitType === 'ac') {
+                    electron.position += Math.sin(currentTime * 2 * Math.PI * frequency) * baseSpeed * electron.speed;
+                } else {
+                    // Untuk DC, elektron bergerak satu arah
+                    electron.position += baseSpeed * electron.speed;
+                }
+                
+                // Reset posisi jika melewati panjang kabel
+                if (electron.position > 600) electron.position = 0;
+                if (electron.position < 0) electron.position = 600;
+                
+                // Posisi elektron di sepanjang kabel (mengikuti bentuk persegi)
+                let x, y;
+                const segment = Math.floor(electron.position / 150);
+                const posInSegment = electron.position % 150;
+                
+                switch(segment) {
+                    case 0: // Kabel bawah kiri ke kanan
+                        x = 50 + posInSegment;
+                        y = containerRect.height - 50;
+                        break;
+                    case 1: // Kabel bawah kanan ke atas
+                        x = 200;
+                        y = containerRect.height - 50 - posInSegment;
+                        break;
+                    case 2: // Kabel atas kanan ke kiri
+                        x = 200 - posInSegment;
+                        y = 50;
+                        break;
+                    case 3: // Kabel atas kiri ke bawah
+                        x = 50;
+                        y = 50 + posInSegment;
+                        break;
+                }
+                
+                electron.element.style.left = `${x}px`;
+                electron.element.style.top = `${y}px`;
+                
+                // Untuk AC, ubah warna berdasarkan arah
+                if (circuitType === 'ac') {
+                    const direction = Math.sin(currentTime * 2 * Math.PI * frequency);
+                    if (direction > 0) {
+                        electron.element.style.background = '#2196F3';
+                        electron.element.style.boxShadow = '0 0 8px rgba(33, 150, 243, 0.8)';
+                    } else {
+                        electron.element.style.background = '#FF5252';
+                        electron.element.style.boxShadow = '0 0 8px rgba(255, 82, 82, 0.8)';
+                    }
+                }
+            });
+            
+            // Update panah arah arus
+            currentDirectionArrows.forEach(arrow => {
+                let x, y;
+                const segment = Math.floor(arrow.position / 150);
+                const posInSegment = arrow.position % 150;
+                
+                switch(segment) {
+                    case 0:
+                        x = 50 + posInSegment;
+                        y = containerRect.height - 50;
+                        break;
+                    case 1:
+                        x = 200;
+                        y = containerRect.height - 50 - posInSegment;
+                        break;
+                    case 2:
+                        x = 200 - posInSegment;
+                        y = 50;
+                        break;
+                    case 3:
+                        x = 50;
+                        y = 50 + posInSegment;
+                        break;
+                }
+                
+                arrow.element.style.left = `${x}px`;
+                arrow.element.style.top = `${y}px`;
+                
+                // Untuk AC, rotasi panah berdasarkan arah arus
+                if (circuitType === 'ac') {
+                    const direction = Math.sin(currentTime * 2 * Math.PI * frequency);
+                    if (direction > 0) {
+                        arrow.element.innerHTML = '→';
+                        arrow.element.style.color = '#2196F3';
+                    } else {
+                        arrow.element.innerHTML = '←';
+                        arrow.element.style.color = '#FF5252';
+                    }
+                }
+            });
+        }
+        
+        // Inisialisasi grafik
+        function initCharts() {
+            const currentCtx = document.getElementById('current-chart').getContext('2d');
+            currentChart = new Chart(currentCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Arus (A)',
+                        data: [],
+                        borderColor: '#2196F3',
+                        backgroundColor: 'rgba(33, 150, 243, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Waktu (s)',
+                                color: '#495057'
+                            },
+                            grid: {
+                                color: 'rgba(73, 80, 87, 0.1)'
+                            },
+                            ticks: {
+                                color: '#495057',
+                                maxTicksLimit: 8
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Arus (A)',
+                                color: '#495057'
+                            },
+                            grid: {
+                                color: 'rgba(73, 80, 87, 0.1)'
+                            },
+                            ticks: {
+                                color: '#495057',
+                                maxTicksLimit: 6
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#495057',
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            const voltageCtx = document.getElementById('voltage-chart').getContext('2d');
+            voltageChart = new Chart(voltageCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Tegangan (V)',
+                        data: [],
+                        borderColor: '#4CAF50',
+                        backgroundColor: 'rgba(76, 175, 80, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Waktu (s)',
+                                color: '#495057'
+                            },
+                            grid: {
+                                color: 'rgba(73, 80, 87, 0.1)'
+                            },
+                            ticks: {
+                                color: '#495057',
+                                maxTicksLimit: 8
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Tegangan (V)',
+                                color: '#495057'
+                            },
+                            grid: {
+                                color: 'rgba(73, 80, 87, 0.1)'
+                            },
+                            ticks: {
+                                color: '#495057',
+                                maxTicksLimit: 6
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#495057',
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Fungsi animasi
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            if (isAnimating) {
+                currentTime = (Date.now() - startTime) / 1000;
+                document.getElementById('time-display').textContent = currentTime.toFixed(2);
+                
+                // Hitung arus berdasarkan Hukum Ohm
+                const circuitType = document.querySelector('.tab.active').dataset.type;
+                let current, actualVoltage;
+                
+                if (circuitType === 'dc') {
+                    // Rangkaian DC: I = V / R
+                    current = voltage / resistance;
+                    actualVoltage = voltage;
+                } else {
+                    // Rangkaian AC: V = Vmax * sin(2πft), I = V / R
+                    actualVoltage = voltage * Math.sin(2 * Math.PI * frequency * currentTime);
+                    current = actualVoltage / resistance;
+                }
+                
+                // Update nilai di panel info
+                document.getElementById('current-value').textContent = current.toFixed(2) + ' A';
+                const power = actualVoltage * current;
+                document.getElementById('power-value').textContent = power.toFixed(2) + ' W';
+                const energy = power * currentTime;
+                document.getElementById('energy-value').textContent = energy.toFixed(2) + ' J';
+                
+                // Update elektron
+                updateElectrons(current);
+                
+                // Simpan data untuk grafik
+                timeData.push(currentTime);
+                currentData.push(current);
+                voltageData.push(actualVoltage);
+                
+                // Update grafik
+                updateCharts();
+                
+                // Hentikan animasi setelah 30 detik
+                if (currentTime > 30) {
+                    isAnimating = false;
+                }
+            }
+            
+            renderer.render(scene, camera);
+        }
+        
+        // Update grafik
+        function updateCharts() {
+            // Batasi jumlah data yang ditampilkan untuk performa mobile
+            const maxDataPoints = 100;
+            if (timeData.length > maxDataPoints) {
+                const step = Math.ceil(timeData.length / maxDataPoints);
+                const filteredTimeData = timeData.filter((_, i) => i % step === 0);
+                const filteredCurrentData = currentData.filter((_, i) => i % step === 0);
+                const filteredVoltageData = voltageData.filter((_, i) => i % step === 0);
+                
+                currentChart.data.labels = filteredTimeData;
+                currentChart.data.datasets[0].data = filteredCurrentData;
+                
+                voltageChart.data.labels = filteredTimeData;
+                voltageChart.data.datasets[0].data = filteredVoltageData;
+            } else {
+                currentChart.data.labels = timeData;
+                currentChart.data.datasets[0].data = currentData;
+                
+                voltageChart.data.labels = timeData;
+                voltageChart.data.datasets[0].data = voltageData;
+            }
+            
+            currentChart.update('none');
+            voltageChart.update('none');
+        }
+        
+        // Reset simulasi
+        function resetSimulation() {
+            isAnimating = false;
+            
+            // Reset data
+            timeData = [];
+            currentData = [];
+            voltageData = [];
+            
+            // Reset grafik
+            currentChart.data.labels = [];
+            currentChart.data.datasets[0].data = [];
+            voltageChart.data.labels = [];
+            voltageChart.data.datasets[0].data = [];
+            
+            currentChart.update();
+            voltageChart.update();
+            
+            // Reset nilai di panel info
+            document.getElementById('current-value').textContent = '0.00 A';
+            document.getElementById('power-value').textContent = '0.00 W';
+            document.getElementById('energy-value').textContent = '0.00 J';
+            document.getElementById('time-display').textContent = '0.00';
+            
+            // Reset elektron ke posisi awal
+            createElectrons();
+        }
+        
+        // Unduh data sebagai CSV
+        function downloadData() {
+            let csvContent = "Waktu (s),Arus (A),Tegangan (V)\n";
+            
+            for (let i = 0; i < timeData.length; i++) {
+                csvContent += `${timeData[i].toFixed(2)},${currentData[i].toFixed(2)},${voltageData[i].toFixed(2)}\n`;
+            }
+            
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'data_simulasi_listrik.csv';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        
+        // Event listeners untuk mobile
+        document.addEventListener('DOMContentLoaded', () => {
+            // Inisialisasi
+            initThreeJS();
+            initCharts();
+            animate();
+            
+            // Update nilai slider dengan format yang lebih baik untuk mobile
+            const updateSliderValue = (sliderId, displayId, unit) => {
+                const slider = document.getElementById(sliderId);
+                const display = document.getElementById(displayId);
+                
+                slider.addEventListener('input', function() {
+                    display.textContent = this.value + unit;
+                });
+                
+                // Trigger initial value
+                display.textContent = slider.value + unit;
+            };
+            
+            updateSliderValue('voltage', 'voltage-value', ' V');
+            updateSliderValue('resistance', 'resistance-value', ' Ω');
+            updateSliderValue('frequency', 'frequency-value', ' Hz');
+            
+            // Tombol mulai
+            document.getElementById('start-btn').addEventListener('click', function() {
+                if (isAnimating) return;
+                
+                // Ambil nilai dari slider
+                voltage = parseFloat(document.getElementById('voltage').value);
+                resistance = parseFloat(document.getElementById('resistance').value);
+                frequency = parseFloat(document.getElementById('frequency').value);
+                
+                // Reset data sebelumnya
+                resetSimulation();
+                
+                // Mulai animasi
+                isAnimating = true;
+                startTime = Date.now();
+            });
+            
+            // Tombol reset
+            document.getElementById('reset-btn').addEventListener('click', resetSimulation);
+            
+            // Tombol unduh data
+            document.getElementById('download-btn').addEventListener('click', downloadData);
+            
+            // Tab DC/AC
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Tampilkan/sembunyikan kontrol frekuensi
+                    const frequencyControl = document.querySelector('.ac-control');
+                    if (this.dataset.type === 'ac') {
+                        frequencyControl.style.display = 'block';
+                    } else {
+                        frequencyControl.style.display = 'none';
+                    }
+                    
+                    // Reset simulasi saat mengganti tab
+                    resetSimulation();
+                });
+            });
+            
+            // Mencegah zoom halaman pada interaksi slider (untuk iOS)
+            document.querySelectorAll('input[type="range"]').forEach(slider => {
+                slider.addEventListener('touchstart', function(e) {
+                    e.stopPropagation();
+                });
+            });
+            
+            // Optimasi untuk performa mobile
+            if ('ontouchstart' in window) {
+                // Jika perangkat memiliki layar sentuh, tambahkan kelas khusus
+                document.body.classList.add('touch-device');
+            }
+        });
+    </script>
+</body>
+</html>

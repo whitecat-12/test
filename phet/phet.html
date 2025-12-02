@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TETA SAINS - Simulasi Fisika 3D</title>
+    <title>TETA SAINS - Simulasi Fisika</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -32,7 +32,6 @@
             box-shadow: 0 0 20px rgba(0,0,0,0.1);
         }
         
-        /* NAVBAR YANG SUDAH DIPERBAIKI - SAMA DENGAN FILE UTAMA */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -41,12 +40,11 @@
             box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
             background: white;
             z-index: 10;
-            height: 70px; /* TINGGI KONSISTEN */
+            height: 70px;
             display: flex;
             align-items: center;
         }
         
-        /* STYLE UNTUK NAV ITEM - SAMA DENGAN FILE UTAMA */
         .nav-item {
             display: flex;
             flex-direction: column;
@@ -71,11 +69,11 @@
         
         .nav-icon {
             transition: all 0.3s ease;
-            font-size: 1.25rem; /* UKURAN KONSISTEN */
+            font-size: 1.25rem;
         }
         
         .nav-icon.active {
-            transform: translateY(-5px); /* EFEK YANG SAMA */
+            transform: translateY(-5px);
             color: var(--primary);
         }
         
@@ -149,6 +147,9 @@
             overflow: hidden;
             cursor: pointer;
             border-radius: 10px;
+            text-decoration: none;
+            display: block;
+            color: inherit;
         }
         
         .simulation-card:hover {
@@ -195,18 +196,16 @@
             border-left: 4px solid var(--primary);
         }
         
-        /* Improved mobile styles untuk konsistensi */
         @media (max-width: 414px) {
             .bottom-nav {
-                height: 65px; /* SAMA DENGAN FILE UTAMA */
+                height: 65px;
             }
             
             .nav-icon {
-                font-size: 1.1rem; /* SAMA DENGAN FILE UTAMA */
+                font-size: 1.1rem;
             }
         }
 
-        /* Style untuk kategori header */
         .category-header {
             background-color: #f1f5f9;
             border-radius: 8px;
@@ -258,19 +257,6 @@
             background-color: #ef4444;
             color: white;
         }
-        
-        .badge-3d {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background-color: #9999ff;
-            color: white;
-            font-size: 0.65rem;
-            padding: 3px 8px;
-            border-radius: 12px;
-            font-weight: bold;
-            letter-spacing: 0.5px;
-        }
     </style>
 </head>
 <body>
@@ -298,7 +284,7 @@
             <section class="p-4">
                 <div class="flex items-center justify-between">
                     <div>
-                        <h2 class="text-2xl font-bold text-gray-800">Simulasi Fisika 3D</h2>
+                        <h2 class="text-2xl font-bold text-gray-800">Simulasi Fisika</h2>
                         <p class="text-sm text-gray-600">15 simulasi interaktif untuk memahami konsep fisika</p>
                     </div>
                     <div class="bg-primary/10 text-primary p-3 rounded-full">
@@ -316,16 +302,16 @@
                         </div>
                         <div>
                             <h3 class="font-bold text-gray-800">Tip Interaktif</h3>
-                            <p class="text-sm text-gray-600 mt-1">"Gunakan simulasi 3D untuk melihat konsep fisika dari berbagai sudut pandang. Kamu bisa mengontrol parameter dan melihat efeknya secara real-time!"</p>
+                            <p class="text-sm text-gray-600 mt-1">"Gunakan simulasi untuk melihat konsep fisika dari berbagai sudut pandang. Kamu bisa mengontrol parameter dan melihat efeknya secara real-time!"</p>
                         </div>
                     </div>
                 </div>
             </section>
             
-                
+            <!-- Simulation Cards -->
+            <section class="p-4">
                 <!-- 1. Getaran dan Gelombang -->
-                <div class="simulation-card bg-white rounded-lg shadow-sm p-4 mb-4 border-l-blue-500 physics-bg" onclick="getarangelombang.html">
-                    <div class="badge-3d">3D</div>
+                <a href="getarangelombang.html" class="simulation-card bg-white rounded-lg shadow-sm p-4 mb-4 border-l-blue-500 physics-bg">
                     <div class="flex justify-between items-center">
                         <div class="flex items-center">
                             <div class="simulation-icon bg-blue-100 text-blue-600">
@@ -343,11 +329,10 @@
                             <i class="fas fa-chevron-right"></i>
                         </div>
                     </div>
-                </div>
+                </a>
                 
                 <!-- 2. GLB dan GLBB -->
-                <div class="simulation-card bg-white rounded-lg shadow-sm p-4 mb-4 border-l-green-500 mechanics-bg" onclick="glbglbb.html">
-                    <div class="badge-3d">3D</div>
+                <a href="glbglbb.html" class="simulation-card bg-white rounded-lg shadow-sm p-4 mb-4 border-l-green-500 mechanics-bg">
                     <div class="flex justify-between items-center">
                         <div class="flex items-center">
                             <div class="simulation-icon bg-green-100 text-green-600">
@@ -365,11 +350,10 @@
                             <i class="fas fa-chevron-right"></i>
                         </div>
                     </div>
-                </div>
+                </a>
                 
                 <!-- 3. Termodinamika -->
-                <div class="simulation-card bg-white rounded-lg shadow-sm p-4 mb-4 border-l-red-500 thermo-bg" onclick="termodinamika.html">
-                    <div class="badge-3d">3D</div>
+                <a href="termodinamika.html" class="simulation-card bg-white rounded-lg shadow-sm p-4 mb-4 border-l-red-500 thermo-bg">
                     <div class="flex justify-between items-center">
                         <div class="flex items-center">
                             <div class="simulation-icon bg-red-100 text-red-600">
@@ -387,11 +371,10 @@
                             <i class="fas fa-chevron-right"></i>
                         </div>
                     </div>
-                </div>
+                </a>
                 
                 <!-- 4. Medan Magnet -->
-                <div class="simulation-card bg-white rounded-lg shadow-sm p-4 mb-4 border-l-purple-500 electro-bg" onclick="medanmagnet.html">
-                    <div class="badge-3d">3D</div>
+                <a href="medanmagnet.html" class="simulation-card bg-white rounded-lg shadow-sm p-4 mb-4 border-l-purple-500 electro-bg">
                     <div class="flex justify-between items-center">
                         <div class="flex items-center">
                             <div class="simulation-icon bg-purple-100 text-purple-600">
@@ -409,11 +392,10 @@
                             <i class="fas fa-chevron-right"></i>
                         </div>
                     </div>
-                </div>
+                </a>
                 
                 <!-- 5. Optika Geometri -->
-                <div class="simulation-card bg-white rounded-lg shadow-sm p-4 mb-4 border-l-yellow-500 wave-bg" onclick="openSimulation(5)">
-                    <div class="badge-3d">3D</div>
+                <a href="optikageometri.html" class="simulation-card bg-white rounded-lg shadow-sm p-4 mb-4 border-l-yellow-500 wave-bg">
                     <div class="flex justify-between items-center">
                         <div class="flex items-center">
                             <div class="simulation-icon bg-yellow-100 text-yellow-600">
@@ -431,11 +413,10 @@
                             <i class="fas fa-chevron-right"></i>
                         </div>
                     </div>
-                </div>
+                </a>
                 
                 <!-- 6. Listrik Dinamis -->
-                <div class="simulation-card bg-white rounded-lg shadow-sm p-4 mb-4 border-l-indigo-500 electro-bg" onclick="openSimulation(6)">
-                    <div class="badge-3d">3D</div>
+                <a href="listrikdinamis.html" class="simulation-card bg-white rounded-lg shadow-sm p-4 mb-4 border-l-indigo-500 electro-bg">
                     <div class="flex justify-between items-center">
                         <div class="flex items-center">
                             <div class="simulation-icon bg-indigo-100 text-indigo-600">
@@ -453,11 +434,10 @@
                             <i class="fas fa-chevron-right"></i>
                         </div>
                     </div>
-                </div>
+                </a>
                 
                 <!-- 7. Mekanika Fluida -->
-                <div class="simulation-card bg-white rounded-lg shadow-sm p-4 mb-4 border-l-cyan-500 physics-bg" onclick="openSimulation(7)">
-                    <div class="badge-3d">3D</div>
+                <a href="mekanikafluida.html" class="simulation-card bg-white rounded-lg shadow-sm p-4 mb-4 border-l-cyan-500 physics-bg">
                     <div class="flex justify-between items-center">
                         <div class="flex items-center">
                             <div class="simulation-icon bg-cyan-100 text-cyan-600">
@@ -475,11 +455,10 @@
                             <i class="fas fa-chevron-right"></i>
                         </div>
                     </div>
-                </div>
+                </a>
                 
                 <!-- 8. Gerak Parabola -->
-                <div class="simulation-card bg-white rounded-lg shadow-sm p-4 mb-4 border-l-emerald-500 mechanics-bg" onclick="openSimulation(8)">
-                    <div class="badge-3d">3D</div>
+                <a href="gerakparabola.html" class="simulation-card bg-white rounded-lg shadow-sm p-4 mb-4 border-l-emerald-500 mechanics-bg">
                     <div class="flex justify-between items-center">
                         <div class="flex items-center">
                             <div class="simulation-icon bg-emerald-100 text-emerald-600">
@@ -498,11 +477,10 @@
                             <i class="fas fa-chevron-right"></i>
                         </div>
                     </div>
-                </div>
+                </a>
                 
                 <!-- 9. Gelombang Bunyi -->
-                <div class="simulation-card bg-white rounded-lg shadow-sm p-4 mb-4 border-l-blue-400 wave-bg" onclick="openSimulation(9)">
-                    <div class="badge-3d">3D</div>
+                <a href="gelombangbunyi.html" class="simulation-card bg-white rounded-lg shadow-sm p-4 mb-4 border-l-blue-400 wave-bg">
                     <div class="flex justify-between items-center">
                         <div class="flex items-center">
                             <div class="simulation-icon bg-blue-50 text-blue-500">
@@ -520,11 +498,10 @@
                             <i class="fas fa-chevron-right"></i>
                         </div>
                     </div>
-                </div>
+                </a>
                 
                 <!-- 10. Fisika Modern -->
-                <div class="simulation-card bg-white rounded-lg shadow-sm p-4 mb-4 border-l-gray-700 physics-bg" onclick="openSimulation(10)">
-                    <div class="badge-3d">3D</div>
+                <a href="fisikamodern.html" class="simulation-card bg-white rounded-lg shadow-sm p-4 mb-4 border-l-gray-700 physics-bg">
                     <div class="flex justify-between items-center">
                         <div class="flex items-center">
                             <div class="simulation-icon bg-gray-100 text-gray-700">
@@ -542,11 +519,10 @@
                             <i class="fas fa-chevron-right"></i>
                         </div>
                     </div>
-                </div>
+                </a>
                 
                 <!-- 11. Gerak Harmonik Sederhana -->
-                <div class="simulation-card bg-white rounded-lg shadow-sm p-4 mb-4 border-l-pink-500 wave-bg" onclick="openSimulation(11)">
-                    <div class="badge-3d">3D</div>
+                <a href="gerakharmonik.html" class="simulation-card bg-white rounded-lg shadow-sm p-4 mb-4 border-l-pink-500 wave-bg">
                     <div class="flex justify-between items-center">
                         <div class="flex items-center">
                             <div class="simulation-icon bg-pink-100 text-pink-600">
@@ -564,11 +540,10 @@
                             <i class="fas fa-chevron-right"></i>
                         </div>
                     </div>
-                </div>
+                </a>
                 
                 <!-- 12. Hukum Newton -->
-                <div class="simulation-card bg-white rounded-lg shadow-sm p-4 mb-4 border-l-orange-500 mechanics-bg" onclick="openSimulation(12)">
-                    <div class="badge-3d">3D</div>
+                <a href="hukumnewton.html" class="simulation-card bg-white rounded-lg shadow-sm p-4 mb-4 border-l-orange-500 mechanics-bg">
                     <div class="flex justify-between items-center">
                         <div class="flex items-center">
                             <div class="simulation-icon bg-orange-100 text-orange-600">
@@ -586,11 +561,10 @@
                             <i class="fas fa-chevron-right"></i>
                         </div>
                     </div>
-                </div>
+                </a>
                 
                 <!-- 13. Listrik Statis -->
-                <div class="simulation-card bg-white rounded-lg shadow-sm p-4 mb-4 border-l-violet-500 electro-bg" onclick="openSimulation(13)">
-                    <div class="badge-3d">3D</div>
+                <a href="listrikstatis.html" class="simulation-card bg-white rounded-lg shadow-sm p-4 mb-4 border-l-violet-500 electro-bg">
                     <div class="flex justify-between items-center">
                         <div class="flex items-center">
                             <div class="simulation-icon bg-violet-100 text-violet-600">
@@ -608,11 +582,10 @@
                             <i class="fas fa-chevron-right"></i>
                         </div>
                     </div>
-                </div>
+                </a>
                 
                 <!-- 14. Kalor dan Perpindahan Panas -->
-                <div class="simulation-card bg-white rounded-lg shadow-sm p-4 mb-4 border-l-rose-500 thermo-bg" onclick="openSimulation(14)">
-                    <div class="badge-3d">3D</div>
+                <a href="kalordanpanas.html" class="simulation-card bg-white rounded-lg shadow-sm p-4 mb-4 border-l-rose-500 thermo-bg">
                     <div class="flex justify-between items-center">
                         <div class="flex items-center">
                             <div class="simulation-icon bg-rose-100 text-rose-600">
@@ -630,11 +603,10 @@
                             <i class="fas fa-chevron-right"></i>
                         </div>
                     </div>
-                </div>
+                </a>
                 
                 <!-- 15. Usaha dan Energi -->
-                <div class="simulation-card bg-white rounded-lg shadow-sm p-4 mb-4 border-l-lime-500 mechanics-bg" onclick="openSimulation(15)">
-                    <div class="badge-3d">3D</div>
+                <a href="usahadanenergi.html" class="simulation-card bg-white rounded-lg shadow-sm p-4 mb-4 border-l-lime-500 mechanics-bg">
                     <div class="flex justify-between items-center">
                         <div class="flex items-center">
                             <div class="simulation-icon bg-lime-100 text-lime-600">
@@ -652,8 +624,7 @@
                             <i class="fas fa-chevron-right"></i>
                         </div>
                     </div>
-                </div>
-                
+                </a>
             </section>
             
             <!-- Quick Stats -->
@@ -670,16 +641,15 @@
                             <div class="text-xs text-gray-600">Tingkat Dasar</div>
                         </div>
                         <div class="bg-white rounded-lg p-3 text-center">
-                            <div class="text-purple-600 font-bold text-xl">15</div>
-                            <div class="text-xs text-gray-600">Simulasi 3D</div>
+                            <div class="text-purple-600 font-bold text-xl">7</div>
+                            <div class="text-xs text-gray-600">Tingkat Menengah</div>
                         </div>
                     </div>
                 </div>
             </section>
-            
         </main>
         
-        <!-- BOTTOM NAVIGATION YANG SUDAH DIPERBAIKI - SAMA DENGAN FILE UTAMA -->
+        <!-- Bottom Navigation -->
         <nav class="bottom-nav">
             <a href="../dashboard siswa.html" class="nav-item">
                 <i class="fas fa-home nav-icon"></i>
@@ -702,7 +672,6 @@
                 <span>Profil</span>
             </a>
         </nav>
-
     </div>
 
     <script>
@@ -728,98 +697,19 @@
                 currentNavItem.classList.add('active');
                 currentNavItem.querySelector('.nav-icon').classList.add('active');
             }
+            
+            // Jika file tidak ada, tampilkan pesan
+            document.querySelectorAll('.simulation-card').forEach(card => {
+                card.addEventListener('click', function(e) {
+                    // Jika file belum dibuat, tampilkan alert
+                    if (this.getAttribute('href') === '#') {
+                        e.preventDefault();
+                        const title = this.querySelector('h3').textContent;
+                        alert(`Simulasi "${title}" sedang dalam pengembangan.`);
+                    }
+                });
+            });
         });
-        
-        // Function to open simulation
-        function openSimulation(simNumber) {
-            const simulationNames = [
-                "Getaran dan Gelombang",
-                "GLB dan GLBB",
-                "Termodinamika",
-                "Medan Magnet",
-                "Optika Geometri",
-                "Listrik Dinamis",
-                "Mekanika Fluida",
-                "Gerak Parabola",
-                "Gelombang Bunyi",
-                "Fisika Modern",
-                "Gerak Harmonik Sederhana",
-                "Hukum Newton",
-                "Listrik Statis",
-                "Kalor dan Perpindahan Panas",
-                "Usaha dan Energi"
-            ];
-            
-            // Create simulation modal
-            const modal = document.createElement('div');
-            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
-            modal.innerHTML = `
-                <div class="bg-white rounded-xl max-w-md w-full p-6">
-                    <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-xl font-bold text-gray-800">${simulationNames[simNumber-1]}</h3>
-                        <button onclick="this.parentElement.parentElement.remove()" class="text-gray-500 hover:text-gray-700">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                    
-                    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 mb-4 flex flex-col items-center justify-center">
-                        <div class="text-5xl mb-4 text-primary">
-                            <i class="fas fa-cube"></i>
-                        </div>
-                        <h4 class="font-bold text-gray-800 text-lg mb-2">Simulasi 3D Siap Dimuat</h4>
-                        <p class="text-sm text-gray-600 text-center">Simulasi ini akan menampilkan visualisasi 3D interaktif untuk memahami konsep ${simulationNames[simNumber-1].toLowerCase()}.</p>
-                    </div>
-                    
-                    <div class="mb-4">
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="text-sm font-medium text-gray-700">Konsumsi Memori</span>
-                            <span class="text-sm font-bold text-primary">${Math.floor(Math.random() * 50) + 30} MB</span>
-                        </div>
-                        <div class="w-full bg-gray-200 rounded-full h-2.5">
-                            <div class="bg-primary h-2.5 rounded-full" style="width: ${Math.floor(Math.random() * 30) + 60}%"></div>
-                        </div>
-                    </div>
-                    
-                    <div class="flex space-x-3">
-                        <button onclick="this.parentElement.parentElement.remove()" class="flex-1 border border-gray-300 text-gray-700 py-3 rounded-lg font-medium hover:bg-gray-50 transition">
-                            Nanti
-                        </button>
-                        <button onclick="launchSimulation(${simNumber})" class="flex-1 bg-primary text-white py-3 rounded-lg font-medium hover:bg-indigo-600 transition">
-                            <i class="fas fa-play mr-2"></i> Jalankan
-                        </button>
-                    </div>
-                </div>
-            `;
-            
-            document.body.appendChild(modal);
-        }
-        
-        // Function to launch simulation
-        function launchSimulation(simNumber) {
-            const simulationNames = [
-                "Getaran dan Gelombang",
-                "GLB dan GLBB",
-                "Termodinamika",
-                "Medan Magnet",
-                "Optika Geometri",
-                "Listrik Dinamis",
-                "Mekanika Fluida",
-                "Gerak Parabola",
-                "Gelombang Bunyi",
-                "Fisika Modern",
-                "Gerak Harmonik Sederhana",
-                "Hukum Newton",
-                "Listrik Statis",
-                "Kalor dan Perpindahan Panas",
-                "Usaha dan Energi"
-            ];
-            
-            alert(`Memuat simulasi 3D: ${simulationNames[simNumber-1]}\n\nFitur simulasi 3D akan dijalankan dalam mode interaktif. Kamu dapat mengontrol parameter fisika dan melihat hasilnya dalam visualisasi 3D.`);
-            
-            // Remove modal
-            const modal = document.querySelector('.fixed.inset-0.bg-black');
-            if (modal) modal.remove();
-        }
     </script>
 </body>
 </html>

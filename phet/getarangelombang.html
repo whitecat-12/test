@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Simulator Getaran & Gelombang - Fisika Interaktif</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            background: #ffffff;
+            color: #333;
+            min-height: 100vh;
+            padding: 10px;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            width: 100%;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 15px;
+            padding: 15px 10px;
+            background: linear-gradient(135deg, #9b59b6, #8e44ad);
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            color: white;
+        }
+        
+        h1 {
+            font-size: 1.6rem;
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+        
+        .subtitle {
+            font-size: 0.95rem;
+            opacity: 0.9;
+            line-height: 1.4;
+        }
+        
+        .content {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .panel {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border: 1px solid #eaeaea;
+            width: 100%;
+        }
+        
+        .simulation-panel {
+            height: 300px;
+            position: relative;
+            overflow: hidden;
+            order: 1;
+        }
+        
+        #simulation-container {
+            width: 100%;
+            height: 100%;
+            border-radius: 8px;
+            background: #f8f9fa;
+            border: 1px solid #eaeaea;
+        }
+        
+        .controls-panel {
+            order: 2;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 15px;
+            background: #f1f3f5;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 12px 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #495057;
+            font-size: 0.95rem;
+            touch-action: manipulation;
+        }
+        
+        .tab.active {
+            background: #9b59b6;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .control-group {
+            margin-bottom: 18px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #495057;
+            font-size: 0.95rem;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            margin-bottom: 5px;
+            height: 32px;
+            -webkit-appearance: none;
+            background: #e9ecef;
+            border-radius: 16px;
+            outline: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #9b59b6;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .value-display {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin-top: 3px;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            flex-direction: column;
+        }
+        
+        button {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            background: #9b59b6;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            font-size: 1rem;
+            touch-action: manipulation;
+        }
+        
+        button:hover, button:active {
+            background: #8e44ad;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        button.reset {
+            background: #e74c3c;
+        }
+        
+        button.reset:hover, button.reset:active {
+            background: #c0392b;
+        }
+        
+        .data-panel {
+            order: 3;
+            margin-top: 0;
+        }
+        
+        .data-panel h2 {
+            font-size: 1.3rem;
+            margin-bottom: 12px;
+        }
+        
+        .charts {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .chart-container {
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 12px;
+            height: 250px;
+            border: 1px solid #eaeaea;
+        }
+        
+        canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+        
+        .data-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 15px;
+            align-items: stretch;
+        }
+        
+        .data-controls div {
+            display: flex;
+            justify-content: center;
+        }
+        
+        .time-display {
+            font-weight: bold;
+            color: #9b59b6;
+            font-size: 1.1rem;
+            text-align: center;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .instructions {
+            margin-top: 20px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            color: #495057;
+            border: 1px solid #eaeaea;
+        }
+        
+        .instructions h3 {
+            margin-bottom: 8px;
+            color: #9b59b6;
+            font-size: 1rem;
+        }
+        
+        .instructions ul {
+            margin-left: 18px;
+        }
+        
+        .instructions li {
+            margin-bottom: 6px;
+        }
+        
+        /* Responsive improvements */
+        @media (min-width: 768px) {
+            body {
+                padding: 15px;
+            }
+            
+            .simulation-panel {
+                height: 350px;
+            }
+            
+            .buttons {
+                flex-direction: row;
+            }
+            
+            .data-controls {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .content {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 20px;
+            }
+            
+            .simulation-panel {
+                grid-column: 1;
+                height: 400px;
+            }
+            
+            .controls-panel {
+                grid-column: 2;
+            }
+            
+            .data-panel {
+                grid-column: 1 / -1;
+            }
+            
+            .charts {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 20px;
+            }
+        }
+        
+        /* Touch-friendly improvements */
+        .slider-container {
+            padding: 5px 0;
+        }
+        
+        /* Mobile landscape optimization */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .simulation-panel {
+                height: 250px;
+            }
+            
+            .chart-container {
+                height: 200px;
+            }
+            
+            .buttons {
+                flex-direction: row;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Simulator Getaran & Gelombang</h1>
+            <p class="subtitle">Visualisasi Getaran Harmonik Sederhana dan Gelombang Berjalan</p>
+        </header>
+        
+        <div class="content">
+            <div class="panel simulation-panel">
+                <div id="simulation-container"></div>
+            </div>
+            
+            <div class="panel controls-panel">
+                <div class="tabs">
+                    <div class="tab active" data-type="getaran">Getaran</div>
+                    <div class="tab" data-type="gelombang">Gelombang</div>
+                </div>
+                
+                <div class="control-group">
+                    <label for="amplitude">Amplitudo (m):</label>
+                    <div class="slider-container">
+                        <input type="range" id="amplitude" min="0.1" max="5" value="2" step="0.1">
+                    </div>
+                    <div class="value-display">
+                        <span>0.1</span>
+                        <span id="amplitude-value">2 m</span>
+                        <span>5</span>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <label for="frequency">Frekuensi (Hz):</label>
+                    <div class="slider-container">
+                        <input type="range" id="frequency" min="0.1" max="5" value="1" step="0.1">
+                    </div>
+                    <div class="value-display">
+                        <span>0.1</span>
+                        <span id="frequency-value">1 Hz</span>
+                        <span>5</span>
+                    </div>
+                </div>
+                
+                <div class="control-group gelombang-control" style="display: none;">
+                    <label for="wavelength">Panjang Gelombang (m):</label>
+                    <div class="slider-container">
+                        <input type="range" id="wavelength" min="1" max="10" value="4" step="0.5">
+                    </div>
+                    <div class="value-display">
+                        <span>1</span>
+                        <span id="wavelength-value">4 m</span>
+                        <span>10</span>
+                    </div>
+                </div>
+                
+                <div class="control-group gelombang-control" style="display: none;">
+                    <label for="wave-speed">Cepat Rambat (m/s):</label>
+                    <div class="slider-container">
+                        <input type="range" id="wave-speed" min="1" max="10" value="2" step="0.5">
+                    </div>
+                    <div class="value-display">
+                        <span>1</span>
+                        <span id="wave-speed-value">2 m/s</span>
+                        <span>10</span>
+                    </div>
+                </div>
+                
+                <div class="buttons">
+                    <button id="start-btn">Mulai Simulasi</button>
+                    <button id="pause-btn" style="display:none;">Jeda</button>
+                    <button id="reset-btn" class="reset">Reset</button>
+                </div>
+                
+                <div class="instructions">
+                    <h3>Petunjuk Penggunaan:</h3>
+                    <ul>
+                        <li>Pilih jenis simulasi (Getaran atau Gelombang) dengan mengklik tab</li>
+                        <li>Atur parameter amplitudo, frekuensi, dan untuk gelombang: panjang gelombang & cepat rambat</li>
+                        <li>Klik "Mulai Simulasi" untuk menjalankan simulasi</li>
+                        <li>Untuk mengubah sudut pandang: sentuh dan seret untuk memutar, cubit untuk zoom</li>
+                        <li>Data simulasi dapat diunduh dalam format CSV</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="panel data-panel">
+                <h2>Data dan Grafik</h2>
+                
+                <div class="data-controls">
+                    <div>
+                        <button id="download-btn">Unduh Data CSV</button>
+                    </div>
+                    <div>
+                        <span>Waktu: <span id="time-display" class="time-display">0.00</span> s</span>
+                    </div>
+                </div>
+                
+                <div class="charts">
+                    <div class="chart-container">
+                        <canvas id="position-chart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="velocity-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variabel global
+        let scene, camera, renderer, oscillator, wavePoints = [], waveLines, referenceLine;
+        let isAnimating = false;
+        let startTime, currentTime;
+        let amplitude, frequency, wavelength, waveSpeed;
+        let positionData = [], velocityData = [], timeData = [];
+        let positionChart, velocityChart;
+        let pauseTime = 0;
+        
+        // Inisialisasi Three.js
+        function initThreeJS() {
+            const container = document.getElementById('simulation-container');
+            
+            // Buat scene
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0xf8f9fa);
+            
+            // Buat kamera dengan viewport yang lebih sesuai untuk mobile
+            camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+            camera.position.set(0, 5, 15);
+            camera.lookAt(0, 0, 0);
+            
+            // Buat renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            container.appendChild(renderer.domElement);
+            
+            // Tambahkan pencahayaan
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(10, 20, 5);
+            scene.add(directionalLight);
+            
+            // Buat bidang referensi
+            const planeGeometry = new THREE.PlaneGeometry(20, 10);
+            const planeMaterial = new THREE.MeshLambertMaterial({ 
+                color: 0x3498db,
+                side: THREE.DoubleSide,
+                transparent: true,
+                opacity: 0.2
+            });
+            const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+            plane.rotation.x = Math.PI / 2;
+            scene.add(plane);
+            
+            // Tambahkan grid helper
+            const gridHelper = new THREE.GridHelper(20, 20, 0x495057, 0xdee2e6);
+            gridHelper.material.opacity = 0.3;
+            gridHelper.material.transparent = true;
+            scene.add(gridHelper);
+            
+            // Buat garis referensi untuk getaran
+            const lineMaterial = new THREE.LineBasicMaterial({ color: 0x7f8c8d, linewidth: 2 });
+            const lineGeometry = new THREE.BufferGeometry().setFromPoints([
+                new THREE.Vector3(-10, 0, 0),
+                new THREE.Vector3(10, 0, 0)
+            ]);
+            referenceLine = new THREE.Line(lineGeometry, lineMaterial);
+            scene.add(referenceLine);
+            
+            // Buat osilator (bola yang bergetar)
+            const sphereGeometry = new THREE.SphereGeometry(0.3, 24, 24);
+            const sphereMaterial = new THREE.MeshLambertMaterial({ color: 0xe74c3c });
+            oscillator = new THREE.Mesh(sphereGeometry, sphereMaterial);
+            oscillator.position.set(0, 0, 0);
+            scene.add(oscillator);
+            
+            // Inisialisasi titik-titik gelombang
+            initWavePoints();
+            
+            // Kontrol sentuh (touch) untuk mobile
+            let isTouching = false;
+            let previousTouchPosition = {
+                x: 0,
+                y: 0
+            };
+            
+            renderer.domElement.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                isTouching = true;
+                previousTouchPosition = {
+                    x: e.touches[0].clientX,
+                    y: e.touches[0].clientY
+                };
+            }, { passive: false });
+            
+            renderer.domElement.addEventListener('touchend', () => {
+                isTouching = false;
+            });
+            
+            renderer.domElement.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                if (!isTouching) return;
+                
+                const deltaMove = {
+                    x: e.touches[0].clientX - previousTouchPosition.x,
+                    y: e.touches[0].clientY - previousTouchPosition.y
+                };
+                
+                // Rotasi kamera berdasarkan pergerakan sentuhan
+                camera.position.x -= deltaMove.x * 0.02;
+                camera.position.y += deltaMove.y * 0.02;
+                
+                // Pastikan kamera tetap melihat ke pusat scene
+                camera.lookAt(0, 0, 0);
+                
+                previousTouchPosition = {
+                    x: e.touches[0].clientX,
+                    y: e.touches[0].clientY
+                };
+            }, { passive: false });
+            
+            // Zoom dengan pinch gesture (sederhana)
+            let initialDistance = 0;
+            renderer.domElement.addEventListener('touchstart', (e) => {
+                if (e.touches.length >= 2) {
+                    initialDistance = Math.hypot(
+                        e.touches[0].clientX - e.touches[1].clientX,
+                        e.touches[0].clientY - e.touches[1].clientY
+                    );
+                }
+            });
+            
+            renderer.domElement.addEventListener('touchmove', (e) => {
+                if (e.touches.length >= 2) {
+                    const currentDistance = Math.hypot(
+                        e.touches[0].clientX - e.touches[1].clientX,
+                        e.touches[0].clientY - e.touches[1].clientY
+                    );
+                    
+                    const delta = currentDistance - initialDistance;
+                    camera.position.z += delta * 0.05;
+                    camera.lookAt(0, 0, 0);
+                    
+                    initialDistance = currentDistance;
+                }
+            });
+            
+            // Handle resize window untuk mobile
+            window.addEventListener('resize', () => {
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
+            });
+            
+            // Optimasi untuk performa mobile
+            renderer.setPixelRatio(window.devicePixelRatio);
+        }
+        
+        // Inisialisasi titik-titik gelombang
+        function initWavePoints() {
+            // Hapus titik-titik gelombang sebelumnya jika ada
+            if (waveLines) {
+                scene.remove(waveLines);
+            }
+            
+            wavePoints = [];
+            const points = [];
+            const numPoints = 100;
+            
+            for (let i = 0; i <= numPoints; i++) {
+                const x = (i / numPoints) * 20 - 10; // Dari -10 sampai 10
+                points.push(new THREE.Vector3(x, 0, 0));
+                
+                // Buat titik kecil untuk setiap titik gelombang
+                const pointGeometry = new THREE.SphereGeometry(0.05, 8, 8);
+                const pointMaterial = new THREE.MeshLambertMaterial({ color: 0x2ecc71 });
+                const point = new THREE.Mesh(pointGeometry, pointMaterial);
+                point.position.set(x, 0, 0);
+                wavePoints.push(point);
+                scene.add(point);
+            }
+            
+            // Buat garis yang menghubungkan titik-titik
+            const lineGeometry = new THREE.BufferGeometry().setFromPoints(points);
+            const lineMaterial = new THREE.LineBasicMaterial({ color: 0x9b59b6, linewidth: 2 });
+            waveLines = new THREE.Line(lineGeometry, lineMaterial);
+            scene.add(waveLines);
+        }
+        
+        // Inisialisasi grafik
+        function initCharts() {
+            const positionCtx = document.getElementById('position-chart').getContext('2d');
+            positionChart = new Chart(positionCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Simpangan (m)',
+                        data: [],
+                        borderColor: '#e74c3c',
+                        backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Waktu (s)',
+                                color: '#495057'
+                            },
+                            grid: {
+                                color: 'rgba(73, 80, 87, 0.1)'
+                            },
+                            ticks: {
+                                color: '#495057',
+                                maxTicksLimit: 8
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Simpangan (m)',
+                                color: '#495057'
+                            },
+                            grid: {
+                                color: 'rgba(73, 80, 87, 0.1)'
+                            },
+                            ticks: {
+                                color: '#495057',
+                                maxTicksLimit: 6
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#495057',
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            const velocityCtx = document.getElementById('velocity-chart').getContext('2d');
+            velocityChart = new Chart(velocityCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Kecepatan (m/s)',
+                        data: [],
+                        borderColor: '#9b59b6',
+                        backgroundColor: 'rgba(155, 89, 182, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Waktu (s)',
+                                color: '#495057'
+                            },
+                            grid: {
+                                color: 'rgba(73, 80, 87, 0.1)'
+                            },
+                            ticks: {
+                                color: '#495057',
+                                maxTicksLimit: 8
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Kecepatan (m/s)',
+                                color: '#495057'
+                            },
+                            grid: {
+                                color: 'rgba(73, 80, 87, 0.1)'
+                            },
+                            ticks: {
+                                color: '#495057',
+                                maxTicksLimit: 6
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#495057',
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Fungsi animasi
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            if (isAnimating) {
+                currentTime = (Date.now() - startTime) / 1000 + pauseTime;
+                document.getElementById('time-display').textContent = currentTime.toFixed(2);
+                
+                // Ambil nilai parameter
+                amplitude = parseFloat(document.getElementById('amplitude').value);
+                frequency = parseFloat(document.getElementById('frequency').value);
+                
+                const motionType = document.querySelector('.tab.active').dataset.type;
+                
+                if (motionType === 'getaran') {
+                    // Simulasi getaran harmonik sederhana
+                    // y = A * sin(2πft)
+                    const angularFreq = 2 * Math.PI * frequency;
+                    const displacement = amplitude * Math.sin(angularFreq * currentTime);
+                    const velocity = amplitude * angularFreq * Math.cos(angularFreq * currentTime);
+                    
+                    // Update posisi osilator
+                    oscillator.position.y = displacement;
+                    
+                    // Simpan data untuk grafik
+                    timeData.push(currentTime);
+                    positionData.push(displacement);
+                    velocityData.push(velocity);
+                    
+                } else {
+                    // Simulasi gelombang berjalan
+                    wavelength = parseFloat(document.getElementById('wavelength').value);
+                    waveSpeed = parseFloat(document.getElementById('wave-speed').value);
+                    
+                    // Persamaan gelombang: y = A * sin(2π(ft - x/λ))
+                    const angularFreq = 2 * Math.PI * frequency;
+                    const waveNumber = 2 * Math.PI / wavelength;
+                    
+                    // Update posisi osilator (sumber gelombang di x=0)
+                    const sourceDisplacement = amplitude * Math.sin(angularFreq * currentTime);
+                    oscillator.position.y = sourceDisplacement;
+                    
+                    // Update setiap titik gelombang
+                    const points = [];
+                    for (let i = 0; i < wavePoints.length; i++) {
+                        const x = wavePoints[i].position.x;
+                        // Gelombang berjalan ke kanan: y = A * sin(ωt - kx)
+                        const displacement = amplitude * Math.sin(angularFreq * currentTime - waveNumber * x);
+                        wavePoints[i].position.y = displacement;
+                        points.push(new THREE.Vector3(x, displacement, 0));
+                    }
+                    
+                    // Update garis gelombang
+                    waveLines.geometry.setFromPoints(points);
+                    
+                    // Simpan data untuk grafik (posisi sumber)
+                    timeData.push(currentTime);
+                    positionData.push(sourceDisplacement);
+                    velocityData.push(amplitude * angularFreq * Math.cos(angularFreq * currentTime));
+                }
+                
+                // Update grafik
+                updateCharts();
+                
+                // Hentikan animasi jika terlalu lama
+                if (currentTime > 20) {
+                    isAnimating = false;
+                    document.getElementById('start-btn').style.display = 'block';
+                    document.getElementById('pause-btn').style.display = 'none';
+                }
+            }
+            
+            renderer.render(scene, camera);
+        }
+        
+        // Update grafik
+        function updateCharts() {
+            // Batasi jumlah data yang ditampilkan untuk performa mobile
+            const maxDataPoints = 100;
+            if (timeData.length > maxDataPoints) {
+                const step = Math.ceil(timeData.length / maxDataPoints);
+                const filteredTimeData = timeData.filter((_, i) => i % step === 0);
+                const filteredPositionData = positionData.filter((_, i) => i % step === 0);
+                const filteredVelocityData = velocityData.filter((_, i) => i % step === 0);
+                
+                positionChart.data.labels = filteredTimeData;
+                positionChart.data.datasets[0].data = filteredPositionData;
+                
+                velocityChart.data.labels = filteredTimeData;
+                velocityChart.data.datasets[0].data = filteredVelocityData;
+            } else {
+                positionChart.data.labels = timeData;
+                positionChart.data.datasets[0].data = positionData;
+                
+                velocityChart.data.labels = timeData;
+                velocityChart.data.datasets[0].data = velocityData;
+            }
+            
+            positionChart.update('none');
+            velocityChart.update('none');
+        }
+        
+        // Reset simulasi
+        function resetSimulation() {
+            isAnimating = false;
+            pauseTime = 0;
+            oscillator.position.set(0, 0, 0);
+            
+            // Reset titik-titik gelombang
+            wavePoints.forEach(point => {
+                point.position.y = 0;
+            });
+            
+            // Reset garis gelombang
+            const points = [];
+            wavePoints.forEach(point => {
+                points.push(new THREE.Vector3(point.position.x, 0, 0));
+            });
+            waveLines.geometry.setFromPoints(points);
+            
+            // Reset data
+            timeData = [];
+            positionData = [];
+            velocityData = [];
+            
+            // Reset grafik
+            positionChart.data.labels = [];
+            positionChart.data.datasets[0].data = [];
+            velocityChart.data.labels = [];
+            velocityChart.data.datasets[0].data = [];
+            
+            positionChart.update();
+            velocityChart.update();
+            
+            document.getElementById('time-display').textContent = '0.00';
+            document.getElementById('start-btn').style.display = 'block';
+            document.getElementById('pause-btn').style.display = 'none';
+        }
+        
+        // Jeda simulasi
+        function pauseSimulation() {
+            if (isAnimating) {
+                isAnimating = false;
+                pauseTime = currentTime;
+                document.getElementById('pause-btn').textContent = 'Lanjutkan';
+            } else {
+                isAnimating = true;
+                startTime = Date.now() - pauseTime * 1000;
+                document.getElementById('pause-btn').textContent = 'Jeda';
+            }
+        }
+        
+        // Unduh data sebagai CSV
+        function downloadData() {
+            let csvContent = "Waktu (s),Simpangan (m),Kecepatan (m/s)\n";
+            
+            for (let i = 0; i < timeData.length; i++) {
+                csvContent += `${timeData[i].toFixed(2)},${positionData[i].toFixed(2)},${velocityData[i].toFixed(2)}\n`;
+            }
+            
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'data_simulasi_getaran_gelombang.csv';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        
+        // Event listeners untuk mobile
+        document.addEventListener('DOMContentLoaded', () => {
+            // Inisialisasi
+            initThreeJS();
+            initCharts();
+            animate();
+            
+            // Update nilai slider dengan format yang lebih baik untuk mobile
+            const updateSliderValue = (sliderId, displayId, unit) => {
+                const slider = document.getElementById(sliderId);
+                const display = document.getElementById(displayId);
+                
+                slider.addEventListener('input', function() {
+                    display.textContent = this.value + unit;
+                });
+                
+                // Trigger initial value
+                display.textContent = slider.value + unit;
+            };
+            
+            updateSliderValue('amplitude', 'amplitude-value', ' m');
+            updateSliderValue('frequency', 'frequency-value', ' Hz');
+            updateSliderValue('wavelength', 'wavelength-value', ' m');
+            updateSliderValue('wave-speed', 'wave-speed-value', ' m/s');
+            
+            // Tombol mulai
+            document.getElementById('start-btn').addEventListener('click', function() {
+                if (isAnimating) return;
+                
+                // Reset data sebelumnya
+                resetSimulation();
+                
+                // Mulai animasi
+                isAnimating = true;
+                startTime = Date.now();
+                pauseTime = 0;
+                
+                // Tampilkan tombol jeda
+                this.style.display = 'none';
+                document.getElementById('pause-btn').style.display = 'block';
+            });
+            
+            // Tombol jeda/lanjutkan
+            document.getElementById('pause-btn').addEventListener('click', pauseSimulation);
+            
+            // Tombol reset
+            document.getElementById('reset-btn').addEventListener('click', resetSimulation);
+            
+            // Tombol unduh data
+            document.getElementById('download-btn').addEventListener('click', downloadData);
+            
+            // Tab Getaran/Gelombang
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Tampilkan/sembunyikan kontrol gelombang
+                    const waveControls = document.querySelectorAll('.gelombang-control');
+                    if (this.dataset.type === 'gelombang') {
+                        waveControls.forEach(control => {
+                            control.style.display = 'block';
+                        });
+                        // Tampilkan gelombang
+                        wavePoints.forEach(point => point.visible = true);
+                        waveLines.visible = true;
+                    } else {
+                        waveControls.forEach(control => {
+                            control.style.display = 'none';
+                        });
+                        // Sembunyikan gelombang
+                        wavePoints.forEach(point => point.visible = false);
+                        waveLines.visible = false;
+                    }
+                });
+            });
+            
+            // Mencegah zoom halaman pada interaksi slider (untuk iOS)
+            document.querySelectorAll('input[type="range"]').forEach(slider => {
+                slider.addEventListener('touchstart', function(e) {
+                    e.stopPropagation();
+                });
+            });
+            
+            // Optimasi untuk performa mobile
+            if ('ontouchstart' in window) {
+                // Jika perangkat memiliki layar sentuh, tambahkan kelas khusus
+                document.body.classList.add('touch-device');
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1119 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Simulator Gerak Parabola - Fisika Interaktif</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            background: #ffffff;
+            color: #333;
+            min-height: 100vh;
+            padding: 10px;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            width: 100%;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 15px;
+            padding: 15px 10px;
+            background: linear-gradient(135deg, #4a90e2, #357abd);
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            color: white;
+        }
+        
+        h1 {
+            font-size: 1.6rem;
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+        
+        .subtitle {
+            font-size: 0.95rem;
+            opacity: 0.9;
+            line-height: 1.4;
+        }
+        
+        .content {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .panel {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border: 1px solid #eaeaea;
+            width: 100%;
+        }
+        
+        .simulation-panel {
+            height: 300px;
+            position: relative;
+            overflow: hidden;
+            order: 1;
+        }
+        
+        #simulation-container {
+            width: 100%;
+            height: 100%;
+            border-radius: 8px;
+            background: #f8f9fa;
+            border: 1px solid #eaeaea;
+        }
+        
+        .controls-panel {
+            order: 2;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 15px;
+            background: #f1f3f5;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 12px 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #495057;
+            font-size: 0.95rem;
+            touch-action: manipulation;
+        }
+        
+        .tab.active {
+            background: #4a90e2;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .control-group {
+            margin-bottom: 18px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #495057;
+            font-size: 0.95rem;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            margin-bottom: 5px;
+            height: 32px;
+            -webkit-appearance: none;
+            background: #e9ecef;
+            border-radius: 16px;
+            outline: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #4a90e2;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .value-display {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin-top: 3px;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            flex-direction: column;
+        }
+        
+        button {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            background: #4a90e2;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            font-size: 1rem;
+            touch-action: manipulation;
+        }
+        
+        button:hover, button:active {
+            background: #357abd;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        button.reset {
+            background: #e74c3c;
+        }
+        
+        button.reset:hover, button.reset:active {
+            background: #c0392b;
+        }
+        
+        .data-panel {
+            order: 3;
+            margin-top: 0;
+        }
+        
+        .data-panel h2 {
+            font-size: 1.3rem;
+            margin-bottom: 12px;
+        }
+        
+        .physics-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .info-box {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #eaeaea;
+            text-align: center;
+        }
+        
+        .info-box h3 {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-bottom: 5px;
+        }
+        
+        .info-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #4a90e2;
+        }
+        
+        .charts {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .chart-container {
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 12px;
+            height: 250px;
+            border: 1px solid #eaeaea;
+        }
+        
+        canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+        
+        .data-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 15px;
+            align-items: stretch;
+        }
+        
+        .data-controls div {
+            display: flex;
+            justify-content: center;
+        }
+        
+        .time-display {
+            font-weight: bold;
+            color: #4a90e2;
+            font-size: 1.1rem;
+            text-align: center;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .instructions {
+            margin-top: 20px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            color: #495057;
+            border: 1px solid #eaeaea;
+        }
+        
+        .instructions h3 {
+            margin-bottom: 8px;
+            color: #4a90e2;
+            font-size: 1rem;
+        }
+        
+        .instructions ul {
+            margin-left: 18px;
+        }
+        
+        .instructions li {
+            margin-bottom: 6px;
+        }
+        
+        /* Responsive improvements */
+        @media (min-width: 768px) {
+            body {
+                padding: 15px;
+            }
+            
+            .simulation-panel {
+                height: 350px;
+            }
+            
+            .buttons {
+                flex-direction: row;
+            }
+            
+            .data-controls {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .content {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 20px;
+            }
+            
+            .simulation-panel {
+                grid-column: 1;
+                height: 400px;
+            }
+            
+            .controls-panel {
+                grid-column: 2;
+            }
+            
+            .data-panel {
+                grid-column: 1 / -1;
+            }
+            
+            .charts {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 20px;
+            }
+        }
+        
+        /* Touch-friendly improvements */
+        .slider-container {
+            padding: 5px 0;
+        }
+        
+        /* Mobile landscape optimization */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .simulation-panel {
+                height: 250px;
+            }
+            
+            .chart-container {
+                height: 200px;
+            }
+            
+            .buttons {
+                flex-direction: row;
+            }
+        }
+        
+        .parabola-path {
+            position: absolute;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Simulator Gerak Parabola</h1>
+            <p class="subtitle">Visualisasi Gerak Peluru dengan Analisis Komponen Vektor</p>
+        </header>
+        
+        <div class="content">
+            <div class="panel simulation-panel">
+                <div id="simulation-container"></div>
+                <canvas id="parabola-canvas" class="parabola-path"></canvas>
+            </div>
+            
+            <div class="panel controls-panel">
+                <div class="tabs">
+                    <div class="tab active" data-type="parabola">Parabola</div>
+                    <div class="tab" data-type="analysis">Analisis</div>
+                </div>
+                
+                <div class="control-group">
+                    <label for="velocity">Kecepatan Awal (m/s):</label>
+                    <div class="slider-container">
+                        <input type="range" id="velocity" min="5" max="50" value="25" step="1">
+                    </div>
+                    <div class="value-display">
+                        <span>5</span>
+                        <span id="velocity-value">25 m/s</span>
+                        <span>50</span>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <label for="angle">Sudut Elevasi (derajat):</label>
+                    <div class="slider-container">
+                        <input type="range" id="angle" min="10" max="80" value="45" step="1">
+                    </div>
+                    <div class="value-display">
+                        <span>10°</span>
+                        <span id="angle-value">45°</span>
+                        <span>80°</span>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <label for="gravity">Gravitasi (m/s²):</label>
+                    <div class="slider-container">
+                        <input type="range" id="gravity" min="5" max="20" value="9.8" step="0.1">
+                    </div>
+                    <div class="value-display">
+                        <span>5</span>
+                        <span id="gravity-value">9.8 m/s²</span>
+                        <span>20</span>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <label for="height">Ketinggian Awal (m):</label>
+                    <div class="slider-container">
+                        <input type="range" id="height" min="0" max="20" value="5" step="0.5">
+                    </div>
+                    <div class="value-display">
+                        <span>0</span>
+                        <span id="height-value">5 m</span>
+                        <span>20</span>
+                    </div>
+                </div>
+                
+                <div class="buttons">
+                    <button id="start-btn">Mulai Simulasi</button>
+                    <button id="reset-btn" class="reset">Reset</button>
+                </div>
+                
+                <div class="instructions">
+                    <h3>Petunjuk Penggunaan:</h3>
+                    <ul>
+                        <li>Atur kecepatan awal, sudut elevasi, gravitasi, dan ketinggian awal</li>
+                        <li>Klik "Mulai Simulasi" untuk menjalankan simulasi gerak parabola</li>
+                        <li>Tab "Analisis" menunjukkan informasi fisika tentang gerakan</li>
+                        <li>Untuk mengubah sudut pandang: sentuh dan seret untuk memutar, cubit untuk zoom</li>
+                        <li>Data simulasi dapat diunduh dalam format CSV</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="panel data-panel">
+                <h2>Data dan Analisis</h2>
+                
+                <div class="physics-info">
+                    <div class="info-box">
+                        <h3>Jangkauan Maksimum</h3>
+                        <div id="range-value" class="info-value">0 m</div>
+                    </div>
+                    <div class="info-box">
+                        <h3>Tinggi Maksimum</h3>
+                        <div id="max-height-value" class="info-value">0 m</div>
+                    </div>
+                    <div class="info-box">
+                        <h3>Waktu Total</h3>
+                        <div id="total-time-value" class="info-value">0 s</div>
+                    </div>
+                    <div class="info-box">
+                        <h3>Kecepatan Akhir</h3>
+                        <div id="final-velocity-value" class="info-value">0 m/s</div>
+                    </div>
+                </div>
+                
+                <div class="data-controls">
+                    <div>
+                        <button id="download-btn">Unduh Data CSV</button>
+                    </div>
+                    <div>
+                        <span>Waktu: <span id="time-display" class="time-display">0.00</span> s</span>
+                    </div>
+                </div>
+                
+                <div class="charts">
+                    <div class="chart-container">
+                        <canvas id="trajectory-chart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="velocity-components-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variabel global
+        let scene, camera, renderer, object, ground;
+        let isAnimating = false;
+        let startTime, currentTime;
+        let velocity, angle, gravity, initialHeight;
+        let positionDataX = [], positionDataY = [], timeData = [];
+        let velocityXData = [], velocityYData = [], velocityMagData = [];
+        let trajectoryChart, velocityChart;
+        let parabolaCanvas, parabolaCtx;
+        
+        // Inisialisasi Three.js
+        function initThreeJS() {
+            const container = document.getElementById('simulation-container');
+            
+            // Buat scene
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0xf8f9fa);
+            
+            // Buat kamera dengan viewport yang lebih sesuai untuk mobile
+            camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+            camera.position.set(0, 5, 15);
+            camera.lookAt(0, 0, 0);
+            
+            // Buat renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            container.appendChild(renderer.domElement);
+            
+            // Tambahkan pencahayaan
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(10, 20, 5);
+            scene.add(directionalLight);
+            
+            // Buat tanah
+            const groundGeometry = new THREE.PlaneGeometry(100, 40);
+            const groundMaterial = new THREE.MeshLambertMaterial({ 
+                color: 0x4a90e2,
+                side: THREE.DoubleSide
+            });
+            ground = new THREE.Mesh(groundGeometry, groundMaterial);
+            ground.rotation.x = Math.PI / 2;
+            ground.position.y = -0.5;
+            scene.add(ground);
+            
+            // Tambahkan grid helper
+            const gridHelper = new THREE.GridHelper(100, 20, 0x495057, 0xdee2e6);
+            gridHelper.material.opacity = 0.3;
+            gridHelper.material.transparent = true;
+            scene.add(gridHelper);
+            
+            // Buat objek yang akan bergerak (bola)
+            const sphereGeometry = new THREE.SphereGeometry(0.5, 24, 24);
+            const sphereMaterial = new THREE.MeshLambertMaterial({ color: 0xe74c3c });
+            object = new THREE.Mesh(sphereGeometry, sphereMaterial);
+            scene.add(object);
+            
+            // Buat garis lintasan parabola
+            const lineMaterial = new THREE.LineBasicMaterial({ color: 0x2ecc71, linewidth: 2 });
+            const lineGeometry = new THREE.BufferGeometry();
+            const parabolaLine = new THREE.Line(lineGeometry, lineMaterial);
+            scene.add(parabolaLine);
+            
+            // Inisialisasi canvas untuk menggambar lintasan parabola 2D
+            parabolaCanvas = document.getElementById('parabola-canvas');
+            parabolaCtx = parabolaCanvas.getContext('2d');
+            parabolaCanvas.width = container.clientWidth;
+            parabolaCanvas.height = container.clientHeight;
+            parabolaCanvas.style.position = 'absolute';
+            parabolaCanvas.style.top = '0';
+            parabolaCanvas.style.left = '0';
+            parabolaCanvas.style.width = '100%';
+            parabolaCanvas.style.height = '100%';
+            
+            // Kontrol sentuh (touch) untuk mobile
+            let isTouching = false;
+            let previousTouchPosition = {
+                x: 0,
+                y: 0
+            };
+            
+            renderer.domElement.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                isTouching = true;
+                previousTouchPosition = {
+                    x: e.touches[0].clientX,
+                    y: e.touches[0].clientY
+                };
+            }, { passive: false });
+            
+            renderer.domElement.addEventListener('touchend', () => {
+                isTouching = false;
+            });
+            
+            renderer.domElement.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                if (!isTouching) return;
+                
+                const deltaMove = {
+                    x: e.touches[0].clientX - previousTouchPosition.x,
+                    y: e.touches[0].clientY - previousTouchPosition.y
+                };
+                
+                // Rotasi kamera berdasarkan pergerakan sentuhan
+                camera.position.x -= deltaMove.x * 0.02;
+                camera.position.y += deltaMove.y * 0.02;
+                
+                // Pastikan kamera tetap melihat ke pusat scene
+                camera.lookAt(0, 0, 0);
+                
+                previousTouchPosition = {
+                    x: e.touches[0].clientX,
+                    y: e.touches[0].clientY
+                };
+            }, { passive: false });
+            
+            // Zoom dengan pinch gesture
+            let initialDistance = 0;
+            renderer.domElement.addEventListener('touchstart', (e) => {
+                if (e.touches.length >= 2) {
+                    initialDistance = Math.hypot(
+                        e.touches[0].clientX - e.touches[1].clientX,
+                        e.touches[0].clientY - e.touches[1].clientY
+                    );
+                }
+            });
+            
+            renderer.domElement.addEventListener('touchmove', (e) => {
+                if (e.touches.length >= 2) {
+                    const currentDistance = Math.hypot(
+                        e.touches[0].clientX - e.touches[1].clientX,
+                        e.touches[0].clientY - e.touches[1].clientY
+                    );
+                    
+                    const delta = currentDistance - initialDistance;
+                    camera.position.z += delta * 0.05;
+                    camera.lookAt(0, 0, 0);
+                    
+                    initialDistance = currentDistance;
+                }
+            });
+            
+            // Handle resize window untuk mobile
+            window.addEventListener('resize', () => {
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
+                parabolaCanvas.width = container.clientWidth;
+                parabolaCanvas.height = container.clientHeight;
+            });
+            
+            // Optimasi untuk performa mobile
+            renderer.setPixelRatio(window.devicePixelRatio);
+            
+            return { parabolaLine, lineGeometry };
+        }
+        
+        // Inisialisasi grafik
+        function initCharts() {
+            const trajectoryCtx = document.getElementById('trajectory-chart').getContext('2d');
+            trajectoryChart = new Chart(trajectoryCtx, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: 'Lintasan Parabola',
+                        data: [],
+                        borderColor: '#e74c3c',
+                        backgroundColor: 'rgba(231, 76, 60, 0.5)',
+                        borderWidth: 2,
+                        pointRadius: 3,
+                        showLine: true,
+                        fill: false
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Jarak Horizontal (m)',
+                                color: '#495057'
+                            },
+                            grid: {
+                                color: 'rgba(73, 80, 87, 0.1)'
+                            },
+                            ticks: {
+                                color: '#495057',
+                                maxTicksLimit: 8
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Ketinggian (m)',
+                                color: '#495057'
+                            },
+                            grid: {
+                                color: 'rgba(73, 80, 87, 0.1)'
+                            },
+                            ticks: {
+                                color: '#495057',
+                                maxTicksLimit: 6
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#495057',
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            const velocityCtx = document.getElementById('velocity-components-chart').getContext('2d');
+            velocityChart = new Chart(velocityCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [
+                        {
+                            label: 'Kecepatan Horizontal (Vx)',
+                            data: [],
+                            borderColor: '#4a90e2',
+                            backgroundColor: 'rgba(74, 144, 226, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.4,
+                            fill: false
+                        },
+                        {
+                            label: 'Kecepatan Vertikal (Vy)',
+                            data: [],
+                            borderColor: '#2ecc71',
+                            backgroundColor: 'rgba(46, 204, 113, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.4,
+                            fill: false
+                        },
+                        {
+                            label: 'Kecepatan Total',
+                            data: [],
+                            borderColor: '#e74c3c',
+                            backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                            borderWidth: 2,
+                            tension: 0.4,
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Waktu (s)',
+                                color: '#495057'
+                            },
+                            grid: {
+                                color: 'rgba(73, 80, 87, 0.1)'
+                            },
+                            ticks: {
+                                color: '#495057',
+                                maxTicksLimit: 8
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Kecepatan (m/s)',
+                                color: '#495057'
+                            },
+                            grid: {
+                                color: 'rgba(73, 80, 87, 0.1)'
+                            },
+                            ticks: {
+                                color: '#495057',
+                                maxTicksLimit: 6
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#495057',
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Hitung parameter gerak parabola
+        function calculateProjectileParams(v0, angle, g, h0) {
+            const angleRad = angle * Math.PI / 180;
+            const v0x = v0 * Math.cos(angleRad);
+            const v0y = v0 * Math.sin(angleRad);
+            
+            // Waktu mencapai tinggi maksimum
+            const timeToMaxHeight = v0y / g;
+            
+            // Tinggi maksimum
+            const maxHeight = h0 + (v0y * v0y) / (2 * g);
+            
+            // Waktu total penerbangan (dari ketinggian h0)
+            const totalTime = (v0y + Math.sqrt(v0y * v0y + 2 * g * h0)) / g;
+            
+            // Jangkauan horizontal maksimum
+            const maxRange = v0x * totalTime;
+            
+            return {
+                v0x, v0y, timeToMaxHeight, maxHeight, totalTime, maxRange
+            };
+        }
+        
+        // Update informasi fisika
+        function updatePhysicsInfo(params) {
+            document.getElementById('range-value').textContent = params.maxRange.toFixed(2) + ' m';
+            document.getElementById('max-height-value').textContent = params.maxHeight.toFixed(2) + ' m';
+            document.getElementById('total-time-value').textContent = params.totalTime.toFixed(2) + ' s';
+            document.getElementById('final-velocity-value').textContent = 
+                Math.sqrt(params.v0x * params.v0x + Math.pow(params.v0y - gravity * params.totalTime, 2)).toFixed(2) + ' m/s';
+        }
+        
+        // Gambar lintasan parabola di canvas 2D
+        function drawParabolaPath(v0, angle, g, h0) {
+            const params = calculateProjectileParams(v0, angle, g, h0);
+            const angleRad = angle * Math.PI / 180;
+            const v0x = v0 * Math.cos(angleRad);
+            const v0y = v0 * Math.sin(angleRad);
+            
+            // Bersihkan canvas
+            parabolaCtx.clearRect(0, 0, parabolaCanvas.width, parabolaCanvas.height);
+            
+            // Gambar sumbu koordinat
+            parabolaCtx.strokeStyle = '#495057';
+            parabolaCtx.lineWidth = 1;
+            
+            // Sumbu X (horizontal)
+            parabolaCtx.beginPath();
+            parabolaCtx.moveTo(50, parabolaCanvas.height - 50);
+            parabolaCtx.lineTo(parabolaCanvas.width - 50, parabolaCanvas.height - 50);
+            parabolaCtx.stroke();
+            
+            // Sumbu Y (vertikal)
+            parabolaCtx.beginPath();
+            parabolaCtx.moveTo(50, 50);
+            parabolaCtx.lineTo(50, parabolaCanvas.height - 50);
+            parabolaCtx.stroke();
+            
+            // Skala koordinat
+            const scaleX = (parabolaCanvas.width - 100) / params.maxRange;
+            const scaleY = (parabolaCanvas.height - 100) / (params.maxHeight * 1.5);
+            
+            // Gambar lintasan parabola
+            parabolaCtx.strokeStyle = '#e74c3c';
+            parabolaCtx.lineWidth = 3;
+            parabolaCtx.beginPath();
+            
+            for (let t = 0; t <= params.totalTime; t += 0.1) {
+                const x = v0x * t;
+                const y = h0 + v0y * t - 0.5 * g * t * t;
+                
+                const canvasX = 50 + x * scaleX;
+                const canvasY = parabolaCanvas.height - 50 - y * scaleY;
+                
+                if (t === 0) {
+                    parabolaCtx.moveTo(canvasX, canvasY);
+                } else {
+                    parabolaCtx.lineTo(canvasX, canvasY);
+                }
+            }
+            
+            parabolaCtx.stroke();
+            
+            // Gambar titik proyeksi
+            parabolaCtx.fillStyle = '#4a90e2';
+            parabolaCtx.beginPath();
+            parabolaCtx.arc(50, parabolaCanvas.height - 50 - h0 * scaleY, 6, 0, Math.PI * 2);
+            parabolaCtx.fill();
+            
+            // Label sumbu
+            parabolaCtx.fillStyle = '#495057';
+            parabolaCtx.font = '12px Arial';
+            parabolaCtx.fillText('Jarak (m)', parabolaCanvas.width - 80, parabolaCanvas.height - 30);
+            parabolaCtx.fillText('Ketinggian (m)', 20, 20);
+        }
+        
+        // Fungsi animasi
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            if (isAnimating) {
+                currentTime = (Date.now() - startTime) / 1000;
+                document.getElementById('time-display').textContent = currentTime.toFixed(2);
+                
+                // Hitung posisi berdasarkan persamaan gerak parabola
+                const angleRad = angle * Math.PI / 180;
+                const v0x = velocity * Math.cos(angleRad);
+                const v0y = velocity * Math.sin(angleRad);
+                
+                // Posisi horizontal: x = v0x * t
+                const x = v0x * currentTime;
+                
+                // Posisi vertikal: y = h0 + v0y * t - 0.5 * g * t²
+                const y = initialHeight + v0y * currentTime - 0.5 * gravity * currentTime * currentTime;
+                
+                // Update posisi objek 3D
+                object.position.x = x - 20; // Geser sedikit ke kiri untuk melihat lintasan
+                object.position.y = y;
+                
+                // Kecepatan saat ini
+                const vx = v0x;
+                const vy = v0y - gravity * currentTime;
+                const v = Math.sqrt(vx * vx + vy * vy);
+                
+                // Simpan data untuk grafik
+                if (timeData.length === 0 || currentTime > timeData[timeData.length - 1]) {
+                    timeData.push(currentTime);
+                    positionDataX.push(x);
+                    positionDataY.push(y);
+                    velocityXData.push(vx);
+                    velocityYData.push(vy);
+                    velocityMagData.push(v);
+                }
+                
+                // Update grafik
+                updateCharts();
+                
+                // Hentikan animasi jika objek menyentuh tanah
+                if (y <= 0 || currentTime > 20) {
+                    isAnimating = false;
+                    object.position.y = 0;
+                }
+            }
+            
+            renderer.render(scene, camera);
+        }
+        
+        // Update grafik
+        function updateCharts() {
+            // Update grafik lintasan
+            const trajectoryData = [];
+            for (let i = 0; i < positionDataX.length; i++) {
+                trajectoryData.push({ x: positionDataX[i], y: positionDataY[i] });
+            }
+            trajectoryChart.data.datasets[0].data = trajectoryData;
+            trajectoryChart.update('none');
+            
+            // Update grafik kecepatan
+            velocityChart.data.labels = timeData;
+            velocityChart.data.datasets[0].data = velocityXData;
+            velocityChart.data.datasets[1].data = velocityYData;
+            velocityChart.data.datasets[2].data = velocityMagData;
+            velocityChart.update('none');
+        }
+        
+        // Reset simulasi
+        function resetSimulation() {
+            isAnimating = false;
+            object.position.set(-20, initialHeight, 0);
+            
+            // Reset data
+            timeData = [];
+            positionDataX = [];
+            positionDataY = [];
+            velocityXData = [];
+            velocityYData = [];
+            velocityMagData = [];
+            
+            // Reset grafik
+            trajectoryChart.data.datasets[0].data = [];
+            velocityChart.data.labels = [];
+            velocityChart.data.datasets[0].data = [];
+            velocityChart.data.datasets[1].data = [];
+            velocityChart.data.datasets[2].data = [];
+            
+            trajectoryChart.update();
+            velocityChart.update();
+            
+            document.getElementById('time-display').textContent = '0.00';
+            
+            // Bersihkan canvas parabola
+            parabolaCtx.clearRect(0, 0, parabolaCanvas.width, parabolaCanvas.height);
+        }
+        
+        // Unduh data sebagai CSV
+        function downloadData() {
+            let csvContent = "Waktu (s),Posisi X (m),Posisi Y (m),Kecepatan X (m/s),Kecepatan Y (m/s),Kecepatan Total (m/s)\n";
+            
+            for (let i = 0; i < timeData.length; i++) {
+                csvContent += `${timeData[i].toFixed(2)},${positionDataX[i].toFixed(2)},${positionDataY[i].toFixed(2)},${velocityXData[i].toFixed(2)},${velocityYData[i].toFixed(2)},${velocityMagData[i].toFixed(2)}\n`;
+            }
+            
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'data_simulasi_parabola.csv';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        
+        // Event listeners untuk mobile
+        document.addEventListener('DOMContentLoaded', () => {
+            // Inisialisasi
+            const { parabolaLine, lineGeometry } = initThreeJS();
+            initCharts();
+            animate();
+            
+            // Update nilai slider dengan format yang lebih baik untuk mobile
+            const updateSliderValue = (sliderId, displayId, unit) => {
+                const slider = document.getElementById(sliderId);
+                const display = document.getElementById(displayId);
+                
+                slider.addEventListener('input', function() {
+                    display.textContent = this.value + unit;
+                });
+                
+                // Trigger initial value
+                display.textContent = slider.value + unit;
+            };
+            
+            updateSliderValue('velocity', 'velocity-value', ' m/s');
+            updateSliderValue('angle', 'angle-value', '°');
+            updateSliderValue('gravity', 'gravity-value', ' m/s²');
+            updateSliderValue('height', 'height-value', ' m');
+            
+            // Tombol mulai
+            document.getElementById('start-btn').addEventListener('click', function() {
+                if (isAnimating) return;
+                
+                // Ambil nilai dari slider
+                velocity = parseFloat(document.getElementById('velocity').value);
+                angle = parseFloat(document.getElementById('angle').value);
+                gravity = parseFloat(document.getElementById('gravity').value);
+                initialHeight = parseFloat(document.getElementById('height').value);
+                
+                // Hitung parameter parabola
+                const params = calculateProjectileParams(velocity, angle, gravity, initialHeight);
+                updatePhysicsInfo(params);
+                
+                // Gambar lintasan parabola
+                drawParabolaPath(velocity, angle, gravity, initialHeight);
+                
+                // Reset data sebelumnya
+                resetSimulation();
+                object.position.y = initialHeight;
+                
+                // Mulai animasi
+                isAnimating = true;
+                startTime = Date.now();
+            });
+            
+            // Tombol reset
+            document.getElementById('reset-btn').addEventListener('click', resetSimulation);
+            
+            // Tombol unduh data
+            document.getElementById('download-btn').addEventListener('click', downloadData);
+            
+            // Tab Parabola/Analisis
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Tampilkan/sembunyikan informasi fisika
+                    const physicsInfo = document.querySelector('.physics-info');
+                    if (this.dataset.type === 'analysis') {
+                        physicsInfo.style.display = 'grid';
+                        // Hitung dan tampilkan info fisika
+                        velocity = parseFloat(document.getElementById('velocity').value);
+                        angle = parseFloat(document.getElementById('angle').value);
+                        gravity = parseFloat(document.getElementById('gravity').value);
+                        initialHeight = parseFloat(document.getElementById('height').value);
+                        const params = calculateProjectileParams(velocity, angle, gravity, initialHeight);
+                        updatePhysicsInfo(params);
+                    } else {
+                        physicsInfo.style.display = 'none';
+                    }
+                });
+            });
+            
+            // Mencegah zoom halaman pada interaksi slider (untuk iOS)
+            document.querySelectorAll('input[type="range"]').forEach(slider => {
+                slider.addEventListener('touchstart', function(e) {
+                    e.stopPropagation();
+                });
+            });
+            
+            // Optimasi untuk performa mobile
+            if ('ontouchstart' in window) {
+                document.body.classList.add('touch-device');
+            }
+            
+            // Hitung dan tampilkan info fisika awal
+            velocity = parseFloat(document.getElementById('velocity').value);
+            angle = parseFloat(document.getElementById('angle').value);
+            gravity = parseFloat(document.getElementById('gravity').value);
+            initialHeight = parseFloat(document.getElementById('height').value);
+            const params = calculateProjectileParams(velocity, angle, gravity, initialHeight);
+            updatePhysicsInfo(params);
+            drawParabolaPath(velocity, angle, gravity, initialHeight);
+            
+            // Posisi awal objek
+            object.position.set(-20, initialHeight, 0);
+        });
+    </script>
+</body>
+</html>

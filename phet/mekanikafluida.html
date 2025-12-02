@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Simulator Mekanika Fluida - Fisika Interaktif</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            background: #ffffff;
+            color: #333;
+            min-height: 100vh;
+            padding: 10px;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            width: 100%;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 15px;
+            padding: 15px 10px;
+            background: linear-gradient(135deg, #0066cc, #004080);
+            border-radius: 12px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            color: white;
+        }
+        
+        h1 {
+            font-size: 1.6rem;
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+        
+        .subtitle {
+            font-size: 0.95rem;
+            opacity: 0.9;
+            line-height: 1.4;
+        }
+        
+        .content {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+        
+        .panel {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border: 1px solid #eaeaea;
+            width: 100%;
+        }
+        
+        .simulation-panel {
+            height: 300px;
+            position: relative;
+            overflow: hidden;
+            order: 1;
+        }
+        
+        #simulation-container {
+            width: 100%;
+            height: 100%;
+            border-radius: 8px;
+            background: #f0f8ff;
+            border: 1px solid #eaeaea;
+        }
+        
+        .controls-panel {
+            order: 2;
+        }
+        
+        .tabs {
+            display: flex;
+            margin-bottom: 15px;
+            background: #f1f3f5;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 12px 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #495057;
+            font-size: 0.95rem;
+            touch-action: manipulation;
+        }
+        
+        .tab.active {
+            background: #0066cc;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .control-group {
+            margin-bottom: 18px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #495057;
+            font-size: 0.95rem;
+        }
+        
+        input[type="range"] {
+            width: 100%;
+            margin-bottom: 5px;
+            height: 32px;
+            -webkit-appearance: none;
+            background: #e9ecef;
+            border-radius: 16px;
+            outline: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #0066cc;
+            cursor: pointer;
+            border: 2px solid white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .value-display {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin-top: 3px;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+            flex-direction: column;
+        }
+        
+        button {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            background: #0066cc;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            font-size: 1rem;
+            touch-action: manipulation;
+        }
+        
+        button:hover, button:active {
+            background: #004080;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        button.reset {
+            background: #e74c3c;
+        }
+        
+        button.reset:hover, button.reset:active {
+            background: #c0392b;
+        }
+        
+        .data-panel {
+            order: 3;
+            margin-top: 0;
+        }
+        
+        .data-panel h2 {
+            font-size: 1.3rem;
+            margin-bottom: 12px;
+        }
+        
+        .charts {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .chart-container {
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 12px;
+            height: 250px;
+            border: 1px solid #eaeaea;
+        }
+        
+        canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+        
+        .data-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-top: 15px;
+            align-items: stretch;
+        }
+        
+        .data-controls div {
+            display: flex;
+            justify-content: center;
+        }
+        
+        .time-display {
+            font-weight: bold;
+            color: #0066cc;
+            font-size: 1.1rem;
+            text-align: center;
+            padding: 8px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .instructions {
+            margin-top: 20px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            line-height: 1.5;
+            color: #495057;
+            border: 1px solid #eaeaea;
+        }
+        
+        .instructions h3 {
+            margin-bottom: 8px;
+            color: #0066cc;
+            font-size: 1rem;
+        }
+        
+        .instructions ul {
+            margin-left: 18px;
+        }
+        
+        .instructions li {
+            margin-bottom: 6px;
+        }
+        
+        .flow-particle {
+            position: absolute;
+            background-color: rgba(0, 102, 204, 0.7);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+        
+        /* Responsive improvements */
+        @media (min-width: 768px) {
+            body {
+                padding: 15px;
+            }
+            
+            .simulation-panel {
+                height: 350px;
+            }
+            
+            .buttons {
+                flex-direction: row;
+            }
+            
+            .data-controls {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .content {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 20px;
+            }
+            
+            .simulation-panel {
+                grid-column: 1;
+                height: 400px;
+            }
+            
+            .controls-panel {
+                grid-column: 2;
+            }
+            
+            .data-panel {
+                grid-column: 1 / -1;
+            }
+            
+            .charts {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 20px;
+            }
+        }
+        
+        /* Touch-friendly improvements */
+        .slider-container {
+            padding: 5px 0;
+        }
+        
+        /* Mobile landscape optimization */
+        @media (max-height: 500px) and (orientation: landscape) {
+            .simulation-panel {
+                height: 250px;
+            }
+            
+            .chart-container {
+                height: 200px;
+            }
+            
+            .buttons {
+                flex-direction: row;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Simulator Mekanika Fluida</h1>
+            <p class="subtitle">Visualisasi Aliran Fluida, Tekanan, dan Viskositas</p>
+        </header>
+        
+        <div class="content">
+            <div class="panel simulation-panel">
+                <div id="simulation-container"></div>
+            </div>
+            
+            <div class="panel controls-panel">
+                <div class="tabs">
+                    <div class="tab active" data-type="flow">Aliran Fluida</div>
+                    <div class="tab" data-type="pressure">Distribusi Tekanan</div>
+                </div>
+                
+                <div class="control-group">
+                    <label for="velocity">Kecepatan Aliran (m/s):</label>
+                    <div class="slider-container">
+                        <input type="range" id="velocity" min="0.1" max="10" value="2" step="0.1">
+                    </div>
+                    <div class="value-display">
+                        <span>0.1</span>
+                        <span id="velocity-value">2 m/s</span>
+                        <span>10</span>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <label for="viscosity">Viskositas Fluida (Pa·s):</label>
+                    <div class="slider-container">
+                        <input type="range" id="viscosity" min="0.001" max="2" value="0.01" step="0.001">
+                    </div>
+                    <div class="value-display">
+                        <span>0.001</span>
+                        <span id="viscosity-value">0.01 Pa·s</span>
+                        <span>2</span>
+                    </div>
+                </div>
+                
+                <div class="control-group pressure-control" style="display: none;">
+                    <label for="pressure">Tekanan (kPa):</label>
+                    <div class="slider-container">
+                        <input type="range" id="pressure" min="50" max="500" value="100" step="10">
+                    </div>
+                    <div class="value-display">
+                        <span>50</span>
+                        <span id="pressure-value">100 kPa</span>
+                        <span>500</span>
+                    </div>
+                </div>
+                
+                <div class="control-group">
+                    <label for="density">Kepadatan Fluida (kg/m³):</label>
+                    <div class="slider-container">
+                        <input type="range" id="density" min="700" max="1500" value="1000" step="10">
+                    </div>
+                    <div class="value-display">
+                        <span>700</span>
+                        <span id="density-value">1000 kg/m³</span>
+                        <span>1500</span>
+                    </div>
+                </div>
+                
+                <div class="buttons">
+                    <button id="start-btn">Mulai Simulasi</button>
+                    <button id="reset-btn" class="reset">Reset</button>
+                </div>
+                
+                <div class="instructions">
+                    <h3>Petunjuk Penggunaan:</h3>
+                    <ul>
+                        <li>Pilih jenis simulasi (Aliran Fluida atau Distribusi Tekanan)</li>
+                        <li>Atur parameter kecepatan, viskositas, tekanan, dan kepadatan fluida</li>
+                        <li>Klik "Mulai Simulasi" untuk menjalankan simulasi</li>
+                        <li>Untuk mengubah sudut pandang: sentuh dan seret untuk memutar, cubit untuk zoom</li>
+                        <li>Partikel menunjukkan aliran fluida dalam pipa</li>
+                        <li>Data simulasi dapat diunduh dalam format CSV</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="panel data-panel">
+                <h2>Data dan Grafik</h2>
+                
+                <div class="data-controls">
+                    <div>
+                        <button id="download-btn">Unduh Data CSV</button>
+                    </div>
+                    <div>
+                        <span>Waktu: <span id="time-display" class="time-display">0.00</span> s</span>
+                    </div>
+                </div>
+                
+                <div class="charts">
+                    <div class="chart-container">
+                        <canvas id="velocity-chart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="pressure-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Variabel global
+        let scene, camera, renderer, pipe, fluidParticles = [];
+        let isAnimating = false;
+        let startTime, currentTime;
+        let flowVelocity, viscosity, pressure, density;
+        let velocityData = [], pressureData = [], timeData = [];
+        let velocityChart, pressureChart;
+        let particleSystem;
+        
+        // Inisialisasi Three.js
+        function initThreeJS() {
+            const container = document.getElementById('simulation-container');
+            
+            // Buat scene
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0xf0f8ff);
+            
+            // Buat kamera dengan viewport yang lebih sesuai untuk mobile
+            camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+            camera.position.set(0, 5, 10);
+            camera.lookAt(0, 0, 0);
+            
+            // Buat renderer
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(container.clientWidth, container.clientHeight);
+            container.appendChild(renderer.domElement);
+            
+            // Tambahkan pencahayaan
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+            scene.add(ambientLight);
+            
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+            directionalLight.position.set(10, 20, 5);
+            scene.add(directionalLight);
+            
+            // Buat pipa (silinder)
+            const pipeGeometry = new THREE.CylinderGeometry(2, 2, 20, 32);
+            const pipeMaterial = new THREE.MeshLambertMaterial({ 
+                color: 0xcccccc,
+                transparent: true,
+                opacity: 0.3
+            });
+            pipe = new THREE.Mesh(pipeGeometry, pipeMaterial);
+            pipe.rotation.z = Math.PI / 2;
+            scene.add(pipe);
+            
+            // Tambahkan grid helper
+            const gridHelper = new THREE.GridHelper(40, 40, 0x495057, 0xdee2e6);
+            gridHelper.material.opacity = 0.3;
+            gridHelper.material.transparent = true;
+            scene.add(gridHelper);
+            
+            // Buat partikel untuk aliran fluida
+            createFluidParticles();
+            
+            // Kontrol sentuh (touch) untuk mobile
+            let isTouching = false;
+            let previousTouchPosition = {
+                x: 0,
+                y: 0
+            };
+            
+            renderer.domElement.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                isTouching = true;
+                previousTouchPosition = {
+                    x: e.touches[0].clientX,
+                    y: e.touches[0].clientY
+                };
+            }, { passive: false });
+            
+            renderer.domElement.addEventListener('touchend', () => {
+                isTouching = false;
+            });
+            
+            renderer.domElement.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                if (!isTouching) return;
+                
+                const deltaMove = {
+                    x: e.touches[0].clientX - previousTouchPosition.x,
+                    y: e.touches[0].clientY - previousTouchPosition.y
+                };
+                
+                // Rotasi kamera berdasarkan pergerakan sentuhan
+                camera.position.x -= deltaMove.x * 0.02;
+                camera.position.y += deltaMove.y * 0.02;
+                
+                // Pastikan kamera tetap melihat ke pusat scene
+                camera.lookAt(0, 0, 0);
+                
+                previousTouchPosition = {
+                    x: e.touches[0].clientX,
+                    y: e.touches[0].clientY
+                };
+            }, { passive: false });
+            
+            // Zoom dengan pinch gesture (sederhana)
+            let initialDistance = 0;
+            renderer.domElement.addEventListener('touchstart', (e) => {
+                if (e.touches.length >= 2) {
+                    initialDistance = Math.hypot(
+                        e.touches[0].clientX - e.touches[1].clientX,
+                        e.touches[0].clientY - e.touches[1].clientY
+                    );
+                }
+            });
+            
+            renderer.domElement.addEventListener('touchmove', (e) => {
+                if (e.touches.length >= 2) {
+                    const currentDistance = Math.hypot(
+                        e.touches[0].clientX - e.touches[1].clientX,
+                        e.touches[0].clientY - e.touches[1].clientY
+                    );
+                    
+                    const delta = currentDistance - initialDistance;
+                    camera.position.z += delta * 0.05;
+                    camera.lookAt(0, 0, 0);
+                    
+                    initialDistance = currentDistance;
+                }
+            });
+            
+            // Handle resize window untuk mobile
+            window.addEventListener('resize', () => {
+                camera.aspect = container.clientWidth / container.clientHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(container.clientWidth, container.clientHeight);
+            });
+            
+            // Optimasi untuk performa mobile
+            renderer.setPixelRatio(window.devicePixelRatio);
+        }
+        
+        // Buat partikel untuk aliran fluida
+        function createFluidParticles() {
+            // Hapus partikel lama jika ada
+            fluidParticles.forEach(particle => scene.remove(particle));
+            fluidParticles = [];
+            
+            // Buat partikel baru
+            const particleCount = 100;
+            const particleGeometry = new THREE.SphereGeometry(0.1, 8, 8);
+            const particleMaterial = new THREE.MeshBasicMaterial({ 
+                color: 0x0066cc,
+                transparent: true,
+                opacity: 0.7
+            });
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = new THREE.Mesh(particleGeometry, particleMaterial);
+                
+                // Posisi acak di dalam pipa
+                const radius = 1.8 * Math.random();
+                const angle = Math.random() * Math.PI * 2;
+                const z = -9 + Math.random() * 18;
+                
+                particle.position.x = radius * Math.cos(angle);
+                particle.position.y = radius * Math.sin(angle);
+                particle.position.z = z;
+                
+                // Simpan kecepatan awal partikel
+                particle.userData.velocity = Math.random() * 0.5 + 0.5;
+                particle.userData.radius = radius;
+                particle.userData.angle = angle;
+                
+                scene.add(particle);
+                fluidParticles.push(particle);
+            }
+        }
+        
+        // Inisialisasi grafik
+        function initCharts() {
+            const velocityCtx = document.getElementById('velocity-chart').getContext('2d');
+            velocityChart = new Chart(velocityCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Kecepatan Aliran (m/s)',
+                        data: [],
+                        borderColor: '#0066cc',
+                        backgroundColor: 'rgba(0, 102, 204, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Waktu (s)',
+                                color: '#495057'
+                            },
+                            grid: {
+                                color: 'rgba(73, 80, 87, 0.1)'
+                            },
+                            ticks: {
+                                color: '#495057',
+                                maxTicksLimit: 8
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Kecepatan (m/s)',
+                                color: '#495057'
+                            },
+                            grid: {
+                                color: 'rgba(73, 80, 87, 0.1)'
+                            },
+                            ticks: {
+                                color: '#495057',
+                                maxTicksLimit: 6
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#495057',
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+            
+            const pressureCtx = document.getElementById('pressure-chart').getContext('2d');
+            pressureChart = new Chart(pressureCtx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Tekanan (kPa)',
+                        data: [],
+                        borderColor: '#e74c3c',
+                        backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Waktu (s)',
+                                color: '#495057'
+                            },
+                            grid: {
+                                color: 'rgba(73, 80, 87, 0.1)'
+                            },
+                            ticks: {
+                                color: '#495057',
+                                maxTicksLimit: 8
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Tekanan (kPa)',
+                                color: '#495057'
+                            },
+                            grid: {
+                                color: 'rgba(73, 80, 87, 0.1)'
+                            },
+                            ticks: {
+                                color: '#495057',
+                                maxTicksLimit: 6
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#495057',
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Fungsi animasi
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            if (isAnimating) {
+                currentTime = (Date.now() - startTime) / 1000;
+                document.getElementById('time-display').textContent = currentTime.toFixed(2);
+                
+                // Hitung parameter berdasarkan jenis simulasi
+                const simulationType = document.querySelector('.tab.active').dataset.type;
+                
+                if (simulationType === 'flow') {
+                    // Simulasi aliran fluida
+                    updateFluidFlow();
+                    
+                    // Hitung kecepatan rata-rata
+                    let avgVelocity = 0;
+                    fluidParticles.forEach(particle => {
+                        avgVelocity += particle.userData.velocity;
+                    });
+                    avgVelocity /= fluidParticles.length;
+                    
+                    velocity = avgVelocity * flowVelocity;
+                } else {
+                    // Simulasi distribusi tekanan
+                    updatePressureDistribution();
+                    velocity = flowVelocity * (1 - Math.sin(currentTime) * 0.2); // Variasi kecepatan
+                }
+                
+                // Hitung tekanan menggunakan persamaan Bernoulli (sederhana)
+                const calculatedPressure = pressure - (0.5 * density * velocity * velocity) / 1000;
+                
+                // Simpan data untuk grafik
+                timeData.push(currentTime);
+                velocityData.push(velocity);
+                pressureData.push(calculatedPressure);
+                
+                // Update grafik
+                updateCharts();
+                
+                // Hentikan animasi setelah waktu tertentu
+                if (currentTime > 15) {
+                    isAnimating = false;
+                }
+            }
+            
+            renderer.render(scene, camera);
+        }
+        
+        // Update aliran fluida
+        function updateFluidFlow() {
+            fluidParticles.forEach(particle => {
+                // Gerakkan partikel sepanjang pipa
+                particle.position.z += particle.userData.velocity * flowVelocity * 0.05;
+                
+                // Efek viskositas - partikel di tepi lebih lambat
+                const distanceFromCenter = Math.sqrt(
+                    particle.position.x * particle.position.x + 
+                    particle.position.y * particle.position.y
+                );
+                
+                // Kurangi kecepatan berdasarkan viskositas dan jarak dari pusat
+                const viscosityEffect = 1 - (distanceFromCenter / 2) * viscosity * 10;
+                particle.position.z += particle.userData.velocity * flowVelocity * 0.05 * Math.max(0.1, viscosityEffect);
+                
+                // Tambahkan sedikit gerakan acak untuk efek turbulensi
+                particle.position.x += (Math.random() - 0.5) * 0.05 * viscosity;
+                particle.position.y += (Math.random() - 0.5) * 0.05 * viscosity;
+                
+                // Batasi partikel di dalam pipa
+                const distance = Math.sqrt(
+                    particle.position.x * particle.position.x + 
+                    particle.position.y * particle.position.y
+                );
+                
+                if (distance > 1.9) {
+                    // Dorong partikel kembali ke dalam pipa
+                    const angle = Math.atan2(particle.position.y, particle.position.x);
+                    particle.position.x = 1.9 * Math.cos(angle);
+                    particle.position.y = 1.9 * Math.sin(angle);
+                }
+                
+                // Reset partikel jika mencapai ujung pipa
+                if (particle.position.z > 9) {
+                    particle.position.z = -9;
+                    // Reset posisi radial
+                    const radius = 1.8 * Math.random();
+                    const angle = Math.random() * Math.PI * 2;
+                    particle.position.x = radius * Math.cos(angle);
+                    particle.position.y = radius * Math.sin(angle);
+                }
+            });
+        }
+        
+        // Update distribusi tekanan
+        function updatePressureDistribution() {
+            // Ubah warna pipa berdasarkan tekanan
+            const pressureFactor = pressure / 500;
+            const pipeMaterial = pipe.material;
+            pipeMaterial.color.setRGB(0.5 + pressureFactor * 0.5, 0.5 - pressureFactor * 0.3, 0.5 - pressureFactor * 0.3);
+            
+            // Gerakkan partikel dengan pola berbeda untuk simulasi tekanan
+            fluidParticles.forEach((particle, index) => {
+                // Pola aliran berdasarkan tekanan
+                const pressureEffect = pressure / 200;
+                const wave = Math.sin(currentTime + index * 0.1) * 0.2;
+                
+                particle.position.z += flowVelocity * 0.05 * (1 + wave * pressureEffect);
+                
+                // Gerakan radial berdasarkan tekanan
+                const timeOffset = index * 0.05;
+                const radialMovement = Math.sin(currentTime + timeOffset) * 0.1 * pressureEffect;
+                
+                const currentAngle = Math.atan2(particle.position.y, particle.position.x);
+                const newRadius = Math.max(0.1, particle.userData.radius + radialMovement);
+                
+                particle.position.x = newRadius * Math.cos(currentAngle);
+                particle.position.y = newRadius * Math.sin(currentAngle);
+                
+                // Reset partikel jika mencapai ujung pipa
+                if (particle.position.z > 9) {
+                    particle.position.z = -9;
+                    // Reset posisi
+                    const radius = 1.5 + Math.random() * 0.4;
+                    const angle = Math.random() * Math.PI * 2;
+                    particle.position.x = radius * Math.cos(angle);
+                    particle.position.y = radius * Math.sin(angle);
+                    particle.userData.radius = radius;
+                }
+            });
+        }
+        
+        // Update grafik
+        function updateCharts() {
+            // Batasi jumlah data yang ditampilkan untuk performa mobile
+            const maxDataPoints = 80;
+            if (timeData.length > maxDataPoints) {
+                const step = Math.ceil(timeData.length / maxDataPoints);
+                const filteredTimeData = timeData.filter((_, i) => i % step === 0);
+                const filteredVelocityData = velocityData.filter((_, i) => i % step === 0);
+                const filteredPressureData = pressureData.filter((_, i) => i % step === 0);
+                
+                velocityChart.data.labels = filteredTimeData;
+                velocityChart.data.datasets[0].data = filteredVelocityData;
+                
+                pressureChart.data.labels = filteredTimeData;
+                pressureChart.data.datasets[0].data = filteredPressureData;
+            } else {
+                velocityChart.data.labels = timeData;
+                velocityChart.data.datasets[0].data = velocityData;
+                
+                pressureChart.data.labels = timeData;
+                pressureChart.data.datasets[0].data = pressureData;
+            }
+            
+            velocityChart.update('none');
+            pressureChart.update('none');
+        }
+        
+        // Reset simulasi
+        function resetSimulation() {
+            isAnimating = false;
+            
+            // Reset partikel
+            createFluidParticles();
+            
+            // Reset warna pipa
+            pipe.material.color.set(0xcccccc);
+            
+            // Reset data
+            timeData = [];
+            velocityData = [];
+            pressureData = [];
+            
+            // Reset grafik
+            velocityChart.data.labels = [];
+            velocityChart.data.datasets[0].data = [];
+            pressureChart.data.labels = [];
+            pressureChart.data.datasets[0].data = [];
+            
+            velocityChart.update();
+            pressureChart.update();
+            
+            document.getElementById('time-display').textContent = '0.00';
+        }
+        
+        // Unduh data sebagai CSV
+        function downloadData() {
+            let csvContent = "Waktu (s),Kecepatan (m/s),Tekanan (kPa)\n";
+            
+            for (let i = 0; i < timeData.length; i++) {
+                csvContent += `${timeData[i].toFixed(2)},${velocityData[i].toFixed(2)},${pressureData[i].toFixed(2)}\n`;
+            }
+            
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'data_simulasi_mekanika_fluida.csv';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        
+        // Event listeners untuk mobile
+        document.addEventListener('DOMContentLoaded', () => {
+            // Inisialisasi
+            initThreeJS();
+            initCharts();
+            animate();
+            
+            // Update nilai slider dengan format yang lebih baik untuk mobile
+            const updateSliderValue = (sliderId, displayId, unit) => {
+                const slider = document.getElementById(sliderId);
+                const display = document.getElementById(displayId);
+                
+                slider.addEventListener('input', function() {
+                    display.textContent = this.value + unit;
+                });
+                
+                // Trigger initial value
+                display.textContent = slider.value + unit;
+            };
+            
+            updateSliderValue('velocity', 'velocity-value', ' m/s');
+            updateSliderValue('viscosity', 'viscosity-value', ' Pa·s');
+            updateSliderValue('pressure', 'pressure-value', ' kPa');
+            updateSliderValue('density', 'density-value', ' kg/m³');
+            
+            // Tombol mulai
+            document.getElementById('start-btn').addEventListener('click', function() {
+                if (isAnimating) return;
+                
+                // Ambil nilai dari slider
+                flowVelocity = parseFloat(document.getElementById('velocity').value);
+                viscosity = parseFloat(document.getElementById('viscosity').value);
+                pressure = parseFloat(document.getElementById('pressure').value);
+                density = parseFloat(document.getElementById('density').value);
+                
+                // Reset data sebelumnya
+                resetSimulation();
+                
+                // Mulai animasi
+                isAnimating = true;
+                startTime = Date.now();
+            });
+            
+            // Tombol reset
+            document.getElementById('reset-btn').addEventListener('click', resetSimulation);
+            
+            // Tombol unduh data
+            document.getElementById('download-btn').addEventListener('click', downloadData);
+            
+            // Tab simulasi
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Tampilkan/sembunyikan kontrol tekanan
+                    const pressureControl = document.querySelector('.pressure-control');
+                    if (this.dataset.type === 'pressure') {
+                        pressureControl.style.display = 'block';
+                    } else {
+                        pressureControl.style.display = 'none';
+                    }
+                    
+                    // Reset simulasi saat ganti tab
+                    resetSimulation();
+                });
+            });
+            
+            // Mencegah zoom halaman pada interaksi slider (untuk iOS)
+            document.querySelectorAll('input[type="range"]').forEach(slider => {
+                slider.addEventListener('touchstart', function(e) {
+                    e.stopPropagation();
+                });
+            });
+            
+            // Optimasi untuk performa mobile
+            if ('ontouchstart' in window) {
+                // Jika perangkat memiliki layar sentuh, tambahkan kelas khusus
+                document.body.classList.add('touch-device');
+            }
+        });
+    </script>
+</body>
+</html>

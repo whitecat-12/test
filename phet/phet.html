@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TETA SAINS - Simulasi Fisika 3D</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #9999ff;
+            --secondary: #9999ff;
+            --accent: #f59e0b;
+            --physics: #6366f1;
+            --mechanics: #10b981;
+            --thermo: #ef4444;
+            --electro: #8b5cf6;
+        }
+        
+        body {
+            font-family: 'Baloo 2', cursive;
+            background-color: #f8fafc;
+        }
+        
+        .app-container {
+            max-width: 414px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        /* NAVBAR YANG SUDAH DIPERBAIKI - SAMA DENGAN FILE UTAMA */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            max-width: 414px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            background: white;
+            z-index: 10;
+            height: 70px; /* TINGGI KONSISTEN */
+            display: flex;
+            align-items: center;
+        }
+        
+        /* STYLE UNTUK NAV ITEM - SAMA DENGAN FILE UTAMA */
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+            text-decoration: none;
+            flex: 1;
+            height: 100%;
+            padding: 0.5rem 0;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item span {
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
+        
+        .nav-item.active {
+            color: var(--primary);
+        }
+        
+        .nav-icon {
+            transition: all 0.3s ease;
+            font-size: 1.25rem; /* UKURAN KONSISTEN */
+        }
+        
+        .nav-icon.active {
+            transform: translateY(-5px); /* EFEK YANG SAMA */
+            color: var(--primary);
+        }
+        
+        .floating-btn {
+            animation: float 4s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+        }
+        
+        .section-content {
+            display: none;
+            padding: 16px;
+            background: white;
+            border-radius: 12px;
+            margin-top: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+        
+        .active-section {
+            display: block;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .app-logo {
+            display: flex;
+            align-items: center;
+        }
+        
+        .app-logo-icon {
+            background: linear-gradient(135deg, #9999ff, #9999ff);
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 8px;
+        }
+        
+        .app-name {
+            font-weight: 700;
+            font-size: 1.25rem;
+            background: linear-gradient(135deg, #9999ff, #9999ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .simulation-card {
+            transition: all 0.3s ease;
+            border-left: 4px solid;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            border-radius: 10px;
+        }
+        
+        .simulation-card:hover {
+            transform: translateX(5px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+        
+        .simulation-icon {
+            transition: all 0.3s ease;
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+        
+        .simulation-card:hover .simulation-icon {
+            transform: scale(1.1);
+        }
+        
+        .new-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #ef4444;
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-weight: bold;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .daily-tip {
+            background-color: #f8fafc;
+            border-left: 4px solid var(--primary);
+        }
+        
+        /* Improved mobile styles untuk konsistensi */
+        @media (max-width: 414px) {
+            .bottom-nav {
+                height: 65px; /* SAMA DENGAN FILE UTAMA */
+            }
+            
+            .nav-icon {
+                font-size: 1.1rem; /* SAMA DENGAN FILE UTAMA */
+            }
+        }
+
+        /* Style untuk kategori header */
+        .category-header {
+            background-color: #f1f5f9;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .physics-bg {
+            background-color: rgba(99, 102, 241, 0.05);
+        }
+        
+        .mechanics-bg {
+            background-color: rgba(16, 185, 129, 0.05);
+        }
+        
+        .thermo-bg {
+            background-color: rgba(239, 68, 68, 0.05);
+        }
+        
+        .electro-bg {
+            background-color: rgba(139, 92, 246, 0.05);
+        }
+        
+        .wave-bg {
+            background-color: rgba(14, 165, 233, 0.05);
+        }
+        
+        .level-indicator {
+            display: inline-block;
+            font-size: 0.7rem;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-weight: bold;
+            margin-left: 5px;
+        }
+        
+        .level-basic {
+            background-color: #10b981;
+            color: white;
+        }
+        
+        .level-intermediate {
+            background-color: #f59e0b;
+            color: white;
+        }
+        
+        .level-advanced {
+            background-color: #ef4444;
+            color: white;
+        }
+        
+        .badge-3d {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: #9999ff;
+            color: white;
+            font-size: 0.65rem;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-weight: bold;
+            letter-spacing: 0.5px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile App Container -->
+    <div class="app-container">
+        <!-- App Header -->
+        <header class="bg-gradient-to-r from-primary to-secondary p-4 text-white">
+            <div class="flex justify-between items-center">
+                <div class="app-logo">
+                    <div class="app-logo-icon">
+                        <i class="fas fa-atom"></i>
+                    </div>
+                    <h1 class="app-name">TETA SAINS</h1>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-search"></i>
+                    <i class="fas fa-user-circle text-xl"></i>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Main Content Area -->
+        <main class="pb-20">
+            <!-- Page Title -->
+            <section class="p-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h2 class="text-2xl font-bold text-gray-800">Simulasi Fisika 3D</h2>
+                        <p class="text-sm text-gray-600">15 simulasi interaktif untuk memahami konsep fisika</p>
+                    </div>
+                    <div class="bg-primary/10 text-primary p-3 rounded-full">
+                        <i class="fas fa-cube text-xl"></i>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Daily Tip -->
+            <section class="p-4">
+                <div class="daily-tip rounded-lg p-4 shadow-sm">
+                    <div class="flex items-start">
+                        <div class="bg-primary/10 text-primary p-2 rounded-full mr-3">
+                            <i class="fas fa-lightbulb"></i>
+                        </div>
+                        <div>
+                            <h3 class="font-bold text-gray-800">Tip Interaktif</h3>
+                            <p class="text-sm text-gray-600 mt-1">"Gunakan simulasi 3D untuk melihat konsep fisika dari berbagai sudut pandang. Kamu bisa mengontrol parameter dan melihat efeknya secara real-time!"</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Download Button -->
+            <section class="p-4">
+                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 shadow-sm border border-blue-100">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center">
+                            <div class="bg-blue-100 text-blue-600 p-2 rounded-lg mr-3">
+                                <i class="fas fa-download"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-800">Plugin Simulasi 3D</h3>
+                                <p class="text-xs text-gray-600">Instal plugin untuk pengalaman terbaik</p>
+                            </div>
+                        </div>
+                        <button class="bg-primary text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-indigo-600 transition">
+                            Instal
+                        </button>
+                    </div>
+                </div>
+            </section>
+           
+            <!-- Physics Simulations List -->
+            <section class="p-4">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="font-bold text-gray-800 text-lg">Daftar Simulasi Fisika 3D</h3>
+                    <div class="text-xs text-gray-500">
+                        <i class="fas fa-cube mr-1"></i>
+                        <span>15 Simulasi</span>
+                    </div>
+                </div>
+                
+                <!-- 1. Getaran dan Gelombang -->
+                <div class="simulation-card bg-white rounded-lg shadow-sm p-4 mb-4 border-l-blue-500 physics-bg" onclick="openSimulation(1)">
+                    <div class="badge-3d">3D</div>
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center">
+                            <div class="simulation-icon bg-blue-100 text-blue-600">
+                                <i class="fas fa-wave-square"></i>
+                            </div>
+                            <div class="ml-3">
+                                <div class="flex items-center">
+                                    <h3 class="font-bold text-gray-800">Getaran & Gelombang</h3>
+                                    <span class="level-indicator level-basic">Dasar</span>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">Simulasi osilasi, gelombang transversal & longitudinal</p>
+                            </div>
+                        </div>
+                        <div class="text-gray-400">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 2. GLB dan GLBB -->
+                <div class="simulation-card bg-white rounded-lg shadow-sm p-4 mb-4 border-l-green-500 mechanics-bg" onclick="openSimulation(2)">
+                    <div class="badge-3d">3D</div>
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center">
+                            <div class="simulation-icon bg-green-100 text-green-600">
+                                <i class="fas fa-car"></i>
+                            </div>
+                            <div class="ml-3">
+                                <div class="flex items-center">
+                                    <h3 class="font-bold text-gray-800">GLB & GLBB</h3>
+                                    <span class="level-indicator level-basic">Dasar</span>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">Gerak lurus beraturan dan berubah beraturan</p>
+                            </div>
+                        </div>
+                        <div class="text-gray-400">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 3. Termodinamika -->
+                <div class="simulation-card bg-white rounded-lg shadow-sm p-4 mb-4 border-l-red-500 thermo-bg" onclick="openSimulation(3)">
+                    <div class="badge-3d">3D</div>
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center">
+                            <div class="simulation-icon bg-red-100 text-red-600">
+                                <i class="fas fa-temperature-high"></i>
+                            </div>
+                            <div class="ml-3">
+                                <div class="flex items-center">
+                                    <h3 class="font-bold text-gray-800">Termodinamika</h3>
+                                    <span class="level-indicator level-intermediate">Menengah</span>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">Hukum termodinamika, siklus panas, dan entropi</p>
+                            </div>
+                        </div>
+                        <div class="text-gray-400">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 4. Medan Magnet -->
+                <div class="simulation-card bg-white rounded-lg shadow-sm p-4 mb-4 border-l-purple-500 electro-bg" onclick="openSimulation(4)">
+                    <div class="badge-3d">3D</div>
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center">
+                            <div class="simulation-icon bg-purple-100 text-purple-600">
+                                <i class="fas fa-magnet"></i>
+                            </div>
+                            <div class="ml-3">
+                                <div class="flex items-center">
+                                    <h3 class="font-bold text-gray-800">Medan Magnet</h3>
+                                    <span class="level-indicator level-intermediate">Menengah</span>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">Garis gaya magnet, induksi elektromagnetik</p>
+                            </div>
+                        </div>
+                        <div class="text-gray-400">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 5. Optika Geometri -->
+                <div class="simulation-card bg-white rounded-lg shadow-sm p-4 mb-4 border-l-yellow-500 wave-bg" onclick="openSimulation(5)">
+                    <div class="badge-3d">3D</div>
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center">
+                            <div class="simulation-icon bg-yellow-100 text-yellow-600">
+                                <i class="fas fa-sun"></i>
+                            </div>
+                            <div class="ml-3">
+                                <div class="flex items-center">
+                                    <h3 class="font-bold text-gray-800">Optika Geometri</h3>
+                                    <span class="level-indicator level-intermediate">Menengah</span>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">Pemantulan, pembiasan, lensa, dan cermin</p>
+                            </div>
+                        </div>
+                        <div class="text-gray-400">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 6. Listrik Dinamis -->
+                <div class="simulation-card bg-white rounded-lg shadow-sm p-4 mb-4 border-l-indigo-500 electro-bg" onclick="openSimulation(6)">
+                    <div class="badge-3d">3D</div>
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center">
+                            <div class="simulation-icon bg-indigo-100 text-indigo-600">
+                                <i class="fas fa-bolt"></i>
+                            </div>
+                            <div class="ml-3">
+                                <div class="flex items-center">
+                                    <h3 class="font-bold text-gray-800">Listrik Dinamis</h3>
+                                    <span class="level-indicator level-intermediate">Menengah</span>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">Rangkaian listrik, hukum Ohm, dan Kirchhoff</p>
+                            </div>
+                        </div>
+                        <div class="text-gray-400">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 7. Mekanika Fluida -->
+                <div class="simulation-card bg-white rounded-lg shadow-sm p-4 mb-4 border-l-cyan-500 physics-bg" onclick="openSimulation(7)">
+                    <div class="badge-3d">3D</div>
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center">
+                            <div class="simulation-icon bg-cyan-100 text-cyan-600">
+                                <i class="fas fa-water"></i>
+                            </div>
+                            <div class="ml-3">
+                                <div class="flex items-center">
+                                    <h3 class="font-bold text-gray-800">Mekanika Fluida</h3>
+                                    <span class="level-indicator level-advanced">Lanjut</span>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">Tekanan hidrostatis, hukum Bernoulli, viskositas</p>
+                            </div>
+                        </div>
+                        <div class="text-gray-400">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 8. Gerak Parabola -->
+                <div class="simulation-card bg-white rounded-lg shadow-sm p-4 mb-4 border-l-emerald-500 mechanics-bg" onclick="openSimulation(8)">
+                    <div class="badge-3d">3D</div>
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center">
+                            <div class="simulation-icon bg-emerald-100 text-emerald-600">
+                                <i class="fas fa-basketball-ball"></i>
+                            </div>
+                            <div class="ml-3">
+                                <div class="flex items-center">
+                                    <h3 class="font-bold text-gray-800">Gerak Parabola</h3>
+                                    <span class="level-indicator level-basic">Dasar</span>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">Peluru, sudut elevasi, dan jangkauan maksimum</p>
+                                <div class="new-badge">BARU</div>
+                            </div>
+                        </div>
+                        <div class="text-gray-400">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 9. Gelombang Bunyi -->
+                <div class="simulation-card bg-white rounded-lg shadow-sm p-4 mb-4 border-l-blue-400 wave-bg" onclick="openSimulation(9)">
+                    <div class="badge-3d">3D</div>
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center">
+                            <div class="simulation-icon bg-blue-50 text-blue-500">
+                                <i class="fas fa-volume-up"></i>
+                            </div>
+                            <div class="ml-3">
+                                <div class="flex items-center">
+                                    <h3 class="font-bold text-gray-800">Gelombang Bunyi</h3>
+                                    <span class="level-indicator level-intermediate">Menengah</span>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">Resonansi, efek Doppler, intensitas bunyi</p>
+                            </div>
+                        </div>
+                        <div class="text-gray-400">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 10. Fisika Modern -->
+                <div class="simulation-card bg-white rounded-lg shadow-sm p-4 mb-4 border-l-gray-700 physics-bg" onclick="openSimulation(10)">
+                    <div class="badge-3d">3D</div>
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center">
+                            <div class="simulation-icon bg-gray-100 text-gray-700">
+                                <i class="fas fa-atom"></i>
+                            </div>
+                            <div class="ml-3">
+                                <div class="flex items-center">
+                                    <h3 class="font-bold text-gray-800">Fisika Modern</h3>
+                                    <span class="level-indicator level-advanced">Lanjut</span>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">Relativitas, fisika kuantum, dualisme gelombang-partikel</p>
+                            </div>
+                        </div>
+                        <div class="text-gray-400">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 11. Gerak Harmonik Sederhana -->
+                <div class="simulation-card bg-white rounded-lg shadow-sm p-4 mb-4 border-l-pink-500 wave-bg" onclick="openSimulation(11)">
+                    <div class="badge-3d">3D</div>
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center">
+                            <div class="simulation-icon bg-pink-100 text-pink-600">
+                                <i class="fas fa-weight-hanging"></i>
+                            </div>
+                            <div class="ml-3">
+                                <div class="flex items-center">
+                                    <h3 class="font-bold text-gray-800">Gerak Harmonik Sederhana</h3>
+                                    <span class="level-indicator level-intermediate">Menengah</span>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">Pegas, bandul, dan osilasi teredam</p>
+                            </div>
+                        </div>
+                        <div class="text-gray-400">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 12. Hukum Newton -->
+                <div class="simulation-card bg-white rounded-lg shadow-sm p-4 mb-4 border-l-orange-500 mechanics-bg" onclick="openSimulation(12)">
+                    <div class="badge-3d">3D</div>
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center">
+                            <div class="simulation-icon bg-orange-100 text-orange-600">
+                                <i class="fas fa-balance-scale"></i>
+                            </div>
+                            <div class="ml-3">
+                                <div class="flex items-center">
+                                    <h3 class="font-bold text-gray-800">Hukum Newton</h3>
+                                    <span class="level-indicator level-basic">Dasar</span>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">Hukum gerak, gaya aksi-reaksi, gesekan</p>
+                            </div>
+                        </div>
+                        <div class="text-gray-400">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 13. Listrik Statis -->
+                <div class="simulation-card bg-white rounded-lg shadow-sm p-4 mb-4 border-l-violet-500 electro-bg" onclick="openSimulation(13)">
+                    <div class="badge-3d">3D</div>
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center">
+                            <div class="simulation-icon bg-violet-100 text-violet-600">
+                                <i class="fas fa-bolt-lightning"></i>
+                            </div>
+                            <div class="ml-3">
+                                <div class="flex items-center">
+                                    <h3 class="font-bold text-gray-800">Listrik Statis</h3>
+                                    <span class="level-indicator level-basic">Dasar</span>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">Muatan listrik, hukum Coulomb, medan listrik</p>
+                            </div>
+                        </div>
+                        <div class="text-gray-400">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 14. Kalor dan Perpindahan Panas -->
+                <div class="simulation-card bg-white rounded-lg shadow-sm p-4 mb-4 border-l-rose-500 thermo-bg" onclick="openSimulation(14)">
+                    <div class="badge-3d">3D</div>
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center">
+                            <div class="simulation-icon bg-rose-100 text-rose-600">
+                                <i class="fas fa-fire"></i>
+                            </div>
+                            <div class="ml-3">
+                                <div class="flex items-center">
+                                    <h3 class="font-bold text-gray-800">Kalor & Perpindahan Panas</h3>
+                                    <span class="level-indicator level-intermediate">Menengah</span>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">Konduksi, konveksi, radiasi, dan kalor laten</p>
+                            </div>
+                        </div>
+                        <div class="text-gray-400">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 15. Usaha dan Energi -->
+                <div class="simulation-card bg-white rounded-lg shadow-sm p-4 mb-4 border-l-lime-500 mechanics-bg" onclick="openSimulation(15)">
+                    <div class="badge-3d">3D</div>
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center">
+                            <div class="simulation-icon bg-lime-100 text-lime-600">
+                                <i class="fas fa-battery-full"></i>
+                            </div>
+                            <div class="ml-3">
+                                <div class="flex items-center">
+                                    <h3 class="font-bold text-gray-800">Usaha dan Energi</h3>
+                                    <span class="level-indicator level-basic">Dasar</span>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-1">Energi kinetik, potensial, kekekalan energi, daya</p>
+                            </div>
+                        </div>
+                        <div class="text-gray-400">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                </div>
+                
+            </section>
+            
+            <!-- Quick Stats -->
+            <section class="p-4">
+                <div class="bg-gradient-to-r from-gray-50 to-slate-100 rounded-lg p-4 shadow-sm">
+                    <h3 class="font-bold text-gray-800 mb-3">Statistik Simulasi</h3>
+                    <div class="grid grid-cols-3 gap-3">
+                        <div class="bg-white rounded-lg p-3 text-center">
+                            <div class="text-primary font-bold text-xl">15</div>
+                            <div class="text-xs text-gray-600">Total Simulasi</div>
+                        </div>
+                        <div class="bg-white rounded-lg p-3 text-center">
+                            <div class="text-green-600 font-bold text-xl">6</div>
+                            <div class="text-xs text-gray-600">Tingkat Dasar</div>
+                        </div>
+                        <div class="bg-white rounded-lg p-3 text-center">
+                            <div class="text-purple-600 font-bold text-xl">15</div>
+                            <div class="text-xs text-gray-600">Simulasi 3D</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+        </main>
+        
+        <!-- BOTTOM NAVIGATION YANG SUDAH DIPERBAIKI - SAMA DENGAN FILE UTAMA -->
+        <nav class="bottom-nav">
+            <a href="../dashboard siswa.html" class="nav-item">
+                <i class="fas fa-home nav-icon"></i>
+                <span>Beranda</span>
+            </a>
+            <a href="../soal harian/dashboard soal.html" class="nav-item">
+                <i class="fas fa-flask nav-icon"></i>
+                <span>Soal Harian</span>
+            </a>
+            <a href="../ai/nayra.html" class="nav-item">
+                <i class="fas fa-robot nav-icon"></i>
+                <span>Nayra AI</span>
+            </a>
+            <a href="../kategori/kategori materi.html" class="nav-item">
+                <i class="fas fa-chalkboard-teacher nav-icon"></i>
+                <span>Materi Harian</span>
+            </a>
+            <a href="../profil/profil.html" class="nav-item">
+                <i class="fas fa-user nav-icon"></i>
+                <span>Profil</span>
+            </a>
+        </nav>
+
+    </div>
+
+    <script>
+        // Simple interaction for bottom nav
+        document.addEventListener('DOMContentLoaded', function() {
+            const navItems = document.querySelectorAll('.nav-item');
+            
+            navItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    navItems.forEach(nav => {
+                        nav.classList.remove('active');
+                        nav.querySelector('.nav-icon').classList.remove('active');
+                    });
+                    
+                    this.classList.add('active');
+                    this.querySelector('.nav-icon').classList.add('active');
+                });
+            });
+            
+            // Set current page as active
+            const currentNavItem = document.querySelector('.bottom-nav a[href*="kategori materi.html"]');
+            if (currentNavItem) {
+                currentNavItem.classList.add('active');
+                currentNavItem.querySelector('.nav-icon').classList.add('active');
+            }
+        });
+        
+        // Function to open simulation
+        function openSimulation(simNumber) {
+            const simulationNames = [
+                "Getaran dan Gelombang",
+                "GLB dan GLBB",
+                "Termodinamika",
+                "Medan Magnet",
+                "Optika Geometri",
+                "Listrik Dinamis",
+                "Mekanika Fluida",
+                "Gerak Parabola",
+                "Gelombang Bunyi",
+                "Fisika Modern",
+                "Gerak Harmonik Sederhana",
+                "Hukum Newton",
+                "Listrik Statis",
+                "Kalor dan Perpindahan Panas",
+                "Usaha dan Energi"
+            ];
+            
+            // Create simulation modal
+            const modal = document.createElement('div');
+            modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+            modal.innerHTML = `
+                <div class="bg-white rounded-xl max-w-md w-full p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-bold text-gray-800">${simulationNames[simNumber-1]}</h3>
+                        <button onclick="this.parentElement.parentElement.remove()" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-6 mb-4 flex flex-col items-center justify-center">
+                        <div class="text-5xl mb-4 text-primary">
+                            <i class="fas fa-cube"></i>
+                        </div>
+                        <h4 class="font-bold text-gray-800 text-lg mb-2">Simulasi 3D Siap Dimuat</h4>
+                        <p class="text-sm text-gray-600 text-center">Simulasi ini akan menampilkan visualisasi 3D interaktif untuk memahami konsep ${simulationNames[simNumber-1].toLowerCase()}.</p>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm font-medium text-gray-700">Konsumsi Memori</span>
+                            <span class="text-sm font-bold text-primary">${Math.floor(Math.random() * 50) + 30} MB</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2.5">
+                            <div class="bg-primary h-2.5 rounded-full" style="width: ${Math.floor(Math.random() * 30) + 60}%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="flex space-x-3">
+                        <button onclick="this.parentElement.parentElement.remove()" class="flex-1 border border-gray-300 text-gray-700 py-3 rounded-lg font-medium hover:bg-gray-50 transition">
+                            Nanti
+                        </button>
+                        <button onclick="launchSimulation(${simNumber})" class="flex-1 bg-primary text-white py-3 rounded-lg font-medium hover:bg-indigo-600 transition">
+                            <i class="fas fa-play mr-2"></i> Jalankan
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+        
+        // Function to launch simulation
+        function launchSimulation(simNumber) {
+            const simulationNames = [
+                "Getaran dan Gelombang",
+                "GLB dan GLBB",
+                "Termodinamika",
+                "Medan Magnet",
+                "Optika Geometri",
+                "Listrik Dinamis",
+                "Mekanika Fluida",
+                "Gerak Parabola",
+                "Gelombang Bunyi",
+                "Fisika Modern",
+                "Gerak Harmonik Sederhana",
+                "Hukum Newton",
+                "Listrik Statis",
+                "Kalor dan Perpindahan Panas",
+                "Usaha dan Energi"
+            ];
+            
+            alert(`Memuat simulasi 3D: ${simulationNames[simNumber-1]}\n\nFitur simulasi 3D akan dijalankan dalam mode interaktif. Kamu dapat mengontrol parameter fisika dan melihat hasilnya dalam visualisasi 3D.`);
+            
+            // Remove modal
+            const modal = document.querySelector('.fixed.inset-0.bg-black');
+            if (modal) modal.remove();
+        }
+    </script>
+</body>
+</html>

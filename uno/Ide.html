@@ -1,0 +1,1124 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TETA Arduino IDE - Pemrograman Blok Lego</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/blockly@10.3.2/blockly.min.css" rel="stylesheet" />
+    <style>
+        :root {
+            --primary: #38b2ac;
+            --secondary: #0e7490;
+            --accent: #f59e0b;
+            --lego-yellow: #ffd500;
+            --lego-red: #ff0000;
+            --lego-blue: #0055bf;
+            --lego-green: #00a500;
+        }
+        
+        body {
+            font-family: 'Baloo 2', cursive;
+            background-color: #f8fafc;
+            overflow: hidden;
+        }
+        
+        .app-container {
+            max-width: 414px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        /* Bottom Navigation - Tetap Sama */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            max-width: 414px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            background: white;
+            z-index: 10;
+            height: 70px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+            text-decoration: none;
+            flex: 1;
+            height: 100%;
+            padding: 0.5rem 0;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item span {
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
+        
+        .nav-item.active {
+            color: var(--primary);
+        }
+        
+        .nav-icon {
+            transition: all 0.3s ease;
+            font-size: 1.25rem;
+        }
+        
+        .nav-icon.active {
+            transform: translateY(-5px);
+            color: var(--primary);
+        }
+        
+        /* IDE Arduino Styles */
+        .ide-header {
+            background: linear-gradient(135deg, #1e293b, #334155);
+            color: white;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .ide-title {
+            display: flex;
+            align-items: center;
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+        
+        .ide-title-icon {
+            background: var(--lego-red);
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+        }
+        
+        .ide-controls {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .control-btn {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .control-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        /* Canvas Area */
+        .canvas-container {
+            height: calc(100vh - 140px);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .blockly-canvas {
+            width: 100%;
+            height: 100%;
+            background: #f1f5f9;
+        }
+        
+        /* Toolbox Sidebar */
+        .toolbox-sidebar {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 60px;
+            height: 100%;
+            background: white;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            z-index: 5;
+            display: flex;
+            flex-direction: column;
+            padding-top: 10px;
+            transition: transform 0.3s ease;
+        }
+        
+        .toolbox-sidebar.collapsed {
+            transform: translateX(-100%);
+        }
+        
+        .toolbox-btn {
+            width: 44px;
+            height: 44px;
+            margin: 6px auto;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1.2rem;
+        }
+        
+        .toolbox-btn:hover {
+            transform: scale(1.1);
+        }
+        
+        .toolbox-btn.active {
+            box-shadow: 0 0 0 2px currentColor;
+        }
+        
+        /* Blocks Palette */
+        .blocks-palette {
+            position: absolute;
+            left: 60px;
+            top: 0;
+            width: 280px;
+            height: 100%;
+            background: white;
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            z-index: 4;
+            overflow-y: auto;
+            padding: 15px;
+            transition: transform 0.3s ease;
+        }
+        
+        .blocks-palette.collapsed {
+            transform: translateX(-100%);
+        }
+        
+        .blocks-category {
+            margin-bottom: 20px;
+        }
+        
+        .category-title {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #64748b;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .blocks-list {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+        
+        .block-item {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 10px;
+            cursor: move;
+            transition: all 0.3s ease;
+            font-size: 0.8rem;
+            text-align: center;
+        }
+        
+        .block-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .block-icon {
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+        }
+        
+        /* Properties Panel */
+        .properties-panel {
+            position: absolute;
+            right: 0;
+            top: 0;
+            width: 280px;
+            height: 100%;
+            background: white;
+            box-shadow: -2px 0 5px rgba(0,0,0,0.1);
+            z-index: 4;
+            overflow-y: auto;
+            padding: 15px;
+            transition: transform 0.3s ease;
+        }
+        
+        .properties-panel.collapsed {
+            transform: translateX(100%);
+        }
+        
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        .panel-title {
+            font-weight: 600;
+            font-size: 1rem;
+            color: #1e293b;
+        }
+        
+        .property-group {
+            margin-bottom: 15px;
+        }
+        
+        .property-label {
+            font-size: 0.85rem;
+            color: #64748b;
+            margin-bottom: 5px;
+        }
+        
+        .property-input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+        
+        .property-select {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            background: white;
+        }
+        
+        /* Code Panel */
+        .code-panel {
+            position: absolute;
+            bottom: 70px;
+            left: 0;
+            width: 100%;
+            height: 200px;
+            background: #1e293b;
+            color: white;
+            z-index: 6;
+            transition: transform 0.3s ease;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.2);
+        }
+        
+        .code-panel.collapsed {
+            transform: translateY(100%);
+        }
+        
+        .code-header {
+            background: #334155;
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .code-content {
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            height: calc(100% - 50px);
+            overflow-y: auto;
+            white-space: pre-wrap;
+        }
+        
+        .code-line {
+            line-height: 1.5;
+            margin-bottom: 2px;
+        }
+        
+        /* Floating Action Buttons */
+        .fab-container {
+            position: absolute;
+            bottom: 80px;
+            right: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 7;
+        }
+        
+        .fab {
+            width: 50px;
+            height: 50px;
+            border-radius: 25px;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .fab:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+        }
+        
+        /* Lego Block Styles */
+        .lego-block {
+            border-radius: 4px;
+            position: relative;
+            padding: 8px;
+            margin: 5px 0;
+            font-weight: 500;
+            color: white;
+        }
+        
+        .lego-block:before {
+            content: '';
+            position: absolute;
+            top: -3px;
+            left: 5px;
+            right: 5px;
+            height: 6px;
+            background: inherit;
+            opacity: 0.7;
+            border-radius: 3px;
+        }
+        
+        .lego-block:after {
+            content: '';
+            position: absolute;
+            bottom: -3px;
+            left: 5px;
+            right: 5px;
+            height: 6px;
+            background: inherit;
+            opacity: 0.5;
+            border-radius: 3px;
+        }
+        
+        .block-control { background: var(--lego-blue); }
+        .block-sensor { background: var(--lego-green); }
+        .block-actuator { background: var(--lego-red); }
+        .block-logic { background: var(--lego-yellow); color: #333; }
+        .block-math { background: #8b5cf6; }
+        .block-variable { background: #ec4899; }
+        
+        /* Simulation Area */
+        .simulation-area {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 180px;
+            height: 180px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            z-index: 3;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.3s ease;
+        }
+        
+        .simulation-area.collapsed {
+            transform: translateX(120%);
+        }
+        
+        .simulation-title {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #475569;
+            margin-bottom: 10px;
+        }
+        
+        .arduino-board {
+            width: 120px;
+            height: 80px;
+            background: #1e293b;
+            border-radius: 8px;
+            position: relative;
+            margin: 10px 0;
+        }
+        
+        .board-pin {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #cbd5e1;
+        }
+        
+        .pin-0 { top: 10px; left: 10px; }
+        .pin-1 { top: 10px; left: 25px; }
+        .pin-2 { top: 10px; left: 40px; }
+        .pin-3 { top: 10px; left: 55px; }
+        .pin-4 { top: 10px; left: 70px; }
+        .pin-5 { top: 10px; left: 85px; }
+        .pin-6 { top: 10px; left: 100px; }
+        
+        .pin-7 { bottom: 10px; left: 10px; }
+        .pin-8 { bottom: 10px; left: 25px; }
+        .pin-9 { bottom: 10px; left: 40px; }
+        .pin-10 { bottom: 10px; left: 55px; }
+        .pin-11 { bottom: 10px; left: 70px; }
+        .pin-12 { bottom: 10px; left: 85px; }
+        .pin-13 { bottom: 10px; left: 100px; }
+        
+        .led-indicator {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #dc2626;
+            margin-top: 10px;
+            box-shadow: 0 0 5px #dc2626;
+        }
+        
+        .led-indicator.active {
+            background: #22c55e;
+            box-shadow: 0 0 10px #22c55e;
+        }
+        
+        /* Toggle Switch */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #cbd5e1;
+            transition: .4s;
+            border-radius: 24px;
+        }
+        
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .toggle-slider {
+            background-color: var(--primary);
+        }
+        
+        input:checked + .toggle-slider:before {
+            transform: translateX(26px);
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile App Container -->
+    <div class="app-container">
+        <!-- IDE Header -->
+        <header class="ide-header">
+            <div class="ide-title">
+                <div class="ide-title-icon">
+                    <i class="fas fa-microchip"></i>
+                </div>
+                <span>TETA Arduino IDE</span>
+            </div>
+            
+            <div class="ide-controls">
+                <button class="control-btn" onclick="toggleToolbox()">
+                    <i class="fas fa-toolbox"></i>
+                </button>
+                <button class="control-btn" onclick="toggleProperties()">
+                    <i class="fas fa-sliders-h"></i>
+                </button>
+                <button class="control-btn" onclick="toggleCodePanel()">
+                    <i class="fas fa-code"></i>
+                </button>
+            </div>
+        </header>
+        
+        <!-- Canvas Area -->
+        <main class="canvas-container">
+            <!-- Toolbox Sidebar -->
+            <div class="toolbox-sidebar" id="toolboxSidebar">
+                <div class="toolbox-btn active" style="color: var(--lego-blue);" onclick="selectCategory('control')">
+                    <i class="fas fa-play"></i>
+                </div>
+                <div class="toolbox-btn" style="color: var(--lego-green);" onclick="selectCategory('sensor')">
+                    <i class="fas fa-thermometer-half"></i>
+                </div>
+                <div class="toolbox-btn" style="color: var(--lego-red);" onclick="selectCategory('actuator')">
+                    <i class="fas fa-bolt"></i>
+                </div>
+                <div class="toolbox-btn" style="color: var(--lego-yellow);" onclick="selectCategory('logic')">
+                    <i class="fas fa-random"></i>
+                </div>
+                <div class="toolbox-btn" style="color: #8b5cf6;" onclick="selectCategory('math')">
+                    <i class="fas fa-calculator"></i>
+                </div>
+                <div class="toolbox-btn" style="color: #ec4899;" onclick="selectCategory('variable')">
+                    <i class="fas fa-code-branch"></i>
+                </div>
+            </div>
+            
+            <!-- Blocks Palette -->
+            <div class="blocks-palette" id="blocksPalette">
+                <div class="blocks-category" id="control-category">
+                    <div class="category-title">
+                        <i class="fas fa-play mr-2" style="color: var(--lego-blue);"></i>
+                        Blok Kontrol
+                    </div>
+                    <div class="blocks-list">
+                        <div class="block-item lego-block block-control" draggable="true" onclick="addBlock('loop')">
+                            <div class="block-icon">
+                                <i class="fas fa-redo"></i>
+                            </div>
+                            <div>Loop Tak Hingga</div>
+                        </div>
+                        <div class="block-item lego-block block-control" draggable="true" onclick="addBlock('delay')">
+                            <div class="block-icon">
+                                <i class="fas fa-clock"></i>
+                            </div>
+                            <div>Tunda (ms)</div>
+                        </div>
+                        <div class="block-item lego-block block-control" draggable="true" onclick="addBlock('if')">
+                            <div class="block-icon">
+                                <i class="fas fa-question"></i>
+                            </div>
+                            <div>Jika ... maka</div>
+                        </div>
+                        <div class="block-item lego-block block-control" draggable="true" onclick="addBlock('for')">
+                            <div class="block-icon">
+                                <i class="fas fa-repeat"></i>
+                            </div>
+                            <div>Ulangi ... kali</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="blocks-category" id="sensor-category" style="display: none;">
+                    <div class="category-title">
+                        <i class="fas fa-thermometer-half mr-2" style="color: var(--lego-green);"></i>
+                        Blok Sensor
+                    </div>
+                    <div class="blocks-list">
+                        <div class="block-item lego-block block-sensor" draggable="true" onclick="addBlock('digitalRead')">
+                            <div class="block-icon">
+                                <i class="fas fa-plug"></i>
+                            </div>
+                            <div>Baca Digital</div>
+                        </div>
+                        <div class="block-item lego-block block-sensor" draggable="true" onclick="addBlock('analogRead')">
+                            <div class="block-icon">
+                                <i class="fas fa-wave-square"></i>
+                            </div>
+                            <div>Baca Analog</div>
+                        </div>
+                        <div class="block-item lego-block block-sensor" draggable="true" onclick="addBlock('button')">
+                            <div class="block-icon">
+                                <i class="fas fa-toggle-on"></i>
+                            </div>
+                            <div>Tombol Ditekan?</div>
+                        </div>
+                        <div class="block-item lego-block block-sensor" draggable="true" onclick="addBlock('distance')">
+                            <div class="block-icon">
+                                <i class="fas fa-ruler"></i>
+                            </div>
+                            <div>Sensor Jarak</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="blocks-category" id="actuator-category" style="display: none;">
+                    <div class="category-title">
+                        <i class="fas fa-bolt mr-2" style="color: var(--lego-red);"></i>
+                        Blok Aktuator
+                    </div>
+                    <div class="blocks-list">
+                        <div class="block-item lego-block block-actuator" draggable="true" onclick="addBlock('digitalWrite')">
+                            <div class="block-icon">
+                                <i class="fas fa-bolt"></i>
+                            </div>
+                            <div>Digital HIGH/LOW</div>
+                        </div>
+                        <div class="block-item lego-block block-actuator" draggable="true" onclick="addBlock('analogWrite')">
+                            <div class="block-icon">
+                                <i class="fas fa-sliders-h"></i>
+                            </div>
+                            <div>PWM (0-255)</div>
+                        </div>
+                        <div class="block-item lego-block block-actuator" draggable="true" onclick="addBlock('led')">
+                            <div class="block-icon">
+                                <i class="fas fa-lightbulb"></i>
+                            </div>
+                            <div>LED On/Off</div>
+                        </div>
+                        <div class="block-item lego-block block-actuator" draggable="true" onclick="addBlock('servo')">
+                            <div class="block-icon">
+                                <i class="fas fa-cogs"></i>
+                            </div>
+                            <div>Servo Putar</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Main Canvas -->
+            <div class="blockly-canvas" id="blocklyCanvas">
+                <!-- Blockly akan dirender di sini -->
+                <div id="blocklyDiv" style="width: 100%; height: 100%;"></div>
+            </div>
+            
+            <!-- Properties Panel -->
+            <div class="properties-panel collapsed" id="propertiesPanel">
+                <div class="panel-header">
+                    <div class="panel-title">Properties</div>
+                    <button class="control-btn" onclick="toggleProperties()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div class="property-group">
+                    <div class="property-label">Nama Blok</div>
+                    <input type="text" class="property-input" id="blockName" placeholder="Masukkan nama blok">
+                </div>
+                
+                <div class="property-group">
+                    <div class="property-label">Pin Arduino</div>
+                    <select class="property-select" id="blockPin">
+                        <option value="2">Pin Digital 2</option>
+                        <option value="3">Pin Digital 3</option>
+                        <option value="4">Pin Digital 4</option>
+                        <option value="5">Pin Digital 5</option>
+                        <option value="6">Pin Digital 6</option>
+                        <option value="7">Pin Digital 7</option>
+                        <option value="8">Pin Digital 8</option>
+                        <option value="9">Pin Digital 9</option>
+                        <option value="10">Pin Digital 10</option>
+                        <option value="11">Pin Digital 11</option>
+                        <option value="12">Pin Digital 12</option>
+                        <option value="13">Pin Digital 13</option>
+                        <option value="A0">Pin Analog A0</option>
+                        <option value="A1">Pin Analog A1</option>
+                        <option value="A2">Pin Analog A2</option>
+                        <option value="A3">Pin Analog A3</option>
+                        <option value="A4">Pin Analog A4</option>
+                        <option value="A5">Pin Analog A5</option>
+                    </select>
+                </div>
+                
+                <div class="property-group">
+                    <div class="property-label">Nilai</div>
+                    <input type="text" class="property-input" id="blockValue" placeholder="Masukkan nilai">
+                </div>
+                
+                <div class="property-group">
+                    <div class="property-label">Warna Blok</div>
+                    <div class="flex gap-2 mt-2">
+                        <div class="w-8 h-8 rounded cursor-pointer bg-blue-500" onclick="setBlockColor('blue')"></div>
+                        <div class="w-8 h-8 rounded cursor-pointer bg-red-500" onclick="setBlockColor('red')"></div>
+                        <div class="w-8 h-8 rounded cursor-pointer bg-green-500" onclick="setBlockColor('green')"></div>
+                        <div class="w-8 h-8 rounded cursor-pointer bg-yellow-500" onclick="setBlockColor('yellow')"></div>
+                        <div class="w-8 h-8 rounded cursor-pointer bg-purple-500" onclick="setBlockColor('purple')"></div>
+                    </div>
+                </div>
+                
+                <div class="property-group">
+                    <div class="property-label">Simpan Blok</div>
+                    <button class="w-full py-2 bg-primary text-white rounded-lg mt-2" onclick="saveBlockProperties()">
+                        <i class="fas fa-save mr-2"></i> Simpan Perubahan
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Simulation Area -->
+            <div class="simulation-area" id="simulationArea">
+                <div class="simulation-title">Simulasi Arduino</div>
+                <div class="arduino-board">
+                    <div class="board-pin pin-0"></div>
+                    <div class="board-pin pin-1"></div>
+                    <div class="board-pin pin-2"></div>
+                    <div class="board-pin pin-3"></div>
+                    <div class="board-pin pin-4"></div>
+                    <div class="board-pin pin-5"></div>
+                    <div class="board-pin pin-6"></div>
+                    <div class="board-pin pin-7"></div>
+                    <div class="board-pin pin-8"></div>
+                    <div class="board-pin pin-9"></div>
+                    <div class="board-pin pin-10"></div>
+                    <div class="board-pin pin-11"></div>
+                    <div class="board-pin pin-12"></div>
+                    <div class="board-pin pin-13"></div>
+                </div>
+                <div class="led-indicator" id="ledIndicator"></div>
+                <div class="text-xs text-gray-600 mt-2">LED Pin 13</div>
+            </div>
+            
+            <!-- Code Panel -->
+            <div class="code-panel collapsed" id="codePanel">
+                <div class="code-header">
+                    <div class="panel-title">Kode Arduino</div>
+                    <button class="control-btn" onclick="toggleCodePanel()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="code-content" id="codeContent">
+                    <div class="code-line">// Kode akan muncul di sini</div>
+                    <div class="code-line">void setup() {</div>
+                    <div class="code-line">  // Inisialisasi pin</div>
+                    <div class="code-line">  pinMode(13, OUTPUT);</div>
+                    <div class="code-line">}</div>
+                    <div class="code-line"></div>
+                    <div class="code-line">void loop() {</div>
+                    <div class="code-line">  // Program utama</div>
+                    <div class="code-line">  digitalWrite(13, HIGH);</div>
+                    <div class="code-line">  delay(1000);</div>
+                    <div class="code-line">  digitalWrite(13, LOW);</div>
+                    <div class="code-line">  delay(1000);</div>
+                    <div class="code-line">}</div>
+                </div>
+            </div>
+            
+            <!-- Floating Action Buttons -->
+            <div class="fab-container">
+                <div class="fab" style="background: var(--lego-blue);" onclick="runCode()">
+                    <i class="fas fa-play"></i>
+                </div>
+                <div class="fab" style="background: var(--lego-green);" onclick="saveProject()">
+                    <i class="fas fa-save"></i>
+                </div>
+                <div class="fab" style="background: var(--lego-red);" onclick="clearCanvas()">
+                    <i class="fas fa-trash"></i>
+                </div>
+                <div class="fab" style="background: var(--accent);" onclick="toggleSimulation()">
+                    <i class="fas fa-eye"></i>
+                </div>
+            </div>
+        </main>
+        
+        <!-- BOTTOM NAVIGATION - Tetap Sama -->
+        <nav class="bottom-nav">
+            <a href="dashboad siswa.html" class="nav-item">
+                <i class="fas fa-home nav-icon"></i>
+                <span>Beranda</span>
+            </a>
+            <a href="soal harian/dashboard soal.html" class="nav-item">
+                <i class="fas fa-flask nav-icon"></i>
+                <span>Soal Harian</span>
+            </a>
+            <a href="ai/nayra.html" class="nav-item">
+                <i class="fas fa-robot nav-icon"></i>
+                <span>Nayra AI</span>
+            </a>
+            <a href="materi harian/kategori materi.html" class="nav-item">
+                <i class="fas fa-chalkboard-teacher nav-icon"></i>
+                <span>Materi Harian</span>
+            </a>
+            <a href="profil/profil.html" class="nav-item">
+                <i class="fas fa-user nav-icon"></i>
+                <span>Profil</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Blockly Library -->
+    <script src="https://cdn.jsdelivr.net/npm/blockly@10.3.2/blockly.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/blockly@10.3.2/msg/id.min.js"></script>
+    
+    <script>
+        // Inisialisasi Blockly
+        const workspace = Blockly.inject('blocklyDiv', {
+            toolbox: document.getElementById('toolbox'),
+            scrollbars: true,
+            horizontalLayout: false,
+            toolboxPosition: 'start',
+            renderer: 'zelos',
+            theme: Blockly.Theme.defineTheme('legoTheme', {
+                'base': Blockly.Themes.Zelos,
+                'componentStyles': {
+                    'workspaceBackgroundColour': '#f1f5f9',
+                    'toolboxBackgroundColour': '#FFFFFF',
+                    'toolboxForegroundColour': '#000000',
+                    'flyoutBackgroundColour': '#FFFFFF',
+                    'flyoutForegroundColour': '#000000',
+                    'flyoutOpacity': 1,
+                    'scrollbarColour': '#cbd5e1',
+                    'insertionMarkerColour': '#000000',
+                    'insertionMarkerOpacity': 0.3,
+                    'scrollbarOpacity': 0.7,
+                    'cursorColour': '#000000'
+                }
+            })
+        });
+        
+        // State variables
+        let currentCategory = 'control';
+        let simulationRunning = false;
+        let simulationInterval = null;
+        
+        // Fungsi untuk memilih kategori blok
+        function selectCategory(category) {
+            currentCategory = category;
+            
+            // Update active button
+            document.querySelectorAll('.toolbox-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.currentTarget.classList.add('active');
+            
+            // Tampilkan kategori yang dipilih
+            document.querySelectorAll('.blocks-category').forEach(cat => {
+                cat.style.display = 'none';
+            });
+            document.getElementById(`${category}-category`).style.display = 'block';
+        }
+        
+        // Fungsi untuk menambahkan blok ke canvas
+        function addBlock(blockType) {
+            let xml = '';
+            
+            switch(blockType) {
+                case 'loop':
+                    xml = `<block type="controls_whileUntil"></block>`;
+                    break;
+                case 'delay':
+                    xml = `<block type="time_delay">
+                               <value name="DELAY_TIME">
+                                   <shadow type="math_number">
+                                       <field name="NUM">1000</field>
+                                   </shadow>
+                               </value>
+                           </block>`;
+                    break;
+                case 'if':
+                    xml = `<block type="controls_if"></block>`;
+                    break;
+                case 'digitalWrite':
+                    xml = `<block type="digital_write">
+                               <value name="PIN">
+                                   <shadow type="math_number">
+                                       <field name="NUM">13</field>
+                                   </shadow>
+                               </value>
+                               <value name="STATE">
+                                   <shadow type="logic_boolean"></shadow>
+                               </value>
+                           </block>`;
+                    break;
+                case 'led':
+                    xml = `<block type="toggle_led">
+                               <value name="PIN">
+                                   <shadow type="math_number">
+                                       <field name="NUM">13</field>
+                                   </shadow>
+                               </value>
+                           </block>`;
+                    break;
+            }
+            
+            if (xml) {
+                const block = Blockly.Xml.textToDom(xml);
+                Blockly.Xml.domToBlock(block, workspace);
+                updateCode();
+            }
+        }
+        
+        // Fungsi untuk update kode Arduino
+        function updateCode() {
+            const code = Blockly.Arduino.workspaceToCode(workspace);
+            document.getElementById('codeContent').innerHTML = code.split('\n').map(line => 
+                `<div class="code-line">${line}</div>`
+            ).join('');
+        }
+        
+        // Fungsi untuk menjalankan kode
+        function runCode() {
+            if (simulationRunning) {
+                stopSimulation();
+                return;
+            }
+            
+            simulationRunning = true;
+            document.getElementById('ledIndicator').classList.add('active');
+            document.querySelector('.fab i').className = 'fas fa-stop';
+            
+            // Simulasi LED berkedip
+            simulationInterval = setInterval(() => {
+                const led = document.getElementById('ledIndicator');
+                led.classList.toggle('active');
+            }, 500);
+            
+            // Update code panel
+            updateCode();
+            
+            // Tampilkan notifikasi
+            showNotification('Program sedang berjalan...', 'success');
+        }
+        
+        // Fungsi untuk menghentikan simulasi
+        function stopSimulation() {
+            simulationRunning = false;
+            clearInterval(simulationInterval);
+            document.getElementById('ledIndicator').classList.remove('active');
+            document.querySelector('.fab i').className = 'fas fa-play';
+            
+            showNotification('Program dihentikan', 'info');
+        }
+        
+        // Fungsi untuk menyimpan proyek
+        function saveProject() {
+            const xml = Blockly.Xml.workspaceToDom(workspace);
+            const xmlText = Blockly.Xml.domToText(xml);
+            
+            // Simpan ke localStorage
+            localStorage.setItem('arduinoProject', xmlText);
+            
+            showNotification('Proyek disimpan!', 'success');
+        }
+        
+        // Fungsi untuk memuat proyek
+        function loadProject() {
+            const xmlText = localStorage.getItem('arduinoProject');
+            if (xmlText) {
+                const xml = Blockly.Xml.textToDom(xmlText);
+                Blockly.Xml.domToWorkspace(xml, workspace);
+                updateCode();
+                showNotification('Proyek dimuat!', 'success');
+            }
+        }
+        
+        // Fungsi untuk membersihkan canvas
+        function clearCanvas() {
+            if (confirm('Apakah Anda yakin ingin menghapus semua blok?')) {
+                workspace.clear();
+                updateCode();
+                showNotification('Canvas dibersihkan', 'info');
+            }
+        }
+        
+        // Fungsi untuk toggle panel
+        function toggleToolbox() {
+            const toolbox = document.getElementById('toolboxSidebar');
+            const palette = document.getElementById('blocksPalette');
+            
+            if (toolbox.classList.contains('collapsed')) {
+                toolbox.classList.remove('collapsed');
+                palette.classList.remove('collapsed');
+            } else {
+                toolbox.classList.add('collapsed');
+                palette.classList.add('collapsed');
+            }
+        }
+        
+        function toggleProperties() {
+            document.getElementById('propertiesPanel').classList.toggle('collapsed');
+        }
+        
+        function toggleCodePanel() {
+            document.getElementById('codePanel').classList.toggle('collapsed');
+        }
+        
+        function toggleSimulation() {
+            document.getElementById('simulationArea').classList.toggle('collapsed');
+        }
+        
+        // Fungsi untuk menyimpan properti blok
+        function saveBlockProperties() {
+            showNotification('Properti blok disimpan', 'success');
+        }
+        
+        // Fungsi untuk mengatur warna blok
+        function setBlockColor(color) {
+            showNotification(`Warna blok diubah ke ${color}`, 'info');
+        }
+        
+        // Fungsi untuk menampilkan notifikasi
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 px-4 py-2 rounded-lg shadow-lg text-white ${
+                type === 'success' ? 'bg-green-500' : 
+                type === 'error' ? 'bg-red-500' : 'bg-blue-500'
+            } z-50`;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+        
+        // Event listener untuk drag and drop
+        document.addEventListener('DOMContentLoaded', function() {
+            // Setup drag and drop untuk blok
+            const blockItems = document.querySelectorAll('.block-item');
+            blockItems.forEach(item => {
+                item.addEventListener('dragstart', function(e) {
+                    e.dataTransfer.setData('text/plain', this.getAttribute('onclick').match(/'([^']+)'/)[1]);
+                });
+            });
+            
+            // Setup drop zone
+            const canvas = document.getElementById('blocklyCanvas');
+            canvas.addEventListener('dragover', function(e) {
+                e.preventDefault();
+            });
+            
+            canvas.addEventListener('drop', function(e) {
+                e.preventDefault();
+                const blockType = e.dataTransfer.getData('text/plain');
+                addBlock(blockType);
+            });
+            
+            // Setup bottom nav
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    navItems.forEach(nav => {
+                        nav.classList.remove('active');
+                        nav.querySelector('.nav-icon').classList.remove('active');
+                    });
+                    
+                    this.classList.add('active');
+                    this.querySelector('.nav-icon').classList.add('active');
+                });
+            });
+            
+            // Load project jika ada
+            loadProject();
+            
+            // Update code secara berkala
+            workspace.addChangeListener(updateCode);
+        });
+    </script>
+</body>
+  </html>

@@ -162,29 +162,6 @@
       display: none;
     }
     
-    /* Tap to speak indicator */
-    .tap-to-speak {
-      position: absolute;
-      bottom: 120px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(59, 130, 246, 0.9);
-      color: white;
-      padding: 8px 16px;
-      border-radius: 20px;
-      font-size: 0.875rem;
-      text-align: center;
-      z-index: 5;
-      display: none;
-      cursor: pointer;
-      animation: bounce 2s infinite;
-    }
-    
-    @keyframes bounce {
-      0%, 100% { transform: translateX(-50%) translateY(0); }
-      50% { transform: translateX(-50%) translateY(-5px); }
-    }
-    
     .message-input-container {
       position: fixed;
       bottom: 70px;
@@ -604,10 +581,6 @@
       .avatar-status {
         bottom: 70px;
       }
-      
-      .tap-to-speak {
-        bottom: 100px;
-      }
     }
   </style>
 </head>
@@ -651,12 +624,6 @@
       <div class="user-input-indicator" id="userInputIndicator">
         <i class="fas fa-user mr-2"></i>
         <span id="userInputText"></span>
-      </div>
-      
-      <!-- Tap to speak indicator -->
-      <div class="tap-to-speak" id="tapToSpeakIndicator">
-        <i class="fas fa-hand-pointer mr-2"></i>
-        <span>Ketuk untuk mendengar jawaban</span>
       </div>
       
       <!-- Avatar status -->
@@ -838,7 +805,6 @@
     const statusText = document.getElementById("statusText");
     const userInputIndicator = document.getElementById("userInputIndicator");
     const userInputText = document.getElementById("userInputText");
-    const tapToSpeakIndicator = document.getElementById("tapToSpeakIndicator");
     
     // Sidebar elements
     const hamburgerButton = document.getElementById("hamburgerButton");
@@ -1146,7 +1112,6 @@
           statusDot.className = 'status-dot speaking';
           statusText.textContent = 'Sedang Berbicara';
           userInputIndicator.style.display = 'none';
-          tapToSpeakIndicator.style.display = 'none';
           
           // Show speaking video, hide idle
           avatarIdle.style.display = 'none';
@@ -1180,7 +1145,6 @@
         case 'ready':
           statusDot.className = 'status-dot ready';
           statusText.textContent = 'Siap Berbicara';
-          tapToSpeakIndicator.style.display = 'block';
           avatarIdle.style.display = 'block';
           avatarSpeaking.style.display = 'none';
           avatarSpeaking.pause();
@@ -1192,7 +1156,6 @@
           statusDot.className = 'status-dot idle';
           statusText.textContent = 'Siap Mendengarkan';
           userInputIndicator.style.display = 'none';
-          tapToSpeakIndicator.style.display = 'none';
           avatarSpeaking.style.display = 'none';
           avatarIdle.style.display = 'block';
           avatarSpeaking.pause();
@@ -1700,12 +1663,6 @@
       }
     });
     
-    // Tap to speak indicator
-    tapToSpeakIndicator.addEventListener("click", function() {
-      userHasInteracted = true;
-      triggerPendingTTS();
-    });
-    
     // Avatar click for pending TTS
     avatarIdle.addEventListener("click", function() {
       if (pendingTTSResponse) {
@@ -1774,13 +1731,6 @@
       document.addEventListener('click', firstInteractionHandler);
       document.addEventListener('touchstart', firstInteractionHandler);
       document.addEventListener('keydown', firstInteractionHandler);
-      
-      // Auto-show welcome after 3 seconds if no interaction
-      setTimeout(() => {
-        if (!userHasInteracted) {
-          showNotification("Ketuk layar untuk memulai percakapan dengan Nayra AI");
-        }
-      }, 3000);
     }
     
     // ============================
@@ -1811,8 +1761,15 @@
       console.log("Android:", isAndroid, "iOS:", isIOS);
       
       if (isAndroid) {
-        showNotification("Mode Android aktif. Ketuk layar untuk memulai dengan aksen Indonesia.");
+        showNotification("Mode Android aktif.");
       }
+      
+      // Auto-play welcome message
+      setTimeout(() => {
+        if (ttsSettings.autoSpeak && ttsSettings.voiceInputEnabled && !isSpeaking) {
+          speakText("Halo! Saya Nayra AI dengan aksen Indonesia, asisten sains Anda di TETA SAINS. Silakan ajukan pertanyaan sains Anda.", "", true);
+        }
+      }, 1500);
       
       // Test TTS availability
       setTimeout(() => {

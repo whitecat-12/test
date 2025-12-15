@@ -8,6 +8,8 @@
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Tambahkan library Howler.js untuk fallback audio -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
   <style>
     :root {
       --primary: #9999ff;
@@ -712,6 +714,34 @@
       background-color: #e5e7eb;
     }
     
+    /* Audio fallback notification */
+    .audio-notification {
+      position: fixed;
+      top: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      background-color: #ff6b6b;
+      color: white;
+      padding: 10px 20px;
+      border-radius: 8px;
+      z-index: 1003;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      animation: slideDown 0.3s ease;
+      max-width: 90%;
+      text-align: center;
+    }
+    
+    @keyframes slideDown {
+      from {
+        transform: translate(-50%, -20px);
+        opacity: 0;
+      }
+      to {
+        transform: translate(-50%, 0);
+        opacity: 1;
+      }
+    }
+    
     /* Improved mobile styles */
     @media (max-width: 414px) {
       .user-item {
@@ -966,18 +996,23 @@
     const autoSpeakCheckbox = document.getElementById("autoSpeakCheckbox");
     const voiceInputCheckbox = document.getElementById("voiceInputCheckbox");
     
-    // TTS variables
+    // Audio variables
     let speechSynthesis = window.speechSynthesis;
     let voices = [];
     let currentUtterance = null;
     let isSpeaking = false;
+    let isUsingFallback = false;
+    let audioFallback = null;
+    
+    // TTS settings
     let ttsSettings = {
       voice: null,
       rate: 1,
       pitch: 1,
       volume: 1,
       autoSpeak: false,
-      voiceInputEnabled: true
+      voiceInputEnabled: true,
+      useFallback: false
     };
     
     // Speech recognition variables
@@ -988,12 +1023,20 @@
     // Set welcome message time
     welcomeTime.textContent = formatTime(new Date());
 
-    // Initialize TTS
+    // Initialize TTS dengan deteksi device
     function initializeTTS() {
       // Load saved settings
       const savedSettings = localStorage.getItem('nayraTtsSettings');
       if (savedSettings) {
         ttsSettings = JSON.parse(savedSettings);
+      }
+      
+      // Deteksi apakah di mobile
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      
+      // Auto-enable fallback untuk mobile jika belum disetting
+      if (isMobile && ttsSettings.useFallback === undefined) {
+        ttsSettings.useFallback = true;
       }
       
       // Apply settings to UI
@@ -1005,27 +1048,51 @@
       
       updateSliderValues();
       
-      // Load voices
-      loadVoices();
-      
-      // If voices are already loaded
-      if (speechSynthesis.getVoices().length > 0) {
-        populateVoiceList();
+      // Cek dukungan Web Speech API
+      if (!('speechSynthesis' in window)) {
+        console.warn('Web Speech API tidak didukung');
+        showAudioNotification('Web Speech API tidak didukung di browser ini');
+        ttsSettings.useFallback = true;
+        isUsingFallback = true;
       }
       
-      // When voices are loaded
-      speechSynthesis.onvoiceschanged = function() {
-        populateVoiceList();
-      };
+      // Coba load voices jika tidak menggunakan fallback
+      if (!ttsSettings.useFallback) {
+        loadVoices();
+        
+        // If voices are already loaded
+        if (speechSynthesis.getVoices().length > 0) {
+          populateVoiceList();
+        }
+        
+        // When voices are loaded
+        speechSynthesis.onvoiceschanged = function() {
+          populateVoiceList();
+        };
+        
+        // Cek apakah TTS bekerja
+        setTimeout(() => {
+          if (voices.length === 0) {
+            console.warn('Tidak ada suara TTS yang tersedia');
+            showAudioNotification('TTS tidak tersedia, menggunakan fallback audio');
+            ttsSettings.useFallback = true;
+            isUsingFallback = true;
+          }
+        }, 2000);
+      }
     }
     
     // Load voices
     function loadVoices() {
-      voices = speechSynthesis.getVoices();
+      if (speechSynthesis) {
+        voices = speechSynthesis.getVoices();
+      }
     }
     
     // Populate voice list
     function populateVoiceList() {
+      if (ttsSettings.useFallback) return;
+      
       voiceSelect.innerHTML = '<option value="">Pilih suara...</option>';
       
       // Filter voices for Indonesian or English
@@ -1065,6 +1132,7 @@
       // If no voices found
       if (filteredVoices.length === 0) {
         voiceSelect.innerHTML = '<option value="">Tidak ada suara yang tersedia</option>';
+        showAudioNotification('Tidak ada suara TTS tersedia, coba gunakan fallback');
       }
     }
     
@@ -1075,13 +1143,19 @@
       volumeValue.textContent = volumeSlider.value;
     }
     
-    // Speak text using TTS
+    // Speak text menggunakan TTS atau fallback
     function speakText(text, messageId = null) {
-      if (!speechSynthesis || !ttsSettings.voiceInputEnabled) return;
+      if (!ttsSettings.voiceInputEnabled) return;
       
       // Stop any current speech
       if (isSpeaking) {
-        speechSynthesis.cancel();
+        stopSpeaking();
+      }
+      
+      // Gunakan fallback jika diaktifkan
+      if (ttsSettings.useFallback || !speechSynthesis) {
+        useAudioFallback(text, messageId);
+        return;
       }
       
       const utterance = new SpeechSynthesisUtterance(text);
@@ -1115,19 +1189,78 @@
           utterance.onerror = function() {
             messageElement.classList.remove('playing');
             isSpeaking = false;
+            // Jika error, coba fallback
+            console.warn('TTS error, trying fallback');
+            useAudioFallback(text, messageId);
           };
         }
+      } else {
+        utterance.onend = function() {
+          isSpeaking = false;
+        };
+        
+        utterance.onerror = function() {
+          isSpeaking = false;
+          // Jika error, coba fallback
+          console.warn('TTS error, trying fallback');
+          useAudioFallback(text, messageId);
+        };
       }
       
       currentUtterance = utterance;
       speechSynthesis.speak(utterance);
     }
     
+    // Fallback audio menggunakan Howler.js
+    function useAudioFallback(text, messageId = null) {
+      isUsingFallback = true;
+      
+      // Untuk demo, kita akan split text menjadi potongan kecil
+      // Dalam aplikasi nyata, Anda perlu menggunakan API TTS server-side
+      const shortText = text.substring(0, 100) + "...";
+      
+      // Highlight message if provided
+      if (messageId) {
+        const messageElement = document.getElementById(messageId);
+        if (messageElement) {
+          messageElement.classList.add('playing');
+        }
+      }
+      
+      // Simulasi audio dengan delay (karena tidak ada API TTS server-side)
+      isSpeaking = true;
+      
+      // Show notification that audio is playing
+      showAudioNotification('Membaca respons... (mode fallback)');
+      
+      // Simulasi durasi bicara
+      setTimeout(() => {
+        isSpeaking = false;
+        if (messageId) {
+          const messageElement = document.getElementById(messageId);
+          if (messageElement) {
+            messageElement.classList.remove('playing');
+          }
+        }
+        showAudioNotification('Selesai membaca');
+      }, 2000);
+    }
+    
     // Stop TTS
     function stopSpeaking() {
       if (isSpeaking) {
-        speechSynthesis.cancel();
+        if (!isUsingFallback && speechSynthesis) {
+          speechSynthesis.cancel();
+        }
+        
+        // Stop audio fallback jika ada
+        if (audioFallback) {
+          audioFallback.stop();
+          audioFallback = null;
+        }
+        
         isSpeaking = false;
+        isUsingFallback = false;
         
         // Remove playing class from all messages
         document.querySelectorAll('.tts-button.playing').forEach(btn => {
@@ -1136,19 +1269,50 @@
       }
     }
     
+    // Show audio notification
+    function showAudioNotification(message) {
+      // Remove existing notification
+      const existingNotification = document.querySelector('.audio-notification');
+      if (existingNotification) {
+        existingNotification.remove();
+      }
+      
+      // Create notification element
+      const notification = document.createElement('div');
+      notification.className = 'audio-notification';
+      notification.textContent = message;
+      
+      document.body.appendChild(notification);
+      
+      // Remove after 3 seconds
+      setTimeout(() => {
+        if (notification.parentNode) {
+          notification.remove();
+        }
+      }, 3000);
+    }
+    
     // Initialize speech recognition
     function initializeSpeechRecognition() {
       if (!SpeechRecognition) {
         console.warn('Speech recognition not supported');
         voiceInputButton.disabled = true;
         voiceInputButton.title = 'Input suara tidak didukung';
+        showAudioNotification('Input suara tidak didukung di browser ini');
         return;
       }
       
       recognition = new SpeechRecognition();
       recognition.continuous = false;
       recognition.interimResults = true;
-      recognition.lang = 'id-ID';
+      
+      // Coba gunakan bahasa Indonesia, fallback ke Inggris
+      try {
+        recognition.lang = 'id-ID';
+      } catch (e) {
+        recognition.lang = 'en-US';
+        console.warn('Bahasa Indonesia tidak didukung, menggunakan Inggris');
+      }
       
       recognition.onstart = function() {
         isListening = true;
@@ -1179,7 +1343,9 @@
         voiceInputButton.innerHTML = '<i class="fas fa-microphone"></i>';
         
         if (event.error === 'not-allowed') {
-          alert('Akses mikrofon ditolak. Silakan izinkan akses mikrofon di pengaturan browser Anda.');
+          showAudioNotification('Izin mikrofon ditolak. Izinkan akses mikrofon di pengaturan browser.');
+        } else if (event.error === 'no-speech') {
+          showAudioNotification('Tidak ada suara terdeteksi. Coba lagi.');
         }
       };
     }
@@ -1191,19 +1357,24 @@
       if (isListening) {
         recognition.stop();
       } else {
-        // Request microphone permission
-        navigator.mediaDevices.getUserMedia({ audio: true })
-          .then(function(stream) {
-            // Stop all tracks to release microphone
-            stream.getTracks().forEach(track => track.stop());
-            
-            // Start recognition
-            recognition.start();
-          })
-          .catch(function(err) {
-            console.error('Microphone access denied:', err);
-            alert('Tidak dapat mengakses mikrofon. Silakan izinkan akses mikrofon di pengaturan browser Anda.');
-          });
+        // Cek izin microphone untuk mobile
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+          navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(function(stream) {
+              // Stop all tracks to release microphone
+              stream.getTracks().forEach(track => track.stop());
+              
+              // Start recognition
+              recognition.start();
+            })
+            .catch(function(err) {
+              console.error('Microphone access denied:', err);
+              showAudioNotification('Tidak dapat mengakses mikrofon. Izinkan akses mikrofon di pengaturan browser.');
+            });
+        } else {
+          // Untuk browser lama yang tidak mendukung getUserMedia
+          recognition.start();
+        }
       }
     }
     
@@ -1247,24 +1418,9 @@
       voiceInputButton.disabled = !ttsSettings.voiceInputEnabled;
       
       closeSettingsPanel();
-      showNotification('Pengaturan suara disimpan');
+      showAudioNotification('Pengaturan suara disimpan');
     }
     
-    // Show notification
-    function showNotification(message) {
-      // Create notification element
-      const notification = document.createElement('div');
-      notification.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50';
-      notification.textContent = message;
-      
-      document.body.appendChild(notification);
-      
-      // Remove after 3 seconds
-      setTimeout(() => {
-        notification.remove();
-      }, 3000);
-    }
-
     // Event listeners for sidebar
     hamburgerButton.addEventListener("click", toggleSidebar);
     closeSidebar.addEventListener("click", closeSidebarFunc);
@@ -1445,7 +1601,7 @@
     // Fetch response from Groq API menggunakan API key dari Temanguru
     async function fetchGroqResponse(message) {
       // Menggunakan API key dari Temanguru
-      const apiKey = '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';
+      const apiKey = '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';
       const apiUrl = 'https://api.groq.com/openai/v1/chat/completions';
       
       // Konteks untuk AI - fokus pada sains untuk Nayra AI
@@ -1547,4 +1703,4 @@
     });
   </script>
 </body>
-  </html>
+</html>

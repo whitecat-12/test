@@ -635,13 +635,13 @@
     <!-- Avatar Video Container -->
     <div class="avatar-container">
       <!-- Ganti src dengan path ke video avatar yang Anda siapkan -->
-      <video id="avatarSpeaking" class="avatar-video" style="display: none;" loop>
+      <video id="avatarSpeaking" class="avatar-video" style="display: none;">
         <!-- Ganti dengan video avatar berbicara Anda -->
         <source src="avatar-speaking.mp4" type="video/mp4">
         Browser Anda tidak mendukung tag video.
       </video>
       
-      <video id="avatarIdle" class="avatar-idle" autoplay loop muted>
+      <video id="avatarIdle" class="avatar-idle" style="display: block;">
         <!-- Ganti dengan video avatar idle/diam Anda -->
         <source src="avatar-idle.mp4" type="video/mp4">
         Browser Anda tidak mendukung tag video.
@@ -898,6 +898,121 @@
     let recognition = null;
     let isListening = false;
     
+    // Avatar video management
+    let isAvatarSpeaking = false;
+    
+    // ============================
+    // Avatar Video Management
+    // ============================
+    function playAvatarIdle() {
+      console.log("Memulai avatar idle (background loop)");
+      
+      // Reset video speaking ke awal
+      avatarSpeaking.pause();
+      avatarSpeaking.currentTime = 0;
+      
+      // Tampilkan dan mainkan video idle
+      avatarIdle.style.display = 'block';
+      avatarSpeaking.style.display = 'none';
+      
+      // Pastikan video idle dimainkan dengan loop
+      avatarIdle.loop = true;
+      avatarIdle.muted = true; // Muted untuk autoplay compliance
+      
+      // Play video idle
+      const playPromise = avatarIdle.play();
+      
+      if (playPromise !== undefined) {
+        playPromise.catch(error => {
+          console.log("Autoplay untuk avatar idle dicegah:", error);
+          // Akan diputar nanti saat ada interaksi pengguna
+        });
+      }
+      
+      isAvatarSpeaking = false;
+    }
+
+    function playAvatarSpeaking() {
+      console.log("Memulai avatar speaking");
+      
+      if (isAvatarSpeaking) return;
+      
+      // Hentikan video idle
+      avatarIdle.pause();
+      avatarIdle.currentTime = 0;
+      
+      // Tampilkan dan mainkan video speaking
+      avatarIdle.style.display = 'none';
+      avatarSpeaking.style.display = 'block';
+      
+      // Atur loop sesuai kebutuhan (biasanya speaking video tidak di-loop)
+      avatarSpeaking.loop = false;
+      avatarSpeaking.muted = false; // Unmute untuk speaking
+      
+      // Play video speaking
+      const playPromise = avatarSpeaking.play();
+      
+      if (playPromise !== undefined) {
+        playPromise.catch(error => {
+          console.error("Gagal memainkan avatar speaking:", error);
+          // Fallback ke idle jika speaking gagal
+          playAvatarIdle();
+        }).then(() => {
+          isAvatarSpeaking = true;
+        });
+      } else {
+        isAvatarSpeaking = true;
+      }
+      
+      // Kembali ke idle setelah speaking selesai
+      avatarSpeaking.onended = function() {
+        console.log("Avatar speaking selesai, kembali ke idle");
+        playAvatarIdle();
+      };
+      
+      // Juga handle jika video berhenti karena alasan lain
+      avatarSpeaking.onerror = function() {
+        console.error("Error pada avatar speaking, kembali ke idle");
+        playAvatarIdle();
+      };
+    }
+
+    // ============================
+    // Setup Video Listeners
+    // ============================
+    function setupVideoListeners() {
+      // Handle autoplay issues untuk video idle
+      avatarIdle.addEventListener('play', function() {
+        console.log("Avatar idle mulai diputar");
+      });
+      
+      avatarIdle.addEventListener('error', function(e) {
+        console.error("Error pada avatar idle:", e);
+        // Coba load ulang video
+        setTimeout(() => {
+          avatarIdle.load();
+        }, 1000);
+      });
+      
+      // Handle autoplay issues untuk video speaking
+      avatarSpeaking.addEventListener('play', function() {
+        console.log("Avatar speaking mulai diputar");
+      });
+      
+      avatarSpeaking.addEventListener('error', function(e) {
+        console.error("Error pada avatar speaking:", e);
+        // Kembali ke idle jika speaking error
+        playAvatarIdle();
+      });
+      
+      // Pastikan video selalu di-loop saat idle
+      avatarIdle.loop = true;
+      
+      // Preload videos untuk performa lebih baik
+      avatarIdle.load();
+      avatarSpeaking.load();
+    }
+    
     // ============================
     // TTS Initialization - OPTIMIZED FOR INDONESIAN ACCENT
     // ============================
@@ -1148,19 +1263,15 @@
           userInputIndicator.style.display = 'none';
           tapToSpeakIndicator.style.display = 'none';
           
-          // Show speaking video, hide idle
-          avatarIdle.style.display = 'none';
-          avatarSpeaking.style.display = 'block';
-          avatarSpeaking.play();
+          // Mainkan video speaking
+          playAvatarSpeaking();
           break;
           
         case 'listening':
           statusDot.className = 'status-dot listening';
           statusText.textContent = 'Sedang Mendengarkan';
-          avatarIdle.style.display = 'block';
-          avatarSpeaking.style.display = 'none';
-          avatarSpeaking.pause();
-          avatarIdle.play();
+          // Tetap di idle saat listening
+          playAvatarIdle();
           break;
           
         case 'thinking':
@@ -1170,20 +1281,16 @@
             userInputText.textContent = userMessage;
             userInputIndicator.style.display = 'flex';
           }
-          avatarIdle.style.display = 'block';
-          avatarSpeaking.style.display = 'none';
-          avatarSpeaking.pause();
-          avatarIdle.play();
+          // Tetap di idle saat thinking
+          playAvatarIdle();
           break;
           
         case 'ready':
           statusDot.className = 'status-dot ready';
           statusText.textContent = 'Siap Berbicara';
           tapToSpeakIndicator.style.display = 'block';
-          avatarIdle.style.display = 'block';
-          avatarSpeaking.style.display = 'none';
-          avatarSpeaking.pause();
-          avatarIdle.play();
+          // Tetap di idle saat ready
+          playAvatarIdle();
           break;
           
         case 'idle':
@@ -1192,10 +1299,9 @@
           statusText.textContent = 'Siap Mendengarkan';
           userInputIndicator.style.display = 'none';
           tapToSpeakIndicator.style.display = 'none';
-          avatarSpeaking.style.display = 'none';
-          avatarIdle.style.display = 'block';
-          avatarSpeaking.pause();
-          avatarIdle.play();
+          
+          // Pastikan avatar idle berjalan
+          playAvatarIdle();
           break;
       }
     }
@@ -1275,6 +1381,7 @@
       utterance.onend = function() {
         console.log('TTS selesai');
         isSpeaking = false;
+        // Kembali ke idle setelah selesai berbicara
         updateAvatarStatus('idle');
       };
       
@@ -1709,6 +1816,9 @@
             speakText("Halo! Saya Nayra AI dengan aksen Indonesia, asisten sains Anda di TETA SAINS. Silakan ajukan pertanyaan sains Anda.", "", true);
           }, 1000);
         }
+        
+        // Mulai video idle setelah interaksi pengguna
+        playAvatarIdle();
       };
       
       // Listen for any user interaction
@@ -1736,8 +1846,8 @@
       // Initialize speech recognition
       initializeSpeechRecognition();
       
-      // Start avatar idle video
-      avatarIdle.play();
+      // Setup video event listeners
+      setupVideoListeners();
       
       // Setup initial interaction listener
       setupInitialInteraction();
@@ -1771,16 +1881,22 @@
     // Handle page visibility changes
     document.addEventListener('visibilitychange', function() {
       if (document.hidden) {
-        // Page is hidden, stop any ongoing speech
-        if (isSpeaking) {
-          speechSynthesis.cancel();
-        }
-        if (isListening) {
-          recognition.stop();
-        }
+        // Page is hidden, pause semua video
+        console.log("Halaman tersembunyi, pause video");
+        avatarIdle.pause();
+        avatarSpeaking.pause();
       } else {
-        // Page is visible again
-        avatarIdle.play();
+        // Page is visible again, lanjutkan video idle jika tidak sedang speaking
+        console.log("Halaman terlihat kembali");
+        if (!isAvatarSpeaking) {
+          const playPromise = avatarIdle.play();
+          
+          if (playPromise !== undefined) {
+            playPromise.catch(error => {
+              console.log("Tidak dapat melanjutkan video idle:", error);
+            });
+          }
+        }
       }
     });
   </script>

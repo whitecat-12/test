@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+bisa perbaiki angsung dikode ini <!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
@@ -825,1015 +825,964 @@
   </div>
 
   <script>
-// ============================
-// DOM Elements
-// ============================
-const messageInput = document.getElementById("messageInput");
-const sendButton = document.getElementById("sendButton");
-
-// Avatar elements
-const avatarSpeaking = document.getElementById("avatarSpeaking");
-const avatarIdle = document.getElementById("avatarIdle");
-const statusDot = document.getElementById("statusDot");
-const statusText = document.getElementById("statusText");
-const userInputIndicator = document.getElementById("userInputIndicator");
-const userInputText = document.getElementById("userInputText");
-const tapToSpeakIndicator = document.getElementById("tapToSpeakIndicator");
-
-// Sidebar elements
-const hamburgerButton = document.getElementById("hamburgerButton");
-const closeSidebar = document.getElementById("closeSidebar");
-const sidebar = document.getElementById("sidebar");
-const sidebarOverlay = document.getElementById("sidebarOverlay");
-
-// Voice input elements
-const voiceInputButton = document.getElementById("voiceInputButton");
-
-// Settings elements
-const settingsButton = document.getElementById("settingsButton");
-const closeSettings = document.getElementById("closeSettings");
-const cancelSettings = document.getElementById("cancelSettings");
-const saveSettings = document.getElementById("saveSettings");
-const settingsPanel = document.getElementById("settingsPanel");
-const settingsOverlay = document.getElementById("settingsOverlay");
-
-// TTS elements
-const voiceSelect = document.getElementById("voiceSelect");
-const rateSlider = document.getElementById("rateSlider");
-const pitchSlider = document.getElementById("pitchSlider");
-const volumeSlider = document.getElementById("volumeSlider");
-const rateValue = document.getElementById("rateValue");
-const pitchValue = document.getElementById("pitchValue");
-const volumeValue = document.getElementById("volumeValue");
-const autoSpeakCheckbox = document.getElementById("autoSpeakCheckbox");
-const voiceInputCheckbox = document.getElementById("voiceInputCheckbox");
-const androidModeCheckbox = document.getElementById("androidModeCheckbox");
-const indonesianAccentCheckbox = document.getElementById("indonesianAccentCheckbox");
-
-// ============================
-// Global Variables
-// ============================
-let speechSynthesis = window.speechSynthesis;
-let voices = [];
-let currentUtterance = null;
-let isSpeaking = false;
-let userHasInteracted = false;
-let pendingTTSResponse = null;
-let pendingUserMessage = "";
-
-// TTS settings
-let ttsSettings = {
-  voice: null,
-  rate: 1,
-  pitch: 1,
-  volume: 1,
-  autoSpeak: true,
-  voiceInputEnabled: true,
-  androidMode: true,
-  preferIndonesianAccent: true
-};
-
-// Speech recognition
-let SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-let recognition = null;
-let isListening = false;
-
-// ============================
-// VIDEO PLAYBACK FUNCTIONS - FIXED
-// ============================
-
-// Function to ensure idle video plays correctly
-function ensureIdleVideoPlays() {
-  console.log("Memastikan video idle diputar...");
-  
-  // Ensure video is muted (required for autoplay in many browsers)
-  avatarIdle.muted = true;
-  
-  // Reset video to beginning
-  avatarIdle.currentTime = 0;
-  
-  // Set playback properties
-  avatarIdle.loop = true;
-  avatarIdle.playsInline = true; // Important for iOS
-  
-  // Try to play the video
-  const playPromise = avatarIdle.play();
-  
-  if (playPromise !== undefined) {
-    playPromise.then(() => {
-      console.log("Video idle berhasil diputar");
-      avatarIdle.style.display = 'block';
-    }).catch(error => {
-      console.log("Autoplay diblokir, menunggu interaksi pengguna:", error);
-      // Video will play after user interaction
-    });
-  }
-}
-
-// Function to handle video switching
-function switchToIdleVideo() {
-  console.log("Beralih ke video idle");
-  
-  // Hide speaking video
-  avatarSpeaking.style.display = 'none';
-  avatarSpeaking.pause();
-  
-  // Show and play idle video
-  avatarIdle.style.display = 'block';
-  ensureIdleVideoPlays();
-}
-
-function switchToSpeakingVideo() {
-  console.log("Beralih ke video speaking");
-  
-  // Hide idle video
-  avatarIdle.style.display = 'none';
-  avatarIdle.pause();
-  
-  // Show and play speaking video
-  avatarSpeaking.style.display = 'block';
-  avatarSpeaking.currentTime = 0;
-  avatarSpeaking.play();
-}
-
-// ============================
-// TTS Initialization - OPTIMIZED FOR INDONESIAN ACCENT
-// ============================
-function initializeTTS() {
-  console.log("Menginisialisasi TTS dengan aksen Indonesia...");
-  
-  // Load saved settings
-  const savedSettings = localStorage.getItem('nayraTtsSettings');
-  if (savedSettings) {
-    ttsSettings = JSON.parse(savedSettings);
-  }
-  
-  // Apply settings to UI
-  rateSlider.value = ttsSettings.rate;
-  pitchSlider.value = ttsSettings.pitch;
-  volumeSlider.value = ttsSettings.volume;
-  autoSpeakCheckbox.checked = ttsSettings.autoSpeak;
-  voiceInputCheckbox.checked = ttsSettings.voiceInputEnabled;
-  androidModeCheckbox.checked = ttsSettings.androidMode;
-  indonesianAccentCheckbox.checked = ttsSettings.preferIndonesianAccent;
-  
-  updateSliderValues();
-  
-  // Initialize voices - prioritizing Indonesian
-  loadVoices();
-  
-  // Voice loading handler
-  if (speechSynthesis.onvoiceschanged !== undefined) {
-    speechSynthesis.onvoiceschanged = function() {
-      console.log("Suara berubah");
-      loadVoices();
-    };
-  }
-  
-  // Initial voice load
-  setTimeout(loadVoices, 500);
-}
-
-// Load voices with Indonesian priority
-function loadVoices() {
-  voices = speechSynthesis.getVoices();
-  console.log(`Memuat ${voices.length} suara`);
-  
-  if (voices.length > 0) {
-    populateVoiceList();
+    // ============================
+    // DOM Elements
+    // ============================
+    const messageInput = document.getElementById("messageInput");
+    const sendButton = document.getElementById("sendButton");
     
-    // Auto-select Indonesian voice if available and preferred
-    if ((!ttsSettings.voice || ttsSettings.voice === "") && ttsSettings.preferIndonesianAccent) {
-      selectBestIndonesianVoice();
-    } else if (ttsSettings.voice) {
-      // Ensure the saved voice still exists
-      const savedVoiceExists = voices.some(voice => voice.name === ttsSettings.voice);
-      if (!savedVoiceExists) {
+    // Avatar elements
+    const avatarSpeaking = document.getElementById("avatarSpeaking");
+    const avatarIdle = document.getElementById("avatarIdle");
+    const statusDot = document.getElementById("statusDot");
+    const statusText = document.getElementById("statusText");
+    const userInputIndicator = document.getElementById("userInputIndicator");
+    const userInputText = document.getElementById("userInputText");
+    const tapToSpeakIndicator = document.getElementById("tapToSpeakIndicator");
+    
+    // Sidebar elements
+    const hamburgerButton = document.getElementById("hamburgerButton");
+    const closeSidebar = document.getElementById("closeSidebar");
+    const sidebar = document.getElementById("sidebar");
+    const sidebarOverlay = document.getElementById("sidebarOverlay");
+    
+    // Voice input elements
+    const voiceInputButton = document.getElementById("voiceInputButton");
+    
+    // Settings elements
+    const settingsButton = document.getElementById("settingsButton");
+    const closeSettings = document.getElementById("closeSettings");
+    const cancelSettings = document.getElementById("cancelSettings");
+    const saveSettings = document.getElementById("saveSettings");
+    const settingsPanel = document.getElementById("settingsPanel");
+    const settingsOverlay = document.getElementById("settingsOverlay");
+    
+    // TTS elements
+    const voiceSelect = document.getElementById("voiceSelect");
+    const rateSlider = document.getElementById("rateSlider");
+    const pitchSlider = document.getElementById("pitchSlider");
+    const volumeSlider = document.getElementById("volumeSlider");
+    const rateValue = document.getElementById("rateValue");
+    const pitchValue = document.getElementById("pitchValue");
+    const volumeValue = document.getElementById("volumeValue");
+    const autoSpeakCheckbox = document.getElementById("autoSpeakCheckbox");
+    const voiceInputCheckbox = document.getElementById("voiceInputCheckbox");
+    const androidModeCheckbox = document.getElementById("androidModeCheckbox");
+    const indonesianAccentCheckbox = document.getElementById("indonesianAccentCheckbox");
+    
+    // ============================
+    // Global Variables
+    // ============================
+    let speechSynthesis = window.speechSynthesis;
+    let voices = [];
+    let currentUtterance = null;
+    let isSpeaking = false;
+    let userHasInteracted = false;
+    let pendingTTSResponse = null;
+    let pendingUserMessage = "";
+    
+    // TTS settings
+    let ttsSettings = {
+      voice: null,
+      rate: 1,
+      pitch: 1,
+      volume: 1,
+      autoSpeak: true,
+      voiceInputEnabled: true,
+      androidMode: true,
+      preferIndonesianAccent: true
+    };
+    
+    // Speech recognition
+    let SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let recognition = null;
+    let isListening = false;
+    
+    // ============================
+    // TTS Initialization - OPTIMIZED FOR INDONESIAN ACCENT
+    // ============================
+    function initializeTTS() {
+      console.log("Menginisialisasi TTS dengan aksen Indonesia...");
+      
+      // Load saved settings
+      const savedSettings = localStorage.getItem('nayraTtsSettings');
+      if (savedSettings) {
+        ttsSettings = JSON.parse(savedSettings);
+      }
+      
+      // Apply settings to UI
+      rateSlider.value = ttsSettings.rate;
+      pitchSlider.value = ttsSettings.pitch;
+      volumeSlider.value = ttsSettings.volume;
+      autoSpeakCheckbox.checked = ttsSettings.autoSpeak;
+      voiceInputCheckbox.checked = ttsSettings.voiceInputEnabled;
+      androidModeCheckbox.checked = ttsSettings.androidMode;
+      indonesianAccentCheckbox.checked = ttsSettings.preferIndonesianAccent;
+      
+      updateSliderValues();
+      
+      // Initialize voices - prioritizing Indonesian
+      loadVoices();
+      
+      // Voice loading handler
+      if (speechSynthesis.onvoiceschanged !== undefined) {
+        speechSynthesis.onvoiceschanged = function() {
+          console.log("Suara berubah");
+          loadVoices();
+        };
+      }
+      
+      // Initial voice load
+      setTimeout(loadVoices, 500);
+    }
+    
+    // Load voices with Indonesian priority
+    function loadVoices() {
+      voices = speechSynthesis.getVoices();
+      console.log(`Memuat ${voices.length} suara`);
+      
+      if (voices.length > 0) {
+        populateVoiceList();
+        
+        // Auto-select Indonesian voice if available and preferred
+        if ((!ttsSettings.voice || ttsSettings.voice === "") && ttsSettings.preferIndonesianAccent) {
+          selectBestIndonesianVoice();
+        } else if (ttsSettings.voice) {
+          // Ensure the saved voice still exists
+          const savedVoiceExists = voices.some(voice => voice.name === ttsSettings.voice);
+          if (!savedVoiceExists) {
+            selectBestIndonesianVoice();
+          }
+        }
+      } else {
+        // Retry for browsers that load voices async
+        console.log("Tidak ada suara ditemukan, mencoba lagi...");
+        setTimeout(loadVoices, 1000);
+      }
+    }
+    
+    // Select the best Indonesian voice
+    function selectBestIndonesianVoice() {
+      // Find Indonesian voices
+      const indonesianVoices = getIndonesianVoices();
+      
+      if (indonesianVoices.length > 0) {
+        // Priority: 1. Google Indonesian, 2. Natural/Neural Indonesian, 3. Any Indonesian
+        let selectedVoice = null;
+        
+        // 1. Google Indonesian voices (usually best quality)
+        selectedVoice = indonesianVoices.find(v => v.name.includes('Google') && (v.name.includes('Indonesian') || v.name.includes('Indonesia')));
+        
+        // 2. Natural/Neural Indonesian voices
+        if (!selectedVoice) {
+          selectedVoice = indonesianVoices.find(v => 
+            (v.name.includes('Natural') || v.name.includes('Neural') || v.name.includes('Premium')) &&
+            (v.name.includes('Indonesian') || v.lang === 'id-ID')
+          );
+        }
+        
+        // 3. Any female Indonesian voice
+        if (!selectedVoice) {
+          selectedVoice = indonesianVoices.find(v => 
+            v.name.includes('Female') || 
+            v.name.includes('Woman') ||
+            v.name.includes('Perempuan') ||
+            v.gender === 'female'
+          );
+        }
+        
+        // 4. First available Indonesian voice
+        if (!selectedVoice && indonesianVoices.length > 0) {
+          selectedVoice = indonesianVoices[0];
+        }
+        
+        if (selectedVoice) {
+          ttsSettings.voice = selectedVoice.name;
+          voiceSelect.value = selectedVoice.name;
+          console.log("Memilih suara Indonesia:", selectedVoice.name, "Bahasa:", selectedVoice.lang);
+        }
+      } else if (voices.length > 0) {
+        // Fallback to best available voice
+        const femaleVoices = voices.filter(voice => 
+          voice.name.includes('Female') || 
+          voice.name.includes('Woman') ||
+          voice.gender === 'female'
+        );
+        
+        if (femaleVoices.length > 0) {
+          ttsSettings.voice = femaleVoices[0].name;
+          voiceSelect.value = femaleVoices[0].name;
+          console.log("Memilih suara perempuan:", femaleVoices[0].name);
+        } else {
+          ttsSettings.voice = voices[0].name;
+          voiceSelect.value = voices[0].name;
+          console.log("Memilih suara pertama yang tersedia:", voices[0].name);
+        }
+      }
+    }
+    
+    // Get Indonesian voices
+    function getIndonesianVoices() {
+      return voices.filter(voice => 
+        voice.lang.startsWith('id') || 
+        voice.lang === 'id-ID' ||
+        voice.lang === 'id' ||
+        voice.name.toLowerCase().includes('indonesian') ||
+        voice.name.toLowerCase().includes('indonesia') ||
+        voice.name.toLowerCase().includes('bahasa')
+      );
+    }
+    
+    // Populate voice list with Indonesian priority
+    function populateVoiceList() {
+      voiceSelect.innerHTML = '<option value="">Pilih suara...</option>';
+      
+      if (voices.length === 0) {
+        voiceSelect.innerHTML = '<option value="">Tidak ada suara yang tersedia</option>';
+        return;
+      }
+      
+      // Get categorized voices
+      const indonesianVoices = getIndonesianVoices();
+      const naturalVoices = voices.filter(voice => 
+        (voice.name.includes('Natural') || voice.name.includes('Neural') || voice.name.includes('Premium')) &&
+        !indonesianVoices.includes(voice)
+      );
+      
+      const femaleVoices = voices.filter(voice => 
+        (voice.name.includes('Female') || 
+         voice.name.includes('Woman') ||
+         voice.name.includes('Perempuan') ||
+         voice.gender === 'female') &&
+        !indonesianVoices.includes(voice) &&
+        !naturalVoices.includes(voice)
+      );
+      
+      const otherVoices = voices.filter(voice => 
+        !indonesianVoices.includes(voice) &&
+        !naturalVoices.includes(voice) &&
+        !femaleVoices.includes(voice)
+      );
+      
+      // Add Indonesian voices first if preferred
+      if (indonesianVoices.length > 0) {
+        const optgroup = document.createElement('optgroup');
+        optgroup.label = '🎯 Suara Bahasa Indonesia (Direkomendasikan)';
+        indonesianVoices.forEach(voice => {
+          const option = createVoiceOption(voice);
+          optgroup.appendChild(option);
+        });
+        voiceSelect.appendChild(optgroup);
+      }
+      
+      // Add natural voices
+      if (naturalVoices.length > 0) {
+        const optgroup = document.createElement('optgroup');
+        optgroup.label = '🌟 Suara Natural';
+        naturalVoices.forEach(voice => {
+          const option = createVoiceOption(voice);
+          optgroup.appendChild(option);
+        });
+        voiceSelect.appendChild(optgroup);
+      }
+      
+      // Add female voices
+      if (femaleVoices.length > 0) {
+        const optgroup = document.createElement('optgroup');
+        optgroup.label = '👩 Suara Perempuan';
+        femaleVoices.forEach(voice => {
+          const option = createVoiceOption(voice);
+          optgroup.appendChild(option);
+        });
+        voiceSelect.appendChild(optgroup);
+      }
+      
+      // Add other voices
+      if (otherVoices.length > 0) {
+        const optgroup = document.createElement('optgroup');
+        optgroup.label = '🔊 Suara Lainnya';
+        otherVoices.forEach(voice => {
+          const option = createVoiceOption(voice);
+          optgroup.appendChild(option);
+        });
+        voiceSelect.appendChild(optgroup);
+      }
+    }
+    
+    // Create voice option element
+    function createVoiceOption(voice) {
+      const option = document.createElement('option');
+      option.value = voice.name;
+      
+      // Add emoji for voice type
+      let emoji = '🔊';
+      if (voice.name.includes('Google') && voice.name.includes('Indonesian')) emoji = '🎯';
+      else if (voice.name.includes('Natural') || voice.name.includes('Neural')) emoji = '🌟';
+      else if (voice.name.includes('Female') || voice.name.includes('Woman')) emoji = '👩';
+      else if (voice.name.includes('Male') || voice.name.includes('Man')) emoji = '👨';
+      
+      option.textContent = `${emoji} ${voice.name} (${voice.lang})`;
+      
+      if (ttsSettings.voice && voice.name === ttsSettings.voice) {
+        option.selected = true;
+      }
+      
+      return option;
+    }
+    
+    // Update slider values
+    function updateSliderValues() {
+      rateValue.textContent = rateSlider.value;
+      pitchValue.textContent = pitchSlider.value;
+      volumeValue.textContent = volumeSlider.value;
+    }
+    
+    // ============================
+    // Avatar Status Management
+    // ============================
+    function updateAvatarStatus(state, userMessage = '') {
+      switch(state) {
+        case 'speaking':
+          statusDot.className = 'status-dot speaking';
+          statusText.textContent = 'Sedang Berbicara';
+          userInputIndicator.style.display = 'none';
+          tapToSpeakIndicator.style.display = 'none';
+          
+          // Show speaking video, hide idle
+          avatarIdle.style.display = 'none';
+          avatarSpeaking.style.display = 'block';
+          avatarSpeaking.play();
+          break;
+          
+        case 'listening':
+          statusDot.className = 'status-dot listening';
+          statusText.textContent = 'Sedang Mendengarkan';
+          avatarIdle.style.display = 'block';
+          avatarSpeaking.style.display = 'none';
+          avatarSpeaking.pause();
+          avatarIdle.play();
+          break;
+          
+        case 'thinking':
+          statusDot.className = 'status-dot';
+          statusText.textContent = 'Sedang Berpikir';
+          if (userMessage) {
+            userInputText.textContent = userMessage;
+            userInputIndicator.style.display = 'flex';
+          }
+          avatarIdle.style.display = 'block';
+          avatarSpeaking.style.display = 'none';
+          avatarSpeaking.pause();
+          avatarIdle.play();
+          break;
+          
+        case 'ready':
+          statusDot.className = 'status-dot ready';
+          statusText.textContent = 'Siap Berbicara';
+          tapToSpeakIndicator.style.display = 'block';
+          avatarIdle.style.display = 'block';
+          avatarSpeaking.style.display = 'none';
+          avatarSpeaking.pause();
+          avatarIdle.play();
+          break;
+          
+        case 'idle':
+        default:
+          statusDot.className = 'status-dot idle';
+          statusText.textContent = 'Siap Mendengarkan';
+          userInputIndicator.style.display = 'none';
+          tapToSpeakIndicator.style.display = 'none';
+          avatarSpeaking.style.display = 'none';
+          avatarIdle.style.display = 'block';
+          avatarSpeaking.pause();
+          avatarIdle.play();
+          break;
+      }
+    }
+    
+    // ============================
+    // TTS Functions - OPTIMIZED FOR INDONESIAN ACCENT
+    // ============================
+    function speakText(text, userMessage = '', fromUserInteraction = false) {
+      if (!speechSynthesis || !ttsSettings.voiceInputEnabled) {
+        console.error('TTS tidak tersedia atau dinonaktifkan');
+        return false;
+      }
+      
+      // Android requires user interaction
+      if (ttsSettings.androidMode && !fromUserInteraction && !userHasInteracted) {
+        console.log('Mode Android: Menyimpan TTS untuk interaksi pengguna');
+        pendingTTSResponse = text;
+        pendingUserMessage = userMessage;
+        updateAvatarStatus('ready');
+        return false;
+      }
+      
+      // Stop any current speech
+      if (isSpeaking) {
+        speechSynthesis.cancel();
+      }
+      
+      // Optimize text for Indonesian pronunciation
+      const optimizedText = optimizeIndonesianText(text);
+      
+      const utterance = new SpeechSynthesisUtterance(optimizedText);
+      
+      // Find selected voice
+      const selectedVoice = voices.find(voice => voice.name === ttsSettings.voice);
+      if (selectedVoice) {
+        utterance.voice = selectedVoice;
+        utterance.lang = selectedVoice.lang || 'id-ID';
+        console.log("Menggunakan suara:", selectedVoice.name, "Bahasa:", selectedVoice.lang);
+      } else if (voices.length > 0) {
+        // Try to find Indonesian voice if preferred
+        if (ttsSettings.preferIndonesianAccent) {
+          const indonesianVoice = voices.find(voice => voice.lang.startsWith('id'));
+          if (indonesianVoice) {
+            utterance.voice = indonesianVoice;
+            utterance.lang = indonesianVoice.lang;
+          } else {
+            utterance.voice = voices[0];
+            utterance.lang = voices[0].lang;
+          }
+        } else {
+          utterance.voice = voices[0];
+          utterance.lang = voices[0].lang;
+        }
+      } else {
+        utterance.lang = 'id-ID';
+      }
+      
+      // Apply settings optimized for Indonesian
+      utterance.rate = parseFloat(ttsSettings.rate);
+      utterance.pitch = parseFloat(ttsSettings.pitch);
+      utterance.volume = parseFloat(ttsSettings.volume);
+      
+      // Adjust rate for Indonesian (slightly slower for clarity)
+      if (utterance.lang.startsWith('id')) {
+        utterance.rate = Math.min(utterance.rate, 1.1); // Cap at 1.1 for Indonesian
+      }
+      
+      // Update avatar
+      updateAvatarStatus('speaking', userMessage);
+      
+      // Event handlers
+      utterance.onstart = function() {
+        console.log('TTS dimulai');
+        isSpeaking = true;
+      };
+      
+      utterance.onend = function() {
+        console.log('TTS selesai');
+        isSpeaking = false;
+        updateAvatarStatus('idle');
+      };
+      
+      utterance.onerror = function(event) {
+        console.error('TTS error:', event);
+        isSpeaking = false;
+        updateAvatarStatus('idle');
+        
+        // Show user-friendly error
+        if (event.error === 'not-allowed') {
+          showNotification('Izinkan audio di pengaturan browser');
+        }
+      };
+      
+      try {
+        speechSynthesis.speak(utterance);
+        return true;
+      } catch (error) {
+        console.error('Gagal berbicara:', error);
+        updateAvatarStatus('idle');
+        return false;
+      }
+    }
+    
+    // Optimize text for better Indonesian pronunciation
+    function optimizeIndonesianText(text) {
+      return text
+        // Common Indonesian pronunciation fixes
+        .replace(/(\d+)°/g, '$1 derajat')
+        .replace(/cm³/g, 'sentimeter kubik')
+        .replace(/m³/g, 'meter kubik')
+        .replace(/km\/jam/g, 'kilometer per jam')
+        .replace(/m\/s/g, 'meter per detik')
+        
+        // Scientific terms in Indonesian
+        .replace(/photosynthesis/gi, 'fotosintesis')
+        .replace(/gravity/gi, 'gravitasi')
+        .replace(/molecule/gi, 'molekul')
+        .replace(/atom/gi, 'atom')
+        .replace(/element/gi, 'unsur')
+        .replace(/compound/gi, 'senyawa')
+        .replace(/velocity/gi, 'kecepatan')
+        .replace(/acceleration/gi, 'percepatan')
+        .replace(/energy/gi, 'energi')
+        .replace(/force/gi, 'gaya')
+        
+        // Add pauses for better comprehension
+        .replace(/([.!?]) /g, '$1  ')
+        .replace(/, /g, ',  ')
+        .replace(/;/g, '; ')
+        .replace(/:/g, ': ')
+        
+        // Remove extra whitespace
+        .trim();
+    }
+    
+    // Function to trigger pending TTS
+    function triggerPendingTTS() {
+      if (pendingTTSResponse) {
+        const success = speakText(pendingTTSResponse, pendingUserMessage, true);
+        if (success) {
+          pendingTTSResponse = null;
+          pendingUserMessage = "";
+        }
+      }
+    }
+    
+    // Stop TTS
+    function stopSpeaking() {
+      if (isSpeaking) {
+        speechSynthesis.cancel();
+        isSpeaking = false;
+        updateAvatarStatus('idle');
+      }
+    }
+    
+    // ============================
+    // Speech Recognition
+    // ============================
+    function initializeSpeechRecognition() {
+      if (!SpeechRecognition) {
+        console.warn('Speech recognition tidak didukung');
+        voiceInputButton.disabled = true;
+        voiceInputButton.title = 'Input suara tidak didukung';
+        return;
+      }
+      
+      recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = true;
+      recognition.lang = 'id-ID'; // Set to Indonesian
+      
+      recognition.onstart = function() {
+        isListening = true;
+        voiceInputButton.classList.add('listening');
+        voiceInputButton.innerHTML = '<i class="fas fa-stop"></i>';
+        updateAvatarStatus('listening');
+      };
+      
+      recognition.onresult = function(event) {
+        const transcript = Array.from(event.results)
+          .map(result => result[0])
+          .map(result => result.transcript)
+          .join('');
+        
+        messageInput.value = transcript;
+        sendButton.disabled = !transcript.trim();
+      };
+      
+      recognition.onend = function() {
+        isListening = false;
+        voiceInputButton.classList.remove('listening');
+        voiceInputButton.innerHTML = '<i class="fas fa-microphone"></i>';
+        updateAvatarStatus('idle');
+      };
+      
+      recognition.onerror = function(event) {
+        console.error('Speech recognition error:', event.error);
+        isListening = false;
+        voiceInputButton.classList.remove('listening');
+        voiceInputButton.innerHTML = '<i class="fas fa-microphone"></i>';
+        updateAvatarStatus('idle');
+        
+        if (event.error === 'not-allowed') {
+          showNotification('Izinkan mikrofon di pengaturan browser');
+        }
+      };
+    }
+    
+    // ============================
+    // Message Handling
+    // ============================
+    async function sendMessage(fromUserInteraction = false) {
+      if (!messageInput.value.trim()) return;
+      
+      const messageText = messageInput.value.trim();
+      
+      // Show thinking indicator
+      updateAvatarStatus('thinking', messageText);
+      
+      // Clear input
+      messageInput.value = "";
+      sendButton.disabled = true;
+      
+      try {
+        // Get AI response
+        const response = await fetchGroqResponse(messageText);
+        
+        // Auto-speak if enabled
+        if (ttsSettings.autoSpeak && ttsSettings.voiceInputEnabled) {
+          setTimeout(() => {
+            speakText(response, messageText, fromUserInteraction);
+          }, 500);
+        } else {
+          updateAvatarStatus('idle');
+        }
+      } catch (error) {
+        const errorMessage = "Maaf, terjadi masalah. Silakan coba lagi.";
+        
+        if (ttsSettings.autoSpeak && ttsSettings.voiceInputEnabled) {
+          setTimeout(() => {
+            speakText(errorMessage, messageText, fromUserInteraction);
+          }, 500);
+        } else {
+          updateAvatarStatus('idle');
+        }
+        console.error("Error:", error);
+      }
+    }
+    
+    // ============================
+    // API Integration
+    // ============================
+    async function fetchGroqResponse(message) {
+      const apiKey = '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';
+      const apiUrl = 'https://api.groq.com/openai/v1/chat/completions';
+      
+      const systemPrompt = `Anda adalah Nayra AI, asisten sains yang ramah dan membantu dalam aplikasi TETA SAINS. 
+      Fokuslah pada topik sains seperti fisika, kimia, biologi, matematika, dan ilmu pengetahuan lainnya. 
+      
+      Tugas Anda:
+      1. Berikan penjelasan yang jelas, mudah dipahami, dan relevan dengan pertanyaan sains
+      2. Bantu dengan pemecahan masalah dan konsep sains
+      3. Berikan contoh yang relevan dan aplikatif
+      4. Jika pertanyaan di luar topik sains, dengan sopan arahkan kembali ke topik sains
+      5. Gunakan bahasa Indonesia yang baik dan sederhana
+      6. Sesuaikan penjelasan dengan tingkat pengetahuan siswa
+      7. Gunakan istilah Indonesia yang tepat untuk istilah sains
+      
+      Anda adalah asisten khusus untuk aplikasi pembelajaran sains TETA SAINS.`;
+      
+      const requestBody = {
+        model: 'llama-3.1-8b-instant',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: message }
+        ],
+        temperature: 0.7,
+        max_tokens: 1024,
+        top_p: 1,
+        stream: false
+      };
+      
+      try {
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(requestBody)
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        return data.choices[0].message.content;
+      } catch (error) {
+        console.error("Error calling Groq API:", error);
+        return getFallbackResponse(message);
+      }
+    }
+    
+    function getFallbackResponse(message) {
+      const lowerMessage = message.toLowerCase();
+      
+      if (lowerMessage.includes('fisika') || lowerMessage.includes('fisik')) {
+        return "Fisika adalah ilmu yang mempelajari tentang materi, energi, dan interaksi antara keduanya. Topik fisika mencakup mekanika, termodinamika, elektromagnetisme, dan banyak lagi. Apakah ada topik fisika khusus yang ingin Anda pelajari?";
+      } else if (lowerMessage.includes('kimia')) {
+        return "Kimia adalah ilmu yang mempelajari tentang komposisi, struktur, sifat, dan perubahan materi. Topik kimia meliputi atom, molekul, reaksi kimia, dan tabel periodik. Ada yang spesifik tentang kimia yang ingin Anda tanyakan?";
+      } else if (lowerMessage.includes('biologi') || lowerMessage.includes('biolog')) {
+        return "Biologi adalah ilmu yang mempelajari tentang kehidupan dan organisme hidup. Topik biologi mencakup sel, genetika, evolusi, ekosistem, dan anatomi. Apakah ada aspek biologi tertentu yang ingin Anda ketahui?";
+      } else if (lowerMessage.includes('matematika') || lowerMessage.includes('matematik')) {
+        return "Matematika adalah ilmu tentang angka, struktur, ruang, dan perubahan. Topik matematika meliputi aljabar, geometri, kalkulus, dan statistik. Ada pertanyaan matematika khusus yang bisa saya bantu?";
+      } else if (lowerMessage.includes('halo') || lowerMessage.includes('hai') || lowerMessage.includes('hi')) {
+        return "Halo! Saya Nayra AI, asisten sains Anda di TETA SAINS. Saya siap membantu dengan pertanyaan seputar sains. Apa yang ingin Anda pelajari hari ini?";
+      } else {
+        return "Terima kasih atas pertanyaannya! Sebagai asisten sains Nayra AI di TETA SAINS, saya khusus membantu dengan topik fisika, kimia, biologi, matematika, dan ilmu pengetahuan lainnya. Bisakah Anda memberikan lebih detail tentang apa yang ingin Anda ketahui?";
+      }
+    }
+    
+    // ============================
+    // UI Functions
+    // ============================
+    function toggleSidebar() {
+      sidebar.classList.toggle("active");
+      sidebarOverlay.classList.toggle("active");
+    }
+
+    function closeSidebarFunc() {
+      sidebar.classList.remove("active");
+      sidebarOverlay.classList.remove("active");
+    }
+    
+    function toggleSettingsPanel() {
+      settingsPanel.classList.toggle("active");
+      settingsOverlay.classList.toggle("active");
+    }
+
+    function closeSettingsPanel() {
+      settingsPanel.classList.remove("active");
+      settingsOverlay.classList.remove("active");
+    }
+    
+    function saveTtsSettings() {
+      ttsSettings.voice = voiceSelect.value;
+      ttsSettings.rate = parseFloat(rateSlider.value);
+      ttsSettings.pitch = parseFloat(pitchSlider.value);
+      ttsSettings.volume = parseFloat(volumeSlider.value);
+      ttsSettings.autoSpeak = autoSpeakCheckbox.checked;
+      ttsSettings.voiceInputEnabled = voiceInputCheckbox.checked;
+      ttsSettings.androidMode = androidModeCheckbox.checked;
+      ttsSettings.preferIndonesianAccent = indonesianAccentCheckbox.checked;
+      
+      localStorage.setItem('nayraTtsSettings', JSON.stringify(ttsSettings));
+      voiceInputButton.disabled = !ttsSettings.voiceInputEnabled;
+      
+      // Reload voices to apply changes
+      loadVoices();
+      
+      closeSettingsPanel();
+      showNotification('Pengaturan suara disimpan');
+    }
+    
+    function showNotification(message) {
+      const notification = document.createElement('div');
+      notification.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50';
+      notification.textContent = message;
+      
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.remove();
+      }, 3000);
+    }
+    
+    // Test Indonesian pronunciation
+    function testIndonesianVoice() {
+      if (voices.length > 0 && ttsSettings.voiceInputEnabled) {
+        const testText = "Halo! Saya Nayra AI dengan aksen Indonesia. Siap membantu Anda belajar sains.";
+        speakText(testText, "", true);
+      }
+    }
+    
+    // ============================
+    // Event Listeners
+    // ============================
+    // Sidebar
+    hamburgerButton.addEventListener("click", toggleSidebar);
+    closeSidebar.addEventListener("click", closeSidebarFunc);
+    sidebarOverlay.addEventListener("click", closeSidebarFunc);
+    
+    // Settings
+    settingsButton.addEventListener("click", toggleSettingsPanel);
+    closeSettings.addEventListener("click", closeSettingsPanel);
+    cancelSettings.addEventListener("click", closeSettingsPanel);
+    settingsOverlay.addEventListener("click", closeSettingsPanel);
+    saveSettings.addEventListener("click", saveTtsSettings);
+    
+    // Sliders
+    rateSlider.addEventListener('input', function() {
+      rateValue.textContent = this.value;
+    });
+    
+    pitchSlider.addEventListener('input', function() {
+      pitchValue.textContent = this.value;
+    });
+    
+    volumeSlider.addEventListener('input', function() {
+      volumeValue.textContent = this.value;
+    });
+    
+    // Voice select
+    voiceSelect.addEventListener('change', function() {
+      console.log("Selected voice:", this.value);
+      // Test the selected voice
+      if (this.value && ttsSettings.autoSpeak) {
+        setTimeout(testIndonesianVoice, 500);
+      }
+    });
+    
+    // Indonesian accent checkbox
+    indonesianAccentCheckbox.addEventListener('change', function() {
+      if (this.checked) {
+        console.log("Prioritas aksen Indonesia diaktifkan");
         selectBestIndonesianVoice();
       }
-    }
-  } else {
-    // Retry for browsers that load voices async
-    console.log("Tidak ada suara ditemukan, mencoba lagi...");
-    setTimeout(loadVoices, 1000);
-  }
-}
-
-// Select the best Indonesian voice
-function selectBestIndonesianVoice() {
-  // Find Indonesian voices
-  const indonesianVoices = getIndonesianVoices();
-  
-  if (indonesianVoices.length > 0) {
-    // Priority: 1. Google Indonesian, 2. Natural/Neural Indonesian, 3. Any Indonesian
-    let selectedVoice = null;
-    
-    // 1. Google Indonesian voices (usually best quality)
-    selectedVoice = indonesianVoices.find(v => v.name.includes('Google') && (v.name.includes('Indonesian') || v.name.includes('Indonesia')));
-    
-    // 2. Natural/Neural Indonesian voices
-    if (!selectedVoice) {
-      selectedVoice = indonesianVoices.find(v => 
-        (v.name.includes('Natural') || v.name.includes('Neural') || v.name.includes('Premium')) &&
-        (v.name.includes('Indonesian') || v.lang === 'id-ID')
-      );
-    }
-    
-    // 3. Any female Indonesian voice
-    if (!selectedVoice) {
-      selectedVoice = indonesianVoices.find(v => 
-        v.name.includes('Female') || 
-        v.name.includes('Woman') ||
-        v.name.includes('Perempuan') ||
-        v.gender === 'female'
-      );
-    }
-    
-    // 4. First available Indonesian voice
-    if (!selectedVoice && indonesianVoices.length > 0) {
-      selectedVoice = indonesianVoices[0];
-    }
-    
-    if (selectedVoice) {
-      ttsSettings.voice = selectedVoice.name;
-      voiceSelect.value = selectedVoice.name;
-      console.log("Memilih suara Indonesia:", selectedVoice.name, "Bahasa:", selectedVoice.lang);
-    }
-  } else if (voices.length > 0) {
-    // Fallback to best available voice
-    const femaleVoices = voices.filter(voice => 
-      voice.name.includes('Female') || 
-      voice.name.includes('Woman') ||
-      voice.gender === 'female'
-    );
-    
-    if (femaleVoices.length > 0) {
-      ttsSettings.voice = femaleVoices[0].name;
-      voiceSelect.value = femaleVoices[0].name;
-      console.log("Memilih suara perempuan:", femaleVoices[0].name);
-    } else {
-      ttsSettings.voice = voices[0].name;
-      voiceSelect.value = voices[0].name;
-      console.log("Memilih suara pertama yang tersedia:", voices[0].name);
-    }
-  }
-}
-
-// Get Indonesian voices
-function getIndonesianVoices() {
-  return voices.filter(voice => 
-    voice.lang.startsWith('id') || 
-    voice.lang === 'id-ID' ||
-    voice.lang === 'id' ||
-    voice.name.toLowerCase().includes('indonesian') ||
-    voice.name.toLowerCase().includes('indonesia') ||
-    voice.name.toLowerCase().includes('bahasa')
-  );
-}
-
-// Populate voice list with Indonesian priority
-function populateVoiceList() {
-  voiceSelect.innerHTML = '<option value="">Pilih suara...</option>';
-  
-  if (voices.length === 0) {
-    voiceSelect.innerHTML = '<option value="">Tidak ada suara yang tersedia</option>';
-    return;
-  }
-  
-  // Get categorized voices
-  const indonesianVoices = getIndonesianVoices();
-  const naturalVoices = voices.filter(voice => 
-    (voice.name.includes('Natural') || voice.name.includes('Neural') || voice.name.includes('Premium')) &&
-    !indonesianVoices.includes(voice)
-  );
-  
-  const femaleVoices = voices.filter(voice => 
-    (voice.name.includes('Female') || 
-     voice.name.includes('Woman') ||
-     voice.name.includes('Perempuan') ||
-     voice.gender === 'female') &&
-    !indonesianVoices.includes(voice) &&
-    !naturalVoices.includes(voice)
-  );
-  
-  const otherVoices = voices.filter(voice => 
-    !indonesianVoices.includes(voice) &&
-    !naturalVoices.includes(voice) &&
-    !femaleVoices.includes(voice)
-  );
-  
-  // Add Indonesian voices first if preferred
-  if (indonesianVoices.length > 0) {
-    const optgroup = document.createElement('optgroup');
-    optgroup.label = '🎯 Suara Bahasa Indonesia (Direkomendasikan)';
-    indonesianVoices.forEach(voice => {
-      const option = createVoiceOption(voice);
-      optgroup.appendChild(option);
     });
-    voiceSelect.appendChild(optgroup);
-  }
-  
-  // Add natural voices
-  if (naturalVoices.length > 0) {
-    const optgroup = document.createElement('optgroup');
-    optgroup.label = '🌟 Suara Natural';
-    naturalVoices.forEach(voice => {
-      const option = createVoiceOption(voice);
-      optgroup.appendChild(option);
+    
+    // Message input
+    messageInput.addEventListener("input", () => {
+      sendButton.disabled = !messageInput.value.trim();
     });
-    voiceSelect.appendChild(optgroup);
-  }
-  
-  // Add female voices
-  if (femaleVoices.length > 0) {
-    const optgroup = document.createElement('optgroup');
-    optgroup.label = '👩 Suara Perempuan';
-    femaleVoices.forEach(voice => {
-      const option = createVoiceOption(voice);
-      optgroup.appendChild(option);
+    
+    // Send button - CRITICAL FOR ANDROID
+    sendButton.addEventListener("click", () => {
+      userHasInteracted = true;
+      sendMessage(true);
     });
-    voiceSelect.appendChild(optgroup);
-  }
-  
-  // Add other voices
-  if (otherVoices.length > 0) {
-    const optgroup = document.createElement('optgroup');
-    optgroup.label = '🔊 Suara Lainnya';
-    otherVoices.forEach(voice => {
-      const option = createVoiceOption(voice);
-      optgroup.appendChild(option);
-    });
-    voiceSelect.appendChild(optgroup);
-  }
-}
-
-// Create voice option element
-function createVoiceOption(voice) {
-  const option = document.createElement('option');
-  option.value = voice.name;
-  
-  // Add emoji for voice type
-  let emoji = '🔊';
-  if (voice.name.includes('Google') && voice.name.includes('Indonesian')) emoji = '🎯';
-  else if (voice.name.includes('Natural') || voice.name.includes('Neural')) emoji = '🌟';
-  else if (voice.name.includes('Female') || voice.name.includes('Woman')) emoji = '👩';
-  else if (voice.name.includes('Male') || voice.name.includes('Man')) emoji = '👨';
-  
-  option.textContent = `${emoji} ${voice.name} (${voice.lang})`;
-  
-  if (ttsSettings.voice && voice.name === ttsSettings.voice) {
-    option.selected = true;
-  }
-  
-  return option;
-}
-
-// Update slider values
-function updateSliderValues() {
-  rateValue.textContent = rateSlider.value;
-  pitchValue.textContent = pitchSlider.value;
-  volumeValue.textContent = volumeSlider.value;
-}
-
-// ============================
-// Avatar Status Management - UPDATED WITH VIDEO FUNCTIONS
-// ============================
-function updateAvatarStatus(state, userMessage = '') {
-  switch(state) {
-    case 'speaking':
-      statusDot.className = 'status-dot speaking';
-      statusText.textContent = 'Sedang Berbicara';
-      userInputIndicator.style.display = 'none';
-      tapToSpeakIndicator.style.display = 'none';
-      
-      // Show speaking video, hide idle
-      switchToSpeakingVideo();
-      break;
-      
-    case 'listening':
-      statusDot.className = 'status-dot listening';
-      statusText.textContent = 'Sedang Mendengarkan';
-      switchToIdleVideo();
-      break;
-      
-    case 'thinking':
-      statusDot.className = 'status-dot';
-      statusText.textContent = 'Sedang Berpikir';
-      if (userMessage) {
-        userInputText.textContent = userMessage;
-        userInputIndicator.style.display = 'flex';
+    
+    // Enter key
+    messageInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && messageInput.value.trim()) {
+        userHasInteracted = true;
+        sendMessage(true);
       }
-      switchToIdleVideo();
-      break;
+    });
+    
+    // Voice input button
+    voiceInputButton.addEventListener("click", function() {
+      userHasInteracted = true;
+      if (!recognition || !ttsSettings.voiceInputEnabled) {
+        showNotification('Input suara dinonaktifkan. Aktifkan di pengaturan.');
+        return;
+      }
       
-    case 'ready':
-      statusDot.className = 'status-dot ready';
-      statusText.textContent = 'Siap Berbicara';
-      tapToSpeakIndicator.style.display = 'block';
-      switchToIdleVideo();
-      break;
-      
-    case 'idle':
-    default:
-      statusDot.className = 'status-dot idle';
-      statusText.textContent = 'Siap Mendengarkan';
-      userInputIndicator.style.display = 'none';
-      tapToSpeakIndicator.style.display = 'none';
-      switchToIdleVideo();
-      break;
-  }
-}
-
-// ============================
-// TTS Functions - OPTIMIZED FOR INDONESIAN ACCENT
-// ============================
-function speakText(text, userMessage = '', fromUserInteraction = false) {
-  if (!speechSynthesis || !ttsSettings.voiceInputEnabled) {
-    console.error('TTS tidak tersedia atau dinonaktifkan');
-    return false;
-  }
-  
-  // Android requires user interaction
-  if (ttsSettings.androidMode && !fromUserInteraction && !userHasInteracted) {
-    console.log('Mode Android: Menyimpan TTS untuk interaksi pengguna');
-    pendingTTSResponse = text;
-    pendingUserMessage = userMessage;
-    updateAvatarStatus('ready');
-    return false;
-  }
-  
-  // Stop any current speech
-  if (isSpeaking) {
-    speechSynthesis.cancel();
-  }
-  
-  // Optimize text for Indonesian pronunciation
-  const optimizedText = optimizeIndonesianText(text);
-  
-  const utterance = new SpeechSynthesisUtterance(optimizedText);
-  
-  // Find selected voice
-  const selectedVoice = voices.find(voice => voice.name === ttsSettings.voice);
-  if (selectedVoice) {
-    utterance.voice = selectedVoice;
-    utterance.lang = selectedVoice.lang || 'id-ID';
-    console.log("Menggunakan suara:", selectedVoice.name, "Bahasa:", selectedVoice.lang);
-  } else if (voices.length > 0) {
-    // Try to find Indonesian voice if preferred
-    if (ttsSettings.preferIndonesianAccent) {
-      const indonesianVoice = voices.find(voice => voice.lang.startsWith('id'));
-      if (indonesianVoice) {
-        utterance.voice = indonesianVoice;
-        utterance.lang = indonesianVoice.lang;
+      if (isListening) {
+        recognition.stop();
       } else {
-        utterance.voice = voices[0];
-        utterance.lang = voices[0].lang;
+        navigator.mediaDevices.getUserMedia({ audio: true })
+          .then(function(stream) {
+            stream.getTracks().forEach(track => track.stop());
+            recognition.start();
+          })
+          .catch(function(err) {
+            console.error('Microphone access denied:', err);
+            alert('Izinkan akses mikrofon di pengaturan browser Anda.');
+          });
       }
-    } else {
-      utterance.voice = voices[0];
-      utterance.lang = voices[0].lang;
-    }
-  } else {
-    utterance.lang = 'id-ID';
-  }
-  
-  // Apply settings optimized for Indonesian
-  utterance.rate = parseFloat(ttsSettings.rate);
-  utterance.pitch = parseFloat(ttsSettings.pitch);
-  utterance.volume = parseFloat(ttsSettings.volume);
-  
-  // Adjust rate for Indonesian (slightly slower for clarity)
-  if (utterance.lang.startsWith('id')) {
-    utterance.rate = Math.min(utterance.rate, 1.1); // Cap at 1.1 for Indonesian
-  }
-  
-  // Update avatar
-  updateAvatarStatus('speaking', userMessage);
-  
-  // Event handlers
-  utterance.onstart = function() {
-    console.log('TTS dimulai');
-    isSpeaking = true;
-  };
-  
-  utterance.onend = function() {
-    console.log('TTS selesai');
-    isSpeaking = false;
-    updateAvatarStatus('idle');
-  };
-  
-  utterance.onerror = function(event) {
-    console.error('TTS error:', event);
-    isSpeaking = false;
-    updateAvatarStatus('idle');
-    
-    // Show user-friendly error
-    if (event.error === 'not-allowed') {
-      showNotification('Izinkan audio di pengaturan browser');
-    }
-  };
-  
-  try {
-    speechSynthesis.speak(utterance);
-    return true;
-  } catch (error) {
-    console.error('Gagal berbicara:', error);
-    updateAvatarStatus('idle');
-    return false;
-  }
-}
-
-// Optimize text for better Indonesian pronunciation
-function optimizeIndonesianText(text) {
-  return text
-    // Common Indonesian pronunciation fixes
-    .replace(/(\d+)°/g, '$1 derajat')
-    .replace(/cm³/g, 'sentimeter kubik')
-    .replace(/m³/g, 'meter kubik')
-    .replace(/km\/jam/g, 'kilometer per jam')
-    .replace(/m\/s/g, 'meter per detik')
-    
-    // Scientific terms in Indonesian
-    .replace(/photosynthesis/gi, 'fotosintesis')
-    .replace(/gravity/gi, 'gravitasi')
-    .replace(/molecule/gi, 'molekul')
-    .replace(/atom/gi, 'atom')
-    .replace(/element/gi, 'unsur')
-    .replace(/compound/gi, 'senyawa')
-    .replace(/velocity/gi, 'kecepatan')
-    .replace(/acceleration/gi, 'percepatan')
-    .replace(/energy/gi, 'energi')
-    .replace(/force/gi, 'gaya')
-    
-    // Add pauses for better comprehension
-    .replace(/([.!?]) /g, '$1  ')
-    .replace(/, /g, ',  ')
-    .replace(/;/g, '; ')
-    .replace(/:/g, ': ')
-    
-    // Remove extra whitespace
-    .trim();
-}
-
-// Function to trigger pending TTS
-function triggerPendingTTS() {
-  if (pendingTTSResponse) {
-    const success = speakText(pendingTTSResponse, pendingUserMessage, true);
-    if (success) {
-      pendingTTSResponse = null;
-      pendingUserMessage = "";
-    }
-  }
-}
-
-// Stop TTS
-function stopSpeaking() {
-  if (isSpeaking) {
-    speechSynthesis.cancel();
-    isSpeaking = false;
-    updateAvatarStatus('idle');
-  }
-}
-
-// ============================
-// Speech Recognition
-// ============================
-function initializeSpeechRecognition() {
-  if (!SpeechRecognition) {
-    console.warn('Speech recognition tidak didukung');
-    voiceInputButton.disabled = true;
-    voiceInputButton.title = 'Input suara tidak didukung';
-    return;
-  }
-  
-  recognition = new SpeechRecognition();
-  recognition.continuous = false;
-  recognition.interimResults = true;
-  recognition.lang = 'id-ID'; // Set to Indonesian
-  
-  recognition.onstart = function() {
-    isListening = true;
-    voiceInputButton.classList.add('listening');
-    voiceInputButton.innerHTML = '<i class="fas fa-stop"></i>';
-    updateAvatarStatus('listening');
-  };
-  
-  recognition.onresult = function(event) {
-    const transcript = Array.from(event.results)
-      .map(result => result[0])
-      .map(result => result.transcript)
-      .join('');
-    
-    messageInput.value = transcript;
-    sendButton.disabled = !transcript.trim();
-  };
-  
-  recognition.onend = function() {
-    isListening = false;
-    voiceInputButton.classList.remove('listening');
-    voiceInputButton.innerHTML = '<i class="fas fa-microphone"></i>';
-    updateAvatarStatus('idle');
-  };
-  
-  recognition.onerror = function(event) {
-    console.error('Speech recognition error:', event.error);
-    isListening = false;
-    voiceInputButton.classList.remove('listening');
-    voiceInputButton.innerHTML = '<i class="fas fa-microphone"></i>';
-    updateAvatarStatus('idle');
-    
-    if (event.error === 'not-allowed') {
-      showNotification('Izinkan mikrofon di pengaturan browser');
-    }
-  };
-}
-
-// ============================
-// Message Handling
-// ============================
-async function sendMessage(fromUserInteraction = false) {
-  if (!messageInput.value.trim()) return;
-  
-  const messageText = messageInput.value.trim();
-  
-  // Show thinking indicator
-  updateAvatarStatus('thinking', messageText);
-  
-  // Clear input
-  messageInput.value = "";
-  sendButton.disabled = true;
-  
-  try {
-    // Get AI response
-    const response = await fetchGroqResponse(messageText);
-    
-    // Auto-speak if enabled
-    if (ttsSettings.autoSpeak && ttsSettings.voiceInputEnabled) {
-      setTimeout(() => {
-        speakText(response, messageText, fromUserInteraction);
-      }, 500);
-    } else {
-      updateAvatarStatus('idle');
-    }
-  } catch (error) {
-    const errorMessage = "Maaf, terjadi masalah. Silakan coba lagi.";
-    
-    if (ttsSettings.autoSpeak && ttsSettings.voiceInputEnabled) {
-      setTimeout(() => {
-        speakText(errorMessage, messageText, fromUserInteraction);
-      }, 500);
-    } else {
-      updateAvatarStatus('idle');
-    }
-    console.error("Error:", error);
-  }
-}
-
-// ============================
-// API Integration
-// ============================
-async function fetchGroqResponse(message) {
-  const apiKey = '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';
-  const apiUrl = 'https://api.groq.com/openai/v1/chat/completions';
-  
-  const systemPrompt = `Anda adalah Nayra AI, asisten sains yang ramah dan membantu dalam aplikasi TETA SAINS. 
-  Fokuslah pada topik sains seperti fisika, kimia, biologi, matematika, dan ilmu pengetahuan lainnya. 
-  
-  Tugas Anda:
-  1. Berikan penjelasan yang jelas, mudah dipahami, dan relevan dengan pertanyaan sains
-  2. Bantu dengan pemecahan masalah dan konsep sains
-  3. Berikan contoh yang relevan dan aplikatif
-  4. Jika pertanyaan di luar topik sains, dengan sopan arahkan kembali ke topik sains
-  5. Gunakan bahasa Indonesia yang baik dan sederhana
-  6. Sesuaikan penjelasan dengan tingkat pengetahuan siswa
-  7. Gunakan istilah Indonesia yang tepat untuk istilah sains
-  
-  Anda adalah asisten khusus untuk aplikasi pembelajaran sains TETA SAINS.`;
-  
-  const requestBody = {
-    model: 'llama-3.1-8b-instant',
-    messages: [
-      { role: 'system', content: systemPrompt },
-      { role: 'user', content: message }
-    ],
-    temperature: 0.7,
-    max_tokens: 1024,
-    top_p: 1,
-    stream: false
-  };
-  
-  try {
-    const response = await fetch(apiUrl, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${apiKey}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(requestBody)
     });
     
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
+    // Tap to speak indicator
+    tapToSpeakIndicator.addEventListener("click", function() {
+      userHasInteracted = true;
+      triggerPendingTTS();
+    });
     
-    const data = await response.json();
-    return data.choices[0].message.content;
-  } catch (error) {
-    console.error("Error calling Groq API:", error);
-    return getFallbackResponse(message);
-  }
-}
-
-function getFallbackResponse(message) {
-  const lowerMessage = message.toLowerCase();
-  
-  if (lowerMessage.includes('fisika') || lowerMessage.includes('fisik')) {
-    return "Fisika adalah ilmu yang mempelajari tentang materi, energi, dan interaksi antara keduanya. Topik fisika mencakup mekanika, termodinamika, elektromagnetisme, dan banyak lagi. Apakah ada topik fisika khusus yang ingin Anda pelajari?";
-  } else if (lowerMessage.includes('kimia')) {
-    return "Kimia adalah ilmu yang mempelajari tentang komposisi, struktur, sifat, dan perubahan materi. Topik kimia meliputi atom, molekul, reaksi kimia, dan tabel periodik. Ada yang spesifik tentang kimia yang ingin Anda tanyakan?";
-  } else if (lowerMessage.includes('biologi') || lowerMessage.includes('biolog')) {
-    return "Biologi adalah ilmu yang mempelajari tentang kehidupan dan organisme hidup. Topik biologi mencakup sel, genetika, evolusi, ekosistem, dan anatomi. Apakah ada aspek biologi tertentu yang ingin Anda ketahui?";
-  } else if (lowerMessage.includes('matematika') || lowerMessage.includes('matematik')) {
-    return "Matematika adalah ilmu tentang angka, struktur, ruang, dan perubahan. Topik matematika meliputi aljabar, geometri, kalkulus, dan statistik. Ada pertanyaan matematika khusus yang bisa saya bantu?";
-  } else if (lowerMessage.includes('halo') || lowerMessage.includes('hai') || lowerMessage.includes('hi')) {
-    return "Halo! Saya Nayra AI, asisten sains Anda di TETA SAINS. Saya siap membantu dengan pertanyaan seputar sains. Apa yang ingin Anda pelajari hari ini?";
-  } else {
-    return "Terima kasih atas pertanyaannya! Sebagai asisten sains Nayra AI di TETA SAINS, saya khusus membantu dengan topik fisika, kimia, biologi, matematika, dan ilmu pengetahuan lainnya. Bisakah Anda memberikan lebih detail tentang apa yang ingin Anda ketahui?";
-  }
-}
-
-// ============================
-// UI Functions
-// ============================
-function toggleSidebar() {
-  sidebar.classList.toggle("active");
-  sidebarOverlay.classList.toggle("active");
-}
-
-function closeSidebarFunc() {
-  sidebar.classList.remove("active");
-  sidebarOverlay.classList.remove("active");
-}
-
-function toggleSettingsPanel() {
-  settingsPanel.classList.toggle("active");
-  settingsOverlay.classList.toggle("active");
-}
-
-function closeSettingsPanel() {
-  settingsPanel.classList.remove("active");
-  settingsOverlay.classList.remove("active");
-}
-
-function saveTtsSettings() {
-  ttsSettings.voice = voiceSelect.value;
-  ttsSettings.rate = parseFloat(rateSlider.value);
-  ttsSettings.pitch = parseFloat(pitchSlider.value);
-  ttsSettings.volume = parseFloat(volumeSlider.value);
-  ttsSettings.autoSpeak = autoSpeakCheckbox.checked;
-  ttsSettings.voiceInputEnabled = voiceInputCheckbox.checked;
-  ttsSettings.androidMode = androidModeCheckbox.checked;
-  ttsSettings.preferIndonesianAccent = indonesianAccentCheckbox.checked;
-  
-  localStorage.setItem('nayraTtsSettings', JSON.stringify(ttsSettings));
-  voiceInputButton.disabled = !ttsSettings.voiceInputEnabled;
-  
-  // Reload voices to apply changes
-  loadVoices();
-  
-  closeSettingsPanel();
-  showNotification('Pengaturan suara disimpan');
-}
-
-function showNotification(message) {
-  const notification = document.createElement('div');
-  notification.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50';
-  notification.textContent = message;
-  
-  document.body.appendChild(notification);
-  
-  setTimeout(() => {
-    notification.remove();
-  }, 3000);
-}
-
-// Test Indonesian pronunciation
-function testIndonesianVoice() {
-  if (voices.length > 0 && ttsSettings.voiceInputEnabled) {
-    const testText = "Halo! Saya Nayra AI dengan aksen Indonesia. Siap membantu Anda belajar sains.";
-    speakText(testText, "", true);
-  }
-}
-
-// ============================
-// Event Listeners - UPDATED FOR VIDEO PLAYBACK
-// ============================
-// Sidebar
-hamburgerButton.addEventListener("click", toggleSidebar);
-closeSidebar.addEventListener("click", closeSidebarFunc);
-sidebarOverlay.addEventListener("click", closeSidebarFunc);
-
-// Settings
-settingsButton.addEventListener("click", toggleSettingsPanel);
-closeSettings.addEventListener("click", closeSettingsPanel);
-cancelSettings.addEventListener("click", closeSettingsPanel);
-settingsOverlay.addEventListener("click", closeSettingsPanel);
-saveSettings.addEventListener("click", saveTtsSettings);
-
-// Sliders
-rateSlider.addEventListener('input', function() {
-  rateValue.textContent = this.value;
-});
-
-pitchSlider.addEventListener('input', function() {
-  pitchValue.textContent = this.value;
-});
-
-volumeSlider.addEventListener('input', function() {
-  volumeValue.textContent = this.value;
-});
-
-// Voice select
-voiceSelect.addEventListener('change', function() {
-  console.log("Selected voice:", this.value);
-  // Test the selected voice
-  if (this.value && ttsSettings.autoSpeak) {
-    setTimeout(testIndonesianVoice, 500);
-  }
-});
-
-// Indonesian accent checkbox
-indonesianAccentCheckbox.addEventListener('change', function() {
-  if (this.checked) {
-    console.log("Prioritas aksen Indonesia diaktifkan");
-    selectBestIndonesianVoice();
-  }
-});
-
-// Message input
-messageInput.addEventListener("input", () => {
-  sendButton.disabled = !messageInput.value.trim();
-});
-
-// Send button - CRITICAL FOR ANDROID
-sendButton.addEventListener("click", () => {
-  userHasInteracted = true;
-  sendMessage(true);
-});
-
-// Enter key
-messageInput.addEventListener("keydown", (e) => {
-  if (e.key === "Enter" && messageInput.value.trim()) {
-    userHasInteracted = true;
-    sendMessage(true);
-  }
-});
-
-// Voice input button
-voiceInputButton.addEventListener("click", function() {
-  userHasInteracted = true;
-  if (!recognition || !ttsSettings.voiceInputEnabled) {
-    showNotification('Input suara dinonaktifkan. Aktifkan di pengaturan.');
-    return;
-  }
-  
-  if (isListening) {
-    recognition.stop();
-  } else {
-    navigator.mediaDevices.getUserMedia({ audio: true })
-      .then(function(stream) {
-        stream.getTracks().forEach(track => track.stop());
-        recognition.start();
-      })
-      .catch(function(err) {
-        console.error('Microphone access denied:', err);
-        alert('Izinkan akses mikrofon di pengaturan browser Anda.');
-      });
-  }
-});
-
-// Tap to speak indicator
-tapToSpeakIndicator.addEventListener("click", function() {
-  userHasInteracted = true;
-  triggerPendingTTS();
-});
-
-// Avatar click for pending TTS
-avatarIdle.addEventListener("click", function() {
-  if (pendingTTSResponse) {
-    userHasInteracted = true;
-    triggerPendingTTS();
-  } else if (ttsSettings.autoSpeak) {
-    // Play welcome message if no pending response
-    userHasInteracted = true;
-    speakText("Halo! Saya Nayra AI dengan aksen Indonesia. Silakan ajukan pertanyaan sains Anda.", "", true);
-  }
-});
-
-avatarSpeaking.addEventListener("click", function() {
-  if (isSpeaking) {
-    stopSpeaking();
-  }
-});
-
-// ============================
-// Initialize Application - UPDATED FOR VIDEO
-// ============================
-document.addEventListener('DOMContentLoaded', function() {
-  console.log("DOM dimuat, menginisialisasi aplikasi...");
-  
-  // Initialize TTS dengan aksen Indonesia
-  initializeTTS();
-  
-  // Initialize speech recognition
-  initializeSpeechRecognition();
-  
-  // Setup initial interaction listener
-  setupInitialInteraction();
-  
-  // Check if Android
-  const isAndroid = /Android/i.test(navigator.userAgent);
-  const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-  console.log("Android:", isAndroid, "iOS:", isIOS);
-  
-  if (isAndroid) {
-    showNotification("Mode Android aktif. Ketuk layar untuk memulai dengan aksen Indonesia.");
-  }
-  
-  // Test TTS availability
-  setTimeout(() => {
-    if (voices.length > 0 && !userHasInteracted) {
-      console.log("TTS siap dengan", voices.length, "suara tersedia");
-      console.log("Suara terpilih:", ttsSettings.voice);
-      
-      // Show voice info
-      const indonesianVoices = getIndonesianVoices();
-      if (indonesianVoices.length > 0) {
-        console.log("Suara Indonesia ditemukan:", indonesianVoices.length);
-      } else {
-        console.log("Tidak ada suara Indonesia spesifik, menggunakan yang terbaik");
+    // Avatar click for pending TTS
+    avatarIdle.addEventListener("click", function() {
+      if (pendingTTSResponse) {
+        userHasInteracted = true;
+        triggerPendingTTS();
+      } else if (ttsSettings.autoSpeak) {
+        // Play welcome message if no pending response
+        userHasInteracted = true;
+        speakText("Halo! Saya Nayra AI dengan aksen Indonesia. Silakan ajukan pertanyaan sains Anda.", "", true);
       }
-    }
-  }, 2000);
-});
-
-// Handle page visibility changes - UPDATED FOR VIDEO
-document.addEventListener('visibilitychange', function() {
-  if (document.hidden) {
-    // Page is hidden, stop any ongoing speech
-    if (isSpeaking) {
-      speechSynthesis.cancel();
-    }
-    if (isListening) {
-      recognition.stop();
-    }
-    // Pause videos when page is hidden
-    avatarIdle.pause();
-    avatarSpeaking.pause();
-  } else {
-    // Page is visible again, resume idle video
-    console.log("Halaman terlihat lagi, memutar video idle...");
-    ensureIdleVideoPlays();
-  }
-});
-
-// Initial user interaction listener - UPDATED FOR VIDEO
-function setupInitialInteraction() {
-  const firstInteractionHandler = function() {
-    userHasInteracted = true;
-    console.log("Pengguna telah berinteraksi, TTS sekarang dapat bekerja");
+    });
     
-    // Start video playback after user interaction
-    ensureIdleVideoPlays();
+    avatarSpeaking.addEventListener("click", function() {
+      if (isSpeaking) {
+        stopSpeaking();
+      }
+    });
     
-    // Remove listeners
-    document.removeEventListener('click', firstInteractionHandler);
-    document.removeEventListener('touchstart', firstInteractionHandler);
-    document.removeEventListener('keydown', firstInteractionHandler);
-    
-    // Play welcome message if enabled
-    if (ttsSettings.autoSpeak && ttsSettings.voiceInputEnabled && !isSpeaking) {
+    // Initial user interaction listener
+    function setupInitialInteraction() {
+      const firstInteractionHandler = function() {
+        userHasInteracted = true;
+        console.log("Pengguna telah berinteraksi, TTS sekarang dapat bekerja");
+        
+        // Remove listeners
+        document.removeEventListener('click', firstInteractionHandler);
+        document.removeEventListener('touchstart', firstInteractionHandler);
+        document.removeEventListener('keydown', firstInteractionHandler);
+        
+        // Play welcome message if enabled
+        if (ttsSettings.autoSpeak && ttsSettings.voiceInputEnabled && !isSpeaking) {
+          setTimeout(() => {
+            speakText("Halo! Saya Nayra AI dengan aksen Indonesia, asisten sains Anda di TETA SAINS. Silakan ajukan pertanyaan sains Anda.", "", true);
+          }, 1000);
+        }
+      };
+      
+      // Listen for any user interaction
+      document.addEventListener('click', firstInteractionHandler);
+      document.addEventListener('touchstart', firstInteractionHandler);
+      document.addEventListener('keydown', firstInteractionHandler);
+      
+      // Auto-show welcome after 3 seconds if no interaction
       setTimeout(() => {
-        speakText("Halo! Saya Nayra AI dengan aksen Indonesia, asisten sains Anda di TETA SAINS. Silakan ajukan pertanyaan sains Anda.", "", true);
-      }, 1000);
+        if (!userHasInteracted) {
+          showNotification("Ketuk layar untuk memulai percakapan dengan Nayra AI");
+        }
+      }, 3000);
     }
-  };
-  
-  // Listen for any user interaction
-  document.addEventListener('click', firstInteractionHandler);
-  document.addEventListener('touchstart', firstInteractionHandler);
-  document.addEventListener('keydown', firstInteractionHandler);
-  
-  // Auto-show welcome after 3 seconds if no interaction
-  setTimeout(() => {
-    if (!userHasInteracted) {
-      showNotification("Ketuk layar untuk memulai percakapan dengan Nayra AI");
-    }
-  }, 3000);
-  
-  // Try to play idle video immediately (muted)
-  ensureIdleVideoPlays();
-}
-    </script>
+    
+    // ============================
+    // Initialize Application
+    // ============================
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log("DOM dimuat, menginisialisasi aplikasi...");
+      
+      // Initialize TTS dengan aksen Indonesia
+      initializeTTS();
+      
+      // Initialize speech recognition
+      initializeSpeechRecognition();
+      
+      // Start avatar idle video
+      avatarIdle.play();
+      
+      // Setup initial interaction listener
+      setupInitialInteraction();
+      
+      // Check if Android
+      const isAndroid = /Android/i.test(navigator.userAgent);
+      const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
+      console.log("Android:", isAndroid, "iOS:", isIOS);
+      
+      if (isAndroid) {
+        showNotification("Mode Android aktif. Ketuk layar untuk memulai dengan aksen Indonesia.");
+      }
+      
+      // Test TTS availability
+      setTimeout(() => {
+        if (voices.length > 0 && !userHasInteracted) {
+          console.log("TTS siap dengan", voices.length, "suara tersedia");
+          console.log("Suara terpilih:", ttsSettings.voice);
+          
+          // Show voice info
+          const indonesianVoices = getIndonesianVoices();
+          if (indonesianVoices.length > 0) {
+            console.log("Suara Indonesia ditemukan:", indonesianVoices.length);
+          } else {
+            console.log("Tidak ada suara Indonesia spesifik, menggunakan yang terbaik");
+          }
+        }
+      }, 2000);
+    });
+    
+    // Handle page visibility changes
+    document.addEventListener('visibilitychange', function() {
+      if (document.hidden) {
+        // Page is hidden, stop any ongoing speech
+        if (isSpeaking) {
+          speechSynthesis.cancel();
+        }
+        if (isListening) {
+          recognition.stop();
+        }
+      } else {
+        // Page is visible again
+        avatarIdle.play();
+      }
+    });
+  </script>
 </body>
 </html>

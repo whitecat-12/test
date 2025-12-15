@@ -475,6 +475,243 @@
       50% { opacity: 1; }
     }
     
+    /* Voice input button styles */
+    .voice-input-button {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: #f3f4f6;
+      color: #6b7280;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .voice-input-button:hover {
+      background-color: #e5e7eb;
+    }
+    
+    .voice-input-button.listening {
+      background-color: #ef4444;
+      color: white;
+      animation: pulse 1.5s infinite;
+    }
+    
+    /* TTS button styles */
+    .tts-button {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background-color: #f3f4f6;
+      color: #6b7280;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      font-size: 0.875rem;
+      margin-left: 0.5rem;
+      margin-top: 0.25rem;
+    }
+    
+    .tts-button:hover {
+      background-color: #9999ff;
+      color: white;
+    }
+    
+    .tts-button.playing {
+      background-color: #9999ff;
+      color: white;
+    }
+    
+    .message-actions {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 0.25rem;
+      padding-left: 0.5rem;
+    }
+    
+    /* Settings panel for TTS */
+    .settings-panel {
+      position: fixed;
+      top: 0;
+      right: -300px;
+      width: 300px;
+      height: 100vh;
+      background-color: white;
+      box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+      transition: right 0.3s ease;
+      z-index: 1002;
+      overflow-y: auto;
+    }
+    
+    .settings-panel.active {
+      right: 0;
+    }
+    
+    .settings-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 1001;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    
+    .settings-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    
+    .settings-header {
+      padding: 1rem;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .settings-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #9999ff;
+    }
+    
+    .settings-content {
+      padding: 1rem;
+    }
+    
+    .setting-item {
+      margin-bottom: 1.5rem;
+    }
+    
+    .setting-label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: #2d3748;
+    }
+    
+    .voice-select {
+      width: 100%;
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+      border: 1px solid #e2e8f0;
+      font-size: 0.875rem;
+      outline: none;
+      transition: all 0.3s ease;
+    }
+    
+    .voice-select:focus {
+      border-color: #9999ff;
+      box-shadow: 0 0 0 3px rgba(153, 153, 255, 0.1);
+    }
+    
+    .slider-container {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-top: 0.5rem;
+    }
+    
+    .slider-value {
+      min-width: 40px;
+      text-align: center;
+      font-weight: 600;
+      color: #9999ff;
+    }
+    
+    input[type="range"] {
+      flex: 1;
+      height: 6px;
+      border-radius: 3px;
+      background: #e2e8f0;
+      outline: none;
+      -webkit-appearance: none;
+    }
+    
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #9999ff;
+      cursor: pointer;
+    }
+    
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      font-size: 0.875rem;
+      color: #4b5563;
+    }
+    
+    .checkbox-label input {
+      margin-right: 0.5rem;
+    }
+    
+    .settings-buttons {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+    
+    .settings-button {
+      flex: 1;
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .settings-button.save {
+      background-color: #9999ff;
+      color: white;
+    }
+    
+    .settings-button.save:hover {
+      background-color: #7a7ae6;
+    }
+    
+    .settings-button.cancel {
+      background-color: #f3f4f6;
+      color: #6b7280;
+    }
+    
+    .settings-button.cancel:hover {
+      background-color: #e5e7eb;
+    }
+    
+    /* Settings button in message input */
+    .settings-button-small {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: #f3f4f6;
+      color: #6b7280;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .settings-button-small:hover {
+      background-color: #e5e7eb;
+    }
+    
     /* Improved mobile styles */
     @media (max-width: 414px) {
       .user-item {
@@ -496,6 +733,11 @@
       }
       
       .sidebar {
+        width: 280px;
+        right: -280px;
+      }
+      
+      .settings-panel {
         width: 280px;
         right: -280px;
       }
@@ -567,10 +809,72 @@
       </div>
     </div>
 
+    <!-- Settings Panel for TTS -->
+    <div class="settings-overlay" id="settingsOverlay"></div>
+    
+    <div class="settings-panel" id="settingsPanel">
+      <div class="settings-header">
+        <div class="settings-title">Pengaturan Suara</div>
+        <button class="hamburger" id="closeSettings">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <div class="settings-content">
+        <div class="setting-item">
+          <label class="setting-label" for="voiceSelect">Pilih Suara</label>
+          <select id="voiceSelect" class="voice-select">
+            <option value="">Loading suara...</option>
+          </select>
+        </div>
+        
+        <div class="setting-item">
+          <label class="setting-label">Kecepatan Bicara</label>
+          <div class="slider-container">
+            <span class="slider-value" id="rateValue">1.0</span>
+            <input type="range" id="rateSlider" min="0.5" max="2" step="0.1" value="1">
+          </div>
+        </div>
+        
+        <div class="setting-item">
+          <label class="setting-label">Tinggi Nada</label>
+          <div class="slider-container">
+            <span class="slider-value" id="pitchValue">1.0</span>
+            <input type="range" id="pitchSlider" min="0.5" max="2" step="0.1" value="1">
+          </div>
+        </div>
+        
+        <div class="setting-item">
+          <label class="setting-label">Volume</label>
+          <div class="slider-container">
+            <span class="slider-value" id="volumeValue">1.0</span>
+            <input type="range" id="volumeSlider" min="0.1" max="1" step="0.1" value="1">
+          </div>
+        </div>
+        
+        <div class="setting-item">
+          <label class="checkbox-label">
+            <input type="checkbox" id="autoSpeakCheckbox">
+            <span>Baca otomatis respons Nayra AI</span>
+          </label>
+        </div>
+        
+        <div class="setting-item">
+          <label class="checkbox-label">
+            <input type="checkbox" id="voiceInputCheckbox" checked>
+            <span>Aktifkan input suara</span>
+          </label>
+        </div>
+        
+        <div class="settings-buttons">
+          <button class="settings-button cancel" id="cancelSettings">Batal</button>
+          <button class="settings-button save" id="saveSettings">Simpan</button>
+        </div>
+      </div>
+    </div>
+
     <!-- Chat Container -->
     <div class="chat-container">
-      <!-- Chat Header with Search -->
-     
       <!-- Chat Messages -->
       <div id="chatMessages" class="chat-messages">
         <!-- Welcome message -->
@@ -587,7 +891,16 @@
 
     <!-- Message Input -->
     <div id="messageInputContainer" class="message-input-container">
-      <input type="text" id="messageInput" class="message-input" placeholder="Tanyakan sesuatu tentang sains...">
+      <button id="voiceInputButton" class="voice-input-button" title="Input suara">
+        <i class="fas fa-microphone"></i>
+      </button>
+      
+      <input type="text" id="messageInput" class="message-input" placeholder="Tanyakan sesuatu tentang sains atau tekan tombol mikrofon...">
+      
+      <button id="settingsButton" class="settings-button-small" title="Pengaturan suara">
+        <i class="fas fa-cog"></i>
+      </button>
+      
       <button id="sendButton" class="send-button" disabled>
         <i class="fas fa-paper-plane"></i>
       </button>
@@ -630,10 +943,270 @@
     const closeSidebar = document.getElementById("closeSidebar");
     const sidebar = document.getElementById("sidebar");
     const sidebarOverlay = document.getElementById("sidebarOverlay");
+    
+    // Voice input elements
+    const voiceInputButton = document.getElementById("voiceInputButton");
+    
+    // Settings elements
+    const settingsButton = document.getElementById("settingsButton");
+    const closeSettings = document.getElementById("closeSettings");
+    const cancelSettings = document.getElementById("cancelSettings");
+    const saveSettings = document.getElementById("saveSettings");
+    const settingsPanel = document.getElementById("settingsPanel");
+    const settingsOverlay = document.getElementById("settingsOverlay");
+    
+    // TTS elements
+    const voiceSelect = document.getElementById("voiceSelect");
+    const rateSlider = document.getElementById("rateSlider");
+    const pitchSlider = document.getElementById("pitchSlider");
+    const volumeSlider = document.getElementById("volumeSlider");
+    const rateValue = document.getElementById("rateValue");
+    const pitchValue = document.getElementById("pitchValue");
+    const volumeValue = document.getElementById("volumeValue");
+    const autoSpeakCheckbox = document.getElementById("autoSpeakCheckbox");
+    const voiceInputCheckbox = document.getElementById("voiceInputCheckbox");
+    
+    // TTS variables
+    let speechSynthesis = window.speechSynthesis;
+    let voices = [];
+    let currentUtterance = null;
+    let isSpeaking = false;
+    let ttsSettings = {
+      voice: null,
+      rate: 1,
+      pitch: 1,
+      volume: 1,
+      autoSpeak: false,
+      voiceInputEnabled: true
+    };
+    
+    // Speech recognition variables
+    let SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let recognition = null;
+    let isListening = false;
 
     // Set welcome message time
     welcomeTime.textContent = formatTime(new Date());
 
+    // Initialize TTS
+    function initializeTTS() {
+      // Load saved settings
+      const savedSettings = localStorage.getItem('nayraTtsSettings');
+      if (savedSettings) {
+        ttsSettings = JSON.parse(savedSettings);
+      }
+      
+      // Apply settings to UI
+      rateSlider.value = ttsSettings.rate;
+      pitchSlider.value = ttsSettings.pitch;
+      volumeSlider.value = ttsSettings.volume;
+      autoSpeakCheckbox.checked = ttsSettings.autoSpeak;
+      voiceInputCheckbox.checked = ttsSettings.voiceInputEnabled;
+      
+      updateSliderValues();
+      
+      // Load voices
+      loadVoices();
+      
+      // If voices are already loaded
+      if (speechSynthesis.getVoices().length > 0) {
+        populateVoiceList();
+      }
+      
+      // When voices are loaded
+      speechSynthesis.onvoiceschanged = function() {
+        populateVoiceList();
+      };
+    }
+    
+    // Load voices
+    function loadVoices() {
+      voices = speechSynthesis.getVoices();
+    }
+    
+    // Populate voice list
+    function populateVoiceList() {
+      voiceSelect.innerHTML = '<option value="">Pilih suara...</option>';
+      
+      // Filter voices for Indonesian or English
+      const filteredVoices = voices.filter(voice => 
+        voice.lang.startsWith('id') || 
+        voice.lang.startsWith('en') || 
+        voice.name.includes('Indonesian') ||
+        voice.name.includes('English')
+      );
+      
+      // Sort voices by language and name
+      filteredVoices.sort((a, b) => {
+        if (a.lang.startsWith('id') && !b.lang.startsWith('id')) return -1;
+        if (!a.lang.startsWith('id') && b.lang.startsWith('id')) return 1;
+        return a.name.localeCompare(b.name);
+      });
+      
+      filteredVoices.forEach(voice => {
+        const option = document.createElement('option');
+        option.value = voice.name;
+        option.textContent = `${voice.name} (${voice.lang})`;
+        
+        // Select saved voice
+        if (ttsSettings.voice && voice.name === ttsSettings.voice) {
+          option.selected = true;
+        }
+        
+        // Auto-select Indonesian voice if available and no saved preference
+        if (!ttsSettings.voice && voice.lang.startsWith('id')) {
+          option.selected = true;
+          ttsSettings.voice = voice.name;
+        }
+        
+        voiceSelect.appendChild(option);
+      });
+      
+      // If no voices found
+      if (filteredVoices.length === 0) {
+        voiceSelect.innerHTML = '<option value="">Tidak ada suara yang tersedia</option>';
+      }
+    }
+    
+    // Update slider values display
+    function updateSliderValues() {
+      rateValue.textContent = rateSlider.value;
+      pitchValue.textContent = pitchSlider.value;
+      volumeValue.textContent = volumeSlider.value;
+    }
+    
+    // Speak text using TTS
+    function speakText(text, messageId = null) {
+      if (!speechSynthesis || !ttsSettings.voiceInputEnabled) return;
+      
+      // Stop any current speech
+      if (isSpeaking) {
+        speechSynthesis.cancel();
+      }
+      
+      const utterance = new SpeechSynthesisUtterance(text);
+      
+      // Find selected voice
+      const selectedVoice = voices.find(voice => voice.name === ttsSettings.voice);
+      if (selectedVoice) {
+        utterance.voice = selectedVoice;
+      }
+      
+      // Apply settings
+      utterance.rate = ttsSettings.rate;
+      utterance.pitch = ttsSettings.pitch;
+      utterance.volume = ttsSettings.volume;
+      utterance.lang = selectedVoice ? selectedVoice.lang : 'id-ID';
+      
+      // Highlight message if provided
+      if (messageId) {
+        const messageElement = document.getElementById(messageId);
+        if (messageElement) {
+          utterance.onstart = function() {
+            messageElement.classList.add('playing');
+            isSpeaking = true;
+          };
+          
+          utterance.onend = function() {
+            messageElement.classList.remove('playing');
+            isSpeaking = false;
+          };
+          
+          utterance.onerror = function() {
+            messageElement.classList.remove('playing');
+            isSpeaking = false;
+          };
+        }
+      }
+      
+      currentUtterance = utterance;
+      speechSynthesis.speak(utterance);
+    }
+    
+    // Stop TTS
+    function stopSpeaking() {
+      if (isSpeaking) {
+        speechSynthesis.cancel();
+        isSpeaking = false;
+        
+        // Remove playing class from all messages
+        document.querySelectorAll('.tts-button.playing').forEach(btn => {
+          btn.classList.remove('playing');
+        });
+      }
+    }
+    
+    // Initialize speech recognition
+    function initializeSpeechRecognition() {
+      if (!SpeechRecognition) {
+        console.warn('Speech recognition not supported');
+        voiceInputButton.disabled = true;
+        voiceInputButton.title = 'Input suara tidak didukung';
+        return;
+      }
+      
+      recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = true;
+      recognition.lang = 'id-ID';
+      
+      recognition.onstart = function() {
+        isListening = true;
+        voiceInputButton.classList.add('listening');
+        voiceInputButton.innerHTML = '<i class="fas fa-stop"></i>';
+      };
+      
+      recognition.onresult = function(event) {
+        const transcript = Array.from(event.results)
+          .map(result => result[0])
+          .map(result => result.transcript)
+          .join('');
+        
+        messageInput.value = transcript;
+        sendButton.disabled = !transcript.trim();
+      };
+      
+      recognition.onend = function() {
+        isListening = false;
+        voiceInputButton.classList.remove('listening');
+        voiceInputButton.innerHTML = '<i class="fas fa-microphone"></i>';
+      };
+      
+      recognition.onerror = function(event) {
+        console.error('Speech recognition error:', event.error);
+        isListening = false;
+        voiceInputButton.classList.remove('listening');
+        voiceInputButton.innerHTML = '<i class="fas fa-microphone"></i>';
+        
+        if (event.error === 'not-allowed') {
+          alert('Akses mikrofon ditolak. Silakan izinkan akses mikrofon di pengaturan browser Anda.');
+        }
+      };
+    }
+    
+    // Toggle voice input
+    function toggleVoiceInput() {
+      if (!recognition || !ttsSettings.voiceInputEnabled) return;
+      
+      if (isListening) {
+        recognition.stop();
+      } else {
+        // Request microphone permission
+        navigator.mediaDevices.getUserMedia({ audio: true })
+          .then(function(stream) {
+            // Stop all tracks to release microphone
+            stream.getTracks().forEach(track => track.stop());
+            
+            // Start recognition
+            recognition.start();
+          })
+          .catch(function(err) {
+            console.error('Microphone access denied:', err);
+            alert('Tidak dapat mengakses mikrofon. Silakan izinkan akses mikrofon di pengaturan browser Anda.');
+          });
+      }
+    }
+    
     // Toggle sidebar
     function toggleSidebar() {
       sidebar.classList.toggle("active");
@@ -645,11 +1218,77 @@
       sidebar.classList.remove("active");
       sidebarOverlay.classList.remove("active");
     }
+    
+    // Toggle settings panel
+    function toggleSettingsPanel() {
+      settingsPanel.classList.toggle("active");
+      settingsOverlay.classList.toggle("active");
+    }
+
+    // Close settings panel
+    function closeSettingsPanel() {
+      settingsPanel.classList.remove("active");
+      settingsOverlay.classList.remove("active");
+    }
+    
+    // Save TTS settings
+    function saveTtsSettings() {
+      ttsSettings.voice = voiceSelect.value;
+      ttsSettings.rate = parseFloat(rateSlider.value);
+      ttsSettings.pitch = parseFloat(pitchSlider.value);
+      ttsSettings.volume = parseFloat(volumeSlider.value);
+      ttsSettings.autoSpeak = autoSpeakCheckbox.checked;
+      ttsSettings.voiceInputEnabled = voiceInputCheckbox.checked;
+      
+      // Save to localStorage
+      localStorage.setItem('nayraTtsSettings', JSON.stringify(ttsSettings));
+      
+      // Enable/disable voice input button
+      voiceInputButton.disabled = !ttsSettings.voiceInputEnabled;
+      
+      closeSettingsPanel();
+      showNotification('Pengaturan suara disimpan');
+    }
+    
+    // Show notification
+    function showNotification(message) {
+      // Create notification element
+      const notification = document.createElement('div');
+      notification.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50';
+      notification.textContent = message;
+      
+      document.body.appendChild(notification);
+      
+      // Remove after 3 seconds
+      setTimeout(() => {
+        notification.remove();
+      }, 3000);
+    }
 
     // Event listeners for sidebar
     hamburgerButton.addEventListener("click", toggleSidebar);
     closeSidebar.addEventListener("click", closeSidebarFunc);
     sidebarOverlay.addEventListener("click", closeSidebarFunc);
+    
+    // Event listeners for settings
+    settingsButton.addEventListener("click", toggleSettingsPanel);
+    closeSettings.addEventListener("click", closeSettingsPanel);
+    cancelSettings.addEventListener("click", closeSettingsPanel);
+    settingsOverlay.addEventListener("click", closeSettingsPanel);
+    saveSettings.addEventListener("click", saveTtsSettings);
+    
+    // Slider event listeners
+    rateSlider.addEventListener('input', function() {
+      rateValue.textContent = this.value;
+    });
+    
+    pitchSlider.addEventListener('input', function() {
+      pitchValue.textContent = this.value;
+    });
+    
+    volumeSlider.addEventListener('input', function() {
+      volumeValue.textContent = this.value;
+    });
 
     // Enable/disable send button based on input
     messageInput.addEventListener("input", () => {
@@ -663,6 +1302,9 @@
         sendMessage();
       }
     });
+    
+    // Voice input button
+    voiceInputButton.addEventListener("click", toggleVoiceInput);
 
     // Send message function
     async function sendMessage() {
@@ -688,7 +1330,14 @@
         removeThinkingIndicator();
         
         // Add AI response to chat
-        addMessageToChat(response, 'received');
+        const messageId = addMessageToChat(response, 'received', true);
+        
+        // Auto-speak response if enabled
+        if (ttsSettings.autoSpeak && ttsSettings.voiceInputEnabled) {
+          setTimeout(() => {
+            speakText(response, messageId);
+          }, 500);
+        }
       } catch (error) {
         // Remove thinking indicator
         removeThinkingIndicator();
@@ -703,25 +1352,57 @@
     }
 
     // Add message to chat
-    function addMessageToChat(text, type) {
+    function addMessageToChat(text, type, addTtsButton = false) {
       const messageDiv = document.createElement("div");
       messageDiv.className = `message ${type}`;
       
       const timeString = formatTime(new Date());
+      const messageId = `message-${Date.now()}`;
       
-      messageDiv.innerHTML = `
+      let messageContent = `
         <div class="message-bubble">
           <div class="message-text">${escapeHtml(text)}</div>
           <div class="message-time">${timeString}</div>
         </div>
       `;
       
+      // Add TTS button for received messages
+      if (type === 'received' && addTtsButton && ttsSettings.voiceInputEnabled) {
+        messageContent += `
+          <div class="message-actions">
+            <button class="tts-button" data-message-id="${messageId}" title="Dengarkan jawaban">
+              <i class="fas fa-volume-up"></i>
+            </button>
+          </div>
+        `;
+      }
+      
+      messageDiv.innerHTML = messageContent;
+      messageDiv.id = messageId;
+      
       chatMessages.appendChild(messageDiv);
+      
+      // Add event listener to TTS button if present
+      if (type === 'received' && addTtsButton && ttsSettings.voiceInputEnabled) {
+        const ttsButton = messageDiv.querySelector('.tts-button');
+        ttsButton.addEventListener('click', function() {
+          const msgId = this.getAttribute('data-message-id');
+          const messageText = this.closest('.message').querySelector('.message-text').textContent;
+          
+          // Stop any current speech
+          stopSpeaking();
+          
+          // Speak the message
+          speakText(messageText, msgId);
+        });
+      }
       
       // Scroll to bottom
       setTimeout(() => {
         chatMessages.scrollTop = chatMessages.scrollHeight;
       }, 100);
+      
+      return messageId;
     }
 
     // Show thinking indicator
@@ -850,6 +1531,20 @@
         .replaceAll('"', '&quot;')
         .replaceAll("'", '&#39;');
     }
+    
+    // Initialize everything when page loads
+    document.addEventListener('DOMContentLoaded', function() {
+      initializeTTS();
+      initializeSpeechRecognition();
+      
+      // Speak welcome message if auto-speak is enabled
+      if (ttsSettings.autoSpeak && ttsSettings.voiceInputEnabled) {
+        setTimeout(() => {
+          const welcomeText = "Halo! Saya Nayra AI, asisten sains Anda. Saya siap membantu Anda dengan pertanyaan seputar sains, fisika, kimia, biologi, dan matematika. Apa yang ingin Anda ketahui hari ini?";
+          speakText(welcomeText);
+        }, 1000);
+      }
+    });
   </script>
 </body>
-        </html>
+  </html>

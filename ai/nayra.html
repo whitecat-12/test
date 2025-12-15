@@ -879,7 +879,8 @@
       volume: 1,
       autoSpeak: true,
       voiceInputEnabled: true,
-      androidMode: true
+      androidMode: true,
+      language: 'id-ID' // Default bahasa Indonesia
     };
     
     // Speech recognition
@@ -927,21 +928,9 @@
       if (voices.length > 0) {
         populateVoiceList();
         
-        // Auto-select Indonesian voice if available
+        // Prioritaskan suara Indonesia, hindari suara India
         if (!ttsSettings.voice) {
-          const indonesianVoice = voices.find(voice => 
-            voice.lang.startsWith('id') || 
-            voice.name.includes('Indonesian')
-          );
-          
-          if (indonesianVoice) {
-            ttsSettings.voice = indonesianVoice.name;
-            voiceSelect.value = indonesianVoice.name;
-          } else if (voices.length > 0) {
-            // Fallback to first available voice
-            ttsSettings.voice = voices[0].name;
-            voiceSelect.value = voices[0].name;
-          }
+          selectBestVoice();
         }
       } else {
         // Retry for Android
@@ -950,14 +939,129 @@
       }
     }
     
-    // Populate voice list
+    // Fungsi untuk memilih suara terbaik (Indonesia > English US/UK > lainnya non-India)
+    function selectBestVoice() {
+      // 1. Cari suara Indonesia
+      const indonesianVoices = voices.filter(voice => 
+        voice.lang.startsWith('id') || 
+        voice.name.toLowerCase().includes('indonesian') ||
+        voice.name.toLowerCase().includes('indonesia') ||
+        voice.lang === 'id-ID'
+      );
+      
+      if (indonesianVoices.length > 0) {
+        ttsSettings.voice = indonesianVoices[0].name;
+        voiceSelect.value = indonesianVoices[0].name;
+        console.log("Selected Indonesian voice:", indonesianVoices[0].name);
+        return;
+      }
+      
+      // 2. Cari suara Inggris US/UK (hindari India)
+      const englishVoices = voices.filter(voice => 
+        voice.lang.startsWith('en') && 
+        !isIndianVoice(voice) &&
+        (voice.name.toLowerCase().includes('us') ||
+         voice.name.toLowerCase().includes('united states') ||
+         voice.name.toLowerCase().includes('american') ||
+         voice.name.toLowerCase().includes('uk') ||
+         voice.name.toLowerCase().includes('british') ||
+         voice.name.toLowerCase().includes('english'))
+      );
+      
+      if (englishVoices.length > 0) {
+        ttsSettings.voice = englishVoices[0].name;
+        voiceSelect.value = englishVoices[0].name;
+        console.log("Selected English voice:", englishVoices[0].name);
+        return;
+      }
+      
+      // 3. Cari suara apapun yang non-India
+      const nonIndianVoices = voices.filter(voice => !isIndianVoice(voice));
+      
+      if (nonIndianVoices.length > 0) {
+        ttsSettings.voice = nonIndianVoices[0].name;
+        voiceSelect.value = nonIndianVoices[0].name;
+        console.log("Selected non-Indian voice:", nonIndianVoices[0].name);
+        return;
+      }
+      
+      // 4. Fallback ke suara pertama
+      if (voices.length > 0) {
+        ttsSettings.voice = voices[0].name;
+        voiceSelect.value = voices[0].name;
+        console.log("Selected fallback voice:", voices[0].name);
+      }
+    }
+    
+    // Fungsi untuk mendeteksi suara India
+    function isIndianVoice(voice) {
+      const voiceName = voice.name.toLowerCase();
+      const voiceLang = voice.lang.toLowerCase();
+      
+      return (
+        voiceName.includes('india') ||
+        voiceName.includes('indian') ||
+        voiceName.includes('hindi') ||
+        voiceName.includes('tamil') ||
+        voiceName.includes('telugu') ||
+        voiceName.includes('bengali') ||
+        voiceName.includes('punjabi') ||
+        voiceLang.includes('in') ||
+        voiceLang.includes('hi') ||
+        voiceLang.includes('ta') ||
+        voiceLang.includes('te') ||
+        voiceLang.includes('bn') ||
+        voiceLang.includes('pa')
+      );
+    }
+    
+    // Populate voice list dengan filter suara India
     function populateVoiceList() {
       voiceSelect.innerHTML = '<option value="">Pilih suara...</option>';
       
-      voices.forEach(voice => {
+      // Filter suara yang bukan India
+      const filteredVoices = voices.filter(voice => !isIndianVoice(voice));
+      
+      // Urutkan: Indonesia dulu, kemudian Inggris, kemudian lainnya
+      const sortedVoices = filteredVoices.sort((a, b) => {
+        const aIsIndonesian = a.lang.startsWith('id');
+        const bIsIndonesian = b.lang.startsWith('id');
+        const aIsEnglish = a.lang.startsWith('en');
+        const bIsEnglish = b.lang.startsWith('en');
+        
+        if (aIsIndonesian && !bIsIndonesian) return -1;
+        if (!aIsIndonesian && bIsIndonesian) return 1;
+        if (aIsEnglish && !bIsEnglish) return -1;
+        if (!aIsEnglish && bIsEnglish) return 1;
+        return 0;
+      });
+      
+      sortedVoices.forEach(voice => {
         const option = document.createElement('option');
         option.value = voice.name;
-        option.textContent = `${voice.name} (${voice.lang})`;
+        
+        // Tampilkan label yang informatif
+        let label = voice.name;
+        
+        if (voice.lang.startsWith('id')) {
+          label += " 🇮🇩 (Bahasa Indonesia)";
+          option.style.fontWeight = 'bold';
+          option.style.color = '#1e40af';
+        } else if (voice.lang.startsWith('en')) {
+          if (voice.name.toLowerCase().includes('us') || 
+              voice.name.toLowerCase().includes('american')) {
+            label += " 🇺🇸 (English US)";
+          } else if (voice.name.toLowerCase().includes('uk') || 
+                     voice.name.toLowerCase().includes('british')) {
+            label += " 🇬🇧 (English UK)";
+          } else {
+            label += " 🏴󠁧󠁢󠁥󠁮󠁧󠁿 (English)";
+          }
+        } else {
+          label += ` (${voice.lang})`;
+        }
+        
+        option.textContent = label;
         
         // Select saved voice
         if (ttsSettings.voice && voice.name === ttsSettings.voice) {
@@ -967,9 +1071,18 @@
         voiceSelect.appendChild(option);
       });
       
-      // If no voices found
-      if (voices.length === 0) {
-        voiceSelect.innerHTML = '<option value="">Tidak ada suara yang tersedia</option>';
+      // Jika tidak ada suara yang tersedia
+      if (sortedVoices.length === 0) {
+        const option = document.createElement('option');
+        option.value = "";
+        option.textContent = "Tidak ada suara yang tersedia (non-India)";
+        voiceSelect.appendChild(option);
+        
+        // Jika ada suara tapi semuanya India, tampilkan peringatan
+        if (voices.length > 0 && filteredVoices.length === 0) {
+          console.warn("All available voices are Indian accents");
+          showNotification("Hanya suara dengan aksen India yang tersedia. Instal suara lain di pengaturan sistem.");
+        }
       }
     }
     
@@ -1068,16 +1181,28 @@
       
       const utterance = new SpeechSynthesisUtterance(text);
       
-      // Find selected voice
-      const selectedVoice = voices.find(voice => voice.name === ttsSettings.voice);
+      // Find selected voice, jika tidak ditemukan pilih suara terbaik
+      let selectedVoice = voices.find(voice => voice.name === ttsSettings.voice);
+      
+      // Jika suara yang dipilih adalah suara India, cari alternatif
+      if (selectedVoice && isIndianVoice(selectedVoice)) {
+        console.warn("Selected voice is Indian, finding alternative...");
+        selectedVoice = findNonIndianVoice();
+      }
+      
+      // Jika masih tidak ada suara, gunakan suara pertama non-India
+      if (!selectedVoice) {
+        selectedVoice = findNonIndianVoice();
+      }
+      
       if (selectedVoice) {
         utterance.voice = selectedVoice;
         utterance.lang = selectedVoice.lang;
-      } else if (voices.length > 0) {
-        utterance.voice = voices[0];
-        utterance.lang = voices[0].lang;
+        console.log("Using voice:", selectedVoice.name, "Language:", selectedVoice.lang);
       } else {
+        // Fallback ke bahasa Indonesia
         utterance.lang = 'id-ID';
+        console.log("No voice selected, using default Indonesian language");
       }
       
       // Apply settings
@@ -1121,6 +1246,33 @@
       }
     }
     
+    // Function to find non-Indian voice
+    function findNonIndianVoice() {
+      // Cari suara Indonesia terlebih dahulu
+      const indonesianVoice = voices.find(voice => 
+        voice.lang.startsWith('id') && !isIndianVoice(voice)
+      );
+      if (indonesianVoice) return indonesianVoice;
+      
+      // Cari suara Inggris US/UK
+      const englishVoice = voices.find(voice => 
+        voice.lang.startsWith('en') && 
+        !isIndianVoice(voice) &&
+        (voice.name.toLowerCase().includes('us') ||
+         voice.name.toLowerCase().includes('american') ||
+         voice.name.toLowerCase().includes('uk') ||
+         voice.name.toLowerCase().includes('british'))
+      );
+      if (englishVoice) return englishVoice;
+      
+      // Cari suara apapun yang non-India
+      const nonIndianVoice = voices.find(voice => !isIndianVoice(voice));
+      if (nonIndianVoice) return nonIndianVoice;
+      
+      // Jika semua suara India, gunakan suara pertama
+      return voices[0];
+    }
+    
     // Function to trigger pending TTS
     function triggerPendingTTS() {
       if (pendingTTSResponse) {
@@ -1155,7 +1307,7 @@
       recognition = new SpeechRecognition();
       recognition.continuous = false;
       recognition.interimResults = true;
-      recognition.lang = 'id-ID';
+      recognition.lang = 'id-ID'; // Bahasa Indonesia untuk speech recognition
       
       recognition.onstart = function() {
         isListening = true;
@@ -1386,6 +1538,20 @@
       volumeValue.textContent = this.value;
     });
     
+    // Voice select change
+    voiceSelect.addEventListener('change', function() {
+      const selectedOption = this.options[this.selectedIndex];
+      if (selectedOption.value) {
+        console.log("User selected voice:", selectedOption.value);
+        
+        // Periksa apakah suara yang dipilih adalah suara India
+        const selectedVoice = voices.find(v => v.name === selectedOption.value);
+        if (selectedVoice && isIndianVoice(selectedVoice)) {
+          showNotification("⚠️ Suara ini memiliki aksen India. Rekomendasi: pilih suara Indonesia atau English US/UK.");
+        }
+      }
+    });
+    
     // Message input
     messageInput.addEventListener("input", () => {
       sendButton.disabled = !messageInput.value.trim();
@@ -1496,7 +1662,31 @@
       if (isAndroid) {
         showNotification("Mode Android aktif. Ketuk layar untuk memulai.");
       }
+      
+      // Tambahkan tombol test voice ke settings panel
+      addTestVoiceButton();
     });
+    
+    // Fungsi untuk menambahkan tombol test voice
+    function addTestVoiceButton() {
+      const testButton = document.createElement('button');
+      testButton.className = 'settings-button test mt-4';
+      testButton.innerHTML = '<i class="fas fa-volume-up mr-2"></i> Test Suara';
+      testButton.style.backgroundColor = '#10b981';
+      testButton.style.color = 'white';
+      testButton.style.width = '100%';
+      
+      testButton.addEventListener('click', function() {
+        const testText = "Halo! Saya Nayra AI. Suara ini digunakan untuk belajar sains dalam bahasa Indonesia.";
+        speakText(testText, "", true);
+      });
+      
+      // Tambahkan ke settings content sebelum tombol save/cancel
+      const settingsButtons = document.querySelector('.settings-buttons');
+      if (settingsButtons) {
+        settingsButtons.parentNode.insertBefore(testButton, settingsButtons);
+      }
+    }
   </script>
-</body>
-  </html>
+ </body>
+</html> 

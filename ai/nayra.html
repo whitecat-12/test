@@ -1,4 +1,4 @@
-kok saat tidak ada pertanyaan videonya tidak play ya yang avatar-idle.mp4, bisa play otomatis nddak, bisa kamu perbaiki lngsung dicode<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
@@ -823,14 +823,15 @@ kok saat tidak ada pertanyaan videonya tidak play ya yang avatar-idle.mp4, bisa 
       </a>
     </nav>
   </div>
-<script>
+
+  <script>
     // ============================
     // DOM Elements
     // ============================
     const messageInput = document.getElementById("messageInput");
     const sendButton = document.getElementById("sendButton");
     
-    // Avatar elements - DIPERBARUI: Variabel global untuk kontrol video
+    // Avatar elements
     const avatarSpeaking = document.getElementById("avatarSpeaking");
     const avatarIdle = document.getElementById("avatarIdle");
     const statusDot = document.getElementById("statusDot");
@@ -896,128 +897,6 @@ kok saat tidak ada pertanyaan videonya tidak play ya yang avatar-idle.mp4, bisa 
     let SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     let recognition = null;
     let isListening = false;
-
-    // ============================
-    // FUNGSI BARU: Video Play Management
-    // ============================
-    
-    // Fungsi untuk memastikan video idle selalu play
-    function ensureIdleVideoPlay() {
-      console.log("Memastikan video idle diputar...");
-      
-      // Hanya coba play jika video idle sedang ditampilkan
-      if (avatarIdle.style.display !== 'none') {
-        const playPromise = avatarIdle.play();
-        
-        if (playPromise !== undefined) {
-          playPromise.catch(error => {
-            console.log("Autoplay dicegah, menunggu interaksi pengguna:", error);
-            // Tampilkan petunjuk ke pengguna
-            if (!userHasInteracted) {
-              showNotification("Ketuk layar untuk memulai video avatar");
-            }
-          });
-        }
-      }
-    }
-    
-    // Fungsi untuk memastikan video speaking selalu play
-    function ensureSpeakingVideoPlay() {
-      console.log("Memastikan video speaking diputar...");
-      
-      // Hanya coba play jika video speaking sedang ditampilkan
-      if (avatarSpeaking.style.display !== 'none') {
-        const playPromise = avatarSpeaking.play();
-        
-        if (playPromise !== undefined) {
-          playPromise.catch(error => {
-            console.log("Autoplay video speaking dicegah:", error);
-          });
-        }
-      }
-    }
-    
-    // Fungsi untuk restart video idle (untuk memastikan loop berjalan baik)
-    function restartIdleVideo() {
-      if (avatarIdle.style.display !== 'none') {
-        avatarIdle.currentTime = 0;
-        ensureIdleVideoPlay();
-      }
-    }
-    
-    // ============================
-    // Avatar Status Management - DIPERBARUI
-    // ============================
-    function updateAvatarStatus(state, userMessage = '') {
-      switch(state) {
-        case 'speaking':
-          statusDot.className = 'status-dot speaking';
-          statusText.textContent = 'Sedang Berbicara';
-          userInputIndicator.style.display = 'none';
-          tapToSpeakIndicator.style.display = 'none';
-          
-          // Show speaking video, hide idle
-          avatarIdle.style.display = 'none';
-          avatarIdle.pause();
-          avatarSpeaking.style.display = 'block';
-          
-          // Gunakan fungsi baru untuk memastikan video speaking play
-          setTimeout(ensureSpeakingVideoPlay, 100);
-          break;
-          
-        case 'listening':
-          statusDot.className = 'status-dot listening';
-          statusText.textContent = 'Sedang Mendengarkan';
-          avatarIdle.style.display = 'block';
-          avatarSpeaking.style.display = 'none';
-          avatarSpeaking.pause();
-          
-          // Gunakan fungsi baru untuk memastikan video idle play
-          setTimeout(ensureIdleVideoPlay, 100);
-          break;
-          
-        case 'thinking':
-          statusDot.className = 'status-dot';
-          statusText.textContent = 'Sedang Berpikir';
-          if (userMessage) {
-            userInputText.textContent = userMessage;
-            userInputIndicator.style.display = 'flex';
-          }
-          avatarIdle.style.display = 'block';
-          avatarSpeaking.style.display = 'none';
-          avatarSpeaking.pause();
-          
-          // Gunakan fungsi baru untuk memastikan video idle play
-          setTimeout(ensureIdleVideoPlay, 100);
-          break;
-          
-        case 'ready':
-          statusDot.className = 'status-dot ready';
-          statusText.textContent = 'Siap Berbicara';
-          tapToSpeakIndicator.style.display = 'block';
-          avatarIdle.style.display = 'block';
-          avatarSpeaking.style.display = 'none';
-          avatarSpeaking.pause();
-          
-          // Gunakan fungsi baru untuk memastikan video idle play
-          setTimeout(ensureIdleVideoPlay, 100);
-          break;
-          
-        case 'idle':
-        default:
-          statusDot.className = 'status-dot idle';
-          statusText.textContent = 'Siap Mendengarkan';
-          userInputIndicator.style.display = 'none';
-          tapToSpeakIndicator.style.display = 'none';
-          avatarSpeaking.style.display = 'none';
-          avatarSpeaking.pause();
-          avatarIdle.style.display = 'block';
-          
-          // Gunakan fungsi baru untuk memastikan video idle play
-          setTimeout(ensureIdleVideoPlay, 100);
-          break;
-      }
-    }
     
     // ============================
     // TTS Initialization - OPTIMIZED FOR INDONESIAN ACCENT
@@ -1256,6 +1135,69 @@ kok saat tidak ada pertanyaan videonya tidak play ya yang avatar-idle.mp4, bisa 
       rateValue.textContent = rateSlider.value;
       pitchValue.textContent = pitchSlider.value;
       volumeValue.textContent = volumeSlider.value;
+    }
+    
+    // ============================
+    // Avatar Status Management
+    // ============================
+    function updateAvatarStatus(state, userMessage = '') {
+      switch(state) {
+        case 'speaking':
+          statusDot.className = 'status-dot speaking';
+          statusText.textContent = 'Sedang Berbicara';
+          userInputIndicator.style.display = 'none';
+          tapToSpeakIndicator.style.display = 'none';
+          
+          // Show speaking video, hide idle
+          avatarIdle.style.display = 'none';
+          avatarSpeaking.style.display = 'block';
+          avatarSpeaking.play();
+          break;
+          
+        case 'listening':
+          statusDot.className = 'status-dot listening';
+          statusText.textContent = 'Sedang Mendengarkan';
+          avatarIdle.style.display = 'block';
+          avatarSpeaking.style.display = 'none';
+          avatarSpeaking.pause();
+          avatarIdle.play();
+          break;
+          
+        case 'thinking':
+          statusDot.className = 'status-dot';
+          statusText.textContent = 'Sedang Berpikir';
+          if (userMessage) {
+            userInputText.textContent = userMessage;
+            userInputIndicator.style.display = 'flex';
+          }
+          avatarIdle.style.display = 'block';
+          avatarSpeaking.style.display = 'none';
+          avatarSpeaking.pause();
+          avatarIdle.play();
+          break;
+          
+        case 'ready':
+          statusDot.className = 'status-dot ready';
+          statusText.textContent = 'Siap Berbicara';
+          tapToSpeakIndicator.style.display = 'block';
+          avatarIdle.style.display = 'block';
+          avatarSpeaking.style.display = 'none';
+          avatarSpeaking.pause();
+          avatarIdle.play();
+          break;
+          
+        case 'idle':
+        default:
+          statusDot.className = 'status-dot idle';
+          statusText.textContent = 'Siap Mendengarkan';
+          userInputIndicator.style.display = 'none';
+          tapToSpeakIndicator.style.display = 'none';
+          avatarSpeaking.style.display = 'none';
+          avatarIdle.style.display = 'block';
+          avatarSpeaking.pause();
+          avatarIdle.play();
+          break;
+      }
     }
     
     // ============================
@@ -1640,7 +1582,7 @@ kok saat tidak ada pertanyaan videonya tidak play ya yang avatar-idle.mp4, bisa 
     }
     
     // ============================
-    // Event Listeners - DIPERBARUI untuk video
+    // Event Listeners
     // ============================
     // Sidebar
     hamburgerButton.addEventListener("click", toggleSidebar);
@@ -1693,8 +1635,6 @@ kok saat tidak ada pertanyaan videonya tidak play ya yang avatar-idle.mp4, bisa 
     sendButton.addEventListener("click", () => {
       userHasInteracted = true;
       sendMessage(true);
-      // Setelah interaksi pengguna, pastikan video play
-      setTimeout(ensureIdleVideoPlay, 200);
     });
     
     // Enter key
@@ -1702,8 +1642,6 @@ kok saat tidak ada pertanyaan videonya tidak play ya yang avatar-idle.mp4, bisa 
       if (e.key === "Enter" && messageInput.value.trim()) {
         userHasInteracted = true;
         sendMessage(true);
-        // Setelah interaksi pengguna, pastikan video play
-        setTimeout(ensureIdleVideoPlay, 200);
       }
     });
     
@@ -1728,49 +1666,30 @@ kok saat tidak ada pertanyaan videonya tidak play ya yang avatar-idle.mp4, bisa 
             alert('Izinkan akses mikrofon di pengaturan browser Anda.');
           });
       }
-      // Setelah interaksi pengguna, pastikan video play
-      setTimeout(ensureIdleVideoPlay, 200);
     });
     
     // Tap to speak indicator
     tapToSpeakIndicator.addEventListener("click", function() {
       userHasInteracted = true;
       triggerPendingTTS();
-      // Setelah interaksi pengguna, pastikan video play
-      setTimeout(ensureIdleVideoPlay, 200);
     });
     
-    // Avatar click for pending TTS dan untuk memulai video
+    // Avatar click for pending TTS
     avatarIdle.addEventListener("click", function() {
-      userHasInteracted = true;
-      
       if (pendingTTSResponse) {
+        userHasInteracted = true;
         triggerPendingTTS();
       } else if (ttsSettings.autoSpeak) {
         // Play welcome message if no pending response
+        userHasInteracted = true;
         speakText("Halo! Saya Nayra AI dengan aksen Indonesia. Silakan ajukan pertanyaan sains Anda.", "", true);
       }
-      // Setelah klik, pastikan video idle play
-      setTimeout(ensureIdleVideoPlay, 100);
     });
     
     avatarSpeaking.addEventListener("click", function() {
       if (isSpeaking) {
         stopSpeaking();
       }
-      userHasInteracted = true;
-      // Setelah klik, pastikan video idle play
-      setTimeout(ensureIdleVideoPlay, 100);
-    });
-    
-    // Tambahkan event listener untuk seluruh halaman untuk interaksi pertama
-    document.addEventListener('click', function firstInteraction() {
-      userHasInteracted = true;
-      console.log("Interaksi pengguna pertama terdeteksi, video seharusnya bisa play sekarang");
-      // Coba play video setelah interaksi pertama
-      setTimeout(ensureIdleVideoPlay, 300);
-      // Hapus event listener setelah interaksi pertama
-      document.removeEventListener('click', firstInteraction);
     });
     
     // Initial user interaction listener
@@ -1783,9 +1702,6 @@ kok saat tidak ada pertanyaan videonya tidak play ya yang avatar-idle.mp4, bisa 
         document.removeEventListener('click', firstInteractionHandler);
         document.removeEventListener('touchstart', firstInteractionHandler);
         document.removeEventListener('keydown', firstInteractionHandler);
-        
-        // Coba play video setelah interaksi pertama
-        setTimeout(ensureIdleVideoPlay, 300);
         
         // Play welcome message if enabled
         if (ttsSettings.autoSpeak && ttsSettings.voiceInputEnabled && !isSpeaking) {
@@ -1809,49 +1725,19 @@ kok saat tidak ada pertanyaan videonya tidak play ya yang avatar-idle.mp4, bisa 
     }
     
     // ============================
-    // Initialize Application - DIPERBARUI
+    // Initialize Application
     // ============================
     document.addEventListener('DOMContentLoaded', function() {
       console.log("DOM dimuat, menginisialisasi aplikasi...");
-      
-      // Preload videos untuk menghindari masalah buffering
-      avatarIdle.load();
-      avatarSpeaking.load();
-      
-      // Set video properties untuk autoplay yang lebih baik
-      avatarIdle.setAttribute('playsinline', '');
-      avatarIdle.setAttribute('webkit-playsinline', '');
-      avatarSpeaking.setAttribute('playsinline', '');
-      avatarSpeaking.setAttribute('webkit-playsinline', '');
-      
-      // Tambahkan event listener untuk video error
-      avatarIdle.addEventListener('error', function(e) {
-        console.error("Error video idle:", e);
-        showNotification("Error memuat video avatar idle");
-      });
-      
-      avatarSpeaking.addEventListener('error', function(e) {
-        console.error("Error video speaking:", e);
-        showNotification("Error memuat video avatar speaking");
-      });
-      
-      // Coba play video idle segera
-      setTimeout(ensureIdleVideoPlay, 500);
-      
-      // Setup periodic check untuk memastikan video tetap play
-      setInterval(function() {
-        // Cek jika video idle seharusnya play tapi tidak
-        if (avatarIdle.style.display !== 'none' && avatarIdle.paused) {
-          console.log("Video idle terdeteksi paused, mencoba play lagi...");
-          ensureIdleVideoPlay();
-        }
-      }, 5000); // Cek setiap 5 detik
       
       // Initialize TTS dengan aksen Indonesia
       initializeTTS();
       
       // Initialize speech recognition
       initializeSpeechRecognition();
+      
+      // Start avatar idle video
+      avatarIdle.play();
       
       // Setup initial interaction listener
       setupInitialInteraction();
@@ -1885,18 +1771,16 @@ kok saat tidak ada pertanyaan videonya tidak play ya yang avatar-idle.mp4, bisa 
     // Handle page visibility changes
     document.addEventListener('visibilitychange', function() {
       if (document.hidden) {
-        // Page is hidden, pause videos dan speech
+        // Page is hidden, stop any ongoing speech
         if (isSpeaking) {
           speechSynthesis.cancel();
         }
         if (isListening) {
           recognition.stop();
         }
-        avatarIdle.pause();
-        avatarSpeaking.pause();
       } else {
-        // Page is visible again, coba play video idle
-        setTimeout(ensureIdleVideoPlay, 500);
+        // Page is visible again
+        avatarIdle.play();
       }
     });
   </script>

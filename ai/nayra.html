@@ -641,7 +641,8 @@
         Browser Anda tidak mendukung tag video.
       </video>
       
-      <video id="avatarIdle" class="avatar-idle" autoplay loop muted>
+      <!-- PERBAIKAN 1: Tambahkan playsinline pada video idle -->
+      <video id="avatarIdle" class="avatar-idle" autoplay loop muted playsinline>
         <!-- Ganti dengan video avatar idle/diam Anda -->
         <source src="avatar-idle.mp4" type="video/mp4">
         Browser Anda tidak mendukung tag video.
@@ -1138,7 +1139,34 @@
     }
     
     // ============================
-    // Avatar Status Management
+    // PERBAIKAN 2: Fungsi untuk memastikan video idle diputar
+    // ============================
+    function ensureIdleVideoPlaying() {
+      if (avatarIdle.style.display === 'block' && avatarIdle.paused) {
+        console.log("Mencoba memutar video idle...");
+        avatarIdle.play().then(() => {
+          console.log("Video idle diputar.");
+        }).catch(error => {
+          console.log("Gagal memutar video idle:", error);
+          // Jika gagal karena kebijakan autoplay, tunggu interaksi pengguna
+          if (error.name === 'NotAllowedError') {
+            console.log("Menunggu interaksi pengguna untuk autoplay...");
+            // Set flag untuk mencoba lagi setelah interaksi
+            window.addEventListener('click', function retryPlay() {
+              if (avatarIdle.paused) {
+                avatarIdle.play().then(() => {
+                  console.log("Video idle diputar setelah interaksi.");
+                  window.removeEventListener('click', retryPlay);
+                }).catch(e => console.log("Masih gagal:", e));
+              }
+            }, { once: true });
+          }
+        });
+      }
+    }
+    
+    // ============================
+    // Avatar Status Management - DIPERBAIKI
     // ============================
     function updateAvatarStatus(state, userMessage = '') {
       switch(state) {
@@ -1151,7 +1179,7 @@
           // Show speaking video, hide idle
           avatarIdle.style.display = 'none';
           avatarSpeaking.style.display = 'block';
-          avatarSpeaking.play();
+          avatarSpeaking.play().catch(e => console.log("Gagal play speaking:", e));
           break;
           
         case 'listening':
@@ -1160,7 +1188,8 @@
           avatarIdle.style.display = 'block';
           avatarSpeaking.style.display = 'none';
           avatarSpeaking.pause();
-          avatarIdle.play();
+          // Pastikan video idle diputar kembali
+          ensureIdleVideoPlaying();
           break;
           
         case 'thinking':
@@ -1173,7 +1202,7 @@
           avatarIdle.style.display = 'block';
           avatarSpeaking.style.display = 'none';
           avatarSpeaking.pause();
-          avatarIdle.play();
+          ensureIdleVideoPlaying();
           break;
           
         case 'ready':
@@ -1183,7 +1212,7 @@
           avatarIdle.style.display = 'block';
           avatarSpeaking.style.display = 'none';
           avatarSpeaking.pause();
-          avatarIdle.play();
+          ensureIdleVideoPlaying();
           break;
           
         case 'idle':
@@ -1195,7 +1224,7 @@
           avatarSpeaking.style.display = 'none';
           avatarIdle.style.display = 'block';
           avatarSpeaking.pause();
-          avatarIdle.play();
+          ensureIdleVideoPlaying();
           break;
       }
     }
@@ -1725,7 +1754,7 @@
     }
     
     // ============================
-    // Initialize Application
+    // Initialize Application - DIPERBAIKI
     // ============================
     document.addEventListener('DOMContentLoaded', function() {
       console.log("DOM dimuat, menginisialisasi aplikasi...");
@@ -1736,8 +1765,8 @@
       // Initialize speech recognition
       initializeSpeechRecognition();
       
-      // Start avatar idle video
-      avatarIdle.play();
+      // PERBAIKAN: Gunakan fungsi ensureIdleVideoPlaying() bukan avatarIdle.play()
+      ensureIdleVideoPlaying();
       
       // Setup initial interaction listener
       setupInitialInteraction();
@@ -1780,7 +1809,7 @@
         }
       } else {
         // Page is visible again
-        avatarIdle.play();
+        ensureIdleVideoPlaying();
       }
     });
   </script>

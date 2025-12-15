@@ -717,8 +717,9 @@
         <div class="setting-item">
           <label class="setting-label" for="voiceSelect">Pilih Suara</label>
           <select id="voiceSelect" class="voice-select">
-            <option value="">Loading suara...</option>
+            <option value="">Memuat suara...</option>
           </select>
+          <small class="text-gray-500 text-xs mt-1 block">Suara dengan aksen Indonesia direkomendasikan</small>
         </div>
         
         <div class="setting-item">
@@ -727,6 +728,7 @@
             <span class="slider-value" id="rateValue">1.0</span>
             <input type="range" id="rateSlider" min="0.5" max="2" step="0.1" value="1">
           </div>
+          <small class="text-gray-500 text-xs mt-1 block">1.0 = normal (direkomendasikan untuk Bahasa Indonesia)</small>
         </div>
         
         <div class="setting-item">
@@ -763,6 +765,13 @@
           <label class="checkbox-label">
             <input type="checkbox" id="androidModeCheckbox" checked>
             <span>Mode kompatibilitas Android</span>
+          </label>
+        </div>
+        
+        <div class="setting-item">
+          <label class="checkbox-label">
+            <input type="checkbox" id="indonesianAccentCheckbox" checked>
+            <span>Prioritaskan aksen Indonesia</span>
           </label>
         </div>
         
@@ -859,6 +868,7 @@
     const autoSpeakCheckbox = document.getElementById("autoSpeakCheckbox");
     const voiceInputCheckbox = document.getElementById("voiceInputCheckbox");
     const androidModeCheckbox = document.getElementById("androidModeCheckbox");
+    const indonesianAccentCheckbox = document.getElementById("indonesianAccentCheckbox");
     
     // ============================
     // Global Variables
@@ -879,7 +889,8 @@
       volume: 1,
       autoSpeak: true,
       voiceInputEnabled: true,
-      androidMode: true
+      androidMode: true,
+      preferIndonesianAccent: true
     };
     
     // Speech recognition
@@ -888,10 +899,10 @@
     let isListening = false;
     
     // ============================
-    // TTS Initialization - FIXED FOR INDONESIAN ACCENT
+    // TTS Initialization - OPTIMIZED FOR INDONESIAN ACCENT
     // ============================
     function initializeTTS() {
-      console.log("Initializing TTS dengan aksen Indonesia...");
+      console.log("Menginisialisasi TTS dengan aksen Indonesia...");
       
       // Load saved settings
       const savedSettings = localStorage.getItem('nayraTtsSettings');
@@ -906,6 +917,7 @@
       autoSpeakCheckbox.checked = ttsSettings.autoSpeak;
       voiceInputCheckbox.checked = ttsSettings.voiceInputEnabled;
       androidModeCheckbox.checked = ttsSettings.androidMode;
+      indonesianAccentCheckbox.checked = ttsSettings.preferIndonesianAccent;
       
       updateSliderValues();
       
@@ -915,98 +927,135 @@
       // Voice loading handler
       if (speechSynthesis.onvoiceschanged !== undefined) {
         speechSynthesis.onvoiceschanged = function() {
-          console.log("Voices changed event fired");
+          console.log("Suara berubah");
           loadVoices();
         };
       }
       
       // Initial voice load
-      setTimeout(loadVoices, 1000);
+      setTimeout(loadVoices, 500);
     }
     
     // Load voices with Indonesian priority
     function loadVoices() {
       voices = speechSynthesis.getVoices();
-      console.log(`Loaded ${voices.length} voices`);
+      console.log(`Memuat ${voices.length} suara`);
       
       if (voices.length > 0) {
         populateVoiceList();
         
-        // Auto-select Indonesian voice if available
-        if (!ttsSettings.voice || ttsSettings.voice === "") {
-          const indonesianVoices = voices.filter(voice => 
-            voice.lang.startsWith('id') || 
-            voice.lang === 'id-ID' ||
-            voice.lang === 'id' ||
-            voice.name.toLowerCase().includes('indonesian') ||
-            voice.name.toLowerCase().includes('indonesia') ||
-            voice.name.toLowerCase().includes('bahasa')
-          );
-          
-          if (indonesianVoices.length > 0) {
-            // Prefer Google Indonesian voices
-            const googleIndonesian = indonesianVoices.find(v => v.name.includes('Google') && v.name.includes('Indonesian'));
-            if (googleIndonesian) {
-              ttsSettings.voice = googleIndonesian.name;
-              voiceSelect.value = googleIndonesian.name;
-              console.log("Selected Google Indonesian voice:", googleIndonesian.name);
-            } else {
-              ttsSettings.voice = indonesianVoices[0].name;
-              voiceSelect.value = indonesianVoices[0].name;
-              console.log("Selected Indonesian voice:", indonesianVoices[0].name);
-            }
-          } else {
-            // Fallback to female voices that sound more natural for Indonesian
-            const femaleVoices = voices.filter(voice => 
-              voice.name.includes('Female') || 
-              voice.name.includes('Woman') ||
-              voice.name.includes('Perempuan') ||
-              voice.name.toLowerCase().includes('female') ||
-              voice.lang.startsWith('en') // English as last resort
-            );
-            
-            if (femaleVoices.length > 0) {
-              ttsSettings.voice = femaleVoices[0].name;
-              voiceSelect.value = femaleVoices[0].name;
-              console.log("Selected fallback female voice:", femaleVoices[0].name);
-            } else if (voices.length > 0) {
-              ttsSettings.voice = voices[0].name;
-              voiceSelect.value = voices[0].name;
-              console.log("Selected first available voice:", voices[0].name);
-            }
+        // Auto-select Indonesian voice if available and preferred
+        if ((!ttsSettings.voice || ttsSettings.voice === "") && ttsSettings.preferIndonesianAccent) {
+          selectBestIndonesianVoice();
+        } else if (ttsSettings.voice) {
+          // Ensure the saved voice still exists
+          const savedVoiceExists = voices.some(voice => voice.name === ttsSettings.voice);
+          if (!savedVoiceExists) {
+            selectBestIndonesianVoice();
           }
         }
       } else {
         // Retry for browsers that load voices async
-        console.log("No voices found, retrying...");
+        console.log("Tidak ada suara ditemukan, mencoba lagi...");
         setTimeout(loadVoices, 1000);
       }
+    }
+    
+    // Select the best Indonesian voice
+    function selectBestIndonesianVoice() {
+      // Find Indonesian voices
+      const indonesianVoices = getIndonesianVoices();
+      
+      if (indonesianVoices.length > 0) {
+        // Priority: 1. Google Indonesian, 2. Natural/Neural Indonesian, 3. Any Indonesian
+        let selectedVoice = null;
+        
+        // 1. Google Indonesian voices (usually best quality)
+        selectedVoice = indonesianVoices.find(v => v.name.includes('Google') && (v.name.includes('Indonesian') || v.name.includes('Indonesia')));
+        
+        // 2. Natural/Neural Indonesian voices
+        if (!selectedVoice) {
+          selectedVoice = indonesianVoices.find(v => 
+            (v.name.includes('Natural') || v.name.includes('Neural') || v.name.includes('Premium')) &&
+            (v.name.includes('Indonesian') || v.lang === 'id-ID')
+          );
+        }
+        
+        // 3. Any female Indonesian voice
+        if (!selectedVoice) {
+          selectedVoice = indonesianVoices.find(v => 
+            v.name.includes('Female') || 
+            v.name.includes('Woman') ||
+            v.name.includes('Perempuan') ||
+            v.gender === 'female'
+          );
+        }
+        
+        // 4. First available Indonesian voice
+        if (!selectedVoice && indonesianVoices.length > 0) {
+          selectedVoice = indonesianVoices[0];
+        }
+        
+        if (selectedVoice) {
+          ttsSettings.voice = selectedVoice.name;
+          voiceSelect.value = selectedVoice.name;
+          console.log("Memilih suara Indonesia:", selectedVoice.name, "Bahasa:", selectedVoice.lang);
+        }
+      } else if (voices.length > 0) {
+        // Fallback to best available voice
+        const femaleVoices = voices.filter(voice => 
+          voice.name.includes('Female') || 
+          voice.name.includes('Woman') ||
+          voice.gender === 'female'
+        );
+        
+        if (femaleVoices.length > 0) {
+          ttsSettings.voice = femaleVoices[0].name;
+          voiceSelect.value = femaleVoices[0].name;
+          console.log("Memilih suara perempuan:", femaleVoices[0].name);
+        } else {
+          ttsSettings.voice = voices[0].name;
+          voiceSelect.value = voices[0].name;
+          console.log("Memilih suara pertama yang tersedia:", voices[0].name);
+        }
+      }
+    }
+    
+    // Get Indonesian voices
+    function getIndonesianVoices() {
+      return voices.filter(voice => 
+        voice.lang.startsWith('id') || 
+        voice.lang === 'id-ID' ||
+        voice.lang === 'id' ||
+        voice.name.toLowerCase().includes('indonesian') ||
+        voice.name.toLowerCase().includes('indonesia') ||
+        voice.name.toLowerCase().includes('bahasa')
+      );
     }
     
     // Populate voice list with Indonesian priority
     function populateVoiceList() {
       voiceSelect.innerHTML = '<option value="">Pilih suara...</option>';
       
-      // Group voices by language/type
-      const indonesianVoices = voices.filter(voice => 
-        voice.lang.startsWith('id') || 
-        voice.lang === 'id-ID' ||
-        voice.name.toLowerCase().includes('indonesian') ||
-        voice.name.toLowerCase().includes('indonesia')
-      );
+      if (voices.length === 0) {
+        voiceSelect.innerHTML = '<option value="">Tidak ada suara yang tersedia</option>';
+        return;
+      }
       
+      // Get categorized voices
+      const indonesianVoices = getIndonesianVoices();
       const naturalVoices = voices.filter(voice => 
-        voice.name.includes('Natural') || 
-        voice.name.includes('Neural') ||
-        voice.name.includes('Premium')
+        (voice.name.includes('Natural') || voice.name.includes('Neural') || voice.name.includes('Premium')) &&
+        !indonesianVoices.includes(voice)
       );
       
       const femaleVoices = voices.filter(voice => 
         (voice.name.includes('Female') || 
          voice.name.includes('Woman') ||
          voice.name.includes('Perempuan') ||
-         voice.name.toLowerCase().includes('female')) &&
-        !indonesianVoices.includes(voice)
+         voice.gender === 'female') &&
+        !indonesianVoices.includes(voice) &&
+        !naturalVoices.includes(voice)
       );
       
       const otherVoices = voices.filter(voice => 
@@ -1015,17 +1064,12 @@
         !femaleVoices.includes(voice)
       );
       
-      // Add Indonesian voices first
+      // Add Indonesian voices first if preferred
       if (indonesianVoices.length > 0) {
         const optgroup = document.createElement('optgroup');
-        optgroup.label = 'Suara Bahasa Indonesia';
+        optgroup.label = '🎯 Suara Bahasa Indonesia (Direkomendasikan)';
         indonesianVoices.forEach(voice => {
-          const option = document.createElement('option');
-          option.value = voice.name;
-          option.textContent = `${voice.name} (${voice.lang})`;
-          if (ttsSettings.voice && voice.name === ttsSettings.voice) {
-            option.selected = true;
-          }
+          const option = createVoiceOption(voice);
           optgroup.appendChild(option);
         });
         voiceSelect.appendChild(optgroup);
@@ -1034,14 +1078,9 @@
       // Add natural voices
       if (naturalVoices.length > 0) {
         const optgroup = document.createElement('optgroup');
-        optgroup.label = 'Suara Natural';
+        optgroup.label = '🌟 Suara Natural';
         naturalVoices.forEach(voice => {
-          const option = document.createElement('option');
-          option.value = voice.name;
-          option.textContent = `${voice.name} (${voice.lang})`;
-          if (ttsSettings.voice && voice.name === ttsSettings.voice) {
-            option.selected = true;
-          }
+          const option = createVoiceOption(voice);
           optgroup.appendChild(option);
         });
         voiceSelect.appendChild(optgroup);
@@ -1050,14 +1089,9 @@
       // Add female voices
       if (femaleVoices.length > 0) {
         const optgroup = document.createElement('optgroup');
-        optgroup.label = 'Suara Perempuan';
+        optgroup.label = '👩 Suara Perempuan';
         femaleVoices.forEach(voice => {
-          const option = document.createElement('option');
-          option.value = voice.name;
-          option.textContent = `${voice.name} (${voice.lang})`;
-          if (ttsSettings.voice && voice.name === ttsSettings.voice) {
-            option.selected = true;
-          }
+          const option = createVoiceOption(voice);
           optgroup.appendChild(option);
         });
         voiceSelect.appendChild(optgroup);
@@ -1066,23 +1100,34 @@
       // Add other voices
       if (otherVoices.length > 0) {
         const optgroup = document.createElement('optgroup');
-        optgroup.label = 'Suara Lainnya';
+        optgroup.label = '🔊 Suara Lainnya';
         otherVoices.forEach(voice => {
-          const option = document.createElement('option');
-          option.value = voice.name;
-          option.textContent = `${voice.name} (${voice.lang})`;
-          if (ttsSettings.voice && voice.name === ttsSettings.voice) {
-            option.selected = true;
-          }
+          const option = createVoiceOption(voice);
           optgroup.appendChild(option);
         });
         voiceSelect.appendChild(optgroup);
       }
+    }
+    
+    // Create voice option element
+    function createVoiceOption(voice) {
+      const option = document.createElement('option');
+      option.value = voice.name;
       
-      // If no voices found
-      if (voices.length === 0) {
-        voiceSelect.innerHTML = '<option value="">Tidak ada suara yang tersedia</option>';
+      // Add emoji for voice type
+      let emoji = '🔊';
+      if (voice.name.includes('Google') && voice.name.includes('Indonesian')) emoji = '🎯';
+      else if (voice.name.includes('Natural') || voice.name.includes('Neural')) emoji = '🌟';
+      else if (voice.name.includes('Female') || voice.name.includes('Woman')) emoji = '👩';
+      else if (voice.name.includes('Male') || voice.name.includes('Man')) emoji = '👨';
+      
+      option.textContent = `${emoji} ${voice.name} (${voice.lang})`;
+      
+      if (ttsSettings.voice && voice.name === ttsSettings.voice) {
+        option.selected = true;
       }
+      
+      return option;
     }
     
     // Update slider values
@@ -1156,7 +1201,7 @@
     }
     
     // ============================
-    // TTS Functions - IMPROVED FOR INDONESIAN
+    // TTS Functions - OPTIMIZED FOR INDONESIAN ACCENT
     // ============================
     function speakText(text, userMessage = '', fromUserInteraction = false) {
       if (!speechSynthesis || !ttsSettings.voiceInputEnabled) {
@@ -1166,7 +1211,7 @@
       
       // Android requires user interaction
       if (ttsSettings.androidMode && !fromUserInteraction && !userHasInteracted) {
-        console.log('Android mode: Menyimpan TTS untuk interaksi pengguna');
+        console.log('Mode Android: Menyimpan TTS untuk interaksi pengguna');
         pendingTTSResponse = text;
         pendingUserMessage = userMessage;
         updateAvatarStatus('ready');
@@ -1178,23 +1223,28 @@
         speechSynthesis.cancel();
       }
       
-      // Clean text for better Indonesian pronunciation
-      const cleanedText = cleanIndonesianText(text);
+      // Optimize text for Indonesian pronunciation
+      const optimizedText = optimizeIndonesianText(text);
       
-      const utterance = new SpeechSynthesisUtterance(cleanedText);
+      const utterance = new SpeechSynthesisUtterance(optimizedText);
       
       // Find selected voice
       const selectedVoice = voices.find(voice => voice.name === ttsSettings.voice);
       if (selectedVoice) {
         utterance.voice = selectedVoice;
         utterance.lang = selectedVoice.lang || 'id-ID';
-        console.log("Using voice:", selectedVoice.name, "Language:", selectedVoice.lang);
+        console.log("Menggunakan suara:", selectedVoice.name, "Bahasa:", selectedVoice.lang);
       } else if (voices.length > 0) {
-        // Try to find Indonesian voice
-        const indonesianVoice = voices.find(voice => voice.lang.startsWith('id'));
-        if (indonesianVoice) {
-          utterance.voice = indonesianVoice;
-          utterance.lang = indonesianVoice.lang;
+        // Try to find Indonesian voice if preferred
+        if (ttsSettings.preferIndonesianAccent) {
+          const indonesianVoice = voices.find(voice => voice.lang.startsWith('id'));
+          if (indonesianVoice) {
+            utterance.voice = indonesianVoice;
+            utterance.lang = indonesianVoice.lang;
+          } else {
+            utterance.voice = voices[0];
+            utterance.lang = voices[0].lang;
+          }
         } else {
           utterance.voice = voices[0];
           utterance.lang = voices[0].lang;
@@ -1208,20 +1258,22 @@
       utterance.pitch = parseFloat(ttsSettings.pitch);
       utterance.volume = parseFloat(ttsSettings.volume);
       
-      // Add slight pause between sentences for better clarity
-      utterance.text = utterance.text.replace(/\. /g, '. ');
+      // Adjust rate for Indonesian (slightly slower for clarity)
+      if (utterance.lang.startsWith('id')) {
+        utterance.rate = Math.min(utterance.rate, 1.1); // Cap at 1.1 for Indonesian
+      }
       
       // Update avatar
       updateAvatarStatus('speaking', userMessage);
       
       // Event handlers
       utterance.onstart = function() {
-        console.log('TTS started');
+        console.log('TTS dimulai');
         isSpeaking = true;
       };
       
       utterance.onend = function() {
-        console.log('TTS ended');
+        console.log('TTS selesai');
         isSpeaking = false;
         updateAvatarStatus('idle');
       };
@@ -1241,28 +1293,42 @@
         speechSynthesis.speak(utterance);
         return true;
       } catch (error) {
-        console.error('Failed to speak:', error);
+        console.error('Gagal berbicara:', error);
         updateAvatarStatus('idle');
         return false;
       }
     }
     
-    // Clean text for better Indonesian pronunciation
-    function cleanIndonesianText(text) {
+    // Optimize text for better Indonesian pronunciation
+    function optimizeIndonesianText(text) {
       return text
-        // Replace technical terms with more phonetic versions
-        .replace(/fisika/gi, 'fisika')
-        .replace(/kimia/gi, 'kimia')
-        .replace(/biologi/gi, 'biologi')
-        .replace(/matematika/gi, 'matematika')
-        // Ensure proper pronunciation of common Indonesian words
-        .replace(/apakah/gi, 'apakah')
-        .replace(/bagaimana/gi, 'bagaimana')
-        .replace(/mengapa/gi, 'mengapa')
+        // Common Indonesian pronunciation fixes
+        .replace(/(\d+)°/g, '$1 derajat')
+        .replace(/cm³/g, 'sentimeter kubik')
+        .replace(/m³/g, 'meter kubik')
+        .replace(/km\/jam/g, 'kilometer per jam')
+        .replace(/m\/s/g, 'meter per detik')
+        
+        // Scientific terms in Indonesian
+        .replace(/photosynthesis/gi, 'fotosintesis')
+        .replace(/gravity/gi, 'gravitasi')
+        .replace(/molecule/gi, 'molekul')
+        .replace(/atom/gi, 'atom')
+        .replace(/element/gi, 'unsur')
+        .replace(/compound/gi, 'senyawa')
+        .replace(/velocity/gi, 'kecepatan')
+        .replace(/acceleration/gi, 'percepatan')
+        .replace(/energy/gi, 'energi')
+        .replace(/force/gi, 'gaya')
+        
         // Add pauses for better comprehension
-        .replace(/,/g, ', ')
+        .replace(/([.!?]) /g, '$1  ')
+        .replace(/, /g, ',  ')
         .replace(/;/g, '; ')
-        .replace(/:/g, ': ');
+        .replace(/:/g, ': ')
+        
+        // Remove extra whitespace
+        .trim();
     }
     
     // Function to trigger pending TTS
@@ -1290,7 +1356,7 @@
     // ============================
     function initializeSpeechRecognition() {
       if (!SpeechRecognition) {
-        console.warn('Speech recognition not supported');
+        console.warn('Speech recognition tidak didukung');
         voiceInputButton.disabled = true;
         voiceInputButton.title = 'Input suara tidak didukung';
         return;
@@ -1483,6 +1549,7 @@
       ttsSettings.autoSpeak = autoSpeakCheckbox.checked;
       ttsSettings.voiceInputEnabled = voiceInputCheckbox.checked;
       ttsSettings.androidMode = androidModeCheckbox.checked;
+      ttsSettings.preferIndonesianAccent = indonesianAccentCheckbox.checked;
       
       localStorage.setItem('nayraTtsSettings', JSON.stringify(ttsSettings));
       voiceInputButton.disabled = !ttsSettings.voiceInputEnabled;
@@ -1504,6 +1571,14 @@
       setTimeout(() => {
         notification.remove();
       }, 3000);
+    }
+    
+    // Test Indonesian pronunciation
+    function testIndonesianVoice() {
+      if (voices.length > 0 && ttsSettings.voiceInputEnabled) {
+        const testText = "Halo! Saya Nayra AI dengan aksen Indonesia. Siap membantu Anda belajar sains.";
+        speakText(testText, "", true);
+      }
     }
     
     // ============================
@@ -1537,6 +1612,18 @@
     // Voice select
     voiceSelect.addEventListener('change', function() {
       console.log("Selected voice:", this.value);
+      // Test the selected voice
+      if (this.value && ttsSettings.autoSpeak) {
+        setTimeout(testIndonesianVoice, 500);
+      }
+    });
+    
+    // Indonesian accent checkbox
+    indonesianAccentCheckbox.addEventListener('change', function() {
+      if (this.checked) {
+        console.log("Prioritas aksen Indonesia diaktifkan");
+        selectBestIndonesianVoice();
+      }
     });
     
     // Message input
@@ -1594,7 +1681,8 @@
         triggerPendingTTS();
       } else if (ttsSettings.autoSpeak) {
         // Play welcome message if no pending response
-        speakText("Halo! Saya Nayra AI. Silakan ajukan pertanyaan sains Anda.", "", true);
+        userHasInteracted = true;
+        speakText("Halo! Saya Nayra AI dengan aksen Indonesia. Silakan ajukan pertanyaan sains Anda.", "", true);
       }
     });
     
@@ -1608,7 +1696,7 @@
     function setupInitialInteraction() {
       const firstInteractionHandler = function() {
         userHasInteracted = true;
-        console.log("User has interacted, TTS can now work");
+        console.log("Pengguna telah berinteraksi, TTS sekarang dapat bekerja");
         
         // Remove listeners
         document.removeEventListener('click', firstInteractionHandler);
@@ -1618,7 +1706,7 @@
         // Play welcome message if enabled
         if (ttsSettings.autoSpeak && ttsSettings.voiceInputEnabled && !isSpeaking) {
           setTimeout(() => {
-            speakText("Halo! Saya Nayra AI, asisten sains Anda di TETA SAINS. Silakan ajukan pertanyaan sains Anda.", "", true);
+            speakText("Halo! Saya Nayra AI dengan aksen Indonesia, asisten sains Anda di TETA SAINS. Silakan ajukan pertanyaan sains Anda.", "", true);
           }, 1000);
         }
       };
@@ -1640,7 +1728,7 @@
     // Initialize Application
     // ============================
     document.addEventListener('DOMContentLoaded', function() {
-      console.log("DOM loaded, initializing app...");
+      console.log("DOM dimuat, menginisialisasi aplikasi...");
       
       // Initialize TTS dengan aksen Indonesia
       initializeTTS();
@@ -1657,17 +1745,25 @@
       // Check if Android
       const isAndroid = /Android/i.test(navigator.userAgent);
       const isIOS = /iPhone|iPad|iPod/i.test(navigator.userAgent);
-      console.log("Is Android:", isAndroid, "Is iOS:", isIOS);
+      console.log("Android:", isAndroid, "iOS:", isIOS);
       
       if (isAndroid) {
-        showNotification("Mode Android aktif. Ketuk layar untuk memulai.");
+        showNotification("Mode Android aktif. Ketuk layar untuk memulai dengan aksen Indonesia.");
       }
       
-      // Test TTS with a simple Indonesian phrase
+      // Test TTS availability
       setTimeout(() => {
         if (voices.length > 0 && !userHasInteracted) {
-          console.log("TTS ready with", voices.length, "voices available");
-          console.log("Selected voice:", ttsSettings.voice);
+          console.log("TTS siap dengan", voices.length, "suara tersedia");
+          console.log("Suara terpilih:", ttsSettings.voice);
+          
+          // Show voice info
+          const indonesianVoices = getIndonesianVoices();
+          if (indonesianVoices.length > 0) {
+            console.log("Suara Indonesia ditemukan:", indonesianVoices.length);
+          } else {
+            console.log("Tidak ada suara Indonesia spesifik, menggunakan yang terbaik");
+          }
         }
       }, 2000);
     });

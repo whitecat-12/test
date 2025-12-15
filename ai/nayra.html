@@ -8,8 +8,6 @@
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <!-- Tambahkan library Howler.js untuk fallback audio -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.3/howler.min.js"></script>
   <style>
     :root {
       --primary: #9999ff;
@@ -77,146 +75,91 @@
       color: #9999ff;
     }
 
-    /* Chat styles */
+    /* Chat styles - DISEMBUNYIKAN */
     .chat-container {
-      padding-bottom: 80px;
+      display: none; /* Sembunyikan chat container */
     }
     
-    .chat-header {
-      position: sticky;
-      top: 0;
-      background: white;
-      z-index: 5;
-      padding: 1rem;
-      border-bottom: 1px solid #e2e8f0;
-    }
-    
-    .search-container {
-      margin-top: 0.5rem;
-      position: relative;
-    }
-    
-    .search-input {
+    /* Avatar Container - FULL SCREEN */
+    .avatar-container {
       width: 100%;
-      padding: 0.75rem 1rem 0.75rem 2.5rem;
-      border-radius: 1.5rem;
-      border: 1px solid #e2e8f0;
-      font-size: 0.875rem;
-      outline: none;
-      transition: all 0.3s ease;
-    }
-    
-    .search-input:focus {
-      border-color: #9999ff;
-      box-shadow: 0 0 0 3px rgba(153, 153, 255, 0.1);
-    }
-    
-    .search-icon {
-      position: absolute;
-      left: 1rem;
-      top: 50%;
-      transform: translateY(-50%);
-      color: #9ca3af;
-    }
-    
-    .user-list {
-      padding: 0.5rem;
-    }
-    
-    .user-item {
-      display: flex;
-      align-items: center;
-      padding: 0.75rem;
-      border-radius: 0.75rem;
-      margin-bottom: 0.5rem;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    
-    .user-item:hover {
-      background-color: #f3f4f6;
-    }
-    
-    .user-item.active {
-      background-color: #e0f2fe;
-    }
-    
-    .user-avatar {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      color: white;
-      margin-right: 0.75rem;
-      font-size: 1.125rem;
-    }
-    
-    .user-info {
-      flex: 1;
-    }
-    
-    .user-name {
-      font-weight: 600;
-      color: #1f2937;
-      margin-bottom: 0.25rem;
-    }
-    
-    .user-status {
-      font-size: 0.75rem;
-      color: #6b7280;
-    }
-    
-    .no-users {
-      text-align: center;
-      padding: 2rem;
-      color: #6b7280;
-    }
-    
-    .chat-messages {
-      padding: 1rem;
-      max-height: calc(100vh - 200px);
-      overflow-y: auto;
-    }
-    
-    .message {
-      margin-bottom: 1rem;
-      display: flex;
-    }
-    
-    .message.sent {
-      justify-content: flex-end;
-    }
-    
-    .message.received {
-      justify-content: flex-start;
-    }
-    
-    .message-bubble {
-      max-width: 70%;
-      padding: 0.75rem 1rem;
-      border-radius: 1rem;
+      max-width: 414px;
+      height: calc(100vh - 140px); /* Full screen minus header dan input */
+      background: white;
       position: relative;
+      overflow: hidden;
     }
     
-    .message.sent .message-bubble {
-      background-color: #9999ff;
+    .avatar-video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .avatar-idle {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    /* Status indicator */
+    .avatar-status {
+      position: absolute;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.7);
       color: white;
-      border-bottom-right-radius: 0.25rem;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 0.875rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      z-index: 5;
     }
     
-    .message.received .message-bubble {
-      background-color: #f3f4f6;
-      color: #1f2937;
-      border-bottom-left-radius: 0.25rem;
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #4ade80;
     }
     
-    .message-time {
-      font-size: 0.75rem;
-      margin-top: 0.25rem;
-      opacity: 0.7;
+    .status-dot.idle {
+      background: #94a3b8;
+    }
+    
+    .status-dot.speaking {
+      background: #3b82f6;
+      animation: pulse 1.5s infinite;
+    }
+    
+    .status-dot.listening {
+      background: #ef4444;
+      animation: pulse 1s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    /* User input indicator - muncul di atas avatar */
+    .user-input-indicator {
+      position: absolute;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(153, 153, 255, 0.9);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.875rem;
+      max-width: 80%;
+      text-align: center;
+      z-index: 5;
+      display: none;
     }
     
     .message-input-container {
@@ -428,55 +371,6 @@
       margin-top: 0.25rem;
     }
     
-    /* Nayra AI specific styles */
-    .nayra-avatar {
-      width: 48px;
-      height: 48px;
-      border-radius: 50%;
-      background-color: #9999ff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      margin-right: 0.75rem;
-      font-size: 1.125rem;
-    }
-    
-    .thinking-indicator {
-      display: flex;
-      align-items: center;
-      color: #6b7280;
-      font-size: 0.875rem;
-      margin-top: 0.5rem;
-    }
-    
-    .thinking-dots {
-      display: flex;
-      margin-left: 0.5rem;
-    }
-    
-    .thinking-dots span {
-      width: 4px;
-      height: 4px;
-      border-radius: 50%;
-      background-color: #6b7280;
-      margin: 0 1px;
-      animation: pulse 1.5s infinite ease-in-out;
-    }
-    
-    .thinking-dots span:nth-child(2) {
-      animation-delay: 0.2s;
-    }
-    
-    .thinking-dots span:nth-child(3) {
-      animation-delay: 0.4s;
-    }
-    
-    @keyframes pulse {
-      0%, 100% { opacity: 0.4; }
-      50% { opacity: 1; }
-    }
-    
     /* Voice input button styles */
     .voice-input-button {
       width: 40px;
@@ -502,10 +396,10 @@
       animation: pulse 1.5s infinite;
     }
     
-    /* TTS button styles */
-    .tts-button {
-      width: 32px;
-      height: 32px;
+    /* Settings button in message input */
+    .settings-button-small {
+      width: 40px;
+      height: 40px;
       border-radius: 50%;
       background-color: #f3f4f6;
       color: #6b7280;
@@ -515,26 +409,10 @@
       border: none;
       cursor: pointer;
       transition: all 0.2s ease;
-      font-size: 0.875rem;
-      margin-left: 0.5rem;
-      margin-top: 0.25rem;
     }
     
-    .tts-button:hover {
-      background-color: #9999ff;
-      color: white;
-    }
-    
-    .tts-button.playing {
-      background-color: #9999ff;
-      color: white;
-    }
-    
-    .message-actions {
-      display: flex;
-      justify-content: flex-end;
-      margin-top: 0.25rem;
-      padding-left: 0.5rem;
+    .settings-button-small:hover {
+      background-color: #e5e7eb;
     }
     
     /* Settings panel for TTS */
@@ -695,69 +573,8 @@
       background-color: #e5e7eb;
     }
     
-    /* Settings button in message input */
-    .settings-button-small {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background-color: #f3f4f6;
-      color: #6b7280;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      border: none;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    
-    .settings-button-small:hover {
-      background-color: #e5e7eb;
-    }
-    
-    /* Audio fallback notification */
-    .audio-notification {
-      position: fixed;
-      top: 80px;
-      left: 50%;
-      transform: translateX(-50%);
-      background-color: #ff6b6b;
-      color: white;
-      padding: 10px 20px;
-      border-radius: 8px;
-      z-index: 1003;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-      animation: slideDown 0.3s ease;
-      max-width: 90%;
-      text-align: center;
-    }
-    
-    @keyframes slideDown {
-      from {
-        transform: translate(-50%, -20px);
-        opacity: 0;
-      }
-      to {
-        transform: translate(-50%, 0);
-        opacity: 1;
-      }
-    }
-    
     /* Improved mobile styles */
     @media (max-width: 414px) {
-      .user-item {
-        padding: 0.625rem;
-      }
-      
-      .user-avatar {
-        width: 42px;
-        height: 42px;
-        font-size: 1rem;
-      }
-      
-      .message-bubble {
-        max-width: 80%;
-      }
-      
       .message-input-container {
         padding: 0.625rem;
       }
@@ -778,6 +595,14 @@
       
       .nav-icon {
         font-size: 1.1rem;
+      }
+      
+      .avatar-container {
+        height: calc(100vh - 135px);
+      }
+      
+      .avatar-status {
+        bottom: 70px;
       }
     }
   </style>
@@ -802,6 +627,34 @@
         </div>
       </div>
     </header>
+
+    <!-- Avatar Video Container -->
+    <div class="avatar-container">
+      <!-- Ganti src dengan path ke video avatar yang Anda siapkan -->
+      <video id="avatarSpeaking" class="avatar-video" style="display: none;" loop>
+        <!-- Ganti dengan video avatar berbicara Anda -->
+        <source src="avatar-speaking.mp4" type="video/mp4">
+        Browser Anda tidak mendukung tag video.
+      </video>
+      
+      <video id="avatarIdle" class="avatar-idle" autoplay loop muted>
+        <!-- Ganti dengan video avatar idle/diam Anda -->
+        <source src="avatar-idle.mp4" type="video/mp4">
+        Browser Anda tidak mendukung tag video.
+      </video>
+      
+      <!-- User input indicator -->
+      <div class="user-input-indicator" id="userInputIndicator">
+        <i class="fas fa-user mr-2"></i>
+        <span id="userInputText"></span>
+      </div>
+      
+      <!-- Avatar status -->
+      <div class="avatar-status">
+        <div class="status-dot idle" id="statusDot"></div>
+        <span id="statusText">Siap Mendengarkan</span>
+      </div>
+    </div>
 
     <!-- Sidebar -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
@@ -884,7 +737,7 @@
         
         <div class="setting-item">
           <label class="checkbox-label">
-            <input type="checkbox" id="autoSpeakCheckbox">
+            <input type="checkbox" id="autoSpeakCheckbox" checked>
             <span>Baca otomatis respons Nayra AI</span>
           </label>
         </div>
@@ -899,22 +752,6 @@
         <div class="settings-buttons">
           <button class="settings-button cancel" id="cancelSettings">Batal</button>
           <button class="settings-button save" id="saveSettings">Simpan</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Chat Container -->
-    <div class="chat-container">
-      <!-- Chat Messages -->
-      <div id="chatMessages" class="chat-messages">
-        <!-- Welcome message -->
-        <div class="message received">
-          <div class="message-bubble">
-            <div class="message-text">
-              Halo! Saya Nayra AI, asisten sains Anda. Saya siap membantu Anda dengan pertanyaan seputar sains, fisika, kimia, biologi, dan matematika. Apa yang ingin Anda ketahui hari ini?
-            </div>
-            <div class="message-time" id="welcomeTime"></div>
-          </div>
         </div>
       </div>
     </div>
@@ -963,10 +800,16 @@
 
   <script>
     // DOM Elements
-    const chatMessages = document.getElementById("chatMessages");
     const messageInput = document.getElementById("messageInput");
     const sendButton = document.getElementById("sendButton");
-    const welcomeTime = document.getElementById("welcomeTime");
+    
+    // Avatar elements
+    const avatarSpeaking = document.getElementById("avatarSpeaking");
+    const avatarIdle = document.getElementById("avatarIdle");
+    const statusDot = document.getElementById("statusDot");
+    const statusText = document.getElementById("statusText");
+    const userInputIndicator = document.getElementById("userInputIndicator");
+    const userInputText = document.getElementById("userInputText");
     
     // Sidebar elements
     const hamburgerButton = document.getElementById("hamburgerButton");
@@ -996,23 +839,18 @@
     const autoSpeakCheckbox = document.getElementById("autoSpeakCheckbox");
     const voiceInputCheckbox = document.getElementById("voiceInputCheckbox");
     
-    // Audio variables
+    // TTS variables
     let speechSynthesis = window.speechSynthesis;
     let voices = [];
     let currentUtterance = null;
     let isSpeaking = false;
-    let isUsingFallback = false;
-    let audioFallback = null;
-    
-    // TTS settings
     let ttsSettings = {
       voice: null,
       rate: 1,
       pitch: 1,
       volume: 1,
-      autoSpeak: false,
-      voiceInputEnabled: true,
-      useFallback: false
+      autoSpeak: true, // Default true untuk auto speak
+      voiceInputEnabled: true
     };
     
     // Speech recognition variables
@@ -1020,23 +858,12 @@
     let recognition = null;
     let isListening = false;
 
-    // Set welcome message time
-    welcomeTime.textContent = formatTime(new Date());
-
-    // Initialize TTS dengan deteksi device
+    // Initialize TTS
     function initializeTTS() {
       // Load saved settings
       const savedSettings = localStorage.getItem('nayraTtsSettings');
       if (savedSettings) {
         ttsSettings = JSON.parse(savedSettings);
-      }
-      
-      // Deteksi apakah di mobile
-      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-      
-      // Auto-enable fallback untuk mobile jika belum disetting
-      if (isMobile && ttsSettings.useFallback === undefined) {
-        ttsSettings.useFallback = true;
       }
       
       // Apply settings to UI
@@ -1048,51 +875,27 @@
       
       updateSliderValues();
       
-      // Cek dukungan Web Speech API
-      if (!('speechSynthesis' in window)) {
-        console.warn('Web Speech API tidak didukung');
-        showAudioNotification('Web Speech API tidak didukung di browser ini');
-        ttsSettings.useFallback = true;
-        isUsingFallback = true;
+      // Load voices
+      loadVoices();
+      
+      // If voices are already loaded
+      if (speechSynthesis.getVoices().length > 0) {
+        populateVoiceList();
       }
       
-      // Coba load voices jika tidak menggunakan fallback
-      if (!ttsSettings.useFallback) {
-        loadVoices();
-        
-        // If voices are already loaded
-        if (speechSynthesis.getVoices().length > 0) {
-          populateVoiceList();
-        }
-        
-        // When voices are loaded
-        speechSynthesis.onvoiceschanged = function() {
-          populateVoiceList();
-        };
-        
-        // Cek apakah TTS bekerja
-        setTimeout(() => {
-          if (voices.length === 0) {
-            console.warn('Tidak ada suara TTS yang tersedia');
-            showAudioNotification('TTS tidak tersedia, menggunakan fallback audio');
-            ttsSettings.useFallback = true;
-            isUsingFallback = true;
-          }
-        }, 2000);
-      }
+      // When voices are loaded
+      speechSynthesis.onvoiceschanged = function() {
+        populateVoiceList();
+      };
     }
     
     // Load voices
     function loadVoices() {
-      if (speechSynthesis) {
-        voices = speechSynthesis.getVoices();
-      }
+      voices = speechSynthesis.getVoices();
     }
     
     // Populate voice list
     function populateVoiceList() {
-      if (ttsSettings.useFallback) return;
-      
       voiceSelect.innerHTML = '<option value="">Pilih suara...</option>';
       
       // Filter voices for Indonesian or English
@@ -1132,7 +935,6 @@
       // If no voices found
       if (filteredVoices.length === 0) {
         voiceSelect.innerHTML = '<option value="">Tidak ada suara yang tersedia</option>';
-        showAudioNotification('Tidak ada suara TTS tersedia, coba gunakan fallback');
       }
     }
     
@@ -1143,19 +945,67 @@
       volumeValue.textContent = volumeSlider.value;
     }
     
-    // Speak text menggunakan TTS atau fallback
-    function speakText(text, messageId = null) {
-      if (!ttsSettings.voiceInputEnabled) return;
+    // Update avatar status
+    function updateAvatarStatus(state, userMessage = '') {
+      switch(state) {
+        case 'speaking':
+          statusDot.className = 'status-dot speaking';
+          statusText.textContent = 'Sedang Berbicara';
+          // Sembunyikan user input indicator
+          userInputIndicator.style.display = 'none';
+          // Tampilkan video berbicara, sembunyikan video idle
+          avatarIdle.style.display = 'none';
+          avatarSpeaking.style.display = 'block';
+          avatarSpeaking.play();
+          break;
+          
+        case 'listening':
+          statusDot.className = 'status-dot listening';
+          statusText.textContent = 'Sedang Mendengarkan';
+          // Tetap di idle saat mendengarkan
+          avatarIdle.style.display = 'block';
+          avatarSpeaking.style.display = 'none';
+          avatarSpeaking.pause();
+          avatarIdle.play();
+          break;
+          
+        case 'thinking':
+          statusDot.className = 'status-dot';
+          statusText.textContent = 'Sedang Berpikir';
+          // Tampilkan user input
+          if (userMessage) {
+            userInputText.textContent = userMessage;
+            userInputIndicator.style.display = 'flex';
+          }
+          // Tetap di idle saat berpikir
+          avatarIdle.style.display = 'block';
+          avatarSpeaking.style.display = 'none';
+          avatarSpeaking.pause();
+          avatarIdle.play();
+          break;
+          
+        case 'idle':
+        default:
+          statusDot.className = 'status-dot idle';
+          statusText.textContent = 'Siap Mendengarkan';
+          // Sembunyikan user input indicator
+          userInputIndicator.style.display = 'none';
+          // Tampilkan video idle, sembunyikan video berbicara
+          avatarSpeaking.style.display = 'none';
+          avatarIdle.style.display = 'block';
+          avatarSpeaking.pause();
+          avatarIdle.play();
+          break;
+      }
+    }
+    
+    // Speak text using TTS
+    function speakText(text, userMessage = '') {
+      if (!speechSynthesis || !ttsSettings.voiceInputEnabled) return;
       
       // Stop any current speech
       if (isSpeaking) {
-        stopSpeaking();
-      }
-      
-      // Gunakan fallback jika diaktifkan
-      if (ttsSettings.useFallback || !speechSynthesis) {
-        useAudioFallback(text, messageId);
-        return;
+        speechSynthesis.cancel();
       }
       
       const utterance = new SpeechSynthesisUtterance(text);
@@ -1172,124 +1022,34 @@
       utterance.volume = ttsSettings.volume;
       utterance.lang = selectedVoice ? selectedVoice.lang : 'id-ID';
       
-      // Highlight message if provided
-      if (messageId) {
-        const messageElement = document.getElementById(messageId);
-        if (messageElement) {
-          utterance.onstart = function() {
-            messageElement.classList.add('playing');
-            isSpeaking = true;
-          };
-          
-          utterance.onend = function() {
-            messageElement.classList.remove('playing');
-            isSpeaking = false;
-          };
-          
-          utterance.onerror = function() {
-            messageElement.classList.remove('playing');
-            isSpeaking = false;
-            // Jika error, coba fallback
-            console.warn('TTS error, trying fallback');
-            useAudioFallback(text, messageId);
-          };
-        }
-      } else {
-        utterance.onend = function() {
-          isSpeaking = false;
-        };
-        
-        utterance.onerror = function() {
-          isSpeaking = false;
-          // Jika error, coba fallback
-          console.warn('TTS error, trying fallback');
-          useAudioFallback(text, messageId);
-        };
-      }
+      // Update avatar status
+      updateAvatarStatus('speaking', userMessage);
+      
+      utterance.onstart = function() {
+        isSpeaking = true;
+      };
+      
+      utterance.onend = function() {
+        isSpeaking = false;
+        updateAvatarStatus('idle');
+      };
+      
+      utterance.onerror = function() {
+        isSpeaking = false;
+        updateAvatarStatus('idle');
+      };
       
       currentUtterance = utterance;
       speechSynthesis.speak(utterance);
     }
     
-    // Fallback audio menggunakan Howler.js
-    function useAudioFallback(text, messageId = null) {
-      isUsingFallback = true;
-      
-      // Untuk demo, kita akan split text menjadi potongan kecil
-      // Dalam aplikasi nyata, Anda perlu menggunakan API TTS server-side
-      const shortText = text.substring(0, 100) + "...";
-      
-      // Highlight message if provided
-      if (messageId) {
-        const messageElement = document.getElementById(messageId);
-        if (messageElement) {
-          messageElement.classList.add('playing');
-        }
-      }
-      
-      // Simulasi audio dengan delay (karena tidak ada API TTS server-side)
-      isSpeaking = true;
-      
-      // Show notification that audio is playing
-      showAudioNotification('Membaca respons... (mode fallback)');
-      
-      // Simulasi durasi bicara
-      setTimeout(() => {
-        isSpeaking = false;
-        if (messageId) {
-          const messageElement = document.getElementById(messageId);
-          if (messageElement) {
-            messageElement.classList.remove('playing');
-          }
-        }
-        showAudioNotification('Selesai membaca');
-      }, 2000);
-    }
-    
     // Stop TTS
     function stopSpeaking() {
       if (isSpeaking) {
-        if (!isUsingFallback && speechSynthesis) {
-          speechSynthesis.cancel();
-        }
-        
-        // Stop audio fallback jika ada
-        if (audioFallback) {
-          audioFallback.stop();
-          audioFallback = null;
-        }
-        
+        speechSynthesis.cancel();
         isSpeaking = false;
-        isUsingFallback = false;
-        
-        // Remove playing class from all messages
-        document.querySelectorAll('.tts-button.playing').forEach(btn => {
-          btn.classList.remove('playing');
-        });
+        updateAvatarStatus('idle');
       }
-    }
-    
-    // Show audio notification
-    function showAudioNotification(message) {
-      // Remove existing notification
-      const existingNotification = document.querySelector('.audio-notification');
-      if (existingNotification) {
-        existingNotification.remove();
-      }
-      
-      // Create notification element
-      const notification = document.createElement('div');
-      notification.className = 'audio-notification';
-      notification.textContent = message;
-      
-      document.body.appendChild(notification);
-      
-      // Remove after 3 seconds
-      setTimeout(() => {
-        if (notification.parentNode) {
-          notification.remove();
-        }
-      }, 3000);
     }
     
     // Initialize speech recognition
@@ -1298,26 +1058,19 @@
         console.warn('Speech recognition not supported');
         voiceInputButton.disabled = true;
         voiceInputButton.title = 'Input suara tidak didukung';
-        showAudioNotification('Input suara tidak didukung di browser ini');
         return;
       }
       
       recognition = new SpeechRecognition();
       recognition.continuous = false;
       recognition.interimResults = true;
-      
-      // Coba gunakan bahasa Indonesia, fallback ke Inggris
-      try {
-        recognition.lang = 'id-ID';
-      } catch (e) {
-        recognition.lang = 'en-US';
-        console.warn('Bahasa Indonesia tidak didukung, menggunakan Inggris');
-      }
+      recognition.lang = 'id-ID';
       
       recognition.onstart = function() {
         isListening = true;
         voiceInputButton.classList.add('listening');
         voiceInputButton.innerHTML = '<i class="fas fa-stop"></i>';
+        updateAvatarStatus('listening');
       };
       
       recognition.onresult = function(event) {
@@ -1334,6 +1087,7 @@
         isListening = false;
         voiceInputButton.classList.remove('listening');
         voiceInputButton.innerHTML = '<i class="fas fa-microphone"></i>';
+        updateAvatarStatus('idle');
       };
       
       recognition.onerror = function(event) {
@@ -1341,11 +1095,10 @@
         isListening = false;
         voiceInputButton.classList.remove('listening');
         voiceInputButton.innerHTML = '<i class="fas fa-microphone"></i>';
+        updateAvatarStatus('idle');
         
         if (event.error === 'not-allowed') {
-          showAudioNotification('Izin mikrofon ditolak. Izinkan akses mikrofon di pengaturan browser.');
-        } else if (event.error === 'no-speech') {
-          showAudioNotification('Tidak ada suara terdeteksi. Coba lagi.');
+          alert('Akses mikrofon ditolak. Silakan izinkan akses mikrofon di pengaturan browser Anda.');
         }
       };
     }
@@ -1357,24 +1110,19 @@
       if (isListening) {
         recognition.stop();
       } else {
-        // Cek izin microphone untuk mobile
-        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-          navigator.mediaDevices.getUserMedia({ audio: true })
-            .then(function(stream) {
-              // Stop all tracks to release microphone
-              stream.getTracks().forEach(track => track.stop());
-              
-              // Start recognition
-              recognition.start();
-            })
-            .catch(function(err) {
-              console.error('Microphone access denied:', err);
-              showAudioNotification('Tidak dapat mengakses mikrofon. Izinkan akses mikrofon di pengaturan browser.');
-            });
-        } else {
-          // Untuk browser lama yang tidak mendukung getUserMedia
-          recognition.start();
-        }
+        // Request microphone permission
+        navigator.mediaDevices.getUserMedia({ audio: true })
+          .then(function(stream) {
+            // Stop all tracks to release microphone
+            stream.getTracks().forEach(track => track.stop());
+            
+            // Start recognition
+            recognition.start();
+          })
+          .catch(function(err) {
+            console.error('Microphone access denied:', err);
+            alert('Tidak dapat mengakses mikrofon. Silakan izinkan akses mikrofon di pengaturan browser Anda.');
+          });
       }
     }
     
@@ -1418,9 +1166,24 @@
       voiceInputButton.disabled = !ttsSettings.voiceInputEnabled;
       
       closeSettingsPanel();
-      showAudioNotification('Pengaturan suara disimpan');
+      showNotification('Pengaturan suara disimpan');
     }
     
+    // Show notification
+    function showNotification(message) {
+      // Create notification element
+      const notification = document.createElement('div');
+      notification.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50';
+      notification.textContent = message;
+      
+      document.body.appendChild(notification);
+      
+      // Remove after 3 seconds
+      setTimeout(() => {
+        notification.remove();
+      }, 3000);
+    }
+
     // Event listeners for sidebar
     hamburgerButton.addEventListener("click", toggleSidebar);
     closeSidebar.addEventListener("click", closeSidebarFunc);
@@ -1468,140 +1231,45 @@
       
       const messageText = messageInput.value.trim();
       
-      // Add user message to chat
-      addMessageToChat(messageText, 'sent');
+      // Show thinking indicator with user message
+      updateAvatarStatus('thinking', messageText);
       
       // Clear input
       messageInput.value = "";
       sendButton.disabled = true;
       
-      // Show thinking indicator
-      showThinkingIndicator();
-      
       try {
-        // Send message to Groq API (menggunakan API key dari Temanguru)
+        // Send message to Groq API
         const response = await fetchGroqResponse(messageText);
-        
-        // Remove thinking indicator
-        removeThinkingIndicator();
-        
-        // Add AI response to chat
-        const messageId = addMessageToChat(response, 'received', true);
         
         // Auto-speak response if enabled
         if (ttsSettings.autoSpeak && ttsSettings.voiceInputEnabled) {
           setTimeout(() => {
-            speakText(response, messageId);
+            speakText(response, messageText);
           }, 500);
+        } else {
+          // Jika auto-speak tidak aktif, tetap berpindah ke idle
+          updateAvatarStatus('idle');
         }
       } catch (error) {
-        // Remove thinking indicator
-        removeThinkingIndicator();
-        
         // Show error message
-        addMessageToChat(
-          "Maaf, saya mengalami masalah teknis saat memproses pertanyaan Anda. Silakan coba lagi nanti.", 
-          'received'
-        );
+        const errorMessage = "Maaf, saya mengalami masalah teknis saat memproses pertanyaan Anda. Silakan coba lagi nanti.";
+        
+        if (ttsSettings.autoSpeak && ttsSettings.voiceInputEnabled) {
+          setTimeout(() => {
+            speakText(errorMessage, messageText);
+          }, 500);
+        } else {
+          updateAvatarStatus('idle');
+        }
         console.error("Error:", error);
       }
     }
 
-    // Add message to chat
-    function addMessageToChat(text, type, addTtsButton = false) {
-      const messageDiv = document.createElement("div");
-      messageDiv.className = `message ${type}`;
-      
-      const timeString = formatTime(new Date());
-      const messageId = `message-${Date.now()}`;
-      
-      let messageContent = `
-        <div class="message-bubble">
-          <div class="message-text">${escapeHtml(text)}</div>
-          <div class="message-time">${timeString}</div>
-        </div>
-      `;
-      
-      // Add TTS button for received messages
-      if (type === 'received' && addTtsButton && ttsSettings.voiceInputEnabled) {
-        messageContent += `
-          <div class="message-actions">
-            <button class="tts-button" data-message-id="${messageId}" title="Dengarkan jawaban">
-              <i class="fas fa-volume-up"></i>
-            </button>
-          </div>
-        `;
-      }
-      
-      messageDiv.innerHTML = messageContent;
-      messageDiv.id = messageId;
-      
-      chatMessages.appendChild(messageDiv);
-      
-      // Add event listener to TTS button if present
-      if (type === 'received' && addTtsButton && ttsSettings.voiceInputEnabled) {
-        const ttsButton = messageDiv.querySelector('.tts-button');
-        ttsButton.addEventListener('click', function() {
-          const msgId = this.getAttribute('data-message-id');
-          const messageText = this.closest('.message').querySelector('.message-text').textContent;
-          
-          // Stop any current speech
-          stopSpeaking();
-          
-          // Speak the message
-          speakText(messageText, msgId);
-        });
-      }
-      
-      // Scroll to bottom
-      setTimeout(() => {
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-      }, 100);
-      
-      return messageId;
-    }
-
-    // Show thinking indicator
-    function showThinkingIndicator() {
-      const thinkingDiv = document.createElement("div");
-      thinkingDiv.className = "message received";
-      thinkingDiv.id = "thinkingIndicator";
-      
-      thinkingDiv.innerHTML = `
-        <div class="message-bubble">
-          <div class="message-text">
-            <div class="thinking-indicator">
-              Nayra sedang berpikir
-              <div class="thinking-dots">
-                <span></span>
-                <span></span>
-                <span></span>
-              </div>
-            </div>
-          </div>
-        </div>
-      `;
-      
-      chatMessages.appendChild(thinkingDiv);
-      
-      // Scroll to bottom
-      setTimeout(() => {
-        chatMessages.scrollTop = chatMessages.scrollHeight;
-      }, 100);
-    }
-
-    // Remove thinking indicator
-    function removeThinkingIndicator() {
-      const thinkingIndicator = document.getElementById("thinkingIndicator");
-      if (thinkingIndicator) {
-        thinkingIndicator.remove();
-      }
-    }
-
-    // Fetch response from Groq API menggunakan API key dari Temanguru
+    // Fetch response from Groq API
     async function fetchGroqResponse(message) {
       // Menggunakan API key dari Temanguru
-      const apiKey = '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';
+      const apiKey = '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';
       const apiUrl = 'https://api.groq.com/openai/v1/chat/completions';
       
       // Konteks untuk AI - fokus pada sains untuk Nayra AI
@@ -1619,7 +1287,7 @@
       Anda adalah asisten khusus untuk aplikasi pembelajaran sains TETA SAINS.`;
       
       const requestBody = {
-        model: 'llama-3.1-8b-instant', // Model Groq yang cepat dan efisien
+        model: 'llama-3.1-8b-instant',
         messages: [
           { role: 'system', content: systemPrompt },
           { role: 'user', content: message }
@@ -1672,12 +1340,8 @@
         return "Terima kasih atas pertanyaannya! Sebagai asisten sains Nayra AI di TETA SAINS, saya khusus membantu dengan topik fisika, kimia, biologi, matematika, dan ilmu pengetahuan lainnya. Bisakah Anda memberikan lebih detail tentang apa yang ingin Anda ketahui?";
       }
     }
-
-    // Helper functions
-    function formatTime(date) {
-      return date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-    }
-
+    
+    // Helper function untuk escape HTML
     function escapeHtml(s) {
       if (!s && s !== 0) return "";
       return String(s)
@@ -1693,6 +1357,9 @@
       initializeTTS();
       initializeSpeechRecognition();
       
+      // Initialize avatar videos
+      avatarIdle.play();
+      
       // Speak welcome message if auto-speak is enabled
       if (ttsSettings.autoSpeak && ttsSettings.voiceInputEnabled) {
         setTimeout(() => {
@@ -1703,4 +1370,4 @@
     });
   </script>
 </body>
-</html>
+  </html>

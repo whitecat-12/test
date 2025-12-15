@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+kok saat tidak ada pertanyaan videonya tidak play ya yang avatar-idle.mp4, bisa play otomatis nddak, bisa kamu perbaiki lngsung dicode<!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8" />
@@ -641,8 +641,7 @@
         Browser Anda tidak mendukung tag video.
       </video>
       
-      <!-- PERBAIKAN 1: Tambahkan playsinline pada video idle -->
-      <video id="avatarIdle" class="avatar-idle" autoplay loop muted playsinline>
+      <video id="avatarIdle" class="avatar-idle" autoplay loop muted>
         <!-- Ganti dengan video avatar idle/diam Anda -->
         <source src="avatar-idle.mp4" type="video/mp4">
         Browser Anda tidak mendukung tag video.
@@ -824,176 +823,7 @@
       </a>
     </nav>
   </div>
-
-  <script>
-    // ============================
-    // DOM Elements
-    // ============================
-    const messageInput = document.getElementById("messageInput");
-    const sendButton = document.getElementById("sendButton");
-    
-    // Avatar elements
-    const avatarSpeaking = document.getElementById("avatarSpeaking");
-    const avatarIdle = document.getElementById("avatarIdle");
-    const statusDot = document.getElementById("statusDot");
-    const statusText = document.getElementById("statusText");
-    const userInputIndicator = document.getElementById("userInputIndicator");
-    const userInputText = document.getElementById("userInputText");
-    const tapToSpeakIndicator = document.getElementById("tapToSpeakIndicator");
-    
-    // Sidebar elements
-    const hamburgerButton = document.getElementById("hamburgerButton");
-    const closeSidebar = document.getElementById("closeSidebar");
-    const sidebar = document.getElementById("sidebar");
-    const sidebarOverlay = document.getElementById("sidebarOverlay");
-    
-    // Voice input elements
-    const voiceInputButton = document.getElementById("voiceInputButton");
-    
-    // Settings elements
-    const settingsButton = document.getElementById("settingsButton");
-    const closeSettings = document.getElementById("closeSettings");
-    const cancelSettings = document.getElementById("cancelSettings");
-    const saveSettings = document.getElementById("saveSettings");
-    const settingsPanel = document.getElementById("settingsPanel");
-    const settingsOverlay = document.getElementById("settingsOverlay");
-    
-    // TTS elements
-    const voiceSelect = document.getElementById("voiceSelect");
-    const rateSlider = document.getElementById("rateSlider");
-    const pitchSlider = document.getElementById("pitchSlider");
-    const volumeSlider = document.getElementById("volumeSlider");
-    const rateValue = document.getElementById("rateValue");
-    const pitchValue = document.getElementById("pitchValue");
-    const volumeValue = document.getElementById("volumeValue");
-    const autoSpeakCheckbox = document.getElementById("autoSpeakCheckbox");
-    const voiceInputCheckbox = document.getElementById("voiceInputCheckbox");
-    const androidModeCheckbox = document.getElementById("androidModeCheckbox");
-    const indonesianAccentCheckbox = document.getElementById("indonesianAccentCheckbox");
-    
-    // ============================
-    // Global Variables
-    // ============================
-    let speechSynthesis = window.speechSynthesis;
-    let voices = [];
-    let currentUtterance = null;
-    let isSpeaking = false;
-    let userHasInteracted = false;
-    let pendingTTSResponse = null;
-    let pendingUserMessage = "";
-    
-    // TTS settings
-    let ttsSettings = {
-      voice: null,
-      rate: 1,
-      pitch: 1,
-      volume: 1,
-      autoSpeak: true,
-      voiceInputEnabled: true,
-      androidMode: true,
-      preferIndonesianAccent: true
-    };
-    
-    // Speech recognition
-    let SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    let recognition = null;
-    let isListening = false;
-    
-    // ============================
-    // TTS Initialization - OPTIMIZED FOR INDONESIAN ACCENT
-    // ============================
-    function initializeTTS() {
-      console.log("Menginisialisasi TTS dengan aksen Indonesia...");
-      
-      // Load saved settings
-      const savedSettings = localStorage.getItem('nayraTtsSettings');
-      if (savedSettings) {
-        ttsSettings = JSON.parse(savedSettings);
-      }
-      
-      // Apply settings to UI
-      rateSlider.value = ttsSettings.rate;
-      pitchSlider.value = ttsSettings.pitch;
-      volumeSlider.value = ttsSettings.volume;
-      autoSpeakCheckbox.checked = ttsSettings.autoSpeak;
-      voiceInputCheckbox.checked = ttsSettings.voiceInputEnabled;
-      androidModeCheckbox.checked = ttsSettings.androidMode;
-      indonesianAccentCheckbox.checked = ttsSettings.preferIndonesianAccent;
-      
-      updateSliderValues();
-      
-      // Initialize voices - prioritizing Indonesian
-      loadVoices();
-      
-      // Voice loading handler
-      if (speechSynthesis.onvoiceschanged !== undefined) {
-        speechSynthesis.onvoiceschanged = function() {
-          console.log("Suara berubah");
-          loadVoices();
-        };
-      }
-      
-      // Initial voice load
-      setTimeout(loadVoices, 500);
-    }
-    
-    // Load voices with Indonesian priority
-    function loadVoices() {
-      voices = speechSynthesis.getVoices();
-      console.log(`Memuat ${voices.length} suara`);
-      
-      if (voices.length > 0) {
-        populateVoiceList();
-        
-        // Auto-select Indonesian voice if available and preferred
-        if ((!ttsSettings.voice || ttsSettings.voice === "") && ttsSettings.preferIndonesianAccent) {
-          selectBestIndonesianVoice();
-        } else if (ttsSettings.voice) {
-          // Ensure the saved voice still exists
-          const savedVoiceExists = voices.some(voice => voice.name === ttsSettings.voice);
-          if (!savedVoiceExists) {
-            selectBestIndonesianVoice();
-          }
-        }
-      } else {
-        // Retry for browsers that load voices async
-        console.log("Tidak ada suara ditemukan, mencoba lagi...");
-        setTimeout(loadVoices, 1000);
-      }
-    }
-    
-    // Select the best Indonesian voice
-    function selectBestIndonesianVoice() {
-      // Find Indonesian voices
-      const indonesianVoices = getIndonesianVoices();
-      
-      if (indonesianVoices.length > 0) {
-        // Priority: 1. Google Indonesian, 2. Natural/Neural Indonesian, 3. Any Indonesian
-        let selectedVoice = null;
-        
-        // 1. Google Indonesian voices (usually best quality)
-        selectedVoice = indonesianVoices.find(v => v.name.includes('Google') && (v.name.includes('Indonesian') || v.name.includes('Indonesia')));
-        
-        // 2. Natural/Neural Indonesian voices
-        if (!selectedVoice) {
-          selectedVoice = indonesianVoices.find(v => 
-            (v.name.includes('Natural') || v.name.includes('Neural') || v.name.includes('Premium')) &&
-            (v.name.includes('Indonesian') || v.lang === 'id-ID')
-          );
-        }
-        
-        // 3. Any female Indonesian voice
-        if (!selectedVoice) {
-          selectedVoice = indonesianVoices.find(v => 
-            v.name.includes('Female') || 
-            v.name.includes('Woman') ||
-            v.name.includes('Perempuan') ||
-            v.gender === 'female'
-          );
-        }
-        
-        // 4. First available Indonesian voice
-        if (!selectedVoice && in<script>
+<script>
     // ============================
     // DOM Elements
     // ============================

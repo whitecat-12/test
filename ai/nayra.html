@@ -75,16 +75,11 @@
       color: #9999ff;
     }
 
-    /* Chat styles - DISEMBUNYIKAN */
-    .chat-container {
-      display: none; /* Sembunyikan chat container */
-    }
-    
     /* Avatar Container - FULL SCREEN */
     .avatar-container {
       width: 100%;
       max-width: 414px;
-      height: calc(100vh - 140px); /* Full screen minus header dan input */
+      height: calc(100vh - 140px);
       background: white;
       position: relative;
       overflow: hidden;
@@ -140,12 +135,17 @@
       animation: pulse 1s infinite;
     }
     
+    .status-dot.ready {
+      background: #f59e0b;
+      animation: pulse 1.2s infinite;
+    }
+    
     @keyframes pulse {
       0%, 100% { opacity: 1; }
       50% { opacity: 0.5; }
     }
     
-    /* User input indicator - muncul di atas avatar */
+    /* User input indicator */
     .user-input-indicator {
       position: absolute;
       top: 20px;
@@ -160,6 +160,29 @@
       text-align: center;
       z-index: 5;
       display: none;
+    }
+    
+    /* Tap to speak indicator */
+    .tap-to-speak {
+      position: absolute;
+      bottom: 120px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(59, 130, 246, 0.9);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.875rem;
+      text-align: center;
+      z-index: 5;
+      display: none;
+      cursor: pointer;
+      animation: bounce 2s infinite;
+    }
+    
+    @keyframes bounce {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50% { transform: translateX(-50%) translateY(-5px); }
     }
     
     .message-input-container {
@@ -212,29 +235,6 @@
     .send-button:disabled {
       background-color: #9ca3af;
       cursor: not-allowed;
-    }
-    
-    /* Loading indicator */
-    .loading {
-      display: flex;
-      justify-content: center;
-      padding: 1rem;
-      color: #6b7280;
-    }
-    
-    .loading-spinner {
-      width: 20px;
-      height: 20px;
-      border: 2px solid #e2e8f0;
-      border-top: 2px solid #9999ff;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin-right: 0.5rem;
-    }
-    
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
     }
     
     /* Sidebar Styles */
@@ -604,6 +604,10 @@
       .avatar-status {
         bottom: 70px;
       }
+      
+      .tap-to-speak {
+        bottom: 100px;
+      }
     }
   </style>
 </head>
@@ -647,6 +651,12 @@
       <div class="user-input-indicator" id="userInputIndicator">
         <i class="fas fa-user mr-2"></i>
         <span id="userInputText"></span>
+      </div>
+      
+      <!-- Tap to speak indicator -->
+      <div class="tap-to-speak" id="tapToSpeakIndicator">
+        <i class="fas fa-hand-pointer mr-2"></i>
+        <span>Ketuk untuk mendengar jawaban</span>
       </div>
       
       <!-- Avatar status -->
@@ -749,6 +759,13 @@
           </label>
         </div>
         
+        <div class="setting-item">
+          <label class="checkbox-label">
+            <input type="checkbox" id="androidModeCheckbox" checked>
+            <span>Mode kompatibilitas Android</span>
+          </label>
+        </div>
+        
         <div class="settings-buttons">
           <button class="settings-button cancel" id="cancelSettings">Batal</button>
           <button class="settings-button save" id="saveSettings">Simpan</button>
@@ -799,7 +816,9 @@
   </div>
 
   <script>
+    // ============================
     // DOM Elements
+    // ============================
     const messageInput = document.getElementById("messageInput");
     const sendButton = document.getElementById("sendButton");
     
@@ -810,6 +829,7 @@
     const statusText = document.getElementById("statusText");
     const userInputIndicator = document.getElementById("userInputIndicator");
     const userInputText = document.getElementById("userInputText");
+    const tapToSpeakIndicator = document.getElementById("tapToSpeakIndicator");
     
     // Sidebar elements
     const hamburgerButton = document.getElementById("hamburgerButton");
@@ -838,28 +858,41 @@
     const volumeValue = document.getElementById("volumeValue");
     const autoSpeakCheckbox = document.getElementById("autoSpeakCheckbox");
     const voiceInputCheckbox = document.getElementById("voiceInputCheckbox");
+    const androidModeCheckbox = document.getElementById("androidModeCheckbox");
     
-    // TTS variables
+    // ============================
+    // Global Variables
+    // ============================
     let speechSynthesis = window.speechSynthesis;
     let voices = [];
     let currentUtterance = null;
     let isSpeaking = false;
+    let userHasInteracted = false;
+    let pendingTTSResponse = null;
+    let pendingUserMessage = "";
+    
+    // TTS settings
     let ttsSettings = {
       voice: null,
       rate: 1,
       pitch: 1,
       volume: 1,
-      autoSpeak: true, // Default true untuk auto speak
-      voiceInputEnabled: true
+      autoSpeak: true,
+      voiceInputEnabled: true,
+      androidMode: true
     };
     
-    // Speech recognition variables
+    // Speech recognition
     let SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     let recognition = null;
     let isListening = false;
-
-    // Initialize TTS
+    
+    // ============================
+    // TTS Initialization
+    // ============================
     function initializeTTS() {
+      console.log("Initializing TTS...");
+      
       // Load saved settings
       const savedSettings = localStorage.getItem('nayraTtsSettings');
       if (savedSettings) {
@@ -872,48 +905,56 @@
       volumeSlider.value = ttsSettings.volume;
       autoSpeakCheckbox.checked = ttsSettings.autoSpeak;
       voiceInputCheckbox.checked = ttsSettings.voiceInputEnabled;
+      androidModeCheckbox.checked = ttsSettings.androidMode;
       
       updateSliderValues();
       
-      // Load voices
+      // Initialize voices
       loadVoices();
       
-      // If voices are already loaded
-      if (speechSynthesis.getVoices().length > 0) {
-        populateVoiceList();
-      }
-      
-      // When voices are loaded
+      // Voice loading handler for Android
       speechSynthesis.onvoiceschanged = function() {
-        populateVoiceList();
+        console.log("Voices changed event fired");
+        loadVoices();
       };
     }
     
-    // Load voices
+    // Load voices with Android compatibility
     function loadVoices() {
       voices = speechSynthesis.getVoices();
+      console.log("Loaded voices:", voices.length);
+      
+      if (voices.length > 0) {
+        populateVoiceList();
+        
+        // Auto-select Indonesian voice if available
+        if (!ttsSettings.voice) {
+          const indonesianVoice = voices.find(voice => 
+            voice.lang.startsWith('id') || 
+            voice.name.includes('Indonesian')
+          );
+          
+          if (indonesianVoice) {
+            ttsSettings.voice = indonesianVoice.name;
+            voiceSelect.value = indonesianVoice.name;
+          } else if (voices.length > 0) {
+            // Fallback to first available voice
+            ttsSettings.voice = voices[0].name;
+            voiceSelect.value = voices[0].name;
+          }
+        }
+      } else {
+        // Retry for Android
+        console.log("No voices found, retrying...");
+        setTimeout(loadVoices, 500);
+      }
     }
     
     // Populate voice list
     function populateVoiceList() {
       voiceSelect.innerHTML = '<option value="">Pilih suara...</option>';
       
-      // Filter voices for Indonesian or English
-      const filteredVoices = voices.filter(voice => 
-        voice.lang.startsWith('id') || 
-        voice.lang.startsWith('en') || 
-        voice.name.includes('Indonesian') ||
-        voice.name.includes('English')
-      );
-      
-      // Sort voices by language and name
-      filteredVoices.sort((a, b) => {
-        if (a.lang.startsWith('id') && !b.lang.startsWith('id')) return -1;
-        if (!a.lang.startsWith('id') && b.lang.startsWith('id')) return 1;
-        return a.name.localeCompare(b.name);
-      });
-      
-      filteredVoices.forEach(voice => {
+      voices.forEach(voice => {
         const option = document.createElement('option');
         option.value = voice.name;
         option.textContent = `${voice.name} (${voice.lang})`;
@@ -923,37 +964,34 @@
           option.selected = true;
         }
         
-        // Auto-select Indonesian voice if available and no saved preference
-        if (!ttsSettings.voice && voice.lang.startsWith('id')) {
-          option.selected = true;
-          ttsSettings.voice = voice.name;
-        }
-        
         voiceSelect.appendChild(option);
       });
       
       // If no voices found
-      if (filteredVoices.length === 0) {
+      if (voices.length === 0) {
         voiceSelect.innerHTML = '<option value="">Tidak ada suara yang tersedia</option>';
       }
     }
     
-    // Update slider values display
+    // Update slider values
     function updateSliderValues() {
       rateValue.textContent = rateSlider.value;
       pitchValue.textContent = pitchSlider.value;
       volumeValue.textContent = volumeSlider.value;
     }
     
-    // Update avatar status
+    // ============================
+    // Avatar Status Management
+    // ============================
     function updateAvatarStatus(state, userMessage = '') {
       switch(state) {
         case 'speaking':
           statusDot.className = 'status-dot speaking';
           statusText.textContent = 'Sedang Berbicara';
-          // Sembunyikan user input indicator
           userInputIndicator.style.display = 'none';
-          // Tampilkan video berbicara, sembunyikan video idle
+          tapToSpeakIndicator.style.display = 'none';
+          
+          // Show speaking video, hide idle
           avatarIdle.style.display = 'none';
           avatarSpeaking.style.display = 'block';
           avatarSpeaking.play();
@@ -962,7 +1000,6 @@
         case 'listening':
           statusDot.className = 'status-dot listening';
           statusText.textContent = 'Sedang Mendengarkan';
-          // Tetap di idle saat mendengarkan
           avatarIdle.style.display = 'block';
           avatarSpeaking.style.display = 'none';
           avatarSpeaking.pause();
@@ -972,12 +1009,20 @@
         case 'thinking':
           statusDot.className = 'status-dot';
           statusText.textContent = 'Sedang Berpikir';
-          // Tampilkan user input
           if (userMessage) {
             userInputText.textContent = userMessage;
             userInputIndicator.style.display = 'flex';
           }
-          // Tetap di idle saat berpikir
+          avatarIdle.style.display = 'block';
+          avatarSpeaking.style.display = 'none';
+          avatarSpeaking.pause();
+          avatarIdle.play();
+          break;
+          
+        case 'ready':
+          statusDot.className = 'status-dot ready';
+          statusText.textContent = 'Siap Berbicara';
+          tapToSpeakIndicator.style.display = 'block';
           avatarIdle.style.display = 'block';
           avatarSpeaking.style.display = 'none';
           avatarSpeaking.pause();
@@ -988,9 +1033,8 @@
         default:
           statusDot.className = 'status-dot idle';
           statusText.textContent = 'Siap Mendengarkan';
-          // Sembunyikan user input indicator
           userInputIndicator.style.display = 'none';
-          // Tampilkan video idle, sembunyikan video berbicara
+          tapToSpeakIndicator.style.display = 'none';
           avatarSpeaking.style.display = 'none';
           avatarIdle.style.display = 'block';
           avatarSpeaking.pause();
@@ -999,9 +1043,23 @@
       }
     }
     
-    // Speak text using TTS
-    function speakText(text, userMessage = '') {
-      if (!speechSynthesis || !ttsSettings.voiceInputEnabled) return;
+    // ============================
+    // TTS Functions for Android
+    // ============================
+    function speakText(text, userMessage = '', fromUserInteraction = false) {
+      if (!speechSynthesis || !ttsSettings.voiceInputEnabled) {
+        console.error('TTS tidak tersedia atau dinonaktifkan');
+        return false;
+      }
+      
+      // Android requires user interaction
+      if (ttsSettings.androidMode && !fromUserInteraction && !userHasInteracted) {
+        console.log('Android mode: Storing TTS for user interaction');
+        pendingTTSResponse = text;
+        pendingUserMessage = userMessage;
+        updateAvatarStatus('ready');
+        return false;
+      }
       
       // Stop any current speech
       if (isSpeaking) {
@@ -1014,33 +1072,64 @@
       const selectedVoice = voices.find(voice => voice.name === ttsSettings.voice);
       if (selectedVoice) {
         utterance.voice = selectedVoice;
+        utterance.lang = selectedVoice.lang;
+      } else if (voices.length > 0) {
+        utterance.voice = voices[0];
+        utterance.lang = voices[0].lang;
+      } else {
+        utterance.lang = 'id-ID';
       }
       
       // Apply settings
-      utterance.rate = ttsSettings.rate;
-      utterance.pitch = ttsSettings.pitch;
-      utterance.volume = ttsSettings.volume;
-      utterance.lang = selectedVoice ? selectedVoice.lang : 'id-ID';
+      utterance.rate = parseFloat(ttsSettings.rate);
+      utterance.pitch = parseFloat(ttsSettings.pitch);
+      utterance.volume = parseFloat(ttsSettings.volume);
       
-      // Update avatar status
+      // Update avatar
       updateAvatarStatus('speaking', userMessage);
       
+      // Event handlers
       utterance.onstart = function() {
+        console.log('TTS started');
         isSpeaking = true;
       };
       
       utterance.onend = function() {
+        console.log('TTS ended');
         isSpeaking = false;
         updateAvatarStatus('idle');
       };
       
-      utterance.onerror = function() {
+      utterance.onerror = function(event) {
+        console.error('TTS error:', event);
         isSpeaking = false;
         updateAvatarStatus('idle');
+        
+        // Show user-friendly error
+        if (event.error === 'not-allowed') {
+          showNotification('Izinkan audio di pengaturan browser');
+        }
       };
       
-      currentUtterance = utterance;
-      speechSynthesis.speak(utterance);
+      try {
+        speechSynthesis.speak(utterance);
+        return true;
+      } catch (error) {
+        console.error('Failed to speak:', error);
+        updateAvatarStatus('idle');
+        return false;
+      }
+    }
+    
+    // Function to trigger pending TTS
+    function triggerPendingTTS() {
+      if (pendingTTSResponse) {
+        const success = speakText(pendingTTSResponse, pendingUserMessage, true);
+        if (success) {
+          pendingTTSResponse = null;
+          pendingUserMessage = "";
+        }
+      }
     }
     
     // Stop TTS
@@ -1052,7 +1141,9 @@
       }
     }
     
-    // Initialize speech recognition
+    // ============================
+    // Speech Recognition
+    // ============================
     function initializeSpeechRecognition() {
       if (!SpeechRecognition) {
         console.warn('Speech recognition not supported');
@@ -1098,140 +1189,20 @@
         updateAvatarStatus('idle');
         
         if (event.error === 'not-allowed') {
-          alert('Akses mikrofon ditolak. Silakan izinkan akses mikrofon di pengaturan browser Anda.');
+          showNotification('Izinkan mikrofon di pengaturan browser');
         }
       };
     }
     
-    // Toggle voice input
-    function toggleVoiceInput() {
-      if (!recognition || !ttsSettings.voiceInputEnabled) return;
-      
-      if (isListening) {
-        recognition.stop();
-      } else {
-        // Request microphone permission
-        navigator.mediaDevices.getUserMedia({ audio: true })
-          .then(function(stream) {
-            // Stop all tracks to release microphone
-            stream.getTracks().forEach(track => track.stop());
-            
-            // Start recognition
-            recognition.start();
-          })
-          .catch(function(err) {
-            console.error('Microphone access denied:', err);
-            alert('Tidak dapat mengakses mikrofon. Silakan izinkan akses mikrofon di pengaturan browser Anda.');
-          });
-      }
-    }
-    
-    // Toggle sidebar
-    function toggleSidebar() {
-      sidebar.classList.toggle("active");
-      sidebarOverlay.classList.toggle("active");
-    }
-
-    // Close sidebar
-    function closeSidebarFunc() {
-      sidebar.classList.remove("active");
-      sidebarOverlay.classList.remove("active");
-    }
-    
-    // Toggle settings panel
-    function toggleSettingsPanel() {
-      settingsPanel.classList.toggle("active");
-      settingsOverlay.classList.toggle("active");
-    }
-
-    // Close settings panel
-    function closeSettingsPanel() {
-      settingsPanel.classList.remove("active");
-      settingsOverlay.classList.remove("active");
-    }
-    
-    // Save TTS settings
-    function saveTtsSettings() {
-      ttsSettings.voice = voiceSelect.value;
-      ttsSettings.rate = parseFloat(rateSlider.value);
-      ttsSettings.pitch = parseFloat(pitchSlider.value);
-      ttsSettings.volume = parseFloat(volumeSlider.value);
-      ttsSettings.autoSpeak = autoSpeakCheckbox.checked;
-      ttsSettings.voiceInputEnabled = voiceInputCheckbox.checked;
-      
-      // Save to localStorage
-      localStorage.setItem('nayraTtsSettings', JSON.stringify(ttsSettings));
-      
-      // Enable/disable voice input button
-      voiceInputButton.disabled = !ttsSettings.voiceInputEnabled;
-      
-      closeSettingsPanel();
-      showNotification('Pengaturan suara disimpan');
-    }
-    
-    // Show notification
-    function showNotification(message) {
-      // Create notification element
-      const notification = document.createElement('div');
-      notification.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50';
-      notification.textContent = message;
-      
-      document.body.appendChild(notification);
-      
-      // Remove after 3 seconds
-      setTimeout(() => {
-        notification.remove();
-      }, 3000);
-    }
-
-    // Event listeners for sidebar
-    hamburgerButton.addEventListener("click", toggleSidebar);
-    closeSidebar.addEventListener("click", closeSidebarFunc);
-    sidebarOverlay.addEventListener("click", closeSidebarFunc);
-    
-    // Event listeners for settings
-    settingsButton.addEventListener("click", toggleSettingsPanel);
-    closeSettings.addEventListener("click", closeSettingsPanel);
-    cancelSettings.addEventListener("click", closeSettingsPanel);
-    settingsOverlay.addEventListener("click", closeSettingsPanel);
-    saveSettings.addEventListener("click", saveTtsSettings);
-    
-    // Slider event listeners
-    rateSlider.addEventListener('input', function() {
-      rateValue.textContent = this.value;
-    });
-    
-    pitchSlider.addEventListener('input', function() {
-      pitchValue.textContent = this.value;
-    });
-    
-    volumeSlider.addEventListener('input', function() {
-      volumeValue.textContent = this.value;
-    });
-
-    // Enable/disable send button based on input
-    messageInput.addEventListener("input", () => {
-      sendButton.disabled = !messageInput.value.trim();
-    });
-
-    // Send message
-    sendButton.addEventListener("click", sendMessage);
-    messageInput.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" && messageInput.value.trim()) {
-        sendMessage();
-      }
-    });
-    
-    // Voice input button
-    voiceInputButton.addEventListener("click", toggleVoiceInput);
-
-    // Send message function
-    async function sendMessage() {
+    // ============================
+    // Message Handling
+    // ============================
+    async function sendMessage(fromUserInteraction = false) {
       if (!messageInput.value.trim()) return;
       
       const messageText = messageInput.value.trim();
       
-      // Show thinking indicator with user message
+      // Show thinking indicator
       updateAvatarStatus('thinking', messageText);
       
       // Clear input
@@ -1239,25 +1210,23 @@
       sendButton.disabled = true;
       
       try {
-        // Send message to Groq API
+        // Get AI response
         const response = await fetchGroqResponse(messageText);
         
-        // Auto-speak response if enabled
+        // Auto-speak if enabled
         if (ttsSettings.autoSpeak && ttsSettings.voiceInputEnabled) {
           setTimeout(() => {
-            speakText(response, messageText);
+            speakText(response, messageText, fromUserInteraction);
           }, 500);
         } else {
-          // Jika auto-speak tidak aktif, tetap berpindah ke idle
           updateAvatarStatus('idle');
         }
       } catch (error) {
-        // Show error message
-        const errorMessage = "Maaf, saya mengalami masalah teknis saat memproses pertanyaan Anda. Silakan coba lagi nanti.";
+        const errorMessage = "Maaf, terjadi masalah. Silakan coba lagi.";
         
         if (ttsSettings.autoSpeak && ttsSettings.voiceInputEnabled) {
           setTimeout(() => {
-            speakText(errorMessage, messageText);
+            speakText(errorMessage, messageText, fromUserInteraction);
           }, 500);
         } else {
           updateAvatarStatus('idle');
@@ -1265,14 +1234,14 @@
         console.error("Error:", error);
       }
     }
-
-    // Fetch response from Groq API
+    
+    // ============================
+    // API Integration
+    // ============================
     async function fetchGroqResponse(message) {
-      // Menggunakan API key dari Temanguru
       const apiKey = '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';
       const apiUrl = 'https://api.groq.com/openai/v1/chat/completions';
       
-      // Konteks untuk AI - fokus pada sains untuk Nayra AI
       const systemPrompt = `Anda adalah Nayra AI, asisten sains yang ramah dan membantu dalam aplikasi TETA SAINS. 
       Fokuslah pada topik sains seperti fisika, kimia, biologi, matematika, dan ilmu pengetahuan lainnya. 
       
@@ -1315,17 +1284,14 @@
         const data = await response.json();
         return data.choices[0].message.content;
       } catch (error) {
-        // Fallback response jika API tidak tersedia
         console.error("Error calling Groq API:", error);
         return getFallbackResponse(message);
       }
     }
-
-    // Fallback response jika API tidak tersedia
+    
     function getFallbackResponse(message) {
       const lowerMessage = message.toLowerCase();
       
-      // Respons sederhana berdasarkan kata kunci
       if (lowerMessage.includes('fisika') || lowerMessage.includes('fisik')) {
         return "Fisika adalah ilmu yang mempelajari tentang materi, energi, dan interaksi antara keduanya. Topik fisika mencakup mekanika, termodinamika, elektromagnetisme, dan banyak lagi. Apakah ada topik fisika khusus yang ingin Anda pelajari?";
       } else if (lowerMessage.includes('kimia')) {
@@ -1341,31 +1307,194 @@
       }
     }
     
-    // Helper function untuk escape HTML
-    function escapeHtml(s) {
-      if (!s && s !== 0) return "";
-      return String(s)
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#39;');
+    // ============================
+    // UI Functions
+    // ============================
+    function toggleSidebar() {
+      sidebar.classList.toggle("active");
+      sidebarOverlay.classList.toggle("active");
+    }
+
+    function closeSidebarFunc() {
+      sidebar.classList.remove("active");
+      sidebarOverlay.classList.remove("active");
     }
     
-    // Initialize everything when page loads
+    function toggleSettingsPanel() {
+      settingsPanel.classList.toggle("active");
+      settingsOverlay.classList.toggle("active");
+    }
+
+    function closeSettingsPanel() {
+      settingsPanel.classList.remove("active");
+      settingsOverlay.classList.remove("active");
+    }
+    
+    function saveTtsSettings() {
+      ttsSettings.voice = voiceSelect.value;
+      ttsSettings.rate = parseFloat(rateSlider.value);
+      ttsSettings.pitch = parseFloat(pitchSlider.value);
+      ttsSettings.volume = parseFloat(volumeSlider.value);
+      ttsSettings.autoSpeak = autoSpeakCheckbox.checked;
+      ttsSettings.voiceInputEnabled = voiceInputCheckbox.checked;
+      ttsSettings.androidMode = androidModeCheckbox.checked;
+      
+      localStorage.setItem('nayraTtsSettings', JSON.stringify(ttsSettings));
+      voiceInputButton.disabled = !ttsSettings.voiceInputEnabled;
+      
+      closeSettingsPanel();
+      showNotification('Pengaturan suara disimpan');
+    }
+    
+    function showNotification(message) {
+      const notification = document.createElement('div');
+      notification.className = 'fixed top-4 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50';
+      notification.textContent = message;
+      
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.remove();
+      }, 3000);
+    }
+    
+    // ============================
+    // Event Listeners
+    // ============================
+    // Sidebar
+    hamburgerButton.addEventListener("click", toggleSidebar);
+    closeSidebar.addEventListener("click", closeSidebarFunc);
+    sidebarOverlay.addEventListener("click", closeSidebarFunc);
+    
+    // Settings
+    settingsButton.addEventListener("click", toggleSettingsPanel);
+    closeSettings.addEventListener("click", closeSettingsPanel);
+    cancelSettings.addEventListener("click", closeSettingsPanel);
+    settingsOverlay.addEventListener("click", closeSettingsPanel);
+    saveSettings.addEventListener("click", saveTtsSettings);
+    
+    // Sliders
+    rateSlider.addEventListener('input', function() {
+      rateValue.textContent = this.value;
+    });
+    
+    pitchSlider.addEventListener('input', function() {
+      pitchValue.textContent = this.value;
+    });
+    
+    volumeSlider.addEventListener('input', function() {
+      volumeValue.textContent = this.value;
+    });
+    
+    // Message input
+    messageInput.addEventListener("input", () => {
+      sendButton.disabled = !messageInput.value.trim();
+    });
+    
+    // Send button - CRITICAL FOR ANDROID
+    sendButton.addEventListener("click", () => {
+      userHasInteracted = true;
+      sendMessage(true);
+    });
+    
+    // Enter key
+    messageInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" && messageInput.value.trim()) {
+        userHasInteracted = true;
+        sendMessage(true);
+      }
+    });
+    
+    // Voice input button
+    voiceInputButton.addEventListener("click", function() {
+      userHasInteracted = true;
+      if (!recognition || !ttsSettings.voiceInputEnabled) return;
+      
+      if (isListening) {
+        recognition.stop();
+      } else {
+        navigator.mediaDevices.getUserMedia({ audio: true })
+          .then(function(stream) {
+            stream.getTracks().forEach(track => track.stop());
+            recognition.start();
+          })
+          .catch(function(err) {
+            console.error('Microphone access denied:', err);
+            alert('Izinkan akses mikrofon di pengaturan browser Anda.');
+          });
+      }
+    });
+    
+    // Tap to speak indicator
+    tapToSpeakIndicator.addEventListener("click", function() {
+      userHasInteracted = true;
+      triggerPendingTTS();
+    });
+    
+    // Avatar click for pending TTS
+    avatarIdle.addEventListener("click", function() {
+      if (pendingTTSResponse) {
+        userHasInteracted = true;
+        triggerPendingTTS();
+      }
+    });
+    
+    avatarSpeaking.addEventListener("click", function() {
+      if (pendingTTSResponse) {
+        userHasInteracted = true;
+        triggerPendingTTS();
+      }
+    });
+    
+    // Initial user interaction listener
+    function setupInitialInteraction() {
+      const firstInteractionHandler = function() {
+        userHasInteracted = true;
+        console.log("User has interacted, TTS can now work");
+        
+        // Remove listeners
+        document.removeEventListener('click', firstInteractionHandler);
+        document.removeEventListener('touchstart', firstInteractionHandler);
+        document.removeEventListener('keydown', firstInteractionHandler);
+        
+        // Play welcome message if enabled
+        if (ttsSettings.autoSpeak && ttsSettings.voiceInputEnabled) {
+          setTimeout(() => {
+            speakText("Halo! Saya Nayra AI. Silakan ajukan pertanyaan sains Anda.", "", true);
+          }, 500);
+        }
+      };
+      
+      // Listen for any user interaction
+      document.addEventListener('click', firstInteractionHandler);
+      document.addEventListener('touchstart', firstInteractionHandler);
+      document.addEventListener('keydown', firstInteractionHandler);
+    }
+    
+    // ============================
+    // Initialize Application
+    // ============================
     document.addEventListener('DOMContentLoaded', function() {
+      console.log("DOM loaded, initializing app...");
+      
+      // Initialize TTS
       initializeTTS();
+      
+      // Initialize speech recognition
       initializeSpeechRecognition();
       
-      // Initialize avatar videos
+      // Start avatar idle video
       avatarIdle.play();
       
-      // Speak welcome message if auto-speak is enabled
-      if (ttsSettings.autoSpeak && ttsSettings.voiceInputEnabled) {
-        setTimeout(() => {
-          const welcomeText = "Halo! Saya Nayra AI, asisten sains Anda. Saya siap membantu Anda dengan pertanyaan seputar sains, fisika, kimia, biologi, dan matematika. Apa yang ingin Anda ketahui hari ini?";
-          speakText(welcomeText);
-        }, 1000);
+      // Setup initial interaction listener
+      setupInitialInteraction();
+      
+      // Check if Android
+      const isAndroid = /Android/i.test(navigator.userAgent);
+      console.log("Is Android:", isAndroid);
+      
+      if (isAndroid) {
+        showNotification("Mode Android aktif. Ketuk layar untuk memulai.");
       }
     });
   </script>

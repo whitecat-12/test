@@ -38,6 +38,29 @@
       box-shadow: 0 0 20px rgba(0,0,0,0.1);
     }
     
+    /* Video Styles - Sama seperti contoh */
+    video {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      min-width: 100%;
+      min-height: 100%;
+      width: auto;
+      height: auto;
+      background: black;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      z-index: 0;
+      pointer-events: none;
+      object-fit: cover;
+    }
+    
+    video.show {
+      opacity: 1;
+      z-index: 1;
+    }
+    
     /* App Header */
     .app-header {
       position: fixed;
@@ -76,40 +99,6 @@
       color: #9999ff;
     }
     
-    /* Video Container System */
-    .video-container {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      max-width: 414px;
-      margin: 0 auto;
-      background: black;
-      overflow: hidden;
-      z-index: 0;
-    }
-    
-    video {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      min-width: 100%;
-      min-height: 100%;
-      width: auto;
-      height: auto;
-      object-fit: cover;
-      opacity: 0;
-      transition: opacity 0.5s ease;
-      z-index: 1;
-    }
-    
-    video.show {
-      opacity: 1;
-      z-index: 2;
-    }
-    
     /* Status Overlay */
     .status-overlay {
       position: fixed;
@@ -125,10 +114,12 @@
       z-index: 5;
       max-width: 80%;
       display: none;
+      backdrop-filter: blur(5px);
     }
     
     .status-overlay.show {
       display: block;
+      animation: fadeIn 0.3s ease;
     }
     
     .status-dot {
@@ -155,17 +146,17 @@
       animation: pulse 1.5s infinite;
     }
     
-    .status-dot.ready {
-      background: #4ade80;
-      animation: pulse 1s infinite;
-    }
-    
     @keyframes pulse {
       0%, 100% { opacity: 1; }
       50% { opacity: 0.5; }
     }
     
-    /* Control Buttons */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+      to { opacity: 1; transform: translateX(-50%) translateY(0); }
+    }
+    
+    /* Overlay Controls */
     .controls-overlay {
       position: fixed;
       bottom: 90px;
@@ -360,128 +351,6 @@
       pointer-events: auto;
     }
     
-    .settings-header {
-      padding: 1rem;
-      border-bottom: 1px solid #e2e8f0;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    
-    .settings-title {
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: #9999ff;
-    }
-    
-    .settings-content {
-      padding: 1rem;
-    }
-    
-    .setting-item {
-      margin-bottom: 1.5rem;
-    }
-    
-    .setting-label {
-      display: block;
-      font-weight: 600;
-      margin-bottom: 0.5rem;
-      color: #2d3748;
-    }
-    
-    .voice-select {
-      width: 100%;
-      padding: 0.75rem;
-      border-radius: 0.5rem;
-      border: 1px solid #e2e8f0;
-      font-size: 0.875rem;
-      outline: none;
-      transition: all 0.3s ease;
-    }
-    
-    .voice-select:focus {
-      border-color: #9999ff;
-      box-shadow: 0 0 0 3px rgba(153, 153, 255, 0.1);
-    }
-    
-    .slider-container {
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      margin-top: 0.5rem;
-    }
-    
-    .slider-value {
-      min-width: 40px;
-      text-align: center;
-      font-weight: 600;
-      color: #9999ff;
-    }
-    
-    input[type="range"] {
-      flex: 1;
-      height: 6px;
-      border-radius: 3px;
-      background: #e2e8f0;
-      outline: none;
-      -webkit-appearance: none;
-    }
-    
-    input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      background: #9999ff;
-      cursor: pointer;
-    }
-    
-    .checkbox-label {
-      display: flex;
-      align-items: center;
-      cursor: pointer;
-      font-size: 0.875rem;
-      color: #4b5563;
-    }
-    
-    .checkbox-label input {
-      margin-right: 0.5rem;
-    }
-    
-    .settings-buttons {
-      display: flex;
-      gap: 0.5rem;
-      margin-top: 1rem;
-    }
-    
-    .settings-button {
-      flex: 1;
-      padding: 0.75rem;
-      border-radius: 0.5rem;
-      border: none;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    
-    .settings-button.save {
-      background-color: #9999ff;
-      color: white;
-    }
-    
-    .settings-button.save:hover {
-      background-color: #7a7ae6;
-    }
-    
-    .settings-button.cancel {
-      background-color: #f3f4f6;
-      color: #6b7280;
-    }
-    
-    .settings-button.cancel:hover {
-      background-color: #e5e7eb;
-    }
-    
     /* Responsive Design */
     @media (max-width: 414px) {
       .app-header {
@@ -510,25 +379,6 @@
         right: -280px;
       }
     }
-    
-    /* Dark mode support */
-    @media (prefers-color-scheme: dark) {
-      .app-container {
-        background: #111827;
-      }
-      
-      .app-header {
-        background: rgba(31, 41, 55, 0.95);
-      }
-      
-      .input-container {
-        background: rgba(31, 41, 55, 0.95);
-      }
-      
-      .bottom-nav {
-        background: rgba(31, 41, 55, 0.95);
-      }
-    }
   </style>
 </head>
 <body class="bg-gray-50">
@@ -545,29 +395,26 @@
       </div>
     </header>
 
-    <!-- Video Container -->
-    <div class="video-container">
-      <!-- Video idle (default) -->
-      <video id="videoIdle" class="show" autoplay muted loop playsinline webkit-playsinline>
-        <!-- Ganti dengan video avatar idle/diam Anda -->
-        <source src="avatar-idle.mp4" type="video/mp4">
-        Browser Anda tidak mendukung tag video.
-      </video>
-      
-      <!-- Video speaking -->
-      <video id="videoSpeaking" muted loop playsinline webkit-playsinline>
-        <!-- Ganti dengan video avatar berbicara Anda -->
-        <source src="avatar-speaking.mp4" type="video/mp4">
-        Browser Anda tidak mendukung tag video.
-      </video>
-      
-      <!-- Video thinking (optional) -->
-      <video id="videoThinking" muted loop playsinline webkit-playsinline>
-        <!-- Video untuk status thinking -->
-        <source src="avatar-thinking.mp4" type="video/mp4">
-        Browser Anda tidak mendukung tag video.
-      </video>
-    </div>
+    <!-- Video Container - Sama seperti contoh -->
+    <video id="videoIdle" class="show" autoplay muted loop playsinline webkit-playsinline>
+      <!-- Ganti dengan video avatar idle/diam Anda -->
+      <source src="avatar-idle.mp4" type="video/mp4">
+      Browser Anda tidak mendukung tag video.
+    </video>
+    
+    <!-- Video speaking -->
+    <video id="videoSpeaking" muted loop playsinline webkit-playsinline>
+      <!-- Ganti dengan video avatar berbicara Anda -->
+      <source src="avatar-speaking.mp4" type="video/mp4">
+      Browser Anda tidak mendukung tag video.
+    </video>
+    
+    <!-- Video thinking (optional) -->
+    <video id="videoThinking" muted loop playsinline webkit-playsinline>
+      <!-- Video untuk status thinking -->
+      <source src="avatar-thinking.mp4" type="video/mp4">
+      Browser Anda tidak mendukung tag video.
+    </video>
 
     <!-- Status Overlay -->
     <div id="statusOverlay" class="status-overlay">
@@ -599,62 +446,6 @@
       <button id="sendButton" class="send-button" disabled>
         <i class="fas fa-paper-plane"></i>
       </button>
-    </div>
-
-    <!-- Settings Panel -->
-    <div class="settings-overlay" id="settingsOverlay"></div>
-    
-    <div class="settings-panel" id="settingsPanel">
-      <div class="settings-header">
-        <div class="settings-title">Pengaturan Suara</div>
-        <button class="control-button stop" id="closeSettings" style="width: 40px; height: 40px;">
-          <i class="fas fa-times"></i>
-        </button>
-      </div>
-      
-      <div class="settings-content">
-        <div class="setting-item">
-          <label class="setting-label" for="voiceSelect">Pilih Suara</label>
-          <select id="voiceSelect" class="voice-select">
-            <option value="">Memuat suara...</option>
-          </select>
-        </div>
-        
-        <div class="setting-item">
-          <label class="setting-label">Kecepatan Bicara</label>
-          <div class="slider-container">
-            <span class="slider-value" id="rateValue">1.0</span>
-            <input type="range" id="rateSlider" min="0.5" max="2" step="0.1" value="1">
-          </div>
-        </div>
-        
-        <div class="setting-item">
-          <label class="setting-label">Volume</label>
-          <div class="slider-container">
-            <span class="slider-value" id="volumeValue">1.0</span>
-            <input type="range" id="volumeSlider" min="0.1" max="1" step="0.1" value="1">
-          </div>
-        </div>
-        
-        <div class="setting-item">
-          <label class="checkbox-label">
-            <input type="checkbox" id="autoSpeakCheckbox" checked>
-            <span>Baca otomatis respons Nayra AI</span>
-          </label>
-        </div>
-        
-        <div class="setting-item">
-          <label class="checkbox-label">
-            <input type="checkbox" id="voiceInputCheckbox" checked>
-            <span>Aktifkan input suara</span>
-          </label>
-        </div>
-        
-        <div class="settings-buttons">
-          <button class="settings-button cancel" id="cancelSettings">Batal</button>
-          <button class="settings-button save" id="saveSettings">Simpan</button>
-        </div>
-      </div>
     </div>
     
     <!-- Bottom Navigation -->
@@ -702,20 +493,6 @@
     const textInput = document.getElementById('textInput');
     const sendButton = document.getElementById('sendButton');
     
-    // Settings elements
-    const settingsPanel = document.getElementById('settingsPanel');
-    const settingsOverlay = document.getElementById('settingsOverlay');
-    const closeSettings = document.getElementById('closeSettings');
-    const cancelSettings = document.getElementById('cancelSettings');
-    const saveSettings = document.getElementById('saveSettings');
-    const voiceSelect = document.getElementById('voiceSelect');
-    const rateSlider = document.getElementById('rateSlider');
-    const volumeSlider = document.getElementById('volumeSlider');
-    const rateValue = document.getElementById('rateValue');
-    const volumeValue = document.getElementById('volumeValue');
-    const autoSpeakCheckbox = document.getElementById('autoSpeakCheckbox');
-    const voiceInputCheckbox = document.getElementById('voiceInputCheckbox');
-    
     // ============================
     // Global Variables
     // ============================
@@ -728,6 +505,13 @@
     let SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     let recognition = null;
     let isListening = false;
+    
+    // API Configuration
+    const GROQ_KEYS = [
+      "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",
+      "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"
+    ];
+    let currentApiKeyIndex = 0;
     
     // TTS settings
     let ttsSettings = {
@@ -744,17 +528,22 @@
     // ============================
     // Video Management System
     // ============================
-    function switchVideo(videoToShow) {
+    function switchVideo(toShow) {
       // Hide all videos
       videoIdle.classList.remove('show');
       videoSpeaking.classList.remove('show');
       videoThinking.classList.remove('show');
       
       // Show the selected video
-      videoToShow.classList.add('show');
+      toShow.classList.add('show');
       
       // Ensure the video plays
-      videoToShow.play().catch(e => console.log('Video play error:', e));
+      toShow.play().catch(e => {
+        console.log(`Video ${toShow.id} play error:`, e);
+        // Fallback: restart video
+        toShow.currentTime = 0;
+        setTimeout(() => toShow.play().catch(console.error), 100);
+      });
     }
     
     function updateStatus(state, message = '') {
@@ -784,9 +573,12 @@
           break;
           
         case 'ready':
-          statusDot.className = 'status-dot ready';
+          statusDot.className = 'status-dot';
           if (!message) statusText.textContent = 'Siap';
           statusOverlay.classList.add('show');
+          setTimeout(() => {
+            statusOverlay.classList.remove('show');
+          }, 2000);
           break;
           
         case 'idle':
@@ -800,94 +592,59 @@
       }
     }
     
+    function showNotification(message, duration = 3000) {
+      updateStatus('ready', message);
+      setTimeout(() => {
+        updateStatus('idle');
+      }, duration);
+    }
+    
     // ============================
-    // TTS Initialization
+    // LocalStorage Functions
     // ============================
-    function initializeTTS() {
-      // Load saved settings
-      const savedSettings = localStorage.getItem('nayraTtsSettings');
-      if (savedSettings) {
-        ttsSettings = JSON.parse(savedSettings);
+    function loadChatHistory() {
+      try {
+        const saved = localStorage.getItem('nayraChatHistory');
+        chatHistory = saved ? JSON.parse(saved) : [];
+      } catch (error) {
+        console.error('Error loading chat history:', error);
+        chatHistory = [];
       }
-      
-      // Apply settings to UI
-      rateSlider.value = ttsSettings.rate;
-      volumeSlider.value = ttsSettings.volume;
-      autoSpeakCheckbox.checked = ttsSettings.autoSpeak;
-      voiceInputCheckbox.checked = ttsSettings.voiceInputEnabled;
-      
-      updateSliderValues();
-      
-      // Initialize voices
-      loadVoices();
-      
-      // Voice loading handler
-      if (speechSynthesis.onvoiceschanged !== undefined) {
-        speechSynthesis.onvoiceschanged = loadVoices;
-      }
-      
-      // Initial voice load
-      setTimeout(loadVoices, 500);
     }
     
-    function loadVoices() {
-      voices = speechSynthesis.getVoices();
-      
-      if (voices.length > 0) {
-        populateVoiceList();
-        
-        // Auto-select Indonesian voice if available
-        if (!ttsSettings.voice || ttsSettings.voice === "") {
-          selectIndonesianVoice();
+    function saveChatHistory() {
+      try {
+        localStorage.setItem('nayraChatHistory', JSON.stringify(chatHistory));
+      } catch (error) {
+        console.error('Error saving chat history:', error);
+      }
+    }
+    
+    function loadTtsSettings() {
+      try {
+        const saved = localStorage.getItem('nayraTtsSettings');
+        if (saved) {
+          ttsSettings = JSON.parse(saved);
         }
-      } else {
-        setTimeout(loadVoices, 1000);
+      } catch (error) {
+        console.error('Error loading TTS settings:', error);
       }
     }
     
-    function selectIndonesianVoice() {
-      const indonesianVoices = voices.filter(voice => 
-        voice.lang.startsWith('id') || 
-        voice.name.toLowerCase().includes('indonesian') ||
-        voice.name.toLowerCase().includes('indonesia')
-      );
-      
-      if (indonesianVoices.length > 0) {
-        ttsSettings.voice = indonesianVoices[0].name;
-        voiceSelect.value = indonesianVoices[0].name;
-      } else if (voices.length > 0) {
-        ttsSettings.voice = voices[0].name;
-        voiceSelect.value = voices[0].name;
+    function saveTtsSettings() {
+      try {
+        localStorage.setItem('nayraTtsSettings', JSON.stringify(ttsSettings));
+      } catch (error) {
+        console.error('Error saving TTS settings:', error);
       }
-    }
-    
-    function populateVoiceList() {
-      voiceSelect.innerHTML = '<option value="">Pilih suara...</option>';
-      
-      voices.forEach(voice => {
-        const option = document.createElement('option');
-        option.value = voice.name;
-        option.textContent = `${voice.name} (${voice.lang})`;
-        
-        if (ttsSettings.voice && voice.name === ttsSettings.voice) {
-          option.selected = true;
-        }
-        
-        voiceSelect.appendChild(option);
-      });
-    }
-    
-    function updateSliderValues() {
-      rateValue.textContent = rateSlider.value;
-      volumeValue.textContent = volumeSlider.value;
     }
     
     // ============================
     // Speech Functions
     // ============================
     function speakText(text) {
-      if (!speechSynthesis || !ttsSettings.voiceInputEnabled) {
-        console.error('TTS tidak tersedia atau dinonaktifkan');
+      if (!speechSynthesis) {
+        console.error('TTS tidak tersedia');
         return false;
       }
       
@@ -896,18 +653,27 @@
         speechSynthesis.cancel();
       }
       
-      const utterance = new SpeechSynthesisUtterance(text);
-      
-      // Find selected voice
-      const selectedVoice = voices.find(voice => voice.name === ttsSettings.voice);
-      if (selectedVoice) {
-        utterance.voice = selectedVoice;
-        utterance.lang = selectedVoice.lang || 'id-ID';
+      // Check for dance command
+      if (text.toLowerCase().includes('tari') || text.toLowerCase().includes('dance')) {
+        showNotification("Nayra sedang menari!", 5000);
+        // Jika ada video dance, bisa ditambahkan di sini
+        return true;
       }
+      
+      const utterance = new SpeechSynthesisUtterance(text);
       
       // Apply settings
       utterance.rate = parseFloat(ttsSettings.rate);
       utterance.volume = parseFloat(ttsSettings.volume);
+      utterance.lang = 'id-ID';
+      
+      // Find selected voice if available
+      if (ttsSettings.voice && voices.length > 0) {
+        const selectedVoice = voices.find(voice => voice.name === ttsSettings.voice);
+        if (selectedVoice) {
+          utterance.voice = selectedVoice;
+        }
+      }
       
       // Update UI
       switchVideo(videoSpeaking);
@@ -997,11 +763,43 @@
         micButton.classList.remove('loading');
         switchVideo(videoIdle);
         updateStatus('idle');
+        showNotification('Error: ' + event.error, 3000);
       };
     }
     
+    function startRecognition() {
+      if (!recognition || !ttsSettings.voiceInputEnabled) {
+        showNotification('Input suara dinonaktifkan. Aktifkan di pengaturan.');
+        return;
+      }
+      
+      if (isListening) {
+        recognition.stop();
+      } else {
+        // Request microphone permission
+        navigator.mediaDevices.getUserMedia({ audio: true })
+          .then(function(stream) {
+            stream.getTracks().forEach(track => track.stop());
+            recognition.start();
+          })
+          .catch(function(err) {
+            console.error('Microphone access denied:', err);
+            showNotification('Izinkan akses mikrofon di pengaturan browser', 3000);
+          });
+      }
+    }
+    
+    function stopRecognition() {
+      if (recognition && isListening) {
+        recognition.stop();
+      }
+      micButton.classList.remove('loading');
+      switchVideo(videoIdle);
+      updateStatus('idle');
+    }
+    
     // ============================
-    // Message Processing
+    // AI Processing
     // ============================
     async function processUserInput(userMessage) {
       // Show thinking state
@@ -1047,7 +845,7 @@
     }
     
     async function fetchGroqResponse(message) {
-      const apiKey = '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';
+      const apiKey = GROQ_KEYS[currentApiKeyIndex];
       const apiUrl = 'https://api.groq.com/openai/v1/chat/completions';
       
       const systemPrompt = `Anda adalah Nayra AI, asisten sains yang ramah dan membantu dalam aplikasi TETA SAINS. 
@@ -1068,6 +866,10 @@
         model: 'llama-3.1-8b-instant',
         messages: [
           { role: 'system', content: systemPrompt },
+          ...chatHistory.slice(-5).map(h => [
+            { role: 'user', content: h.user },
+            { role: 'assistant', content: h.ai }
+          ]).flat(),
           { role: 'user', content: message }
         ],
         temperature: 0.7,
@@ -1087,6 +889,11 @@
         });
         
         if (!response.ok) {
+          if (response.status === 429 || response.status === 401) {
+            // Switch to next API key
+            currentApiKeyIndex = (currentApiKeyIndex + 1) % GROQ_KEYS.length;
+            throw new Error(`Mencoba API key lain...`);
+          }
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         
@@ -1111,92 +918,41 @@
         return "Matematika adalah ilmu tentang angka, struktur, ruang, dan perubahan. Topik matematika meliputi aljabar, geometri, kalkulus, dan statistik. Ada pertanyaan matematika khusus yang bisa saya bantu?";
       } else if (lowerMessage.includes('halo') || lowerMessage.includes('hai') || lowerMessage.includes('hi')) {
         return "Halo! Saya Nayra AI, asisten sains Anda di TETA SAINS. Saya siap membantu dengan pertanyaan seputar sains. Apa yang ingin Anda pelajari hari ini?";
+      } else if (lowerMessage.includes('tari') || lowerMessage.includes('dance')) {
+        return "Saya akan menari untuk Anda! Lihat ini!";
       } else {
         return "Terima kasih atas pertanyaannya! Sebagai asisten sains Nayra AI di TETA SAINS, saya khusus membantu dengan topik fisika, kimia, biologi, matematika, dan ilmu pengetahuan lainnya. Bisakah Anda memberikan lebih detail tentang apa yang ingin Anda ketahui?";
       }
     }
     
     // ============================
-    // Chat History Management
+    // Voice Functions
     // ============================
-    function loadChatHistory() {
-      try {
-        const saved = localStorage.getItem('nayraChatHistory');
-        chatHistory = saved ? JSON.parse(saved) : [];
-      } catch (error) {
-        console.error('Error loading chat history:', error);
-        chatHistory = [];
-      }
-    }
-    
-    function saveChatHistory() {
-      try {
-        localStorage.setItem('nayraChatHistory', JSON.stringify(chatHistory));
-      } catch (error) {
-        console.error('Error saving chat history:', error);
-      }
-    }
-    
-    // ============================
-    // UI Functions
-    // ============================
-    function showNotification(message) {
-      // Use status overlay as notification
-      updateStatus('ready', message);
-      setTimeout(() => {
-        updateStatus('idle');
-      }, 3000);
-    }
-    
-    function toggleSettingsPanel() {
-      settingsPanel.classList.toggle("active");
-      settingsOverlay.classList.toggle("active");
-    }
-    
-    function closeSettingsPanel() {
-      settingsPanel.classList.remove("active");
-      settingsOverlay.classList.remove("active");
-    }
-    
-    function saveTtsSettings() {
-      ttsSettings.voice = voiceSelect.value;
-      ttsSettings.rate = parseFloat(rateSlider.value);
-      ttsSettings.volume = parseFloat(volumeSlider.value);
-      ttsSettings.autoSpeak = autoSpeakCheckbox.checked;
-      ttsSettings.voiceInputEnabled = voiceInputCheckbox.checked;
+    function loadVoices() {
+      voices = speechSynthesis.getVoices();
       
-      localStorage.setItem('nayraTtsSettings', JSON.stringify(ttsSettings));
-      micButton.disabled = !ttsSettings.voiceInputEnabled;
-      
-      closeSettingsPanel();
-      showNotification('Pengaturan disimpan');
+      if (voices.length > 0 && !ttsSettings.voice) {
+        // Auto-select Indonesian voice if available
+        const indonesianVoices = voices.filter(voice => 
+          voice.lang.startsWith('id') || 
+          voice.name.toLowerCase().includes('indonesian') ||
+          voice.name.toLowerCase().includes('indonesia')
+        );
+        
+        if (indonesianVoices.length > 0) {
+          ttsSettings.voice = indonesianVoices[0].name;
+        } else if (voices.length > 0) {
+          ttsSettings.voice = voices[0].name;
+        }
+        saveTtsSettings();
+      }
     }
     
     // ============================
     // Event Listeners
     // ============================
     // Mic button
-    micButton.addEventListener('click', function() {
-      if (!recognition || !ttsSettings.voiceInputEnabled) {
-        showNotification('Input suara dinonaktifkan. Aktifkan di pengaturan.');
-        return;
-      }
-      
-      if (isListening) {
-        recognition.stop();
-      } else {
-        // Request microphone permission
-        navigator.mediaDevices.getUserMedia({ audio: true })
-          .then(function(stream) {
-            stream.getTracks().forEach(track => track.stop());
-            recognition.start();
-          })
-          .catch(function(err) {
-            console.error('Microphone access denied:', err);
-            showNotification('Izinkan akses mikrofon di pengaturan browser');
-          });
-      }
-    });
+    micButton.addEventListener('click', startRecognition);
     
     // Text button
     textButton.addEventListener('click', function() {
@@ -1209,9 +965,7 @@
     // Stop button
     stopButton.addEventListener('click', function() {
       stopSpeaking();
-      if (recognition && isListening) {
-        recognition.stop();
-      }
+      stopRecognition();
     });
     
     // Send button for text input
@@ -1238,50 +992,56 @@
       }
     });
     
-    // Settings events
-    textButton.addEventListener('dblclick', toggleSettingsPanel);
-    
-    closeSettings.addEventListener('click', closeSettingsPanel);
-    cancelSettings.addEventListener('click', closeSettingsPanel);
-    settingsOverlay.addEventListener('click', closeSettingsPanel);
-    saveSettings.addEventListener('click', saveTtsSettings);
-    
-    // Sliders
-    rateSlider.addEventListener('input', function() {
-      rateValue.textContent = this.value;
-    });
-    
-    volumeSlider.addEventListener('input', function() {
-      volumeValue.textContent = this.value;
-    });
-    
     // ============================
     // Initialize Application
     // ============================
     document.addEventListener('DOMContentLoaded', function() {
       console.log("Menginisialisasi aplikasi...");
       
-      // Initialize TTS
-      initializeTTS();
+      // Load settings and history
+      loadTtsSettings();
+      loadChatHistory();
       
       // Initialize speech recognition
       initializeSpeechRecognition();
       
-      // Load chat history
-      loadChatHistory();
+      // Initialize TTS voices
+      if (speechSynthesis.onvoiceschanged !== undefined) {
+        speechSynthesis.onvoiceschanged = loadVoices;
+      }
+      loadVoices();
       
-      // Ensure videos are properly loaded
-      videoIdle.load();
+      // Preload videos
       videoSpeaking.load();
       videoThinking.load();
       
-      // Start idle video
-      videoIdle.play().catch(e => console.log('Idle video play error:', e));
+      // Ensure idle video plays
+      videoIdle.play().catch(e => {
+        console.log('Idle video play error:', e);
+        // Retry
+        setTimeout(() => videoIdle.play().catch(console.error), 500);
+      });
+      
+      // Add video event listeners for smooth looping
+      videoIdle.addEventListener('ended', function() {
+        this.currentTime = 0;
+        this.play().catch(console.error);
+      });
+      
+      videoSpeaking.addEventListener('ended', function() {
+        this.currentTime = 0;
+        this.play().catch(console.error);
+      });
+      
+      videoThinking.addEventListener('ended', function() {
+        this.currentTime = 0;
+        this.play().catch(console.error);
+      });
       
       // Show welcome message
       setTimeout(() => {
         if (chatHistory.length === 0) {
-          showNotification('Halo! Saya Nayra AI. Tekan tombol bicara atau ketuk tombol tulis untuk mulai.');
+          showNotification('Halo! Saya Nayra AI. Tekan tombol bicara atau ketuk tombol tulis untuk mulai.', 4000);
         }
       }, 1000);
     });
@@ -1289,15 +1049,17 @@
     // Handle page visibility changes
     document.addEventListener('visibilitychange', function() {
       if (document.hidden) {
-        // Page is hidden, stop any ongoing speech/recognition
+        // Page is hidden, pause videos and stop speech
+        [videoIdle, videoSpeaking, videoThinking].forEach(video => video.pause());
         stopSpeaking();
-        if (recognition && isListening) {
-          recognition.stop();
-        }
+        stopRecognition();
       } else {
-        // Page is visible again, ensure idle video plays
-        if (videoIdle.classList.contains('show')) {
-          videoIdle.play().catch(e => console.log('Idle video play error:', e));
+        // Page is visible again
+        const activeVideo = document.querySelector('video.show');
+        if (activeVideo) {
+          activeVideo.play().catch(console.error);
+        } else {
+          videoIdle.play().catch(console.error);
         }
       }
     });
@@ -1305,17 +1067,30 @@
     // Handle video errors
     videoIdle.addEventListener('error', function(e) {
       console.error('Idle video error:', e);
-      // Fallback to static image or colored background
-      document.querySelector('.video-container').style.backgroundColor = '#9999ff';
+      // Fallback background
+      document.body.style.backgroundColor = '#9999ff';
     });
     
-    videoSpeaking.addEventListener('error', function(e) {
-      console.error('Speaking video error:', e);
-    });
+    // Auto-reset to idle after inactivity
+    let idleTimeout;
+    function resetIdleTimer() {
+      clearTimeout(idleTimeout);
+      idleTimeout = setTimeout(() => {
+        if (!isSpeaking && !isListening) {
+          switchVideo(videoIdle);
+          updateStatus('idle');
+        }
+      }, 30000); // 30 seconds
+    }
     
-    videoThinking.addEventListener('error', function(e) {
-      console.error('Thinking video error:', e);
-    });
+    // Reset timer on user interaction
+    document.addEventListener('click', resetIdleTimer);
+    document.addEventListener('touchstart', resetIdleTimer);
+    textInput.addEventListener('input', resetIdleTimer);
+    
+    // Initial timer start
+    resetIdleTimer();
+    
   </script>
 </body>
 </html>

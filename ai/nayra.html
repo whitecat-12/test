@@ -1,4 +1,1324 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nayra AI - TETA SAINS</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #9999ff;
+      --secondary: #7a7ae6;
+    }
+    
+    * {
+      box-sizing: border-box;
+    }
+    
+    html, body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Baloo 2', cursive;
+      height: 100%;
+      background: black;
+      overflow: hidden;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+    
+    .app-container {
+      max-width: 414px;
+      margin: 0 auto;
+      background: white;
+      min-height: 100vh;
+      position: relative;
+      box-shadow: 0 0 20px rgba(0,0,0,0.1);
+    }
+    
+    /* App Header */
+    .app-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      max-width: 414px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      z-index: 100;
+      padding: 1rem;
+      border-bottom: 1px solid rgba(0,0,0,0.1);
+    }
+    
+    .app-logo {
+      display: flex;
+      align-items: center;
+    }
+    
+    .app-logo-icon {
+      background-color: #9999ff;
+      color: white;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-right: 8px;
+    }
+    
+    .app-name {
+      font-weight: 700;
+      font-size: 1.25rem;
+      color: #9999ff;
+    }
+    
+    /* Video Container System */
+    .video-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      max-width: 414px;
+      margin: 0 auto;
+      background: black;
+      overflow: hidden;
+      z-index: 0;
+    }
+    
+    video {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      min-width: 100%;
+      min-height: 100%;
+      width: auto;
+      height: auto;
+      object-fit: cover;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+      z-index: 1;
+    }
+    
+    video.show {
+      opacity: 1;
+      z-index: 2;
+    }
+    
+    /* Status Overlay */
+    .status-overlay {
+      position: fixed;
+      top: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(0, 0, 0, 0.7);
+      color: white;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 0.875rem;
+      text-align: center;
+      z-index: 5;
+      max-width: 80%;
+      display: none;
+    }
+    
+    .status-overlay.show {
+      display: block;
+    }
+    
+    .status-dot {
+      display: inline-block;
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      margin-right: 6px;
+      background: #94a3b8;
+    }
+    
+    .status-dot.listening {
+      background: #ef4444;
+      animation: pulse 1s infinite;
+    }
+    
+    .status-dot.thinking {
+      background: #f59e0b;
+      animation: pulse 1.2s infinite;
+    }
+    
+    .status-dot.speaking {
+      background: #3b82f6;
+      animation: pulse 1.5s infinite;
+    }
+    
+    .status-dot.ready {
+      background: #4ade80;
+      animation: pulse 1s infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
+    /* Control Buttons */
+    .controls-overlay {
+      position: fixed;
+      bottom: 90px;
+      left: 0;
+      right: 0;
+      z-index: 10;
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      padding: 0 20px;
+    }
+    
+    .control-button {
+      background: linear-gradient(to bottom right, var(--primary), var(--secondary));
+      color: white;
+      border: none;
+      width: 70px;
+      height: 70px;
+      font-size: 12px;
+      border-radius: 50%;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(153, 153, 255, 0.6);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+      text-align: center;
+      touch-action: manipulation;
+    }
+    
+    .control-button i {
+      font-size: 20px;
+      margin-bottom: 2px;
+    }
+    
+    .control-button:active {
+      transform: scale(0.95);
+      box-shadow: 0 2px 10px rgba(153, 153, 255, 0.8);
+    }
+    
+    .control-button.stop {
+      background: linear-gradient(to bottom right, #ff4d4d, #a00000);
+      box-shadow: 0 4px 15px rgba(255, 0, 0, 0.5);
+    }
+    
+    .control-button.settings {
+      background: linear-gradient(to bottom right, #10b981, #059669);
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.5);
+    }
+    
+    .control-button.loading {
+      background: linear-gradient(to bottom right, #f59e0b, #d97706) !important;
+      box-shadow: 0 4px 15px rgba(245, 158, 11, 0.6) !important;
+    }
+    
+    /* Text Input Container */
+    .input-container {
+      position: fixed;
+      bottom: 70px;
+      left: 0;
+      right: 0;
+      max-width: 414px;
+      margin: 0 auto;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      padding: 0.75rem;
+      border-top: 1px solid rgba(0,0,0,0.1);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      z-index: 10;
+      display: none;
+    }
+    
+    .input-container.show {
+      display: flex;
+    }
+    
+    .text-input {
+      flex: 1;
+      padding: 0.75rem 1rem;
+      border-radius: 1.5rem;
+      border: 1px solid #e2e8f0;
+      outline: none;
+      font-size: 0.875rem;
+      background: white;
+    }
+    
+    .text-input:focus {
+      border-color: #9999ff;
+    }
+    
+    .send-button {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background-color: #9999ff;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .send-button:hover {
+      background-color: #7a7ae6;
+    }
+    
+    .send-button:disabled {
+      background-color: #9ca3af;
+      cursor: not-allowed;
+    }
+    
+    /* Bottom Navigation */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      max-width: 414px;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      z-index: 10;
+      height: 70px;
+      display: flex;
+      align-items: center;
+      border-top: 1px solid rgba(0,0,0,0.1);
+    }
+    
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #6b7280;
+      text-decoration: none;
+      flex: 1;
+      height: 100%;
+      padding: 0.5rem 0;
+    }
+    
+    .nav-icon {
+      transition: all 0.3s ease;
+      font-size: 1.25rem;
+    }
+    
+    .nav-icon.active {
+      transform: translateY(-5px);
+      color: var(--primary);
+    }
+    
+    .nav-item span {
+      font-size: 0.75rem;
+      margin-top: 0.25rem;
+    }
+    
+    /* Settings Panel */
+    .settings-panel {
+      position: fixed;
+      top: 0;
+      right: -300px;
+      width: 300px;
+      height: 100vh;
+      background-color: white;
+      box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+      transition: right 0.3s ease;
+      z-index: 1002;
+      overflow-y: auto;
+    }
+    
+    .settings-panel.active {
+      right: 0;
+    }
+    
+    .settings-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: 1001;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    
+    .settings-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    
+    .settings-header {
+      padding: 1rem;
+      border-bottom: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    
+    .settings-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #9999ff;
+    }
+    
+    .settings-content {
+      padding: 1rem;
+    }
+    
+    .setting-item {
+      margin-bottom: 1.5rem;
+    }
+    
+    .setting-label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: #2d3748;
+    }
+    
+    .voice-select {
+      width: 100%;
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+      border: 1px solid #e2e8f0;
+      font-size: 0.875rem;
+      outline: none;
+      transition: all 0.3s ease;
+    }
+    
+    .voice-select:focus {
+      border-color: #9999ff;
+      box-shadow: 0 0 0 3px rgba(153, 153, 255, 0.1);
+    }
+    
+    .slider-container {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-top: 0.5rem;
+    }
+    
+    .slider-value {
+      min-width: 40px;
+      text-align: center;
+      font-weight: 600;
+      color: #9999ff;
+    }
+    
+    input[type="range"] {
+      flex: 1;
+      height: 6px;
+      border-radius: 3px;
+      background: #e2e8f0;
+      outline: none;
+      -webkit-appearance: none;
+    }
+    
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #9999ff;
+      cursor: pointer;
+    }
+    
+    .checkbox-label {
+      display: flex;
+      align-items: center;
+      cursor: pointer;
+      font-size: 0.875rem;
+      color: #4b5563;
+    }
+    
+    .checkbox-label input {
+      margin-right: 0.5rem;
+    }
+    
+    .settings-buttons {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+    
+    .settings-button {
+      flex: 1;
+      padding: 0.75rem;
+      border-radius: 0.5rem;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .settings-button.save {
+      background-color: #9999ff;
+      color: white;
+    }
+    
+    .settings-button.save:hover {
+      background-color: #7a7ae6;
+    }
+    
+    .settings-button.cancel {
+      background-color: #f3f4f6;
+      color: #6b7280;
+    }
+    
+    .settings-button.cancel:hover {
+      background-color: #e5e7eb;
+    }
+    
+    /* Responsive Design */
+    @media (max-width: 414px) {
+      .app-header {
+        padding: 0.75rem;
+      }
+      
+      .controls-overlay {
+        bottom: 80px;
+      }
+      
+      .control-button {
+        width: 65px;
+        height: 65px;
+      }
+      
+      .bottom-nav {
+        height: 65px;
+      }
+      
+      .nav-icon {
+        font-size: 1.1rem;
+      }
+      
+      .settings-panel {
+        width: 280px;
+        right: -280px;
+      }
+    }
+    
+    /* Dark mode support */
+    @media (prefers-color-scheme: dark) {
+      .app-container {
+        background: #111827;
+      }
+      
+      .app-header {
+        background: rgba(31, 41, 55, 0.95);
+      }
+      
+      .input-container {
+        background: rgba(31, 41, 55, 0.95);
+      }
+      
+      .bottom-nav {
+        background: rgba(31, 41, 55, 0.95);
+      }
+    }
+  </style>
+</head>
+<body class="bg-gray-50">
+
+  <!-- Mobile App Container -->
+  <div class="app-container">
+    <!-- App Header -->
+    <header class="app-header">
+      <div class="app-logo">
+        <div class="app-logo-icon">
+          <i class="fas fa-robot"></i>
+        </div>
+        <h1 class="app-name">NAYRA AI</h1>
+      </div>
+    </header>
+
+    <!-- Video Container -->
+    <div class="video-container">
+      <!-- Video idle (default) -->
+      <video id="videoIdle" class="show" autoplay muted loop playsinline webkit-playsinline>
+        <!-- Ganti dengan video avatar idle/diam Anda -->
+        <source src="avatar-idle.mp4" type="video/mp4">
+        Browser Anda tidak mendukung tag video.
+      </video>
+      
+      <!-- Video speaking -->
+      <video id="videoSpeaking" muted loop playsinline webkit-playsinline>
+        <!-- Ganti dengan video avatar berbicara Anda -->
+        <source src="avatar-speaking.mp4" type="video/mp4">
+        Browser Anda tidak mendukung tag video.
+      </video>
+      
+      <!-- Video thinking (optional) -->
+      <video id="videoThinking" muted loop playsinline webkit-playsinline>
+        <!-- Video untuk status thinking -->
+        <source src="avatar-thinking.mp4" type="video/mp4">
+        Browser Anda tidak mendukung tag video.
+      </video>
+    </div>
+
+    <!-- Status Overlay -->
+    <div id="statusOverlay" class="status-overlay">
+      <span class="status-dot" id="statusDot"></span>
+      <span id="statusText">Siap Mendengarkan</span>
+    </div>
+
+    <!-- Controls -->
+    <div class="controls-overlay">
+      <button id="micButton" class="control-button" title="Tekan untuk berbicara">
+        <i class="fas fa-microphone"></i>
+        <span>Bicara</span>
+      </button>
+      
+      <button id="textButton" class="control-button settings" title="Ketik pesan">
+        <i class="fas fa-keyboard"></i>
+        <span>Tulis</span>
+      </button>
+      
+      <button id="stopButton" class="control-button stop" title="Hentikan">
+        <i class="fas fa-stop"></i>
+        <span>Stop</span>
+      </button>
+    </div>
+
+    <!-- Text Input -->
+    <div id="inputContainer" class="input-container">
+      <input type="text" id="textInput" class="text-input" placeholder="Ketik pesan Anda...">
+      <button id="sendButton" class="send-button" disabled>
+        <i class="fas fa-paper-plane"></i>
+      </button>
+    </div>
+
+    <!-- Settings Panel -->
+    <div class="settings-overlay" id="settingsOverlay"></div>
+    
+    <div class="settings-panel" id="settingsPanel">
+      <div class="settings-header">
+        <div class="settings-title">Pengaturan Suara</div>
+        <button class="control-button stop" id="closeSettings" style="width: 40px; height: 40px;">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <div class="settings-content">
+        <div class="setting-item">
+          <label class="setting-label" for="voiceSelect">Pilih Suara</label>
+          <select id="voiceSelect" class="voice-select">
+            <option value="">Memuat suara...</option>
+          </select>
+        </div>
+        
+        <div class="setting-item">
+          <label class="setting-label">Kecepatan Bicara</label>
+          <div class="slider-container">
+            <span class="slider-value" id="rateValue">1.0</span>
+            <input type="range" id="rateSlider" min="0.5" max="2" step="0.1" value="1">
+          </div>
+        </div>
+        
+        <div class="setting-item">
+          <label class="setting-label">Volume</label>
+          <div class="slider-container">
+            <span class="slider-value" id="volumeValue">1.0</span>
+            <input type="range" id="volumeSlider" min="0.1" max="1" step="0.1" value="1">
+          </div>
+        </div>
+        
+        <div class="setting-item">
+          <label class="checkbox-label">
+            <input type="checkbox" id="autoSpeakCheckbox" checked>
+            <span>Baca otomatis respons Nayra AI</span>
+          </label>
+        </div>
+        
+        <div class="setting-item">
+          <label class="checkbox-label">
+            <input type="checkbox" id="voiceInputCheckbox" checked>
+            <span>Aktifkan input suara</span>
+          </label>
+        </div>
+        
+        <div class="settings-buttons">
+          <button class="settings-button cancel" id="cancelSettings">Batal</button>
+          <button class="settings-button save" id="saveSettings">Simpan</button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+      <a href="../dashboard siswa.html" class="nav-item">
+        <i class="fas fa-home nav-icon"></i>
+        <span>Beranda</span>
+      </a>
+      <a href="../soal harian/dashboard soal.html" class="nav-item">
+        <i class="fas fa-flask nav-icon"></i>
+        <span>Soal Harian</span>
+      </a>
+      <a href="../ai/nayra.html" class="nav-item">
+        <i class="fas fa-robot nav-icon active"></i>
+        <span>Nayra AI</span>
+      </a>
+      <a href="../kategori/kategori materi.html" class="nav-item">
+        <i class="fas fa-chalkboard-teacher nav-icon"></i>
+        <span>Materi Harian</span>
+      </a>
+      <a href="../profil/profil.html" class="nav-item">
+        <i class="fas fa-user nav-icon"></i>
+        <span>Profil</span>
+      </a>
+    </nav>
+  </div>
+
+  <script>
+    // ============================
+    // DOM Elements
+    // ============================
+    const videoIdle = document.getElementById('videoIdle');
+    const videoSpeaking = document.getElementById('videoSpeaking');
+    const videoThinking = document.getElementById('videoThinking');
+    
+    const statusOverlay = document.getElementById('statusOverlay');
+    const statusDot = document.getElementById('statusDot');
+    const statusText = document.getElementById('statusText');
+    
+    const micButton = document.getElementById('micButton');
+    const textButton = document.getElementById('textButton');
+    const stopButton = document.getElementById('stopButton');
+    
+    const inputContainer = document.getElementById('inputContainer');
+    const textInput = document.getElementById('textInput');
+    const sendButton = document.getElementById('sendButton');
+    
+    // Settings elements
+    const settingsPanel = document.getElementById('settingsPanel');
+    const settingsOverlay = document.getElementById('settingsOverlay');
+    const closeSettings = document.getElementById('closeSettings');
+    const cancelSettings = document.getElementById('cancelSettings');
+    const saveSettings = document.getElementById('saveSettings');
+    const voiceSelect = document.getElementById('voiceSelect');
+    const rateSlider = document.getElementById('rateSlider');
+    const volumeSlider = document.getElementById('volumeSlider');
+    const rateValue = document.getElementById('rateValue');
+    const volumeValue = document.getElementById('volumeValue');
+    const autoSpeakCheckbox = document.getElementById('autoSpeakCheckbox');
+    const voiceInputCheckbox = document.getElementById('voiceInputCheckbox');
+    
+    // ============================
+    // Global Variables
+    // ============================
+    let speechSynthesis = window.speechSynthesis;
+    let voices = [];
+    let currentUtterance = null;
+    let isSpeaking = false;
+    
+    // Speech recognition
+    let SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let recognition = null;
+    let isListening = false;
+    
+    // TTS settings
+    let ttsSettings = {
+      voice: null,
+      rate: 1,
+      volume: 1,
+      autoSpeak: true,
+      voiceInputEnabled: true
+    };
+    
+    // Chat history
+    let chatHistory = [];
+    
+    // ============================
+    // Video Management System
+    // ============================
+    function switchVideo(videoToShow) {
+      // Hide all videos
+      videoIdle.classList.remove('show');
+      videoSpeaking.classList.remove('show');
+      videoThinking.classList.remove('show');
+      
+      // Show the selected video
+      videoToShow.classList.add('show');
+      
+      // Ensure the video plays
+      videoToShow.play().catch(e => console.log('Video play error:', e));
+    }
+    
+    function updateStatus(state, message = '') {
+      // Update status text
+      if (message) {
+        statusText.textContent = message;
+      }
+      
+      // Update status dot and text based on state
+      switch(state) {
+        case 'listening':
+          statusDot.className = 'status-dot listening';
+          if (!message) statusText.textContent = 'Mendengarkan...';
+          statusOverlay.classList.add('show');
+          break;
+          
+        case 'thinking':
+          statusDot.className = 'status-dot thinking';
+          if (!message) statusText.textContent = 'Memproses...';
+          statusOverlay.classList.add('show');
+          break;
+          
+        case 'speaking':
+          statusDot.className = 'status-dot speaking';
+          if (!message) statusText.textContent = 'Berbicara...';
+          statusOverlay.classList.add('show');
+          break;
+          
+        case 'ready':
+          statusDot.className = 'status-dot ready';
+          if (!message) statusText.textContent = 'Siap';
+          statusOverlay.classList.add('show');
+          break;
+          
+        case 'idle':
+        default:
+          statusDot.className = 'status-dot';
+          if (!message) statusText.textContent = 'Siap Mendengarkan';
+          setTimeout(() => {
+            statusOverlay.classList.remove('show');
+          }, 1000);
+          break;
+      }
+    }
+    
+    // ============================
+    // TTS Initialization
+    // ============================
+    function initializeTTS() {
+      // Load saved settings
+      const savedSettings = localStorage.getItem('nayraTtsSettings');
+      if (savedSettings) {
+        ttsSettings = JSON.parse(savedSettings);
+      }
+      
+      // Apply settings to UI
+      rateSlider.value = ttsSettings.rate;
+      volumeSlider.value = ttsSettings.volume;
+      autoSpeakCheckbox.checked = ttsSettings.autoSpeak;
+      voiceInputCheckbox.checked = ttsSettings.voiceInputEnabled;
+      
+      updateSliderValues();
+      
+      // Initialize voices
+      loadVoices();
+      
+      // Voice loading handler
+      if (speechSynthesis.onvoiceschanged !== undefined) {
+        speechSynthesis.onvoiceschanged = loadVoices;
+      }
+      
+      // Initial voice load
+      setTimeout(loadVoices, 500);
+    }
+    
+    function loadVoices() {
+      voices = speechSynthesis.getVoices();
+      
+      if (voices.length > 0) {
+        populateVoiceList();
+        
+        // Auto-select Indonesian voice if available
+        if (!ttsSettings.voice || ttsSettings.voice === "") {
+          selectIndonesianVoice();
+        }
+      } else {
+        setTimeout(loadVoices, 1000);
+      }
+    }
+    
+    function selectIndonesianVoice() {
+      const indonesianVoices = voices.filter(voice => 
+        voice.lang.startsWith('id') || 
+        voice.name.toLowerCase().includes('indonesian') ||
+        voice.name.toLowerCase().includes('indonesia')
+      );
+      
+      if (indonesianVoices.length > 0) {
+        ttsSettings.voice = indonesianVoices[0].name;
+        voiceSelect.value = indonesianVoices[0].name;
+      } else if (voices.length > 0) {
+        ttsSettings.voice = voices[0].name;
+        voiceSelect.value = voices[0].name;
+      }
+    }
+    
+    function populateVoiceList() {
+      voiceSelect.innerHTML = '<option value="">Pilih suara...</option>';
+      
+      voices.forEach(voice => {
+        const option = document.createElement('option');
+        option.value = voice.name;
+        option.textContent = `${voice.name} (${voice.lang})`;
+        
+        if (ttsSettings.voice && voice.name === ttsSettings.voice) {
+          option.selected = true;
+        }
+        
+        voiceSelect.appendChild(option);
+      });
+    }
+    
+    function updateSliderValues() {
+      rateValue.textContent = rateSlider.value;
+      volumeValue.textContent = volumeSlider.value;
+    }
+    
+    // ============================
+    // Speech Functions
+    // ============================
+    function speakText(text) {
+      if (!speechSynthesis || !ttsSettings.voiceInputEnabled) {
+        console.error('TTS tidak tersedia atau dinonaktifkan');
+        return false;
+      }
+      
+      // Stop any current speech
+      if (isSpeaking) {
+        speechSynthesis.cancel();
+      }
+      
+      const utterance = new SpeechSynthesisUtterance(text);
+      
+      // Find selected voice
+      const selectedVoice = voices.find(voice => voice.name === ttsSettings.voice);
+      if (selectedVoice) {
+        utterance.voice = selectedVoice;
+        utterance.lang = selectedVoice.lang || 'id-ID';
+      }
+      
+      // Apply settings
+      utterance.rate = parseFloat(ttsSettings.rate);
+      utterance.volume = parseFloat(ttsSettings.volume);
+      
+      // Update UI
+      switchVideo(videoSpeaking);
+      updateStatus('speaking', 'Nayra: ' + text.substring(0, 50) + '...');
+      
+      // Event handlers
+      utterance.onstart = function() {
+        isSpeaking = true;
+      };
+      
+      utterance.onend = function() {
+        isSpeaking = false;
+        switchVideo(videoIdle);
+        updateStatus('idle');
+      };
+      
+      utterance.onerror = function(event) {
+        console.error('TTS error:', event);
+        isSpeaking = false;
+        switchVideo(videoIdle);
+        updateStatus('idle');
+      };
+      
+      try {
+        speechSynthesis.speak(utterance);
+        return true;
+      } catch (error) {
+        console.error('Gagal berbicara:', error);
+        switchVideo(videoIdle);
+        updateStatus('idle');
+        return false;
+      }
+    }
+    
+    function stopSpeaking() {
+      if (isSpeaking) {
+        speechSynthesis.cancel();
+        isSpeaking = false;
+        switchVideo(videoIdle);
+        updateStatus('idle');
+      }
+    }
+    
+    // ============================
+    // Speech Recognition
+    // ============================
+    function initializeSpeechRecognition() {
+      if (!SpeechRecognition) {
+        console.warn('Speech recognition tidak didukung');
+        micButton.disabled = true;
+        micButton.title = 'Input suara tidak didukung';
+        return;
+      }
+      
+      recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = 'id-ID';
+      
+      recognition.onstart = function() {
+        isListening = true;
+        micButton.classList.add('loading');
+        switchVideo(videoSpeaking);
+        updateStatus('listening');
+      };
+      
+      recognition.onresult = function(event) {
+        const transcript = event.results[0][0].transcript;
+        micButton.classList.remove('loading');
+        
+        // Process the user input
+        processUserInput(transcript);
+      };
+      
+      recognition.onend = function() {
+        isListening = false;
+        micButton.classList.remove('loading');
+        if (!isSpeaking) {
+          switchVideo(videoIdle);
+          updateStatus('idle');
+        }
+      };
+      
+      recognition.onerror = function(event) {
+        console.error('Speech recognition error:', event.error);
+        isListening = false;
+        micButton.classList.remove('loading');
+        switchVideo(videoIdle);
+        updateStatus('idle');
+      };
+    }
+    
+    // ============================
+    // Message Processing
+    // ============================
+    async function processUserInput(userMessage) {
+      // Show thinking state
+      switchVideo(videoThinking);
+      updateStatus('thinking', 'Memproses...');
+      
+      try {
+        // Get AI response
+        const response = await fetchGroqResponse(userMessage);
+        
+        // Add to history
+        chatHistory.push({
+          user: userMessage,
+          ai: response,
+          timestamp: new Date().toISOString()
+        });
+        
+        // Save to localStorage
+        saveChatHistory();
+        
+        // Auto-speak if enabled
+        if (ttsSettings.autoSpeak) {
+          setTimeout(() => {
+            speakText(response);
+          }, 500);
+        } else {
+          switchVideo(videoIdle);
+          updateStatus('idle');
+          showNotification(response.substring(0, 100) + '...');
+        }
+      } catch (error) {
+        console.error('Error processing input:', error);
+        const errorMessage = "Maaf, terjadi kesalahan. Silakan coba lagi.";
+        
+        if (ttsSettings.autoSpeak) {
+          speakText(errorMessage);
+        } else {
+          switchVideo(videoIdle);
+          updateStatus('idle');
+          showNotification(errorMessage);
+        }
+      }
+    }
+    
+    async function fetchGroqResponse(message) {
+      const apiKey = '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';
+      const apiUrl = 'https://api.groq.com/openai/v1/chat/completions';
+      
+      const systemPrompt = `Anda adalah Nayra AI, asisten sains yang ramah dan membantu dalam aplikasi TETA SAINS. 
+      Fokuslah pada topik sains seperti fisika, kimia, biologi, matematika, dan ilmu pengetahuan lainnya. 
+      
+      Tugas Anda:
+      1. Berikan penjelasan yang jelas, mudah dipahami, dan relevan dengan pertanyaan sains
+      2. Bantu dengan pemecahan masalah dan konsep sains
+      3. Berikan contoh yang relevan dan aplikatif
+      4. Jika pertanyaan di luar topik sains, dengan sopan arahkan kembali ke topik sains
+      5. Gunakan bahasa Indonesia yang baik dan sederhana
+      6. Sesuaikan penjelasan dengan tingkat pengetahuan siswa
+      7. Gunakan istilah Indonesia yang tepat untuk istilah sains
+      
+      Anda adalah asisten khusus untuk aplikasi pembelajaran sains TETA SAINS.`;
+      
+      const requestBody = {
+        model: 'llama-3.1-8b-instant',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: message }
+        ],
+        temperature: 0.7,
+        max_tokens: 1024,
+        top_p: 1,
+        stream: false
+      };
+      
+      try {
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(requestBody)
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        return data.choices[0].message.content;
+      } catch (error) {
+        console.error("Error calling Groq API:", error);
+        return getFallbackResponse(message);
+      }
+    }
+    
+    function getFallbackResponse(message) {
+      const lowerMessage = message.toLowerCase();
+      
+      if (lowerMessage.includes('fisika') || lowerMessage.includes('fisik')) {
+        return "Fisika adalah ilmu yang mempelajari tentang materi, energi, dan interaksi antara keduanya. Topik fisika mencakup mekanika, termodinamika, elektromagnetisme, dan banyak lagi. Apakah ada topik fisika khusus yang ingin Anda pelajari?";
+      } else if (lowerMessage.includes('kimia')) {
+        return "Kimia adalah ilmu yang mempelajari tentang komposisi, struktur, sifat, dan perubahan materi. Topik kimia meliputi atom, molekul, reaksi kimia, dan tabel periodik. Ada yang spesifik tentang kimia yang ingin Anda tanyakan?";
+      } else if (lowerMessage.includes('biologi') || lowerMessage.includes('biolog')) {
+        return "Biologi adalah ilmu yang mempelajari tentang kehidupan dan organisme hidup. Topik biologi mencakup sel, genetika, evolusi, ekosistem, dan anatomi. Apakah ada aspek biologi tertentu yang ingin Anda ketahui?";
+      } else if (lowerMessage.includes('matematika') || lowerMessage.includes('matematik')) {
+        return "Matematika adalah ilmu tentang angka, struktur, ruang, dan perubahan. Topik matematika meliputi aljabar, geometri, kalkulus, dan statistik. Ada pertanyaan matematika khusus yang bisa saya bantu?";
+      } else if (lowerMessage.includes('halo') || lowerMessage.includes('hai') || lowerMessage.includes('hi')) {
+        return "Halo! Saya Nayra AI, asisten sains Anda di TETA SAINS. Saya siap membantu dengan pertanyaan seputar sains. Apa yang ingin Anda pelajari hari ini?";
+      } else {
+        return "Terima kasih atas pertanyaannya! Sebagai asisten sains Nayra AI di TETA SAINS, saya khusus membantu dengan topik fisika, kimia, biologi, matematika, dan ilmu pengetahuan lainnya. Bisakah Anda memberikan lebih detail tentang apa yang ingin Anda ketahui?";
+      }
+    }
+    
+    // ============================
+    // Chat History Management
+    // ============================
+    function loadChatHistory() {
+      try {
+        const saved = localStorage.getItem('nayraChatHistory');
+        chatHistory = saved ? JSON.parse(saved) : [];
+      } catch (error) {
+        console.error('Error loading chat history:', error);
+        chatHistory = [];
+      }
+    }
+    
+    function saveChatHistory() {
+      try {
+        localStorage.setItem('nayraChatHistory', JSON.stringify(chatHistory));
+      } catch (error) {
+        console.error('Error saving chat history:', error);
+      }
+    }
+    
+    // ============================
+    // UI Functions
+    // ============================
+    function showNotification(message) {
+      // Use status overlay as notification
+      updateStatus('ready', message);
+      setTimeout(() => {
+        updateStatus('idle');
+      }, 3000);
+    }
+    
+    function toggleSettingsPanel() {
+      settingsPanel.classList.toggle("active");
+      settingsOverlay.classList.toggle("active");
+    }
+    
+    function closeSettingsPanel() {
+      settingsPanel.classList.remove("active");
+      settingsOverlay.classList.remove("active");
+    }
+    
+    function saveTtsSettings() {
+      ttsSettings.voice = voiceSelect.value;
+      ttsSettings.rate = parseFloat(rateSlider.value);
+      ttsSettings.volume = parseFloat(volumeSlider.value);
+      ttsSettings.autoSpeak = autoSpeakCheckbox.checked;
+      ttsSettings.voiceInputEnabled = voiceInputCheckbox.checked;
+      
+      localStorage.setItem('nayraTtsSettings', JSON.stringify(ttsSettings));
+      micButton.disabled = !ttsSettings.voiceInputEnabled;
+      
+      closeSettingsPanel();
+      showNotification('Pengaturan disimpan');
+    }
+    
+    // ============================
+    // Event Listeners
+    // ============================
+    // Mic button
+    micButton.addEventListener('click', function() {
+      if (!recognition || !ttsSettings.voiceInputEnabled) {
+        showNotification('Input suara dinonaktifkan. Aktifkan di pengaturan.');
+        return;
+      }
+      
+      if (isListening) {
+        recognition.stop();
+      } else {
+        // Request microphone permission
+        navigator.mediaDevices.getUserMedia({ audio: true })
+          .then(function(stream) {
+            stream.getTracks().forEach(track => track.stop());
+            recognition.start();
+          })
+          .catch(function(err) {
+            console.error('Microphone access denied:', err);
+            showNotification('Izinkan akses mikrofon di pengaturan browser');
+          });
+      }
+    });
+    
+    // Text button
+    textButton.addEventListener('click', function() {
+      inputContainer.classList.toggle('show');
+      if (inputContainer.classList.contains('show')) {
+        textInput.focus();
+      }
+    });
+    
+    // Stop button
+    stopButton.addEventListener('click', function() {
+      stopSpeaking();
+      if (recognition && isListening) {
+        recognition.stop();
+      }
+    });
+    
+    // Send button for text input
+    sendButton.addEventListener('click', function() {
+      if (textInput.value.trim()) {
+        processUserInput(textInput.value.trim());
+        textInput.value = '';
+        sendButton.disabled = true;
+        inputContainer.classList.remove('show');
+      }
+    });
+    
+    // Text input events
+    textInput.addEventListener('input', function() {
+      sendButton.disabled = !this.value.trim();
+    });
+    
+    textInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' && this.value.trim()) {
+        processUserInput(this.value.trim());
+        this.value = '';
+        sendButton.disabled = true;
+        inputContainer.classList.remove('show');
+      }
+    });
+    
+    // Settings events
+    textButton.addEventListener('dblclick', toggleSettingsPanel);
+    
+    closeSettings.addEventListener('click', closeSettingsPanel);
+    cancelSettings.addEventListener('click', closeSettingsPanel);
+    settingsOverlay.addEventListener('click', closeSettingsPanel);
+    saveSettings.addEventListener('click', saveTtsSettings);
+    
+    // Sliders
+    rateSlider.addEventListener('input', function() {
+      rateValue.textContent = this.value;
+    });
+    
+    volumeSlider.addEventListener('input', function() {
+      volumeValue.textContent = this.value;
+    });
+    
+    // ============================
+    // Initialize Application
+    // ============================
+    document.addEventListener('DOMContentLoaded', function() {
+      console.log("Menginisialisasi aplikasi...");
+      
+      // Initialize TTS
+      initializeTTS();
+      
+      // Initialize speech recognition
+      initializeSpeechRecognition();
+      
+      // Load chat history
+      loadChatHistory();
+      
+      // Ensure videos are properly loaded
+      videoIdle.load();
+      videoSpeaking.load();
+      videoThinking.load();
+      
+      // Start idle video
+      videoIdle.play().catch(e => console.log('Idle video play error:', e));
+      
+      // Show welcome message
+      setTimeout(() => {
+        if (chatHistory.length === 0) {
+          showNotification('Halo! Saya Nayra AI. Tekan tombol bicara atau ketuk tombol tulis untuk mulai.');
+        }
+      }, 1000);
+    });
+    
+    // Handle page visibility changes
+    document.addEventListener('visibilitychange', function() {
+      if (document.hidden) {
+        // Page is hidden, stop any ongoing speech/recognition
+        stopSpeaking();
+        if (recognition && isListening) {
+          recognition.stop();
+        }
+      } else {
+        // Page is visible again, ensure idle video plays
+        if (videoIdle.classList.contains('show')) {
+          videoIdle.play().catch(e => console.log('Idle video play error:', e));
+        }
+      }
+    });
+    
+    // Handle video errors
+    videoIdle.addEventListener('error', function(e) {
+      console.error('Idle video error:', e);
+      // Fallback to static image or colored background
+      document.querySelector('.video-container').style.backgroundColor = '#9999ff';
+    });
+    
+    videoSpeaking.addEventListener('error', function(e) {
+      console.error('Speaking video error:', e);
+    });
+    
+    videoThinking.addEventListener('error', function(e) {
+      console.error('Thinking video error:', e);
+    });
+  </script>
+</body>
+</html><!DOCTYPE html>
 <html lang="id">
 <head>
   <meta charset="UTF-8" />

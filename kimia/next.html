@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TETA SAINS - Game Kimia: Kombinasi Unsur</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #38b2ac;
+            --secondary: #0e7490;
+            --accent: #f59e0b;
+            --physics: #3b82f6;
+            --chemistry: #10b981;
+            --biology: #8b5cf6;
+            --astronomy: #ec4899;
+        }
+        
+        body {
+            font-family: 'Baloo 2', cursive;
+            background-color: #f8fafc;
+        }
+        
+        .app-container {
+            max-width: 414px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        /* NAVBAR - TIDAK DIRUBAH */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            max-width: 414px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            background: white;
+            z-index: 10;
+            height: 70px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+            text-decoration: none;
+            flex: 1;
+            height: 100%;
+            padding: 0.5rem 0;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item span {
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
+        
+        .nav-item.active {
+            color: var(--primary);
+        }
+        
+        .nav-icon {
+            transition: all 0.3s ease;
+            font-size: 1.25rem;
+        }
+        
+        .nav-icon.active {
+            transform: translateY(-5px);
+            color: var(--primary);
+        }
+        
+        /* GAME STYLES */
+        .element-card {
+            width: 60px;
+            height: 60px;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            cursor: grab;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border: 2px solid white;
+        }
+        
+        .element-card:hover {
+            transform: scale(1.1);
+            z-index: 5;
+        }
+        
+        .element-symbol {
+            font-size: 1.5rem;
+            font-weight: 800;
+        }
+        
+        .element-number {
+            font-size: 0.7rem;
+            position: absolute;
+            top: 4px;
+            left: 6px;
+        }
+        
+        .element-name {
+            font-size: 0.6rem;
+            margin-top: 2px;
+        }
+        
+        .drop-zone {
+            min-height: 120px;
+            border: 3px dashed #cbd5e1;
+            border-radius: 16px;
+            background-color: #f8fafc;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 15px;
+        }
+        
+        .drop-zone.active {
+            border-color: #10b981;
+            background-color: #d1fae5;
+        }
+        
+        .compound-result {
+            min-height: 80px;
+            border-radius: 16px;
+            background-color: #fef3c7;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 15px;
+            text-align: center;
+        }
+        
+        .compound-name {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #92400e;
+        }
+        
+        .compound-formula {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #d97706;
+            margin: 5px 0;
+        }
+        
+        .compound-description {
+            font-size: 0.85rem;
+            color: #57534e;
+        }
+        
+        /* ELEMENT CATEGORY COLORS - COLORFUL TANPA GRADIENT */
+        .alkali-metal { background-color: #ff6b6b; color: white; }
+        .alkaline-earth { background-color: #ffa726; color: white; }
+        .transition-metal { background-color: #42a5f5; color: white; }
+        .basic-metal { background-color: #66bb6a; color: white; }
+        .semimetal { background-color: #ab47bc; color: white; }
+        .nonmetal { background-color: #26c6da; color: white; }
+        .halogen { background-color: #ffca28; color: #000; }
+        .noble-gas { background-color: #ec407a; color: white; }
+        .lanthanide { background-color: #7e57c2; color: white; }
+        .actinide { background-color: #5c6bc0; color: white; }
+        
+        /* BUTTON STYLES */
+        .game-button {
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 700;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+        }
+        
+        .game-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+        
+        .game-button:active {
+            transform: translateY(-1px);
+        }
+        
+        .combine-btn {
+            background-color: #10b981;
+            color: white;
+        }
+        
+        .reset-btn {
+            background-color: #ef4444;
+            color: white;
+        }
+        
+        .hint-btn {
+            background-color: #f59e0b;
+            color: white;
+        }
+        
+        /* GAME INFO */
+        .game-info-card {
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-left: 5px solid;
+        }
+        
+        .score-display {
+            font-size: 2.5rem;
+            font-weight: 800;
+            text-align: center;
+            color: #10b981;
+            text-shadow: 2px 2px 0 #d1fae5;
+        }
+        
+        .level-indicator {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: 700;
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+        
+        /* ANIMATIONS */
+        @keyframes successPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes newElement {
+            0% { transform: scale(0); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .success-animation {
+            animation: successPulse 0.5s ease 3;
+        }
+        
+        .new-element {
+            animation: newElement 0.3s ease-out;
+        }
+        
+        /* ACHIEVEMENT BADGES */
+        .achievement-badge {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            position: relative;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .app-logo {
+            display: flex;
+            align-items: center;
+        }
+        
+        .app-logo-icon {
+            background: #9999ff;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 8px;
+        }
+        
+        .app-name {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: #9999ff;
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile App Container -->
+    <div class="app-container">
+        <!-- App Header -->
+        <header class="bg-gradient-to-r from-primary to-secondary p-4 text-white">
+            <div class="flex justify-between items-center">
+                <div class="app-logo">
+                    <div class="app-logo-icon">
+                        <i class="fas fa-atom"></i>
+                    </div>
+                    <h1 class="app-name">TETA SAINS</h1>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-search"></i>
+                    <i class="fas fa-user-circle text-xl"></i>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Main Game Content -->
+        <main class="pb-24 p-4">
+            <!-- Game Title and Info -->
+            <div class="mb-6">
+                <h1 class="text-2xl font-bold text-gray-800 mb-2">
+                    <i class="fas fa-flask text-yellow-500 mr-2"></i> Kombinasi Unsur Kimia
+                </h1>
+                <p class="text-gray-600">
+                    Gabungkan unsur-unsur untuk membentuk senyawa kimia! Tarik dan lepas unsur ke zona gabung.
+                </p>
+            </div>
+            
+            <!-- Game Stats -->
+            <div class="grid grid-cols-3 gap-3 mb-6">
+                <div class="bg-blue-50 p-3 rounded-xl text-center border border-blue-100">
+                    <div class="text-2xl font-bold text-blue-600" id="score">0</div>
+                    <div class="text-xs text-blue-800">POIN</div>
+                </div>
+                <div class="bg-green-50 p-3 rounded-xl text-center border border-green-100">
+                    <div class="text-2xl font-bold text-green-600" id="level">1</div>
+                    <div class="text-xs text-green-800">LEVEL</div>
+                </div>
+                <div class="bg-purple-50 p-3 rounded-xl text-center border border-purple-100">
+                    <div class="text-2xl font-bold text-purple-600" id="combinations">0</div>
+                    <div class="text-xs text-purple-800">KOMBINASI</div>
+                </div>
+            </div>
+            
+            <!-- Current Objective -->
+            <div class="game-info-card bg-amber-50 border-l-amber-400 mb-6">
+                <div class="flex items-start">
+                    <i class="fas fa-bullseye text-amber-500 mt-1 mr-3"></i>
+                    <div>
+                        <h3 class="font-bold text-amber-800">Tantangan Level <span id="current-level">1</span></h3>
+                        <p id="objective" class="text-sm text-amber-700">
+                            Buatlah senyawa Air (H₂O)
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Drop Zone for Elements -->
+            <div class="mb-6">
+                <h3 class="font-bold text-gray-700 mb-2 flex items-center">
+                    <i class="fas fa-hand-point-down text-green-500 mr-2"></i> Zona Gabung Unsur
+                </h3>
+                <div id="drop-zone" class="drop-zone">
+                    <div class="text-gray-500" id="drop-hint">
+                        Tarik dan lepas 2-3 unsur ke sini
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Combine Button -->
+            <div class="mb-8 text-center">
+                <button id="combine-btn" class="game-button combine-btn w-full py-4 mb-3">
+                    <i class="fas fa-bolt mr-2"></i> GABUNGKAN UNSUR
+                </button>
+                
+                <div class="flex space-x-3">
+                    <button id="hint-btn" class="game-button hint-btn flex-1 py-3">
+                        <i class="fas fa-lightbulb mr-2"></i> PETUNJUK
+                    </button>
+                    <button id="reset-btn" class="game-button reset-btn flex-1 py-3">
+                        <i class="fas fa-redo mr-2"></i> ULANGI
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Compound Result -->
+            <div class="mb-8">
+                <h3 class="font-bold text-gray-700 mb-2 flex items-center">
+                    <i class="fas fa-vial text-red-500 mr-2"></i> Hasil Senyawa
+                </h3>
+                <div id="compound-result" class="compound-result">
+                    <div class="text-gray-500" id="result-placeholder">
+                        Hasil kombinasi akan muncul di sini
+                    </div>
+                    <div id="result-content" class="hidden">
+                        <div class="compound-formula" id="compound-formula">H₂O</div>
+                        <div class="compound-name" id="compound-name">Air</div>
+                        <div class="compound-description" id="compound-description">
+                            Senyawa penting untuk kehidupan, terdiri dari 2 atom Hidrogen dan 1 atom Oksigen.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Available Elements -->
+            <div class="mb-6">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="font-bold text-gray-700 flex items-center">
+                        <i class="fas fa-atom text-blue-500 mr-2"></i> Unsur Tersedia
+                    </h3>
+                    <div class="text-xs text-gray-500">
+                        <span id="selected-count">0</span>/3 dipilih
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-5 gap-3" id="elements-container">
+                    <!-- Elements will be dynamically added here -->
+                </div>
+            </div>
+            
+            <!-- Achievements -->
+            <div class="mb-8">
+                <h3 class="font-bold text-gray-700 mb-3 flex items-center">
+                    <i class="fas fa-trophy text-yellow-500 mr-2"></i> Pencapaian
+                </h3>
+                <div class="flex justify-around">
+                    <div class="achievement-badge bg-yellow-100 text-yellow-600" id="ach1">
+                        <i class="fas fa-flask"></i>
+                    </div>
+                    <div class="achievement-badge bg-gray-100 text-gray-400" id="ach2">
+                        <i class="fas fa-fire"></i>
+                    </div>
+                    <div class="achievement-badge bg-gray-100 text-gray-400" id="ach3">
+                        <i class="fas fa-water"></i>
+                    </div>
+                    <div class="achievement-badge bg-gray-100 text-gray-400" id="ach4">
+                        <i class="fas fa-gem"></i>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <!-- BOTTOM NAVIGATION - TIDAK DIRUBAH -->
+        <nav class="bottom-nav">
+            <a href="dashboad siswa.html" class="nav-item">
+                <i class="fas fa-home nav-icon"></i>
+                <span>Beranda</span>
+            </a>
+            <a href="soal harian/dashboard soal.html" class="nav-item">
+                <i class="fas fa-flask nav-icon"></i>
+                <span>Soal Harian</span>
+            </a>
+            <a href="ai/nayra.html" class="nav-item">
+                <i class="fas fa-robot nav-icon"></i>
+                <span>Nayra AI</span>
+            </a>
+            <a href="materi harian/kategori materi.html" class="nav-item">
+                <i class="fas fa-chalkboard-teacher nav-icon"></i>
+                <span>Materi Harian</span>
+            </a>
+            <a href="profil/profil.html" class="nav-item">
+                <i class="fas fa-user nav-icon"></i>
+                <span>Profil</span>
+            </a>
+        </nav>
+    </div>
+
+    <script>
+        // Game Data
+        const elements = [
+            { symbol: "H", name: "Hidrogen", number: 1, category: "nonmetal", colorClass: "nonmetal" },
+            { symbol: "O", name: "Oksigen", number: 8, category: "nonmetal", colorClass: "nonmetal" },
+            { symbol: "Na", name: "Natrium", number: 11, category: "alkali-metal", colorClass: "alkali-metal" },
+            { symbol: "Cl", name: "Klorin", number: 17, category: "halogen", colorClass: "halogen" },
+            { symbol: "C", name: "Karbon", number: 6, category: "nonmetal", colorClass: "nonmetal" },
+            { symbol: "N", name: "Nitrogen", number: 7, category: "nonmetal", colorClass: "nonmetal" },
+            { symbol: "Ca", name: "Kalsium", number: 20, category: "alkaline-earth", colorClass: "alkaline-earth" },
+            { symbol: "Fe", name: "Besi", number: 26, category: "transition-metal", colorClass: "transition-metal" },
+            { symbol: "Cu", name: "Tembaga", number: 29, category: "transition-metal", colorClass: "transition-metal" },
+            { symbol: "S", name: "Belerang", number: 16, category: "nonmetal", colorClass: "nonmetal" },
+            { symbol: "Mg", name: "Magnesium", number: 12, category: "alkaline-earth", colorClass: "alkaline-earth" },
+            { symbol: "Zn", name: "Seng", number: 30, category: "transition-metal", colorClass: "transition-metal" },
+            { symbol: "Ag", name: "Perak", number: 47, category: "transition-metal", colorClass: "transition-metal" },
+            { symbol: "Au", name: "Emas", number: 79, category: "transition-metal", colorClass: "transition-metal" },
+            { symbol: "He", name: "Helium", number: 2, category: "noble-gas", colorClass: "noble-gas" }
+        ];
+
+        // Chemical Compounds Database
+        const compounds = [
+            { formula: "H₂O", name: "Air", elements: ["H", "O"], description: "Senyawa penting untuk kehidupan, terdiri dari 2 atom Hidrogen dan 1 atom Oksigen.", points: 10 },
+            { formula: "NaCl", name: "Garam Dapur", elements: ["Na", "Cl"], description: "Senyawa ionik yang penting untuk tubuh dan bumbu masakan.", points: 15 },
+            { formula: "CO₂", name: "Karbon Dioksida", elements: ["C", "O"], description: "Gas rumah kaca yang dihasilkan dari respirasi dan pembakaran.", points: 12 },
+            { formula: "NH₃", name: "Amonia", elements: ["N", "H"], description: "Senyawa penting dalam industri pupuk dan pembersih.", points: 18 },
+            { formula: "CaCO₃", name: "Kalsium Karbonat", elements: ["Ca", "C", "O"], description: "Senyawa yang ditemukan dalam batu kapur, kapur, dan marmer.", points: 25 },
+            { formula: "Fe₂O₃", name: "Besi Oksida", elements: ["Fe", "O"], description: "Senyawa yang menyebabkan karat pada besi, berwarna merah.", points: 20 },
+            { formula: "CuSO₄", name: "Tembaga Sulfat", elements: ["Cu", "S", "O"], description: "Senyawa biru yang digunakan dalam elektroplating dan pestisida.", points: 22 },
+            { formula: "H₂SO₄", name: "Asam Sulfat", elements: ["H", "S", "O"], description: "Asam kuat yang banyak digunakan dalam industri kimia.", points: 30 },
+            { formula: "CH₄", name: "Metana", elements: ["C", "H"], description: "Gas alam utama, komponen penting dalam gas bumi.", points: 15 },
+            { formula: "MgO", name: "Magnesium Oksida", elements: ["Mg", "O"], description: "Senyawa putih yang digunakan dalam konstruksi dan obat-obatan.", points: 15 },
+            { formula: "AgNO₃", name: "Perak Nitrat", elements: ["Ag", "N", "O"], description: "Senyawa penting dalam fotografi dan antiseptik.", points: 28 },
+            { formula: "AuCl₃", name: "Emas(III) Klorida", elements: ["Au", "Cl"], description: "Senyawa emas yang digunakan dalam elektroplating emas.", points: 35 },
+            { formula: "NaOH", name: "Natrium Hidroksida", elements: ["Na", "O", "H"], description: "Basa kuat yang digunakan dalam pembuatan sabun dan pembersih.", points: 20 },
+            { formula: "HCl", name: "Asam Klorida", elements: ["H", "Cl"], description: "Asam kuat yang ditemukan dalam cairan lambung.", points: 18 },
+            { formula: "ZnO", name: "Seng Oksida", elements: ["Zn", "O"], description: "Senyawa putih yang digunakan dalam salep kulit dan tabir surya.", points: 16 }
+        ];
+
+        // Game Levels
+        const levels = [
+            { level: 1, objective: "Buatlah senyawa Air (H₂O)", target: "H₂O", elements: ["H", "O"] },
+            { level: 2, objective: "Buatlah senyawa Garam Dapur (NaCl)", target: "NaCl", elements: ["Na", "Cl"] },
+            { level: 3, objective: "Buatlah senyawa Karbon Dioksida (CO₂)", target: "CO₂", elements: ["C", "O"] },
+            { level: 4, objective: "Buatlah senyawa Amonia (NH₃)", target: "NH₃", elements: ["N", "H"] },
+            { level: 5, objective: "Buatlah senyawa Kalsium Karbonat (CaCO₃)", target: "CaCO₃", elements: ["Ca", "C", "O"] }
+        ];
+
+        // Game State
+        let gameState = {
+            score: 0,
+            level: 1,
+            combinations: 0,
+            selectedElements: [],
+            currentObjective: levels[0],
+            achievements: [true, false, false, false]
+        };
+
+        // DOM Elements
+        const elementsContainer = document.getElementById('elements-container');
+        const dropZone = document.getElementById('drop-zone');
+        const combineBtn = document.getElementById('combine-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const hintBtn = document.getElementById('hint-btn');
+        const compoundResult = document.getElementById('compound-result');
+        const resultPlaceholder = document.getElementById('result-placeholder');
+        const resultContent = document.getElementById('result-content');
+        const scoreDisplay = document.getElementById('score');
+        const levelDisplay = document.getElementById('level');
+        const combinationsDisplay = document.getElementById('combinations');
+        const currentLevelDisplay = document.getElementById('current-level');
+        const objectiveDisplay = document.getElementById('objective');
+        const selectedCountDisplay = document.getElementById('selected-count');
+        const compoundFormula = document.getElementById('compound-formula');
+        const compoundName = document.getElementById('compound-name');
+        const compoundDescription = document.getElementById('compound-description');
+
+        // Initialize Game
+        function initGame() {
+            renderElements();
+            updateGameStats();
+            updateObjective();
+            setupEventListeners();
+            updateAchievements();
+        }
+
+        // Render Elements
+        function renderElements() {
+            elementsContainer.innerHTML = '';
+            
+            // Show only elements needed for current level plus some extras
+            const availableElements = getAvailableElementsForLevel();
+            
+            availableElements.forEach(element => {
+                const elementDiv = document.createElement('div');
+                elementDiv.className = `element-card ${element.colorClass} relative new-element`;
+                elementDiv.dataset.symbol = element.symbol;
+                elementDiv.innerHTML = `
+                    <div class="element-number">${element.number}</div>
+                    <div class="element-symbol">${element.symbol}</div>
+                    <div class="element-name">${element.name}</div>
+                `;
+                
+                // Make element draggable
+                elementDiv.draggable = true;
+                elementDiv.addEventListener('dragstart', handleDragStart);
+                elementDiv.addEventListener('click', () => selectElement(element.symbol));
+                
+                elementsContainer.appendChild(elementDiv);
+            });
+        }
+
+        // Get available elements for current level
+        function getAvailableElementsForLevel() {
+            const levelElements = gameState.currentObjective.elements;
+            const extraElements = 5; // Number of extra random elements to add
+            
+            // Start with required elements
+            let availableElements = elements.filter(el => levelElements.includes(el.symbol));
+            
+            // Add some random elements
+            const otherElements = elements.filter(el => !levelElements.includes(el.symbol));
+            const shuffled = [...otherElements].sort(() => 0.5 - Math.random());
+            availableElements.push(...shuffled.slice(0, extraElements));
+            
+            // Shuffle the final array
+            return availableElements.sort(() => 0.5 - Math.random());
+        }
+
+        // Drag and Drop Functions
+        function handleDragStart(e) {
+            e.dataTransfer.setData('text/plain', e.target.dataset.symbol);
+            e.dataTransfer.effectAllowed = 'move';
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            dropZone.classList.add('active');
+        }
+
+        function handleDragLeave(e) {
+            if (!dropZone.contains(e.relatedTarget)) {
+                dropZone.classList.remove('active');
+            }
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            dropZone.classList.remove('active');
+            
+            const symbol = e.dataTransfer.getData('text/plain');
+            selectElement(symbol);
+        }
+
+        // Element Selection
+        function selectElement(symbol) {
+            if (gameState.selectedElements.length >= 3) {
+                showMessage("Maksimal 3 unsur yang dapat digabungkan!", "error");
+                return;
+            }
+            
+            if (!gameState.selectedElements.includes(symbol)) {
+                gameState.selectedElements.push(symbol);
+                updateDropZone();
+                updateSelectedCount();
+                
+                // Add visual feedback
+                const elementCard = document.querySelector(`[data-symbol="${symbol}"]`);
+                if (elementCard) {
+                    elementCard.style.transform = 'scale(0.95)';
+                    elementCard.style.boxShadow = '0 0 0 3px #10b981';
+                    setTimeout(() => {
+                        elementCard.style.transform = '';
+                        elementCard.style.boxShadow = '';
+                    }, 300);
+                }
+            }
+        }
+
+        // Update Drop Zone
+        function updateDropZone() {
+            const dropHint = document.getElementById('drop-hint');
+            
+            if (gameState.selectedElements.length === 0) {
+                dropZone.innerHTML = '<div class="text-gray-500" id="drop-hint">Tarik dan lepas 2-3 unsur ke sini</div>';
+                return;
+            }
+            
+            dropZone.innerHTML = '';
+            gameState.selectedElements.forEach(symbol => {
+                const element = elements.find(el => el.symbol === symbol);
+                if (element) {
+                    const elementDiv = document.createElement('div');
+                    elementDiv.className = `element-card ${element.colorClass} relative`;
+                    elementDiv.innerHTML = `
+                        <div class="element-number">${element.number}</div>
+                        <div class="element-symbol">${element.symbol}</div>
+                        <div class="element-name">${element.name}</div>
+                    `;
+                    elementDiv.addEventListener('click', () => removeElement(symbol));
+                    dropZone.appendChild(elementDiv);
+                }
+            });
+        }
+
+        // Remove Element from Selection
+        function removeElement(symbol) {
+            gameState.selectedElements = gameState.selectedElements.filter(el => el !== symbol);
+            updateDropZone();
+            updateSelectedCount();
+        }
+
+        // Update Selected Count
+        function updateSelectedCount() {
+            selectedCountDisplay.textContent = gameState.selectedElements.length;
+        }
+
+        // Combine Elements
+        function combineElements() {
+            if (gameState.selectedElements.length < 2) {
+                showMessage("Pilih minimal 2 unsur untuk digabungkan!", "error");
+                return;
+            }
+            
+            // Sort elements for consistent comparison
+            const sortedElements = [...gameState.selectedElements].sort();
+            
+            // Find matching compound
+            let foundCompound = null;
+            
+            // First try exact match
+            for (const compound of compounds) {
+                const compoundElements = [...compound.elements].sort();
+                if (JSON.stringify(sortedElements) === JSON.stringify(compoundElements)) {
+                    foundCompound = compound;
+                    break;
+                }
+            }
+            
+            // If not found, check if elements are subset (for compounds with repeating elements)
+            if (!foundCompound) {
+                for (const compound of compounds) {
+                    const compoundElementSet = new Set(compound.elements);
+                    const selectedElementSet = new Set(sortedElements);
+                    
+                    // Check if selected elements are all in compound elements
+                    let isSubset = true;
+                    for (const element of sortedElements) {
+                        if (!compoundElementSet.has(element)) {
+                            isSubset = false;
+                            break;
+                        }
+                    }
+                    
+                    if (isSubset) {
+                        foundCompound = compound;
+                        break;
+                    }
+                }
+            }
+            
+            // Process result
+            if (foundCompound) {
+                handleSuccessfulCombination(foundCompound);
+            } else {
+                handleFailedCombination();
+            }
+            
+            // Reset selection for next attempt
+            gameState.selectedElements = [];
+            updateDropZone();
+            updateSelectedCount();
+        }
+
+        // Handle Successful Combination
+        function handleSuccessfulCombination(compound) {
+            // Update game stats
+            gameState.score += compound.points;
+            gameState.combinations += 1;
+            
+            // Show result
+            resultPlaceholder.classList.add('hidden');
+            resultContent.classList.remove('hidden');
+            compoundFormula.textContent = compound.formula;
+            compoundName.textContent = compound.name;
+            compoundDescription.textContent = compound.description;
+            
+            // Check if it matches the level objective
+            if (compound.formula === gameState.currentObjective.target) {
+                showMessage(`Sempurna! Kamu berhasil membuat ${compound.name}!`, "success");
+                compoundResult.classList.add('success-animation');
+                
+                // Add bonus points for completing objective
+                gameState.score += 50;
+                
+                // Level up
+                setTimeout(() => {
+                    levelUp();
+                }, 1500);
+            } else {
+                showMessage(`Bagus! Kamu membuat ${compound.name}.`, "info");
+            }
+            
+            // Update displays
+            updateGameStats();
+            updateAchievements();
+            
+            // Remove animation class after animation completes
+            setTimeout(() => {
+                compoundResult.classList.remove('success-animation');
+            }, 1500);
+        }
+
+        // Handle Failed Combination
+        function handleFailedCombination() {
+            showMessage("Kombinasi tidak menghasilkan senyawa yang dikenal. Coba lagi!", "error");
+            
+            // Show failed result
+            resultPlaceholder.classList.add('hidden');
+            resultContent.classList.remove('hidden');
+            compoundFormula.textContent = "?";
+            compoundName.textContent = "Senyawa Tidak Dikenal";
+            compoundDescription.textContent = "Kombinasi unsur ini tidak menghasilkan senyawa yang stabil atau dikenal dalam kimia dasar.";
+            
+            // Deduct points for failed attempt
+            gameState.score = Math.max(0, gameState.score - 5);
+            updateGameStats();
+        }
+
+        // Level Up
+        function levelUp() {
+            if (gameState.level < levels.length) {
+                gameState.level += 1;
+                gameState.currentObjective = levels[gameState.level - 1];
+                updateObjective();
+                updateGameStats();
+                renderElements();
+                
+                showMessage(`Level ${gameState.level} terbuka!`, "success");
+                
+                // Unlock achievement for completing level 2
+                if (gameState.level >= 2 && !gameState.achievements[1]) {
+                    gameState.achievements[1] = true;
+                    unlockAchievement(1, "Ahli Kimia Pemula");
+                }
+                
+                // Unlock achievement for completing level 5
+                if (gameState.level >= 5 && !gameState.achievements[3]) {
+                    gameState.achievements[3] = true;
+                    unlockAchievement(3, "Master Kimia");
+                }
+            } else {
+                showMessage("Selamat! Kamu telah menyelesaikan semua level!", "success");
+            }
+        }
+
+        // Show Message
+        function showMessage(message, type) {
+            // Create message element
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `fixed top-20 left-1/2 transform -translate-x-1/2 z-50 px-4 py-3 rounded-lg shadow-lg max-w-xs text-white font-bold ${
+                type === 'success' ? 'bg-green-500' : 
+                type === 'error' ? 'bg-red-500' : 
+                'bg-blue-500'
+            }`;
+            messageDiv.textContent = message;
+            messageDiv.style.animation = 'fadeIn 0.3s ease-out';
+            
+            // Add to page
+            document.body.appendChild(messageDiv);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                messageDiv.style.animation = 'fadeOut 0.3s ease-out';
+                setTimeout(() => {
+                    if (messageDiv.parentNode) {
+                        messageDiv.parentNode.removeChild(messageDiv);
+                    }
+                }, 300);
+            }, 3000);
+            
+            // Add CSS for animation if not already present
+            if (!document.querySelector('#message-animations')) {
+                const style = document.createElement('style');
+                style.id = 'message-animations';
+                style.textContent = `
+                    @keyframes fadeIn {
+                        from { opacity: 0; transform: translate(-50%, -20px); }
+                        to { opacity: 1; transform: translate(-50%, 0); }
+                    }
+                    @keyframes fadeOut {
+                        from { opacity: 1; transform: translate(-50%, 0); }
+                        to { opacity: 0; transform: translate(-50%, -20px); }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
+
+        // Update Game Stats Display
+        function updateGameStats() {
+            scoreDisplay.textContent = gameState.score;
+            levelDisplay.textContent = gameState.level;
+            combinationsDisplay.textContent = gameState.combinations;
+        }
+
+        // Update Objective Display
+        function updateObjective() {
+            currentLevelDisplay.textContent = gameState.level;
+            objectiveDisplay.textContent = gameState.currentObjective.objective;
+        }
+
+        // Update Achievements
+        function updateAchievements() {
+            const achievements = ['ach1', 'ach2', 'ach3', 'ach4'];
+            achievements.forEach((achId, index) => {
+                const badge = document.getElementById(achId);
+                if (gameState.achievements[index]) {
+                    badge.className = badge.className.replace('bg-gray-100 text-gray-400', 
+                        index === 0 ? 'bg-yellow-100 text-yellow-600' :
+                        index === 1 ? 'bg-orange-100 text-orange-600' :
+                        index === 2 ? 'bg-blue-100 text-blue-600' :
+                        'bg-purple-100 text-purple-600');
+                }
+            });
+            
+            // Unlock first achievement after first combination
+            if (gameState.combinations >= 1 && !gameState.achievements[0]) {
+                gameState.achievements[0] = true;
+                unlockAchievement(0, "Kombinasi Pertama");
+            }
+            
+            // Unlock third achievement after 5 combinations
+            if (gameState.combinations >= 5 && !gameState.achievements[2]) {
+                gameState.achievements[2] = true;
+                unlockAchievement(2, "Ahli Eksperimen");
+            }
+        }
+
+        // Unlock Achievement
+        function unlockAchievement(index, title) {
+            showMessage(`Pencapaian terbuka: ${title}!`, "success");
+            updateAchievements();
+        }
+
+        // Show Hint
+        function showHint() {
+            const hintElements = gameState.currentObjective.elements;
+            showMessage(`Petunjuk: Gunakan unsur ${hintElements.join(', ')}`, "info");
+            
+            // Highlight the needed elements
+            document.querySelectorAll('.element-card').forEach(card => {
+                if (hintElements.includes(card.dataset.symbol)) {
+                    card.style.animation = 'pulse 1s infinite';
+                    setTimeout(() => {
+                        card.style.animation = '';
+                    }, 3000);
+                }
+            });
+            
+            // Add pulse animation if not already present
+            if (!document.querySelector('#pulse-animation')) {
+                const style = document.createElement('style');
+                style.id = 'pulse-animation';
+                style.textContent = `
+                    @keyframes pulse {
+                        0% { transform: scale(1); }
+                        50% { transform: scale(1.1); }
+                        100% { transform: scale(1); }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
+
+        // Reset Game
+        function resetGame() {
+            if (confirm("Apakah Anda yakin ingin mengulang game? Skor dan level akan direset.")) {
+                gameState = {
+                    score: 0,
+                    level: 1,
+                    combinations: 0,
+                    selectedElements: [],
+                    currentObjective: levels[0],
+                    achievements: [false, false, false, false]
+                };
+                
+                // Unlock first achievement (starter)
+                gameState.achievements[0] = true;
+                
+                updateGameStats();
+                updateObjective();
+                updateSelectedCount();
+                renderElements();
+                updateDropZone();
+                
+                // Reset result display
+                resultPlaceholder.classList.remove('hidden');
+                resultContent.classList.add('hidden');
+                
+                showMessage("Game telah direset!", "info");
+            }
+        }
+
+        // Setup Event Listeners
+        function setupEventListeners() {
+            // Drop zone events
+            dropZone.addEventListener('dragover', handleDragOver);
+            dropZone.addEventListener('dragleave', handleDragLeave);
+            dropZone.addEventListener('drop', handleDrop);
+            
+            // Button events
+            combineBtn.addEventListener('click', combineElements);
+            resetBtn.addEventListener('click', resetGame);
+            hintBtn.addEventListener('click', showHint);
+            
+            // Keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    combineElements();
+                }
+                if (e.key === 'r' || e.key === 'R') {
+                    resetGame();
+                }
+                if (e.key === 'h' || e.key === 'H') {
+                    showHint();
+                }
+                if (e.key === 'Escape') {
+                    gameState.selectedElements = [];
+                    updateDropZone();
+                    updateSelectedCount();
+                }
+            });
+        }
+
+        // Initialize the game when page loads
+        document.addEventListener('DOMContentLoaded', initGame);
+    </script>
+</body>
+  </html>

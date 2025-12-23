@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TETA SAINS - Daftar Game Kimia</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #38b2ac;
+            --secondary: #0e7490;
+            --accent: #f59e0b;
+        }
+        
+        body {
+            font-family: 'Baloo 2', cursive;
+            background-color: #f8fafc;
+        }
+        
+        .app-container {
+            max-width: 414px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        /* NAVBAR */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            max-width: 414px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            background: white;
+            z-index: 10;
+            height: 70px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+            text-decoration: none;
+            flex: 1;
+            height: 100%;
+            padding: 0.5rem 0;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item span {
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
+        
+        .nav-item.active {
+            color: var(--primary);
+        }
+        
+        .nav-icon {
+            transition: all 0.3s ease;
+            font-size: 1.25rem;
+        }
+        
+        .nav-icon.active {
+            transform: translateY(-5px);
+            color: var(--primary);
+        }
+        
+        /* GAME LIST STYLES */
+        .game-list-item {
+            display: flex;
+            align-items: center;
+            background: white;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        
+        .game-list-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+            border-color: #10b981;
+        }
+        
+        .game-icon-container {
+            width: 60px;
+            height: 60px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 16px;
+            font-size: 24px;
+            color: white;
+        }
+        
+        .game-info {
+            flex: 1;
+        }
+        
+        .game-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 4px;
+        }
+        
+        .game-description {
+            font-size: 0.85rem;
+            color: #64748b;
+            margin-bottom: 8px;
+        }
+        
+        .game-meta {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .game-meta-item {
+            display: flex;
+            align-items: center;
+            font-size: 0.75rem;
+            color: #475569;
+        }
+        
+        .game-meta-item i {
+            margin-right: 4px;
+        }
+        
+        .difficulty-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            margin-left: auto;
+        }
+        
+        .difficulty-easy {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+        
+        .difficulty-medium {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+        
+        .difficulty-hard {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 24px 0 16px 0;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .section-title {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+        }
+        
+        .section-title i {
+            margin-right: 10px;
+        }
+        
+        .games-played {
+            font-size: 0.85rem;
+            color: #64748b;
+            background: #f1f5f9;
+            padding: 4px 10px;
+            border-radius: 12px;
+        }
+        
+        .app-logo {
+            display: flex;
+            align-items: center;
+        }
+        
+        .app-logo-icon {
+            background: #9999ff;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 8px;
+        }
+        
+        .app-name {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: #9999ff;
+        }
+        
+        .coming-soon-badge {
+            background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            margin-left: 8px;
+        }
+        
+        /* LOADING ANIMATION */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile App Container -->
+    <div class="app-container">
+        <!-- App Header -->
+        <header class="bg-gradient-to-r from-primary to-secondary p-4 text-white">
+            <div class="flex justify-between items-center">
+                <div class="app-logo">
+                    <div class="app-logo-icon">
+                        <i class="fas fa-atom"></i>
+                    </div>
+                    <h1 class="app-name">TETA SAINS</h1>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-search"></i>
+                    <i class="fas fa-user-circle text-xl"></i>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Main Content -->
+        <main class="pb-24 p-4">
+            <!-- Page Title -->
+            <div class="mb-2">
+                <h1 class="text-2xl font-bold text-gray-800 mb-2">
+                    <i class="fas fa-gamepad text-green-500 mr-2"></i> Game Kimia Interaktif
+                </h1>
+                <p class="text-gray-600">
+                    Pilih game kimia favoritmu dan mulai belajar dengan cara yang menyenangkan!
+                </p>
+            </div>
+            
+            <!-- User Stats -->
+            <div class="grid grid-cols-2 gap-3 mb-6 mt-4">
+                <div class="bg-gradient-to-r from-blue-50 to-blue-100 p-4 rounded-xl border border-blue-200">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-blue-500 rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-gamepad text-white"></i>
+                        </div>
+                        <div>
+                            <div class="text-xl font-bold text-blue-700">6</div>
+                            <div class="text-xs text-blue-800">Game Tersedia</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-gradient-to-r from-green-50 to-green-100 p-4 rounded-xl border border-green-200">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-trophy text-white"></i>
+                        </div>
+                        <div>
+                            <div class="text-xl font-bold text-green-700">3</div>
+                            <div class="text-xs text-green-800">Pencapaian</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- ChemGames 1 Section -->
+            <div class="section-header">
+                <h2 class="section-title">
+                    <i class="fas fa-flask text-blue-500"></i> ChemGames 1: Dasar Kimia
+                </h2>
+                <div class="games-played">
+                    <i class="fas fa-play-circle mr-1"></i> 3 Game
+                </div>
+            </div>
+            
+            <!-- Game 1 -->
+            <div class="game-list-item fade-in" data-game="kombinasi-unsur" onclick="playGame('kombinasi-unsur')">
+                <div class="game-icon-container" style="background: linear-gradient(135deg, #3b82f6, #60a5fa);">
+                    <i class="fas fa-atom"></i>
+                </div>
+                <div class="game-info">
+                    <div class="game-title">Kombinasi Unsur</div>
+                    <p class="game-description">Gabungkan unsur-unsur untuk membentuk senyawa kimia</p>
+                    <div class="game-meta">
+                        <span class="game-meta-item"><i class="fas fa-star text-yellow-500"></i> 4.8</span>
+                        <span class="game-meta-item"><i class="fas fa-users"></i> 2.5K</span>
+                        <span class="game-meta-item"><i class="fas fa-level-up-alt"></i> 15 Level</span>
+                    </div>
+                </div>
+                <div class="difficulty-badge difficulty-easy">Mudah</div>
+            </div>
+            
+            <!-- Game 2 -->
+            <div class="game-list-item fade-in" data-game="lab-reaksi" onclick="playGame('lab-reaksi')">
+                <div class="game-icon-container" style="background: linear-gradient(135deg, #8b5cf6, #a78bfa);">
+                    <i class="fas fa-vial"></i>
+                </div>
+                <div class="game-info">
+                    <div class="game-title">Lab Reaksi</div>
+                    <p class="game-description">Lakukan eksperimen di lab virtual dengan reaksi kimia</p>
+                    <div class="game-meta">
+                        <span class="game-meta-item"><i class="fas fa-star text-yellow-500"></i> 4.6</span>
+                        <span class="game-meta-item"><i class="fas fa-users"></i> 1.8K</span>
+                        <span class="game-meta-item"><i class="fas fa-flask"></i> 25 Eksp</span>
+                    </div>
+                </div>
+                <div class="difficulty-badge difficulty-medium">Menengah</div>
+            </div>
+            
+            <!-- Game 3 -->
+            <div class="game-list-item fade-in" data-game="tabel-periodik-puzzle" onclick="playGame('tabel-periodik-puzzle')">
+                <div class="game-icon-container" style="background: linear-gradient(135deg, #10b981, #34d399);">
+                    <i class="fas fa-puzzle-piece"></i>
+                </div>
+                <div class="game-info">
+                    <div class="game-title">Tabel Periodik Puzzle</div>
+                    <p class="game-description">Susun tabel periodik dengan benar dalam game puzzle</p>
+                    <div class="game-meta">
+                        <span class="game-meta-item"><i class="fas fa-star text-yellow-500"></i> 4.7</span>
+                        <span class="game-meta-item"><i class="fas fa-users"></i> 3.2K</span>
+                        <span class="game-meta-item"><i class="fas fa-th-large"></i> 118 Unsur</span>
+                    </div>
+                </div>
+                <div class="difficulty-badge difficulty-easy">Mudah</div>
+            </div>
+            
+            <!-- ChemGames 2 Section -->
+            <div class="section-header mt-8">
+                <h2 class="section-title">
+                    <i class="fas fa-rocket text-orange-500"></i> ChemGames 2: Kimia Lanjutan
+                </h2>
+                <div class="games-played">
+                    <i class="fas fa-play-circle mr-1"></i> 3 Game
+                </div>
+            </div>
+            
+            <!-- Game 4 -->
+            <div class="game-list-item fade-in" data-game="battle-of-reactions" onclick="playGame('battle-of-reactions')">
+                <div class="game-icon-container" style="background: linear-gradient(135deg, #ef4444, #f87171);">
+                    <i class="fas fa-fire"></i>
+                </div>
+                <div class="game-info">
+                    <div class="game-title">Battle of Reactions</div>
+                    <p class="game-description">Game strategi kimia dengan mode PvP online</p>
+                    <div class="game-meta">
+                        <span class="game-meta-item"><i class="fas fa-star text-yellow-500"></i> 4.9</span>
+                        <span class="game-meta-item"><i class="fas fa-users"></i> 5.4K</span>
+                        <span class="game-meta-item"><i class="fas fa-trophy"></i> Kompetitif</span>
+                    </div>
+                </div>
+                <div class="difficulty-badge difficulty-hard">Sulit</div>
+            </div>
+            
+            <!-- Game 5 -->
+            <div class="game-list-item fade-in" data-game="molekul-builder" onclick="playGame('molekul-builder')">
+                <div class="game-icon-container" style="background: linear-gradient(135deg, #8b5cf6, #c4b5fd);">
+                    <i class="fas fa-dna"></i>
+                </div>
+                <div class="game-info">
+                    <div class="game-title">Molekul Builder</div>
+                    <p class="game-description">Bangun molekul kompleks dengan editor 3D interaktif</p>
+                    <div class="game-meta">
+                        <span class="game-meta-item"><i class="fas fa-star text-yellow-500"></i> 4.5</span>
+                        <span class="game-meta-item"><i class="fas fa-users"></i> 2.1K</span>
+                        <span class="game-meta-item"><i class="fas fa-shapes"></i> 150 Mol</span>
+                    </div>
+                </div>
+                <div class="difficulty-badge difficulty-medium">Menengah</div>
+            </div>
+            
+            <!-- Game 6 -->
+            <div class="game-list-item fade-in" data-game="stoikiometri-challenge" onclick="playGame('stoikiometri-challenge')">
+                <div class="game-icon-container" style="background: linear-gradient(135deg, #0ea5e9, #38bdf8);">
+                    <i class="fas fa-calculator"></i>
+                </div>
+                <div class="game-info">
+                    <div class="game-title">Stoikiometri Challenge</div>
+                    <p class="game-description">Uji kemampuan stoikiometri dengan perhitungan kimia</p>
+                    <div class="game-meta">
+                        <span class="game-meta-item"><i class="fas fa-star text-yellow-500"></i> 4.3</span>
+                        <span class="game-meta-item"><i class="fas fa-users"></i> 1.5K</span>
+                        <span class="game-meta-item"><i class="fas fa-brain"></i> 8 Level</span>
+                    </div>
+                </div>
+                <div class="difficulty-badge difficulty-hard">Sulit</div>
+            </div>
+            
+            <!-- Coming Soon Games -->
+            <div class="section-header mt-8">
+                <h2 class="section-title">
+                    <i class="fas fa-hourglass-half text-purple-500"></i> Segera Hadir
+                </h2>
+                <span class="coming-soon-badge">COMING SOON</span>
+            </div>
+            
+            <!-- Coming Soon Game 1 -->
+            <div class="game-list-item" style="opacity: 0.7; cursor: not-allowed;">
+                <div class="game-icon-container" style="background: linear-gradient(135deg, #6b7280, #9ca3af);">
+                    <i class="fas fa-lock"></i>
+                </div>
+                <div class="game-info">
+                    <div class="game-title">Kimia Organik Race</div>
+                    <p class="game-description">Balapan sambil menyusun senyawa organik</p>
+                    <div class="game-meta">
+                        <span class="game-meta-item"><i class="fas fa-clock"></i> Des 2024</span>
+                    </div>
+                </div>
+                <div class="difficulty-badge" style="background: #e5e7eb; color: #4b5563;">Segera</div>
+            </div>
+            
+            <!-- Coming Soon Game 2 -->
+            <div class="game-list-item" style="opacity: 0.7; cursor: not-allowed;">
+                <div class="game-icon-container" style="background: linear-gradient(135deg, #6b7280, #9ca3af);">
+                    <i class="fas fa-lock"></i>
+                </div>
+                <div class="game-info">
+                    <div class="game-title">Element Quest</div>
+                    <p class="game-description">Petualangan mencari unsur-unsur langka</p>
+                    <div class="game-meta">
+                        <span class="game-meta-item"><i class="fas fa-clock"></i> Jan 2025</span>
+                    </div>
+                </div>
+                <div class="difficulty-badge" style="background: #e5e7eb; color: #4b5563;">Segera</div>
+            </div>
+            
+            <!-- Info Box -->
+            <div class="bg-gradient-to-r from-amber-50 to-amber-100 p-4 rounded-2xl mt-8 mb-6 border border-amber-200">
+                <div class="flex items-start">
+                    <div class="w-10 h-10 bg-amber-500 rounded-lg flex items-center justify-center mr-3 flex-shrink-0">
+                        <i class="fas fa-lightbulb text-white"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-amber-800 mb-1">Tips Bermain Game</h3>
+                        <p class="text-sm text-amber-700">
+                            Mulailah dengan game <strong>ChemGames 1</strong> untuk mempelajari dasar-dasar kimia sebelum mencoba game yang lebih menantang di <strong>ChemGames 2</strong>.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Game Progress -->
+            <div class="bg-gradient-to-r from-green-50 to-emerald-50 p-5 rounded-2xl mt-6">
+                <h3 class="font-bold text-gray-800 mb-3 text-lg flex items-center">
+                    <i class="fas fa-chart-line text-green-500 mr-2"></i> Progress Belajar Kamu
+                </h3>
+                
+                <div class="mb-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-gray-700 font-medium">ChemGames 1: Dasar Kimia</span>
+                        <span class="text-green-600 font-bold">85%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-3">
+                        <div class="bg-gradient-to-r from-green-400 to-green-600 h-3 rounded-full" style="width: 85%"></div>
+                    </div>
+                </div>
+                
+                <div>
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-gray-700 font-medium">ChemGames 2: Kimia Lanjutan</span>
+                        <span class="text-blue-600 font-bold">45%</span>
+                    </div>
+                    <div class="w-full bg-gray-200 rounded-full h-3">
+                        <div class="bg-gradient-to-r from-blue-400 to-blue-600 h-3 rounded-full" style="width: 45%"></div>
+                    </div>
+                </div>
+                
+                <div class="text-center mt-4">
+                    <button class="bg-gradient-to-r from-green-500 to-green-600 text-white px-6 py-3 rounded-xl font-bold text-sm hover:shadow-lg transition-all">
+                        <i class="fas fa-sync-alt mr-2"></i> Sync Progress
+                    </button>
+                </div>
+            </div>
+        </main>
+        
+        <!-- BOTTOM NAVIGATION -->
+        <nav class="bottom-nav">
+            <a href="dashboad siswa.html" class="nav-item">
+                <i class="fas fa-home nav-icon"></i>
+                <span>Beranda</span>
+            </a>
+            <a href="soal harian/dashboard soal.html" class="nav-item">
+                <i class="fas fa-flask nav-icon"></i>
+                <span>Soal Harian</span>
+            </a>
+            <a href="ai/nayra.html" class="nav-item">
+                <i class="fas fa-robot nav-icon"></i>
+                <span>Nayra AI</span>
+            </a>
+            <a href="materi harian/kategori materi.html" class="nav-item">
+                <i class="fas fa-chalkboard-teacher nav-icon"></i>
+                <span>Materi Harian</span>
+            </a>
+            <a href="profil/profil.html" class="nav-item">
+                <i class="fas fa-user nav-icon"></i>
+                <span>Profil</span>
+            </a>
+        </nav>
+    </div>
+
+    <script>
+        // Function to handle game play - langsung ke next.html
+        function playGame(gameId) {
+            // Tampilkan loading
+            showLoading(gameId);
+            
+            // Simulasi loading singkat
+            setTimeout(() => {
+                // Redirect ke halaman next.html dengan parameter game
+                window.location.href = `next.html?game=${gameId}`;
+                
+                // Catat riwayat game yang dimainkan (simulasi)
+                saveGameHistory(gameId);
+            }, 800);
+        }
+        
+        // Tampilkan loading screen
+        function showLoading(gameId) {
+            const gameName = getGameName(gameId);
+            
+            // Buat elemen loading
+            const loadingDiv = document.createElement('div');
+            loadingDiv.id = 'game-loading';
+            loadingDiv.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(255, 255, 255, 0.95);
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                z-index: 1000;
+                font-family: 'Baloo 2', cursive;
+            `;
+            
+            loadingDiv.innerHTML = `
+                <div class="text-center p-6">
+                    <div class="w-20 h-20 mx-auto mb-6 bg-gradient-to-r from-green-400 to-blue-500 rounded-full flex items-center justify-center animate-pulse">
+                        <i class="fas fa-gamepad text-white text-2xl"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-gray-800 mb-2">Memuat Game</h2>
+                    <p class="text-gray-600 mb-6">${gameName}</p>
+                    <div class="w-64 h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div id="loading-bar" class="h-full bg-gradient-to-r from-green-500 to-blue-500 rounded-full" style="width: 0%"></div>
+                    </div>
+                    <p class="text-sm text-gray-500 mt-4">Persiapan permainan...</p>
+                </div>
+            `;
+            
+            document.body.appendChild(loadingDiv);
+            
+            // Animasi loading bar
+            const loadingBar = document.getElementById('loading-bar');
+            let width = 0;
+            const interval = setInterval(() => {
+                if (width >= 100) {
+                    clearInterval(interval);
+                } else {
+                    width += 10;
+                    loadingBar.style.width = width + '%';
+                }
+            }, 100);
+        }
+        
+        // Dapatkan nama game berdasarkan ID
+        function getGameName(gameId) {
+            const gameNames = {
+                'kombinasi-unsur': 'Kombinasi Unsur',
+                'lab-reaksi': 'Lab Reaksi',
+                'tabel-periodik-puzzle': 'Tabel Periodik Puzzle',
+                'battle-of-reactions': 'Battle of Reactions',
+                'molekul-builder': 'Molekul Builder',
+                'stoikiometri-challenge': 'Stoikiometri Challenge'
+            };
+            
+            return gameNames[gameId] || 'Game Kimia';
+        }
+        
+        // Simpan riwayat game (simulasi localStorage)
+        function saveGameHistory(gameId) {
+            let gameHistory = JSON.parse(localStorage.getItem('chemGamesHistory')) || [];
+            
+            const gamePlay = {
+                id: gameId,
+                name: getGameName(gameId),
+                timestamp: new Date().toISOString(),
+                date: new Date().toLocaleDateString('id-ID'),
+                time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })
+            };
+            
+            // Tambahkan ke awal array (paling baru pertama)
+            gameHistory.unshift(gamePlay);
+            
+            // Simpan maksimal 20 riwayat
+            if (gameHistory.length > 20) {
+                gameHistory = gameHistory.slice(0, 20);
+            }
+            
+            localStorage.setItem('chemGamesHistory', JSON.stringify(gameHistory));
+            
+            // Update statistik
+            updateGameStats();
+        }
+        
+        // Update statistik game
+        function updateGameStats() {
+            // Dalam implementasi nyata, ini akan mengambil data dari server
+            // Untuk demo, kita update count game yang dimainkan
+            const gameHistory = JSON.parse(localStorage.getItem('chemGamesHistory')) || [];
+            const gamesPlayed = gameHistory.length;
+            
+            // Update UI jika ada elemen untuk menampilkan jumlah game dimainkan
+            const gamesPlayedElement = document.querySelector('.bg-gradient-to-r.from-green-50');
+            if (gamesPlayedElement) {
+                // Hitung progress berdasarkan game yang dimainkan
+                const progress1 = Math.min(85 + (gamesPlayed * 5), 100);
+                const progress2 = Math.min(45 + (gamesPlayed * 8), 100);
+                
+                // Update progress bars
+                const progressBar1 = document.querySelector('.bg-gradient-to-r.from-green-400.to-green-600');
+                const progressBar2 = document.querySelector('.bg-gradient-to-r.from-blue-400.to-blue-600');
+                
+                if (progressBar1) progressBar1.style.width = `${progress1}%`;
+                if (progressBar2) progressBar2.style.width = `${progress2}%`;
+                
+                // Update text progress
+                const progressText1 = document.querySelector('.text-green-600.font-bold');
+                const progressText2 = document.querySelector('.text-blue-600.font-bold');
+                
+                if (progressText1) progressText1.textContent = `${progress1}%`;
+                if (progressText2) progressText2.textContent = `${progress2}%`;
+            }
+        }
+        
+        // Inisialisasi saat halaman dimuat
+        document.addEventListener('DOMContentLoaded', function() {
+            // Tambahkan efek hover pada item game
+            const gameItems = document.querySelectorAll('.game-list-item');
+            gameItems.forEach(item => {
+                if (!item.style.opacity || item.style.opacity !== '0.7') {
+                    item.addEventListener('mouseenter', function() {
+                        this.style.transform = 'translateY(-3px)';
+                        this.style.boxShadow = '0 8px 20px rgba(0,0,0,0.12)';
+                    });
+                    
+                    item.addEventListener('mouseleave', function() {
+                        this.style.transform = '';
+                        this.style.boxShadow = '0 4px 12px rgba(0,0,0,0.08)';
+                    });
+                    
+                    // Tambahkan efek klik
+                    item.addEventListener('click', function() {
+                        this.style.transform = 'scale(0.98)';
+                        setTimeout(() => {
+                            this.style.transform = '';
+                        }, 200);
+                    });
+                }
+            });
+            
+            // Update statistik dari localStorage jika ada
+            updateGameStats();
+            
+            // Tampilkan animasi untuk item game
+            setTimeout(() => {
+                const fadeItems = document.querySelectorAll('.fade-in');
+                fadeItems.forEach((item, index) => {
+                    setTimeout(() => {
+                        item.style.animation = 'fadeIn 0.5s ease-out';
+                    }, index * 100);
+                });
+            }, 300);
+            
+            // Tambahkan efek untuk tombol sync
+            const syncButton = document.querySelector('.bg-gradient-to-r.from-green-500.to-green-600');
+            if (syncButton) {
+                syncButton.addEventListener('click', function() {
+                    // Simulasi sync
+                    this.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i> Menyinkronkan...';
+                    this.disabled = true;
+                    
+                    setTimeout(() => {
+                        this.innerHTML = '<i class="fas fa-check mr-2"></i> Tersinkronisasi!';
+                        this.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+                        
+                        setTimeout(() => {
+                            this.innerHTML = '<i class="fas fa-sync-alt mr-2"></i> Sync Progress';
+                            this.disabled = false;
+                        }, 1500);
+                    }, 1200);
+                    
+                    // Tampilkan notifikasi
+                    showMessage('Progress game berhasil disinkronkan!', 'success');
+                });
+            }
+        });
+        
+        // Fungsi untuk menampilkan pesan
+        function showMessage(message, type) {
+            // Hapus pesan sebelumnya jika ada
+            const existingMessage = document.getElementById('flash-message');
+            if (existingMessage) {
+                existingMessage.remove();
+            }
+            
+            // Buat elemen pesan
+            const messageDiv = document.createElement('div');
+            messageDiv.id = 'flash-message';
+            messageDiv.className = `fixed top-4 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded-xl shadow-lg max-w-xs text-white font-bold ${
+                type === 'success' ? 'bg-green-500' : 
+                type === 'error' ? 'bg-red-500' : 
+                'bg-blue-500'
+            }`;
+            messageDiv.textContent = message;
+            messageDiv.style.animation = 'fadeInDown 0.3s ease-out';
+            
+            // Tambahkan ke halaman
+            document.body.appendChild(messageDiv);
+            
+            // Hapus setelah 3 detik
+            setTimeout(() => {
+                messageDiv.style.animation = 'fadeOutUp 0.3s ease-out';
+                setTimeout(() => {
+                    if (messageDiv.parentNode) {
+                        messageDiv.parentNode.removeChild(messageDiv);
+                    }
+                }, 300);
+            }, 3000);
+            
+            // Tambahkan animasi CSS jika belum ada
+            if (!document.querySelector('#message-animations')) {
+                const style = document.createElement('style');
+                style.id = 'message-animations';
+                style.textContent = `
+                    @keyframes fadeInDown {
+                        from { opacity: 0; transform: translate(-50%, -20px); }
+                        to { opacity: 1; transform: translate(-50%, 0); }
+                    }
+                    @keyframes fadeOutUp {
+                        from { opacity: 1; transform: translate(-50%, 0); }
+                        to { opacity: 0; transform: translate(-50%, -20px); }
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
+    </script>
+</body>
+</html>

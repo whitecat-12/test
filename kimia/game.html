@@ -86,6 +86,8 @@
             transition: all 0.3s ease;
             cursor: pointer;
             border: 2px solid transparent;
+            text-decoration: none !important; /* Tambahkan ini */
+            color: inherit; /* Tambahkan ini */
         }
         
         .game-list-item:hover {
@@ -304,7 +306,7 @@
             </div>
             
             <!-- Game 1 -->
-            <div class="game-list-item fade-in" data-game="kombinasi-unsur" onclick="playGame('kombinasi-unsur')">
+            <a class="game-list-item fade-in" href="next.html?game=kombinasi-unsur">
                 <div class="game-icon-container" style="background: linear-gradient(135deg, #3b82f6, #60a5fa);">
                     <i class="fas fa-atom"></i>
                 </div>
@@ -318,10 +320,10 @@
                     </div>
                 </div>
                 <div class="difficulty-badge difficulty-easy">Mudah</div>
-            </div>
+            </a>
             
             <!-- Game 2 -->
-            <div class="game-list-item fade-in" data-game="lab-reaksi" onclick="playGame('lab-reaksi')">
+            <a class="game-list-item fade-in" href="next.html?game=lab-reaksi">
                 <div class="game-icon-container" style="background: linear-gradient(135deg, #8b5cf6, #a78bfa);">
                     <i class="fas fa-vial"></i>
                 </div>
@@ -335,10 +337,10 @@
                     </div>
                 </div>
                 <div class="difficulty-badge difficulty-medium">Menengah</div>
-            </div>
+            </a>
             
             <!-- Game 3 -->
-            <div class="game-list-item fade-in" data-game="tabel-periodik-puzzle" onclick="playGame('tabel-periodik-puzzle')">
+            <a class="game-list-item fade-in" href="next.html?game=tabel-periodik-puzzle">
                 <div class="game-icon-container" style="background: linear-gradient(135deg, #10b981, #34d399);">
                     <i class="fas fa-puzzle-piece"></i>
                 </div>
@@ -352,7 +354,7 @@
                     </div>
                 </div>
                 <div class="difficulty-badge difficulty-easy">Mudah</div>
-            </div>
+            </a>
             
             <!-- ChemGames 2 Section -->
             <div class="section-header mt-8">
@@ -365,7 +367,7 @@
             </div>
             
             <!-- Game 4 -->
-            <div class="game-list-item fade-in" data-game="battle-of-reactions" onclick="playGame('battle-of-reactions')">
+            <a class="game-list-item fade-in" href="next.html?game=battle-of-reactions">
                 <div class="game-icon-container" style="background: linear-gradient(135deg, #ef4444, #f87171);">
                     <i class="fas fa-fire"></i>
                 </div>
@@ -379,10 +381,10 @@
                     </div>
                 </div>
                 <div class="difficulty-badge difficulty-hard">Sulit</div>
-            </div>
+            </a>
             
             <!-- Game 5 -->
-            <div class="game-list-item fade-in" data-game="molekul-builder" onclick="playGame('molekul-builder')">
+            <a class="game-list-item fade-in" href="next.html?game=molekul-builder">
                 <div class="game-icon-container" style="background: linear-gradient(135deg, #8b5cf6, #c4b5fd);">
                     <i class="fas fa-dna"></i>
                 </div>
@@ -396,10 +398,10 @@
                     </div>
                 </div>
                 <div class="difficulty-badge difficulty-medium">Menengah</div>
-            </div>
+            </a>
             
             <!-- Game 6 -->
-            <div class="game-list-item fade-in" data-game="stoikiometri-challenge" onclick="playGame('stoikiometri-challenge')">
+            <a class="game-list-item fade-in" href="next.html?game=stoikiometri-challenge">
                 <div class="game-icon-container" style="background: linear-gradient(135deg, #0ea5e9, #38bdf8);">
                     <i class="fas fa-calculator"></i>
                 </div>
@@ -413,7 +415,7 @@
                     </div>
                 </div>
                 <div class="difficulty-badge difficulty-hard">Sulit</div>
-            </div>
+            </a>
             
             <!-- Coming Soon Games -->
             <div class="section-header mt-8">
@@ -528,8 +530,10 @@
     </div>
 
     <script>
-        // Function to handle game play - langsung ke next.html
-        function playGame(gameId) {
+        // Function to handle game play dengan efek loading
+        function handleGameClick(e, gameId) {
+            e.preventDefault(); // Mencegah navigasi default
+            
             // Tampilkan loading
             showLoading(gameId);
             
@@ -666,28 +670,54 @@
         
         // Inisialisasi saat halaman dimuat
         document.addEventListener('DOMContentLoaded', function() {
-            // Tambahkan efek hover pada item game
-            const gameItems = document.querySelectorAll('.game-list-item');
-            gameItems.forEach(item => {
-                if (!item.style.opacity || item.style.opacity !== '0.7') {
-                    item.addEventListener('mouseenter', function() {
+            // Tambahkan event listener untuk link game
+            document.querySelectorAll('.game-list-item[href^="next.html"]').forEach(link => {
+                // Dapatkan gameId dari href
+                const href = link.getAttribute('href');
+                const gameId = href.split('=')[1];
+                
+                // Tambahkan event listener untuk efek loading
+                link.addEventListener('click', function(e) {
+                    handleGameClick(e, gameId);
+                });
+                
+                // Tambahkan efek hover
+                link.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-3px)';
+                    this.style.boxShadow = '0 8px 20px rgba(0,0,0,0.12)';
+                });
+                
+                link.addEventListener('mouseleave', function() {
+                    this.style.transform = '';
+                    this.style.boxShadow = '0 4px 12px rgba(0,0,0,0.08)';
+                });
+                
+                // Tambahkan efek klik
+                link.addEventListener('mousedown', function() {
+                    this.style.transform = 'scale(0.98)';
+                });
+                
+                link.addEventListener('mouseup', function() {
+                    this.style.transform = '';
+                });
+            });
+            
+            // Tambahkan efek hover untuk game coming soon (masih div)
+            const comingSoonItems = document.querySelectorAll('.game-list-item:not([href])');
+            comingSoonItems.forEach(item => {
+                item.addEventListener('mouseenter', function() {
+                    if (this.style.opacity !== '0.7') {
                         this.style.transform = 'translateY(-3px)';
                         this.style.boxShadow = '0 8px 20px rgba(0,0,0,0.12)';
-                    });
-                    
-                    item.addEventListener('mouseleave', function() {
+                    }
+                });
+                
+                item.addEventListener('mouseleave', function() {
+                    if (this.style.opacity !== '0.7') {
                         this.style.transform = '';
                         this.style.boxShadow = '0 4px 12px rgba(0,0,0,0.08)';
-                    });
-                    
-                    // Tambahkan efek klik
-                    item.addEventListener('click', function() {
-                        this.style.transform = 'scale(0.98)';
-                        setTimeout(() => {
-                            this.style.transform = '';
-                        }, 200);
-                    });
-                }
+                    }
+                });
             });
             
             // Update statistik dari localStorage jika ada

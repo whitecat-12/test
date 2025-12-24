@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Science Explorer - Puzzle Tabel Periodik</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #38b2ac;
+            --secondary: #0e7490;
+            --accent: #f59e0b;
+            --physics: #3b82f6;
+            --chemistry: #10b981;
+            --biology: #8b5cf6;
+            --astronomy: #ec4899;
+        }
+        
+        body {
+            font-family: 'Baloo 2', cursive;
+            background-color: #f8fafc;
+        }
+        
+        .app-container {
+            max-width: 414px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        /* NAVBAR YANG SUDAH DIPERBAIKI - SAMA DENGAN FILE CHAT */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            max-width: 414px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            background: white;
+            z-index: 10;
+            height: 70px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+            text-decoration: none;
+            flex: 1;
+            height: 100%;
+            padding: 0.5rem 0;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item span {
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
+        
+        .nav-item.active {
+            color: var(--primary);
+        }
+        
+        .nav-icon {
+            transition: all 0.3s ease;
+            font-size: 1.25rem;
+        }
+        
+        .nav-icon.active {
+            transform: translateY(-5px);
+            color: var(--primary);
+        }
+        
+        .app-logo {
+            display: flex;
+            align-items: center;
+        }
+        
+        .app-logo-icon {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 8px;
+        }
+        
+        .app-name {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: #60a5fa;
+        }
+
+        /* GAME STYLES */
+        .game-container {
+            padding: 16px;
+            background: white;
+        }
+
+        .game-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 20px;
+            color: #10b981;
+        }
+
+        .game-subtitle {
+            text-align: center;
+            color: #64748b;
+            margin-bottom: 24px;
+        }
+
+        /* GAME STATUS */
+        .game-status {
+            display: flex;
+            justify-content: space-between;
+            background: #f1f5f9;
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .stat-box {
+            text-align: center;
+            flex: 1;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+
+        /* PERIODIC TABLE PUZZLE */
+        .puzzle-container {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 4px;
+            margin-bottom: 20px;
+        }
+
+        .puzzle-cell {
+            aspect-ratio: 1;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+        }
+
+        .puzzle-cell:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .puzzle-cell.empty {
+            background: #f8fafc;
+            border: 2px dashed #cbd5e1;
+            cursor: default;
+        }
+
+        .puzzle-cell.draggable {
+            cursor: grab;
+        }
+
+        .puzzle-cell.dragging {
+            opacity: 0.7;
+            transform: scale(1.1);
+        }
+
+        .puzzle-cell.correct {
+            border-color: #10b981;
+            background-color: #d1fae5;
+        }
+
+        .puzzle-cell.incorrect {
+            border-color: #ef4444;
+            background-color: #fee2e2;
+        }
+
+        /* ELEMENT CARDS */
+        .elements-container {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .element-card {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+            cursor: grab;
+            transition: all 0.2s ease;
+        }
+
+        .element-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
+        }
+
+        .element-symbol {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .element-name {
+            font-size: 0.8rem;
+            color: #64748b;
+        }
+
+        .element-number {
+            font-size: 0.7rem;
+            color: #94a3b8;
+            margin-top: 4px;
+        }
+
+        /* ELEMENT CATEGORY COLORS */
+        .alkali { background-color: #fef3c7 !important; border-color: #f59e0b !important; color: #92400e !important; }
+        .alkaline-earth { background-color: #dbeafe !important; border-color: #3b82f6 !important; color: #1e40af !important; }
+        .transition { background-color: #f0f9ff !important; border-color: #0ea5e9 !important; color: #0c4a6e !important; }
+        .basic-metal { background-color: #f3e8ff !important; border-color: #8b5cf6 !important; color: #5b21b6 !important; }
+        .semimetal { background-color: #fce7f3 !important; border-color: #ec4899 !important; color: #9d174d !important; }
+        .nonmetal { background-color: #dcfce7 !important; border-color: #10b981 !important; color: #065f46 !important; }
+        .halogen { background-color: #ffedd5 !important; border-color: #f97316 !important; color: #9a3412 !important; }
+        .noble-gas { background-color: #e0e7ff !important; border-color: #6366f1 !important; color: #3730a3 !important; }
+        .lanthanide { background-color: #fef2f2 !important; border-color: #ef4444 !important; color: #991b1b !important; }
+        .actinide { background-color: #f5f5f4 !important; border-color: #78716c !important; color: #44403c !important; }
+
+        /* GAME CONTROLS */
+        .game-controls {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .game-button {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .game-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .game-button.check {
+            background-color: #10b981;
+            color: white;
+        }
+
+        .game-button.hint {
+            background-color: #f59e0b;
+            color: white;
+        }
+
+        .game-button.reset {
+            background-color: #ef4444;
+            color: white;
+        }
+
+        /* MODAL */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 24px;
+            border-radius: 16px;
+            max-width: 320px;
+            width: 90%;
+            text-align: center;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #10b981;
+        }
+
+        .modal-message {
+            color: #64748b;
+            margin-bottom: 20px;
+        }
+
+        .modal-button {
+            padding: 12px 24px;
+            background-color: #10b981;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .modal-button:hover {
+            background-color: #059669;
+            transform: scale(1.05);
+        }
+
+        /* LEVEL INDICATOR */
+        .level-indicator {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .level-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #cbd5e1;
+            transition: all 0.3s ease;
+        }
+
+        .level-dot.active {
+            background-color: #10b981;
+            transform: scale(1.2);
+        }
+
+        /* ACHIEVEMENT BADGE */
+        .achievement-badge {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: #f59e0b;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+            animation: bounce 2s infinite;
+            z-index: 5;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        /* SCORE ANIMATION */
+        .score-popup {
+            position: absolute;
+            font-weight: bold;
+            color: #10b981;
+            animation: floatUp 1s ease forwards;
+            pointer-events: none;
+        }
+
+        @keyframes floatUp {
+            0% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 414px) {
+            .bottom-nav {
+                height: 65px;
+            }
+            
+            .nav-icon {
+                font-size: 1.1rem;
+            }
+            
+            .puzzle-container {
+                grid-template-columns: repeat(8, 1fr);
+                gap: 3px;
+            }
+            
+            .elements-container {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile App Container -->
+    <div class="app-container">
+        <!-- App Header -->
+        <header class="bg-gradient-to-r from-primary to-secondary p-4 text-white">
+            <div class="flex justify-between items-center">
+                <div class="app-logo">
+                    <div class="app-logo-icon" style="background: #9999ff; color: white;">
+                        <i class="fas fa-atom"></i>
+                    </div>
+                    <h1 class="app-name" style="color: #9999ff;">TETA SAINS</h1>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-gamepad"></i>
+                    <i class="fas fa-user-circle text-xl"></i>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Main Game Content -->
+        <main class="pb-20">
+            <div class="game-container">
+                <h1 class="game-title">Puzzle Tabel Periodik</h1>
+                <p class="game-subtitle">Seret dan letakkan unsur kimia ke posisi yang benar!</p>
+                
+                <!-- Level Indicator -->
+                <div class="level-indicator">
+                    <div class="level-dot active"></div>
+                    <div class="level-dot"></div>
+                    <div class="level-dot"></div>
+                    <div class="level-dot"></div>
+                    <div class="level-dot"></div>
+                </div>
+                
+                <!-- Game Status -->
+                <div class="game-status">
+                    <div class="stat-box">
+                        <div class="stat-value" id="score">0</div>
+                        <div class="stat-label">Skor</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value" id="time">60</div>
+                        <div class="stat-label">Detik</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value" id="level">1</div>
+                        <div class="stat-label">Level</div>
+                    </div>
+                    <div class="stat-box">
+                        <div class="stat-value" id="hints">3</div>
+                        <div class="stat-label">Petunjuk</div>
+                    </div>
+                </div>
+                
+                <!-- Achievement Badge -->
+                <div class="achievement-badge" id="achievementBadge">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                
+                <!-- Puzzle Grid -->
+                <div class="puzzle-container" id="puzzleGrid">
+                    <!-- Grid cells will be generated by JavaScript -->
+                </div>
+                
+                <!-- Element Cards -->
+                <h3 class="font-bold text-gray-800 mb-3 text-center">Unsur yang Tersedia</h3>
+                <div class="elements-container" id="elementsContainer">
+                    <!-- Element cards will be generated by JavaScript -->
+                </div>
+                
+                <!-- Game Controls -->
+                <div class="game-controls">
+                    <button class="game-button check" id="checkButton">
+                        <i class="fas fa-check-circle"></i> Cek Jawaban
+                    </button>
+                    <button class="game-button hint" id="hintButton">
+                        <i class="fas fa-lightbulb"></i> Petunjuk
+                    </button>
+                    <button class="game-button reset" id="resetButton">
+                        <i class="fas fa-redo"></i> Ulangi
+                    </button>
+                </div>
+                
+                <!-- Instructions -->
+                <div class="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                    <h4 class="font-bold text-blue-800 mb-2 flex items-center">
+                        <i class="fas fa-info-circle mr-2"></i> Cara Bermain
+                    </h4>
+                    <ol class="text-sm text-blue-700 list-decimal pl-4 space-y-1">
+                        <li>Seret kartu unsur ke tabel periodik</li>
+                        <li>Tempatkan unsur pada posisi yang benar</li>
+                        <li>Semakin cepat dan akurat, semakin tinggi skornya</li>
+                        <li>Gunakan petunjuk jika diperlukan</li>
+                    </ol>
+                </div>
+            </div>
+            
+            <!-- Success Modal -->
+            <div class="modal" id="successModal">
+                <div class="modal-content">
+                    <div class="modal-title">Selamat! 🎉</div>
+                    <div class="modal-message" id="successMessage">
+                        Kamu berhasil menyelesaikan level 1!
+                    </div>
+                    <button class="modal-button" id="nextLevelButton">
+                        Lanjut Level Berikutnya
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Game Over Modal -->
+            <div class="modal" id="gameOverModal">
+                <div class="modal-content">
+                    <div class="modal-title">Waktu Habis! ⏰</div>
+                    <div class="modal-message" id="gameOverMessage">
+                        Waktu bermain sudah habis.
+                    </div>
+                    <button class="modal-button" id="restartButton">
+                        Main Lagi
+                    </button>
+                </div>
+            </div>
+        </main>
+        
+        <!-- BOTTOM NAVIGATION YANG SUDAH DIPERBAIKI -->
+        <nav class="bottom-nav">
+            <a href="dashboad siswa.html" class="nav-item">
+                <i class="fas fa-home nav-icon"></i>
+                <span>Beranda</span>
+            </a>
+            <a href="soal harian/dashboard soal.html" class="nav-item">
+                <i class="fas fa-flask nav-icon"></i>
+                <span>Soal Harian</span>
+            </a>
+            <a href="ai/nayra.html" class="nav-item">
+                <i class="fas fa-robot nav-icon"></i>
+                <span>Nayra AI</span>
+            </a>
+            <a href="materi harian/kategori materi.html" class="nav-item">
+                <i class="fas fa-chalkboard-teacher nav-icon"></i>
+                <span>Materi Harian</span>
+            </a>
+            <a href="profil/profil.html" class="nav-item">
+                <i class="fas fa-user nav-icon"></i>
+                <span>Profil</span>
+            </a>
+        </nav>
+    </div>
+
+    <script>
+        // Data Tabel Periodik
+        const periodicTable = {
+            1: { symbol: "H", name: "Hidrogen", number: 1, group: 1, period: 1, category: "nonmetal" },
+            2: { symbol: "He", name: "Helium", number: 2, group: 18, period: 1, category: "noble-gas" },
+            3: { symbol: "Li", name: "Litium", number: 3, group: 1, period: 2, category: "alkali" },
+            4: { symbol: "Be", name: "Berilium", number: 4, group: 2, period: 2, category: "alkaline-earth" },
+            5: { symbol: "B", name: "Boron", number: 5, group: 13, period: 2, category: "semimetal" },
+            6: { symbol: "C", name: "Karbon", number: 6, group: 14, period: 2, category: "nonmetal" },
+            7: { symbol: "N", name: "Nitrogen", number: 7, group: 15, period: 2, category: "nonmetal" },
+            8: { symbol: "O", name: "Oksigen", number: 8, group: 16, period: 2, category: "nonmetal" },
+            9: { symbol: "F", name: "Fluor", number: 9, group: 17, period: 2, category: "halogen" },
+            10: { symbol: "Ne", name: "Neon", number: 10, group: 18, period: 2, category: "noble-gas" },
+            11: { symbol: "Na", name: "Natrium", number: 11, group: 1, period: 3, category: "alkali" },
+            12: { symbol: "Mg", name: "Magnesium", number: 12, group: 2, period: 3, category: "alkaline-earth" },
+            13: { symbol: "Al", name: "Aluminium", number: 13, group: 13, period: 3, category: "basic-metal" },
+            14: { symbol: "Si", name: "Silikon", number: 14, group: 14, period: 3, category: "semimetal" },
+            15: { symbol: "P", name: "Fosfor", number: 15, group: 15, period: 3, category: "nonmetal" },
+            16: { symbol: "S", name: "Belerang", number: 16, group: 16, period: 3, category: "nonmetal" },
+            17: { symbol: "Cl", name: "Klor", number: 17, group: 17, period: 3, category: "halogen" },
+            18: { symbol: "Ar", name: "Argon", number: 18, group: 18, period: 3, category: "noble-gas" }
+        };
+
+        // Game State
+        let gameState = {
+            score: 0,
+            time: 60,
+            level: 1,
+            hints: 3,
+            timer: null,
+            placedElements: {},
+            currentElements: [],
+            correctPositions: {}
+        };
+
+        // Level Data
+        const levels = [
+            {
+                name: "Level 1: Unsur Ringan",
+                elements: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+                gridSize: 8,
+                timeLimit: 60
+            },
+            {
+                name: "Level 2: Periode 2 & 3",
+                elements: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18],
+                gridSize: 8,
+                timeLimit: 90
+            }
+        ];
+
+        // Initialize Game
+        function initGame() {
+            const currentLevel = levels[gameState.level - 1];
+            gameState.currentElements = currentLevel.elements;
+            gameState.time = currentLevel.timeLimit;
+            gameState.placedElements = {};
+            gameState.correctPositions = {};
+            
+            updateUI();
+            createPuzzleGrid(currentLevel.gridSize);
+            createElementCards();
+            startTimer();
+            
+            // Hide modals
+            document.getElementById('successModal').style.display = 'none';
+            document.getElementById('gameOverModal').style.display = 'none';
+        }
+
+        // Create Puzzle Grid
+        function createPuzzleGrid(size) {
+            const grid = document.getElementById('puzzleGrid');
+            grid.innerHTML = '';
+            
+            // Create 8x8 grid (simplified periodic table)
+            for (let row = 0; row < 8; row++) {
+                for (let col = 0; col < 8; col++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'puzzle-cell empty';
+                    cell.dataset.row = row;
+                    cell.dataset.col = col;
+                    
+                    // Mark correct positions for elements
+                    const elementAtPosition = findElementAtPosition(row, col);
+                    if (elementAtPosition) {
+                        gameState.correctPositions[`${row}-${col}`] = elementAtPosition.number;
+                        cell.classList.add('target');
+                    }
+                    
+                    // Drag and drop events
+                    cell.addEventListener('dragover', handleDragOver);
+                    cell.addEventListener('drop', handleDrop);
+                    cell.addEventListener('dragenter', handleDragEnter);
+                    cell.addEventListener('dragleave', handleDragLeave);
+                    
+                    grid.appendChild(cell);
+                }
+            }
+        }
+
+        // Find element at grid position
+        function findElementAtPosition(row, col) {
+            for (const num in periodicTable) {
+                const element = periodicTable[num];
+                // Simplified positioning logic
+                if (element.group === col + 1 && element.period === row + 1) {
+                    return element;
+                }
+            }
+            return null;
+        }
+
+        // Create Element Cards
+        function createElementCards() {
+            const container = document.getElementById('elementsContainer');
+            container.innerHTML = '';
+            
+            gameState.currentElements.forEach(elementNum => {
+                const element = periodicTable[elementNum];
+                const card = document.createElement('div');
+                card.className = `element-card ${element.category}`;
+                card.draggable = true;
+                card.dataset.element = elementNum;
+                
+                card.innerHTML = `
+                    <div class="element-symbol">${element.symbol}</div>
+                    <div class="element-name">${element.name}</div>
+                    <div class="element-number">${element.number}</div>
+                `;
+                
+                // Drag events
+                card.addEventListener('dragstart', handleDragStart);
+                card.addEventListener('dragend', handleDragEnd);
+                
+                container.appendChild(card);
+            });
+        }
+
+        // Drag and Drop Handlers
+        let draggedElement = null;
+
+        function handleDragStart(e) {
+            draggedElement = e.target;
+            e.target.classList.add('dragging');
+            e.dataTransfer.setData('text/plain', e.target.dataset.element);
+        }
+
+        function handleDragEnd(e) {
+            e.target.classList.remove('dragging');
+            draggedElement = null;
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+        }
+
+        function handleDragEnter(e) {
+            if (e.target.classList.contains('puzzle-cell')) {
+                e.target.classList.add('drag-over');
+            }
+        }
+
+        function handleDragLeave(e) {
+            if (e.target.classList.contains('puzzle-cell')) {
+                e.target.classList.remove('drag-over');
+            }
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            e.target.classList.remove('drag-over');
+            
+            const elementNum = e.dataTransfer.getData('text/plain');
+            const row = e.target.dataset.row;
+            const col = e.target.dataset.col;
+            
+            if (elementNum && !e.target.classList.contains('occupied')) {
+                placeElement(elementNum, row, col, e.target);
+            }
+        }
+
+        // Place Element on Grid
+        function placeElement(elementNum, row, col, cell) {
+            const element = periodicTable[elementNum];
+            
+            // Remove from cards container
+            const card = document.querySelector(`[data-element="${elementNum}"]`);
+            if (card) {
+                card.style.opacity = '0.5';
+                card.style.pointerEvents = 'none';
+            }
+            
+            // Update cell
+            cell.classList.remove('empty');
+            cell.classList.add('occupied', 'draggable', element.category);
+            cell.innerHTML = `
+                <div style="font-weight: bold; font-size: 1.1rem;">${element.symbol}</div>
+                <div style="font-size: 0.6rem;">${element.number}</div>
+            `;
+            cell.dataset.element = elementNum;
+            
+            // Store placement
+            gameState.placedElements[elementNum] = { row, col };
+            
+            // Add score
+            addScore(10);
+            
+            // Show score animation
+            showScoreAnimation(cell, '+10');
+            
+            // Make placed element draggable for repositioning
+            cell.draggable = true;
+            cell.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('text/plain', elementNum);
+            });
+        }
+
+        // Check Answers
+        function checkAnswers() {
+            let correct = 0;
+            let total = gameState.currentElements.length;
+            
+            // Check each placed element
+            for (const elementNum in gameState.placedElements) {
+                const pos = gameState.placedElements[elementNum];
+                const correctPos = gameState.correctPositions[`${pos.row}-${pos.col}`];
+                
+                const cell = document.querySelector(`[data-row="${pos.row}"][data-col="${pos.col}"]`);
+                
+                if (parseInt(elementNum) === correctPos) {
+                    cell.classList.add('correct');
+                    correct++;
+                    addScore(20);
+                } else {
+                    cell.classList.add('incorrect');
+                }
+            }
+            
+            // Show results
+            if (correct === total) {
+                levelComplete();
+            } else {
+                showMessage(`Kamu sudah benar ${correct} dari ${total} unsur. Lanjutkan!`);
+            }
+        }
+
+        // Level Complete
+        function levelComplete() {
+            clearInterval(gameState.timer);
+            addScore(100 * gameState.level);
+            
+            const modal = document.getElementById('successModal');
+            const message = document.getElementById('successMessage');
+            
+            message.textContent = `Level ${gameState.level} selesai! Skor: ${gameState.score}`;
+            modal.style.display = 'flex';
+            
+            // Achievement animation
+            const badge = document.getElementById('achievementBadge');
+            badge.style.background = '#f59e0b';
+            badge.innerHTML = '<i class="fas fa-trophy"></i>';
+        }
+
+        // Use Hint
+        function useHint() {
+            if (gameState.hints > 0) {
+                gameState.hints--;
+                
+                // Find first unplaced element
+                const unplaced = gameState.currentElements.find(num => !gameState.placedElements[num]);
+                if (unplaced) {
+                    const element = periodicTable[unplaced];
+                    showMessage(`Petunjuk: ${element.name} (${element.symbol}) berada di Golongan ${element.group}, Periode ${element.period}`);
+                }
+                
+                updateUI();
+            } else {
+                showMessage('Petunjuk sudah habis!');
+            }
+        }
+
+        // Timer
+        function startTimer() {
+            clearInterval(gameState.timer);
+            gameState.timer = setInterval(() => {
+                gameState.time--;
+                updateUI();
+                
+                if (gameState.time <= 0) {
+                    gameOver();
+                }
+            }, 1000);
+        }
+
+        // Game Over
+        function gameOver() {
+            clearInterval(gameState.timer);
+            
+            const modal = document.getElementById('gameOverModal');
+            const message = document.getElementById('gameOverMessage');
+            
+            message.textContent = `Waktu habis! Skor akhir: ${gameState.score}`;
+            modal.style.display = 'flex';
+        }
+
+        // Add Score
+        function addScore(points) {
+            gameState.score += points;
+            updateUI();
+        }
+
+        // Show Score Animation
+        function showScoreAnimation(element, text) {
+            const popup = document.createElement('div');
+            popup.className = 'score-popup';
+            popup.textContent = text;
+            popup.style.left = element.offsetLeft + 'px';
+            popup.style.top = element.offsetTop + 'px';
+            
+            document.querySelector('.game-container').appendChild(popup);
+            
+            setTimeout(() => {
+                popup.remove();
+            }, 1000);
+        }
+
+        // Show Message
+        function showMessage(text) {
+            // Create temporary message
+            const message = document.createElement('div');
+            message.className = 'fixed top-20 left-1/2 transform -translate-x-1/2 bg-blue-500 text-white px-4 py-2 rounded-lg shadow-lg z-50';
+            message.textContent = text;
+            message.style.animation = 'slideIn 0.3s ease';
+            
+            document.body.appendChild(message);
+            
+            setTimeout(() => {
+                message.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => message.remove(), 300);
+            }, 2000);
+        }
+
+        // Update UI
+        function updateUI() {
+            document.getElementById('score').textContent = gameState.score;
+            document.getElementById('time').textContent = gameState.time;
+            document.getElementById('level').textContent = gameState.level;
+            document.getElementById('hints').textContent = gameState.hints;
+            
+            // Update level dots
+            const dots = document.querySelectorAll('.level-dot');
+            dots.forEach((dot, index) => {
+                dot.classList.toggle('active', index < gameState.level);
+            });
+        }
+
+        // Event Listeners
+        document.getElementById('checkButton').addEventListener('click', checkAnswers);
+        document.getElementById('hintButton').addEventListener('click', useHint);
+        document.getElementById('resetButton').addEventListener('click', initGame);
+        document.getElementById('nextLevelButton').addEventListener('click', () => {
+            if (gameState.level < levels.length) {
+                gameState.level++;
+                initGame();
+            } else {
+                showMessage('Selamat! Kamu telah menyelesaikan semua level!');
+            }
+            document.getElementById('successModal').style.display = 'none';
+        });
+        document.getElementById('restartButton').addEventListener('click', () => {
+            gameState.score = 0;
+            gameState.level = 1;
+            initGame();
+            document.getElementById('gameOverModal').style.display = 'none';
+        });
+
+        // Bottom Navigation
+        document.addEventListener('DOMContentLoaded', function() {
+            const navItems = document.querySelectorAll('.nav-item');
+            
+            navItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    navItems.forEach(nav => {
+                        nav.classList.remove('active');
+                        nav.querySelector('.nav-icon').classList.remove('active');
+                    });
+                    
+                    this.classList.add('active');
+                    this.querySelector('.nav-icon').classList.add('active');
+                });
+            });
+            
+            // Initialize game
+            initGame();
+        });
+
+        // Add CSS for slideOut animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideOut {
+                from {
+                    opacity: 1;
+                    transform: translate(-50%, 0);
+                }
+                to {
+                    opacity: 0;
+                    transform: translate(-50%, -20px);
+                }
+            }
+            
+            .drag-over {
+                border-color: #3b82f6 !important;
+                background-color: #dbeafe !important;
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

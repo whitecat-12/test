@@ -3,26 +3,21 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TETA Arduino IDE - Pemrograman Blok Lego</title>
+    <title>Arduino Block Programming</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/blockly@10.3.2/blockly.min.css" rel="stylesheet" />
     <style>
         :root {
             --primary: #38b2ac;
             --secondary: #0e7490;
             --accent: #f59e0b;
-            --lego-yellow: #ffd500;
-            --lego-red: #ff0000;
-            --lego-blue: #0055bf;
-            --lego-green: #00a500;
+            --arduino: #00979D;
         }
         
         body {
             font-family: 'Baloo 2', cursive;
             background-color: #f8fafc;
-            overflow: hidden;
         }
         
         .app-container {
@@ -34,7 +29,7 @@
             box-shadow: 0 0 20px rgba(0,0,0,0.1);
         }
         
-        /* Bottom Navigation - Tetap Sama */
+        /* NAVBAR - SAMA PERSIS DENGAN YANG KIMIA */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -67,7 +62,7 @@
         }
         
         .nav-item.active {
-            color: var(--primary);
+            color: var(--arduino);
         }
         
         .nav-icon {
@@ -77,756 +72,393 @@
         
         .nav-icon.active {
             transform: translateY(-5px);
-            color: var(--primary);
+            color: var(--arduino);
         }
         
-        /* IDE Arduino Styles */
-        .ide-header {
-            background: linear-gradient(135deg, #1e293b, #334155);
+        /* COMPACT BLOCK STYLES */
+        .block-compact {
+            padding: 10px 14px;
             color: white;
-            padding: 12px 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .ide-title {
-            display: flex;
-            align-items: center;
-            font-weight: 700;
-            font-size: 1.2rem;
-        }
-        
-        .ide-title-icon {
-            background: var(--lego-red);
-            color: white;
-            width: 36px;
-            height: 36px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 10px;
-        }
-        
-        .ide-controls {
-            display: flex;
-            gap: 8px;
-        }
-        
-        .control-btn {
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: white;
-            width: 36px;
-            height: 36px;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
+            cursor: grab;
+            border-radius: 10px;
             transition: all 0.3s ease;
-        }
-        
-        .control-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: translateY(-2px);
-        }
-        
-        /* Canvas Area */
-        .canvas-container {
-            height: calc(100vh - 140px);
+            box-shadow: 0 3px 5px rgba(0, 0, 0, 0.15);
+            border: 2px solid white;
             position: relative;
             overflow: hidden;
-        }
-        
-        .blockly-canvas {
-            width: 100%;
-            height: 100%;
-            background: #f1f5f9;
-        }
-        
-        /* Toolbox Sidebar */
-        .toolbox-sidebar {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 60px;
-            height: 100%;
-            background: white;
-            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-            z-index: 5;
-            display: flex;
-            flex-direction: column;
-            padding-top: 10px;
-            transition: transform 0.3s ease;
-        }
-        
-        .toolbox-sidebar.collapsed {
-            transform: translateX(-100%);
-        }
-        
-        .toolbox-btn {
-            width: 44px;
-            height: 44px;
-            margin: 6px auto;
-            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
             display: flex;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 1.2rem;
+            text-align: center;
+            min-height: 50px;
+            flex-direction: column;
         }
         
-        .toolbox-btn:hover {
+        .block-compact::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.3);
+        }
+        
+        .block-compact:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .block-compact i {
+            font-size: 1rem;
+            margin-bottom: 3px;
+        }
+        
+        /* ARDUINO COLORS FOR COMPACT BLOCKS */
+        .led-high-compact { background: linear-gradient(135deg, #ff6b6b 0%, #c92a2a 100%); }
+        .led-low-compact { background: linear-gradient(135deg, #495057 0%, #212529 100%); }
+        .delay-compact { background: linear-gradient(135deg, #ffa726 0%, #f57c00 100%); }
+        .servo-compact { background: linear-gradient(135deg, #42a5f5 0%, #1976d2 100%); }
+        .servo-loop-compact { background: linear-gradient(135deg, #8b5cf6 0%, #6d28d9 100%); }
+        
+        /* COMPACT BLOCKS GRID */
+        .compact-blocks-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        @media (min-width: 640px) {
+            .compact-blocks-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        
+        /* WORKSPACE BLOCK STYLES */
+        .workspace-block {
+            background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+            color: white;
+            margin: 10px 0;
+            padding: 14px;
+            border-radius: 10px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(76, 175, 80, 0.2);
+            border: 2px solid white;
+            position: relative;
+        }
+        
+        .workspace-block-content {
+            flex: 1;
+        }
+        
+        .delete-btn {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #ef4444;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(239, 68, 68, 0.3);
+            cursor: pointer;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.3s ease;
+            z-index: 5;
+            border: 2px solid white;
+        }
+        
+        .workspace-block:hover .delete-btn {
+            opacity: 1;
+            transform: scale(1);
+        }
+        
+        .delete-btn:hover {
+            background: #dc2626;
             transform: scale(1.1);
         }
         
-        .toolbox-btn.active {
-            box-shadow: 0 0 0 2px currentColor;
-        }
-        
-        /* Blocks Palette */
-        .blocks-palette {
-            position: absolute;
-            left: 60px;
-            top: 0;
-            width: 280px;
-            height: 100%;
-            background: white;
-            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-            z-index: 4;
-            overflow-y: auto;
+        .section {
+            flex: 1;
+            border: 3px solid #e5e7eb;
+            border-radius: 14px;
             padding: 15px;
-            transition: transform 0.3s ease;
+            min-height: 220px;
+            background: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
         }
         
-        .blocks-palette.collapsed {
-            transform: translateX(-100%);
+        .section.drag-over {
+            border-color: #00979D;
+            background-color: #f0fdfa;
+            box-shadow: 0 0 0 3px rgba(0, 151, 157, 0.1);
         }
         
-        .blocks-category {
+        .section h4 {
+            margin: 0;
+            text-align: center;
+            background: linear-gradient(135deg, #2196F3 0%, #0d47a1 100%);
+            color: white;
+            padding: 10px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+        
+        /* CODE OUTPUT STYLING */
+        #code-container {
+            margin-top: 20px;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        
+        #code {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            border-radius: 0 0 14px 14px;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.5;
+            max-height: 350px;
+            overflow-y: auto;
+            text-align: left;
+        }
+        
+        pre {
+            margin: 0;
+        }
+        
+        /* TITLE STYLING */
+        .page-title {
+            text-align: center;
+            color: #333;
+            font-size: 1.8rem;
+            font-weight: 800;
+            padding: 15px 0;
+            border-bottom: 3px solid #00979D;
+            background: linear-gradient(135deg, #00979D 10%, #00757b 90%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
             margin-bottom: 20px;
         }
         
-        .category-title {
-            font-weight: 600;
-            font-size: 0.9rem;
-            color: #64748b;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-        }
-        
-        .blocks-list {
+        /* STATS BAR */
+        .stats-bar {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
-        }
-        
-        .block-item {
-            background: white;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 10px;
-            cursor: move;
-            transition: all 0.3s ease;
-            font-size: 0.8rem;
-            text-align: center;
-        }
-        
-        .block-item:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        
-        .block-icon {
-            font-size: 1.2rem;
-            margin-bottom: 5px;
-        }
-        
-        /* Properties Panel */
-        .properties-panel {
-            position: absolute;
-            right: 0;
-            top: 0;
-            width: 280px;
-            height: 100%;
-            background: white;
-            box-shadow: -2px 0 5px rgba(0,0,0,0.1);
-            z-index: 4;
-            overflow-y: auto;
-            padding: 15px;
-            transition: transform 0.3s ease;
-        }
-        
-        .properties-panel.collapsed {
-            transform: translateX(100%);
-        }
-        
-        .panel-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 15px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid #e2e8f0;
-        }
-        
-        .panel-title {
-            font-weight: 600;
-            font-size: 1rem;
-            color: #1e293b;
-        }
-        
-        .property-group {
-            margin-bottom: 15px;
-        }
-        
-        .property-label {
-            font-size: 0.85rem;
-            color: #64748b;
-            margin-bottom: 5px;
-        }
-        
-        .property-input {
-            width: 100%;
-            padding: 8px 12px;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            font-size: 0.9rem;
-        }
-        
-        .property-select {
-            width: 100%;
-            padding: 8px 12px;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            font-size: 0.9rem;
-            background: white;
-        }
-        
-        /* Code Panel */
-        .code-panel {
-            position: absolute;
-            bottom: 70px;
-            left: 0;
-            width: 100%;
-            height: 200px;
-            background: #1e293b;
-            color: white;
-            z-index: 6;
-            transition: transform 0.3s ease;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.2);
-        }
-        
-        .code-panel.collapsed {
-            transform: translateY(100%);
-        }
-        
-        .code-header {
-            background: #334155;
-            padding: 10px 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .code-content {
-            padding: 15px;
-            font-family: 'Courier New', monospace;
-            font-size: 0.9rem;
-            height: calc(100% - 50px);
-            overflow-y: auto;
-            white-space: pre-wrap;
-        }
-        
-        .code-line {
-            line-height: 1.5;
-            margin-bottom: 2px;
-        }
-        
-        /* Floating Action Buttons */
-        .fab-container {
-            position: absolute;
-            bottom: 80px;
-            right: 15px;
-            display: flex;
-            flex-direction: column;
+            grid-template-columns: repeat(3, 1fr);
             gap: 10px;
-            z-index: 7;
+            margin: 15px 0;
         }
         
-        .fab {
-            width: 50px;
-            height: 50px;
-            border-radius: 25px;
-            background: var(--primary);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2rem;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        .stat-card {
+            background: #f8fafc;
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+            border: 2px solid #e5e7eb;
             transition: all 0.3s ease;
         }
         
-        .fab:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+        .stat-card:hover {
+            border-color: #00979D;
+            transform: translateY(-2px);
         }
         
-        /* Lego Block Styles */
-        .lego-block {
-            border-radius: 4px;
-            position: relative;
-            padding: 8px;
-            margin: 5px 0;
-            font-weight: 500;
-            color: white;
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #00979D;
+            margin-bottom: 4px;
         }
         
-        .lego-block:before {
-            content: '';
-            position: absolute;
-            top: -3px;
-            left: 5px;
-            right: 5px;
-            height: 6px;
-            background: inherit;
-            opacity: 0.7;
-            border-radius: 3px;
+        .stat-label {
+            font-size: 0.8rem;
+            color: #6b7280;
+            font-weight: 600;
         }
         
-        .lego-block:after {
-            content: '';
-            position: absolute;
-            bottom: -3px;
-            left: 5px;
-            right: 5px;
-            height: 6px;
-            background: inherit;
-            opacity: 0.5;
-            border-radius: 3px;
+        /* INPUT STYLES */
+        .block-input, .block-select {
+            width: 70px !important;
+            padding: 6px 8px !important;
+            border: none !important;
+            border-radius: 8px !important;
+            text-align: center !important;
+            font-weight: 600 !important;
+            background: rgba(255, 255, 255, 0.9) !important;
+            color: #00979D !important;
+            margin: 4px !important;
+            cursor: text !important;
         }
         
-        .block-control { background: var(--lego-blue); }
-        .block-sensor { background: var(--lego-green); }
-        .block-actuator { background: var(--lego-red); }
-        .block-logic { background: var(--lego-yellow); color: #333; }
-        .block-math { background: #8b5cf6; }
-        .block-variable { background: #ec4899; }
+        .block-select {
+            width: 120px !important;
+        }
         
-        /* Simulation Area */
-        .simulation-area {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            width: 180px;
-            height: 180px;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            z-index: 3;
-            padding: 15px;
+        /* ANIMATIONS */
+        @keyframes blockDrop {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .new-block {
+            animation: blockDrop 0.3s ease-out;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(0, 151, 157, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(0, 151, 157, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 151, 157, 0); }
+        }
+        
+        .pulse {
+            animation: pulse 1.5s infinite;
+        }
+        
+        /* LAYOUT ADJUSTMENTS */
+        #container {
             display: flex;
             flex-direction: column;
-            align-items: center;
-            transition: transform 0.3s ease;
+            gap: 20px;
         }
         
-        .simulation-area.collapsed {
-            transform: translateX(120%);
+        #blocks-panel {
+            background: white;
+            padding: 15px;
+            border-radius: 14px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            border: 2px solid #e5e7eb;
         }
         
-        .simulation-title {
-            font-weight: 600;
-            font-size: 0.9rem;
-            color: #475569;
-            margin-bottom: 10px;
-        }
-        
-        .arduino-board {
-            width: 120px;
-            height: 80px;
-            background: #1e293b;
-            border-radius: 8px;
-            position: relative;
-            margin: 10px 0;
-        }
-        
-        .board-pin {
-            position: absolute;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #cbd5e1;
-        }
-        
-        .pin-0 { top: 10px; left: 10px; }
-        .pin-1 { top: 10px; left: 25px; }
-        .pin-2 { top: 10px; left: 40px; }
-        .pin-3 { top: 10px; left: 55px; }
-        .pin-4 { top: 10px; left: 70px; }
-        .pin-5 { top: 10px; left: 85px; }
-        .pin-6 { top: 10px; left: 100px; }
-        
-        .pin-7 { bottom: 10px; left: 10px; }
-        .pin-8 { bottom: 10px; left: 25px; }
-        .pin-9 { bottom: 10px; left: 40px; }
-        .pin-10 { bottom: 10px; left: 55px; }
-        .pin-11 { bottom: 10px; left: 70px; }
-        .pin-12 { bottom: 10px; left: 85px; }
-        .pin-13 { bottom: 10px; left: 100px; }
-        
-        .led-indicator {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: #dc2626;
-            margin-top: 10px;
-            box-shadow: 0 0 5px #dc2626;
-        }
-        
-        .led-indicator.active {
-            background: #22c55e;
-            box-shadow: 0 0 10px #22c55e;
-        }
-        
-        /* Toggle Switch */
-        .toggle-switch {
-            position: relative;
-            display: inline-block;
-            width: 50px;
-            height: 24px;
-        }
-        
-        .toggle-switch input {
-            opacity: 0;
-            width: 0;
-            height: 0;
-        }
-        
-        .toggle-slider {
-            position: absolute;
-            cursor: pointer;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: #cbd5e1;
-            transition: .4s;
-            border-radius: 24px;
-        }
-        
-        .toggle-slider:before {
-            position: absolute;
-            content: "";
-            height: 16px;
-            width: 16px;
-            left: 4px;
-            bottom: 4px;
-            background-color: white;
-            transition: .4s;
-            border-radius: 50%;
-        }
-        
-        input:checked + .toggle-slider {
-            background-color: var(--primary);
-        }
-        
-        input:checked + .toggle-slider:before {
-            transform: translateX(26px);
+        #workspace {
+            flex: 1;
         }
     </style>
 </head>
 <body>
     <!-- Mobile App Container -->
     <div class="app-container">
-        <!-- IDE Header -->
-        <header class="ide-header">
-            <div class="ide-title">
-                <div class="ide-title-icon">
-                    <i class="fas fa-microchip"></i>
-                </div>
-                <span>TETA Arduino IDE</span>
-            </div>
+        <!-- Main Content -->
+        <main class="pb-24 p-4">
+            <!-- Page Title -->
+            <h2 class="page-title">
+                <i class="fas fa-cogs mr-2"></i> CODEBLOCK
+            </h2>
             
-            <div class="ide-controls">
-                <button class="control-btn" onclick="toggleToolbox()">
-                    <i class="fas fa-toolbox"></i>
-                </button>
-                <button class="control-btn" onclick="toggleProperties()">
-                    <i class="fas fa-sliders-h"></i>
-                </button>
-                <button class="control-btn" onclick="toggleCodePanel()">
-                    <i class="fas fa-code"></i>
-                </button>
-            </div>
-        </header>
-        
-        <!-- Canvas Area -->
-        <main class="canvas-container">
-            <!-- Toolbox Sidebar -->
-            <div class="toolbox-sidebar" id="toolboxSidebar">
-                <div class="toolbox-btn active" style="color: var(--lego-blue);" onclick="selectCategory('control')">
-                    <i class="fas fa-play"></i>
+            <!-- Stats Bar -->
+            <div class="stats-bar">
+                <div class="stat-card">
+                    <div class="stat-value" id="block-count">0</div>
+                    <div class="stat-label">BLOCKS</div>
                 </div>
-                <div class="toolbox-btn" style="color: var(--lego-green);" onclick="selectCategory('sensor')">
-                    <i class="fas fa-thermometer-half"></i>
+                <div class="stat-card">
+                    <div class="stat-value" id="pin-count">0</div>
+                    <div class="stat-label">PINS USED</div>
                 </div>
-                <div class="toolbox-btn" style="color: var(--lego-red);" onclick="selectCategory('actuator')">
-                    <i class="fas fa-bolt"></i>
-                </div>
-                <div class="toolbox-btn" style="color: var(--lego-yellow);" onclick="selectCategory('logic')">
-                    <i class="fas fa-random"></i>
-                </div>
-                <div class="toolbox-btn" style="color: #8b5cf6;" onclick="selectCategory('math')">
-                    <i class="fas fa-calculator"></i>
-                </div>
-                <div class="toolbox-btn" style="color: #ec4899;" onclick="selectCategory('variable')">
-                    <i class="fas fa-code-branch"></i>
+                <div class="stat-card">
+                    <div class="stat-value" id="line-count">0</div>
+                    <div class="stat-label">CODE LINES</div>
                 </div>
             </div>
             
-            <!-- Blocks Palette -->
-            <div class="blocks-palette" id="blocksPalette">
-                <div class="blocks-category" id="control-category">
-                    <div class="category-title">
-                        <i class="fas fa-play mr-2" style="color: var(--lego-blue);"></i>
-                        Blok Kontrol
-                    </div>
-                    <div class="blocks-list">
-                        <div class="block-item lego-block block-control" draggable="true" onclick="addBlock('loop')">
-                            <div class="block-icon">
-                                <i class="fas fa-redo"></i>
-                            </div>
-                            <div>Loop Tak Hingga</div>
+            <!-- Container for Blocks and Workspace -->
+            <div id="container">
+                <!-- Compact Blocks Panel -->
+                <div id="blocks-panel">
+                    <h3 class="font-bold text-gray-700 mb-4 flex items-center">
+                        <i class="fas fa-cubes text-cyan-500 mr-2"></i> Available Blocks
+                    </h3>
+                    
+                    <div class="compact-blocks-grid">
+                        <div class="block-compact led-high-compact" data-type="led">
+                            <i class="fas fa-lightbulb"></i>
+                            <div>LED ON</div>
                         </div>
-                        <div class="block-item lego-block block-control" draggable="true" onclick="addBlock('delay')">
-                            <div class="block-icon">
-                                <i class="fas fa-clock"></i>
-                            </div>
-                            <div>Tunda (ms)</div>
+                        <div class="block-compact led-low-compact" data-type="ledlow">
+                            <i class="fas fa-lightbulb"></i>
+                            <div>LED OFF</div>
                         </div>
-                        <div class="block-item lego-block block-control" draggable="true" onclick="addBlock('if')">
-                            <div class="block-icon">
-                                <i class="fas fa-question"></i>
-                            </div>
-                            <div>Jika ... maka</div>
+                        <div class="block-compact delay-compact" data-type="delay">
+                            <i class="fas fa-clock"></i>
+                            <div>DELAY</div>
                         </div>
-                        <div class="block-item lego-block block-control" draggable="true" onclick="addBlock('for')">
-                            <div class="block-icon">
-                                <i class="fas fa-repeat"></i>
-                            </div>
-                            <div>Ulangi ... kali</div>
+                        <div class="block-compact servo-compact" data-type="servo">
+                            <i class="fas fa-cogs"></i>
+                            <div>SERVO</div>
+                        </div>
+                        <div class="block-compact servo-loop-compact" data-type="servo-loop">
+                            <i class="fas fa-sync-alt"></i>
+                            <div>SERVO LOOP</div>
                         </div>
                     </div>
-                </div>
-                
-                <div class="blocks-category" id="sensor-category" style="display: none;">
-                    <div class="category-title">
-                        <i class="fas fa-thermometer-half mr-2" style="color: var(--lego-green);"></i>
-                        Blok Sensor
-                    </div>
-                    <div class="blocks-list">
-                        <div class="block-item lego-block block-sensor" draggable="true" onclick="addBlock('digitalRead')">
-                            <div class="block-icon">
-                                <i class="fas fa-plug"></i>
-                            </div>
-                            <div>Baca Digital</div>
-                        </div>
-                        <div class="block-item lego-block block-sensor" draggable="true" onclick="addBlock('analogRead')">
-                            <div class="block-icon">
-                                <i class="fas fa-wave-square"></i>
-                            </div>
-                            <div>Baca Analog</div>
-                        </div>
-                        <div class="block-item lego-block block-sensor" draggable="true" onclick="addBlock('button')">
-                            <div class="block-icon">
-                                <i class="fas fa-toggle-on"></i>
-                            </div>
-                            <div>Tombol Ditekan?</div>
-                        </div>
-                        <div class="block-item lego-block block-sensor" draggable="true" onclick="addBlock('distance')">
-                            <div class="block-icon">
-                                <i class="fas fa-ruler"></i>
-                            </div>
-                            <div>Sensor Jarak</div>
-                        </div>
+                    
+                    <div class="text-xs text-gray-500 text-center mt-2">
+                        <i class="fas fa-hand-point-up mr-1"></i> Drag block ke workspace
                     </div>
                 </div>
-                
-                <div class="blocks-category" id="actuator-category" style="display: none;">
-                    <div class="category-title">
-                        <i class="fas fa-bolt mr-2" style="color: var(--lego-red);"></i>
-                        Blok Aktuator
+
+                <!-- Workspace -->
+                <div id="workspace" class="space-y-5">
+                    <div class="section" data-section="setup">
+                        <h4><i class="fas fa-tools mr-2"></i> setup() Function</h4>
+                        <div class="text-gray-500 text-sm text-center py-10" id="setup-placeholder">
+                            Drag blocks here for initialization code
+                        </div>
                     </div>
-                    <div class="blocks-list">
-                        <div class="block-item lego-block block-actuator" draggable="true" onclick="addBlock('digitalWrite')">
-                            <div class="block-icon">
-                                <i class="fas fa-bolt"></i>
-                            </div>
-                            <div>Digital HIGH/LOW</div>
-                        </div>
-                        <div class="block-item lego-block block-actuator" draggable="true" onclick="addBlock('analogWrite')">
-                            <div class="block-icon">
-                                <i class="fas fa-sliders-h"></i>
-                            </div>
-                            <div>PWM (0-255)</div>
-                        </div>
-                        <div class="block-item lego-block block-actuator" draggable="true" onclick="addBlock('led')">
-                            <div class="block-icon">
-                                <i class="fas fa-lightbulb"></i>
-                            </div>
-                            <div>LED On/Off</div>
-                        </div>
-                        <div class="block-item lego-block block-actuator" draggable="true" onclick="addBlock('servo')">
-                            <div class="block-icon">
-                                <i class="fas fa-cogs"></i>
-                            </div>
-                            <div>Servo Putar</div>
+                    <div class="section" data-section="loop">
+                        <h4><i class="fas fa-redo mr-2"></i> loop() Function</h4>
+                        <div class="text-gray-500 text-sm text-center py-10" id="loop-placeholder">
+                            Drag blocks here for main loop code
                         </div>
                     </div>
                 </div>
             </div>
-            
-            <!-- Main Canvas -->
-            <div class="blockly-canvas" id="blocklyCanvas">
-                <!-- Blockly akan dirender di sini -->
-                <div id="blocklyDiv" style="width: 100%; height: 100%;"></div>
-            </div>
-            
-            <!-- Properties Panel -->
-            <div class="properties-panel collapsed" id="propertiesPanel">
-                <div class="panel-header">
-                    <div class="panel-title">Properties</div>
-                    <button class="control-btn" onclick="toggleProperties()">
-                        <i class="fas fa-times"></i>
+
+            <!-- Generated Code -->
+            <div id="code-container" class="mt-6">
+                <div class="bg-gradient-to-r from-cyan-600 to-cyan-800 p-4 text-white rounded-t-xl flex justify-between items-center">
+                    <h3 class="font-bold flex items-center">
+                        <i class="fas fa-code mr-2"></i> Generated Arduino Code
+                    </h3>
+                    <button id="copy-code" class="bg-white text-cyan-600 px-4 py-2 rounded-lg font-bold text-sm hover:bg-cyan-50 transition">
+                        <i class="fas fa-copy mr-2"></i> Copy Code
                     </button>
                 </div>
-                
-                <div class="property-group">
-                    <div class="property-label">Nama Blok</div>
-                    <input type="text" class="property-input" id="blockName" placeholder="Masukkan nama blok">
-                </div>
-                
-                <div class="property-group">
-                    <div class="property-label">Pin Arduino</div>
-                    <select class="property-select" id="blockPin">
-                        <option value="2">Pin Digital 2</option>
-                        <option value="3">Pin Digital 3</option>
-                        <option value="4">Pin Digital 4</option>
-                        <option value="5">Pin Digital 5</option>
-                        <option value="6">Pin Digital 6</option>
-                        <option value="7">Pin Digital 7</option>
-                        <option value="8">Pin Digital 8</option>
-                        <option value="9">Pin Digital 9</option>
-                        <option value="10">Pin Digital 10</option>
-                        <option value="11">Pin Digital 11</option>
-                        <option value="12">Pin Digital 12</option>
-                        <option value="13">Pin Digital 13</option>
-                        <option value="A0">Pin Analog A0</option>
-                        <option value="A1">Pin Analog A1</option>
-                        <option value="A2">Pin Analog A2</option>
-                        <option value="A3">Pin Analog A3</option>
-                        <option value="A4">Pin Analog A4</option>
-                        <option value="A5">Pin Analog A5</option>
-                    </select>
-                </div>
-                
-                <div class="property-group">
-                    <div class="property-label">Nilai</div>
-                    <input type="text" class="property-input" id="blockValue" placeholder="Masukkan nilai">
-                </div>
-                
-                <div class="property-group">
-                    <div class="property-label">Warna Blok</div>
-                    <div class="flex gap-2 mt-2">
-                        <div class="w-8 h-8 rounded cursor-pointer bg-blue-500" onclick="setBlockColor('blue')"></div>
-                        <div class="w-8 h-8 rounded cursor-pointer bg-red-500" onclick="setBlockColor('red')"></div>
-                        <div class="w-8 h-8 rounded cursor-pointer bg-green-500" onclick="setBlockColor('green')"></div>
-                        <div class="w-8 h-8 rounded cursor-pointer bg-yellow-500" onclick="setBlockColor('yellow')"></div>
-                        <div class="w-8 h-8 rounded cursor-pointer bg-purple-500" onclick="setBlockColor('purple')"></div>
-                    </div>
-                </div>
-                
-                <div class="property-group">
-                    <div class="property-label">Simpan Blok</div>
-                    <button class="w-full py-2 bg-primary text-white rounded-lg mt-2" onclick="saveBlockProperties()">
-                        <i class="fas fa-save mr-2"></i> Simpan Perubahan
-                    </button>
-                </div>
+                <pre id="code">// Generated code will appear here</pre>
             </div>
             
-            <!-- Simulation Area -->
-            <div class="simulation-area" id="simulationArea">
-                <div class="simulation-title">Simulasi Arduino</div>
-                <div class="arduino-board">
-                    <div class="board-pin pin-0"></div>
-                    <div class="board-pin pin-1"></div>
-                    <div class="board-pin pin-2"></div>
-                    <div class="board-pin pin-3"></div>
-                    <div class="board-pin pin-4"></div>
-                    <div class="board-pin pin-5"></div>
-                    <div class="board-pin pin-6"></div>
-                    <div class="board-pin pin-7"></div>
-                    <div class="board-pin pin-8"></div>
-                    <div class="board-pin pin-9"></div>
-                    <div class="board-pin pin-10"></div>
-                    <div class="board-pin pin-11"></div>
-                    <div class="board-pin pin-12"></div>
-                    <div class="board-pin pin-13"></div>
-                </div>
-                <div class="led-indicator" id="ledIndicator"></div>
-                <div class="text-xs text-gray-600 mt-2">LED Pin 13</div>
-            </div>
-            
-            <!-- Code Panel -->
-            <div class="code-panel collapsed" id="codePanel">
-                <div class="code-header">
-                    <div class="panel-title">Kode Arduino</div>
-                    <button class="control-btn" onclick="toggleCodePanel()">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-                <div class="code-content" id="codeContent">
-                    <div class="code-line">// Kode akan muncul di sini</div>
-                    <div class="code-line">void setup() {</div>
-                    <div class="code-line">  // Inisialisasi pin</div>
-                    <div class="code-line">  pinMode(13, OUTPUT);</div>
-                    <div class="code-line">}</div>
-                    <div class="code-line"></div>
-                    <div class="code-line">void loop() {</div>
-                    <div class="code-line">  // Program utama</div>
-                    <div class="code-line">  digitalWrite(13, HIGH);</div>
-                    <div class="code-line">  delay(1000);</div>
-                    <div class="code-line">  digitalWrite(13, LOW);</div>
-                    <div class="code-line">  delay(1000);</div>
-                    <div class="code-line">}</div>
-                </div>
-            </div>
-            
-            <!-- Floating Action Buttons -->
-            <div class="fab-container">
-                <div class="fab" style="background: var(--lego-blue);" onclick="runCode()">
-                    <i class="fas fa-play"></i>
-                </div>
-                <div class="fab" style="background: var(--lego-green);" onclick="saveProject()">
-                    <i class="fas fa-save"></i>
-                </div>
-                <div class="fab" style="background: var(--lego-red);" onclick="clearCanvas()">
-                    <i class="fas fa-trash"></i>
-                </div>
-                <div class="fab" style="background: var(--accent);" onclick="toggleSimulation()">
-                    <i class="fas fa-eye"></i>
-                </div>
+            <!-- Quick Actions -->
+            <div class="flex space-x-3 mt-6">
+                <button id="clear-all" class="game-button reset-btn flex-1 py-3">
+                    <i class="fas fa-trash-alt mr-2"></i> CLEAR ALL
+                </button>
+                <button id="generate-btn" class="game-button combine-btn flex-1 py-3">
+                    <i class="fas fa-play mr-2"></i> GENERATE CODE
+                </button>
+                <button id="example-btn" class="game-button hint-btn flex-1 py-3">
+                    <i class="fas fa-magic mr-2"></i> LOAD EXAMPLE
+                </button>
             </div>
         </main>
         
-        <!-- BOTTOM NAVIGATION - Tetap Sama -->
+        <!-- BOTTOM NAVIGATION - SAMA PERSIS -->
         <nav class="bottom-nav">
             <a href="dashboad siswa.html" class="nav-item">
                 <i class="fas fa-home nav-icon"></i>
@@ -836,9 +468,9 @@
                 <i class="fas fa-flask nav-icon"></i>
                 <span>Soal Harian</span>
             </a>
-            <a href="ai/nayra.html" class="nav-item">
-                <i class="fas fa-robot nav-icon"></i>
-                <span>Nayra AI</span>
+            <a href="ai/nayra.html" class="nav-item active">
+                <i class="fas fa-code nav-icon active"></i>
+                <span>Arduino Lab</span>
             </a>
             <a href="materi harian/kategori materi.html" class="nav-item">
                 <i class="fas fa-chalkboard-teacher nav-icon"></i>
@@ -851,274 +483,579 @@
         </nav>
     </div>
 
-    <!-- Blockly Library -->
-    <script src="https://cdn.jsdelivr.net/npm/blockly@10.3.2/blockly.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/blockly@10.3.2/msg/id.min.js"></script>
-    
     <script>
-        // Inisialisasi Blockly
-        const workspace = Blockly.inject('blocklyDiv', {
-            toolbox: document.getElementById('toolbox'),
-            scrollbars: true,
-            horizontalLayout: false,
-            toolboxPosition: 'start',
-            renderer: 'zelos',
-            theme: Blockly.Theme.defineTheme('legoTheme', {
-                'base': Blockly.Themes.Zelos,
-                'componentStyles': {
-                    'workspaceBackgroundColour': '#f1f5f9',
-                    'toolboxBackgroundColour': '#FFFFFF',
-                    'toolboxForegroundColour': '#000000',
-                    'flyoutBackgroundColour': '#FFFFFF',
-                    'flyoutForegroundColour': '#000000',
-                    'flyoutOpacity': 1,
-                    'scrollbarColour': '#cbd5e1',
-                    'insertionMarkerColour': '#000000',
-                    'insertionMarkerOpacity': 0.3,
-                    'scrollbarOpacity': 0.7,
-                    'cursorColour': '#000000'
-                }
-            })
-        });
-        
-        // State variables
-        let currentCategory = 'control';
-        let simulationRunning = false;
-        let simulationInterval = null;
-        
-        // Fungsi untuk memilih kategori blok
-        function selectCategory(category) {
-            currentCategory = category;
-            
-            // Update active button
-            document.querySelectorAll('.toolbox-btn').forEach(btn => {
-                btn.classList.remove('active');
+        // Game State
+        let gameState = {
+            blockCount: 0,
+            pinCount: 0,
+            lineCount: 0,
+            servoLoopCount: 0
+        };
+
+        // DOM Elements
+        const blocks = document.querySelectorAll('.block-compact');
+        const sections = document.querySelectorAll('.section');
+        const codeOutput = document.getElementById('code');
+        const blockCountDisplay = document.getElementById('block-count');
+        const pinCountDisplay = document.getElementById('pin-count');
+        const lineCountDisplay = document.getElementById('line-count');
+        const copyBtn = document.getElementById('copy-code');
+        const clearBtn = document.getElementById('clear-all');
+        const generateBtn = document.getElementById('generate-btn');
+        const exampleBtn = document.getElementById('example-btn');
+
+        // Default values for each block type
+        const defaultValues = {
+            'led': { pin: 13 },
+            'ledlow': { pin: 13 },
+            'delay': { ms: 1000 },
+            'servo': { angle: 90, pin: 9 },
+            'servo-loop': { 
+                start: 0, 
+                end: 180, 
+                step: 10, 
+                delay: 50, 
+                pin: 9, 
+                mode: 'sweep' 
+            }
+        };
+
+        // Initialize
+        function init() {
+            setupDragAndDrop();
+            setupEventListeners();
+            updateStats();
+        }
+
+        // Setup Drag and Drop
+        function setupDragAndDrop() {
+            blocks.forEach(block => {
+                block.setAttribute('draggable', true);
+                block.addEventListener('dragstart', e => {
+                    e.dataTransfer.setData('text/plain', JSON.stringify({
+                        type: block.dataset.type
+                    }));
+                    block.classList.add('opacity-50');
+                });
+                
+                block.addEventListener('dragend', () => {
+                    block.classList.remove('opacity-50');
+                });
             });
-            event.currentTarget.classList.add('active');
-            
-            // Tampilkan kategori yang dipilih
-            document.querySelectorAll('.blocks-category').forEach(cat => {
-                cat.style.display = 'none';
+
+            sections.forEach(section => {
+                section.addEventListener('dragover', e => {
+                    e.preventDefault();
+                    section.classList.add('drag-over');
+                });
+                
+                section.addEventListener('dragleave', () => {
+                    section.classList.remove('drag-over');
+                });
+                
+                section.addEventListener('drop', e => {
+                    e.preventDefault();
+                    section.classList.remove('drag-over');
+                    
+                    const data = JSON.parse(e.dataTransfer.getData('text/plain'));
+                    addBlockToSection(section, data);
+                });
             });
-            document.getElementById(`${category}-category`).style.display = 'block';
         }
-        
-        // Fungsi untuk menambahkan blok ke canvas
-        function addBlock(blockType) {
-            let xml = '';
+
+        // Add Block to Section
+        function addBlockToSection(section, data) {
+            const type = data.type;
+            const placeholder = section.querySelector('.text-gray-500');
+            if (placeholder) placeholder.remove();
             
-            switch(blockType) {
-                case 'loop':
-                    xml = `<block type="controls_whileUntil"></block>`;
-                    break;
-                case 'delay':
-                    xml = `<block type="time_delay">
-                               <value name="DELAY_TIME">
-                                   <shadow type="math_number">
-                                       <field name="NUM">1000</field>
-                                   </shadow>
-                               </value>
-                           </block>`;
-                    break;
-                case 'if':
-                    xml = `<block type="controls_if"></block>`;
-                    break;
-                case 'digitalWrite':
-                    xml = `<block type="digital_write">
-                               <value name="PIN">
-                                   <shadow type="math_number">
-                                       <field name="NUM">13</field>
-                                   </shadow>
-                               </value>
-                               <value name="STATE">
-                                   <shadow type="logic_boolean"></shadow>
-                               </value>
-                           </block>`;
-                    break;
-                case 'led':
-                    xml = `<block type="toggle_led">
-                               <value name="PIN">
-                                   <shadow type="math_number">
-                                       <field name="NUM">13</field>
-                                   </shadow>
-                               </value>
-                           </block>`;
-                    break;
-            }
+            const newBlock = createWorkspaceBlock(type);
+            section.appendChild(newBlock);
             
-            if (xml) {
-                const block = Blockly.Xml.textToDom(xml);
-                Blockly.Xml.domToBlock(block, workspace);
-                updateCode();
-            }
-        }
-        
-        // Fungsi untuk update kode Arduino
-        function updateCode() {
-            const code = Blockly.Arduino.workspaceToCode(workspace);
-            document.getElementById('codeContent').innerHTML = code.split('\n').map(line => 
-                `<div class="code-line">${line}</div>`
-            ).join('');
-        }
-        
-        // Fungsi untuk menjalankan kode
-        function runCode() {
-            if (simulationRunning) {
-                stopSimulation();
-                return;
-            }
-            
-            simulationRunning = true;
-            document.getElementById('ledIndicator').classList.add('active');
-            document.querySelector('.fab i').className = 'fas fa-stop';
-            
-            // Simulasi LED berkedip
-            simulationInterval = setInterval(() => {
-                const led = document.getElementById('ledIndicator');
-                led.classList.toggle('active');
-            }, 500);
-            
-            // Update code panel
+            gameState.blockCount++;
+            updateStats();
             updateCode();
-            
-            // Tampilkan notifikasi
-            showNotification('Program sedang berjalan...', 'success');
         }
-        
-        // Fungsi untuk menghentikan simulasi
-        function stopSimulation() {
-            simulationRunning = false;
-            clearInterval(simulationInterval);
-            document.getElementById('ledIndicator').classList.remove('active');
-            document.querySelector('.fab i').className = 'fas fa-play';
+
+        // Create Workspace Block
+        function createWorkspaceBlock(type) {
+            const newBlock = document.createElement('div');
+            newBlock.className = `workspace-block new-block ${type}`;
+            newBlock.dataset.type = type;
             
-            showNotification('Program dihentikan', 'info');
-        }
-        
-        // Fungsi untuk menyimpan proyek
-        function saveProject() {
-            const xml = Blockly.Xml.workspaceToDom(workspace);
-            const xmlText = Blockly.Xml.domToText(xml);
+            // Create content container
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'workspace-block-content';
             
-            // Simpan ke localStorage
-            localStorage.setItem('arduinoProject', xmlText);
-            
-            showNotification('Proyek disimpan!', 'success');
-        }
-        
-        // Fungsi untuk memuat proyek
-        function loadProject() {
-            const xmlText = localStorage.getItem('arduinoProject');
-            if (xmlText) {
-                const xml = Blockly.Xml.textToDom(xmlText);
-                Blockly.Xml.domToWorkspace(xml, workspace);
-                updateCode();
-                showNotification('Proyek dimuat!', 'success');
+            // Add appropriate content based on block type
+            if (type === 'led' || type === 'ledlow') {
+                const container = document.createElement('div');
+                container.className = 'flex items-center justify-between w-full';
+                
+                const label = document.createElement('span');
+                label.className = 'font-bold';
+                label.innerHTML = type === 'led' ? 
+                    '<i class="fas fa-lightbulb mr-2"></i> LED ON' : 
+                    '<i class="fas fa-lightbulb mr-2"></i> LED OFF';
+                
+                const pinContainer = document.createElement('div');
+                pinContainer.className = 'flex items-center gap-2';
+                
+                const pinLabel = document.createElement('span');
+                pinLabel.textContent = 'Pin:';
+                
+                const pin = document.createElement('input');
+                pin.type = 'number';
+                pin.value = defaultValues[type].pin;
+                pin.min = 0;
+                pin.max = 13;
+                pin.className = 'block-input';
+                
+                pinContainer.appendChild(pinLabel);
+                pinContainer.appendChild(pin);
+                container.appendChild(label);
+                container.appendChild(pinContainer);
+                contentDiv.appendChild(container);
+                
+            } else if (type === 'delay') {
+                const container = document.createElement('div');
+                container.className = 'flex items-center justify-between w-full';
+                
+                const label = document.createElement('span');
+                label.className = 'font-bold';
+                label.innerHTML = '<i class="fas fa-clock mr-2"></i> DELAY';
+                
+                const delayContainer = document.createElement('div');
+                delayContainer.className = 'flex items-center gap-2';
+                
+                const delayLabel = document.createElement('span');
+                delayLabel.textContent = 'ms:';
+                
+                const delay = document.createElement('input');
+                delay.type = 'number';
+                delay.value = defaultValues[type].ms;
+                delay.min = 0;
+                delay.className = 'block-input';
+                
+                delayContainer.appendChild(delayLabel);
+                delayContainer.appendChild(delay);
+                container.appendChild(label);
+                container.appendChild(delayContainer);
+                contentDiv.appendChild(container);
+                
+            } else if (type === 'servo') {
+                const container = document.createElement('div');
+                container.className = 'space-y-2 w-full';
+                
+                const title = document.createElement('div');
+                title.className = 'font-bold flex items-center';
+                title.innerHTML = '<i class="fas fa-cogs mr-2"></i> SERVO CONTROL';
+                
+                const controls = document.createElement('div');
+                controls.className = 'flex flex-wrap gap-3';
+                
+                // Angle control
+                const angleControl = document.createElement('div');
+                angleControl.className = 'flex items-center gap-2';
+                angleControl.innerHTML = `
+                    <span>Angle:</span>
+                    <input type="number" value="${defaultValues[type].angle}" min="0" max="180" 
+                           class="block-input">
+                `;
+                
+                // Pin control
+                const pinControl = document.createElement('div');
+                pinControl.className = 'flex items-center gap-2';
+                pinControl.innerHTML = `
+                    <span>Pin:</span>
+                    <input type="number" value="${defaultValues[type].pin}" min="0" max="13"
+                           class="block-input">
+                `;
+                
+                controls.appendChild(angleControl);
+                controls.appendChild(pinControl);
+                container.appendChild(title);
+                container.appendChild(controls);
+                contentDiv.appendChild(container);
+                
+            } else if (type === 'servo-loop') {
+                gameState.servoLoopCount++;
+                const container = document.createElement('div');
+                container.className = 'space-y-3 w-full';
+                
+                const title = document.createElement('div');
+                title.className = 'font-bold flex items-center justify-between';
+                title.innerHTML = `
+                    <span><i class="fas fa-sync-alt mr-2"></i> SERVO LOOP #${gameState.servoLoopCount}</span>
+                    <span class="text-xs font-normal bg-white bg-opacity-20 px-2 py-1 rounded">AUTO</span>
+                `;
+                
+                const grid = document.createElement('div');
+                grid.className = 'grid grid-cols-2 gap-3';
+                
+                const params = [
+                    ['Start:', 'start', defaultValues[type].start, '0', '180'],
+                    ['End:', 'end', defaultValues[type].end, '0', '180'],
+                    ['Step:', 'step', defaultValues[type].step, '1', '180'],
+                    ['Delay:', 'delay', defaultValues[type].delay, '0', ''],
+                    ['Pin:', 'pin', defaultValues[type].pin, '0', '13'],
+                ];
+                
+                params.forEach(([label, param, value, min, max]) => {
+                    const paramDiv = document.createElement('div');
+                    paramDiv.className = 'flex items-center justify-between';
+                    paramDiv.innerHTML = `
+                        <span class="text-sm">${label}</span>
+                        <input type="number" value="${value}" min="${min}" ${max ? `max="${max}"` : ''}
+                               data-param="${param}"
+                               class="block-input text-center">
+                    `;
+                    grid.appendChild(paramDiv);
+                });
+                
+                // Mode selector
+                const modeDiv = document.createElement('div');
+                modeDiv.className = 'flex items-center justify-between col-span-2';
+                modeDiv.innerHTML = `
+                    <span class="text-sm">Mode:</span>
+                    <select data-param="mode" class="block-select">
+                        <option value="sweep" ${defaultValues[type].mode === 'sweep' ? 'selected' : ''}>Sweep</option>
+                        <option value="sweep-back" ${defaultValues[type].mode === 'sweep-back' ? 'selected' : ''}>Sweep & Back</option>
+                        <option value="continuous" ${defaultValues[type].mode === 'continuous' ? 'selected' : ''}>Continuous</option>
+                    </select>
+                `;
+                grid.appendChild(modeDiv);
+                
+                container.appendChild(title);
+                container.appendChild(grid);
+                contentDiv.appendChild(container);
             }
-        }
-        
-        // Fungsi untuk membersihkan canvas
-        function clearCanvas() {
-            if (confirm('Apakah Anda yakin ingin menghapus semua blok?')) {
-                workspace.clear();
-                updateCode();
-                showNotification('Canvas dibersihkan', 'info');
-            }
-        }
-        
-        // Fungsi untuk toggle panel
-        function toggleToolbox() {
-            const toolbox = document.getElementById('toolboxSidebar');
-            const palette = document.getElementById('blocksPalette');
             
-            if (toolbox.classList.contains('collapsed')) {
-                toolbox.classList.remove('collapsed');
-                palette.classList.remove('collapsed');
-            } else {
-                toolbox.classList.add('collapsed');
-                palette.classList.add('collapsed');
-            }
-        }
-        
-        function toggleProperties() {
-            document.getElementById('propertiesPanel').classList.toggle('collapsed');
-        }
-        
-        function toggleCodePanel() {
-            document.getElementById('codePanel').classList.toggle('collapsed');
-        }
-        
-        function toggleSimulation() {
-            document.getElementById('simulationArea').classList.toggle('collapsed');
-        }
-        
-        // Fungsi untuk menyimpan properti blok
-        function saveBlockProperties() {
-            showNotification('Properti blok disimpan', 'success');
-        }
-        
-        // Fungsi untuk mengatur warna blok
-        function setBlockColor(color) {
-            showNotification(`Warna blok diubah ke ${color}`, 'info');
-        }
-        
-        // Fungsi untuk menampilkan notifikasi
-        function showNotification(message, type) {
-            const notification = document.createElement('div');
-            notification.className = `fixed top-4 right-4 px-4 py-2 rounded-lg shadow-lg text-white ${
-                type === 'success' ? 'bg-green-500' : 
-                type === 'error' ? 'bg-red-500' : 'bg-blue-500'
-            } z-50`;
-            notification.textContent = message;
-            document.body.appendChild(notification);
+            // Add content to block
+            newBlock.appendChild(contentDiv);
             
-            setTimeout(() => {
-                notification.remove();
-            }, 3000);
-        }
-        
-        // Event listener untuk drag and drop
-        document.addEventListener('DOMContentLoaded', function() {
-            // Setup drag and drop untuk blok
-            const blockItems = document.querySelectorAll('.block-item');
-            blockItems.forEach(item => {
-                item.addEventListener('dragstart', function(e) {
-                    e.dataTransfer.setData('text/plain', this.getAttribute('onclick').match(/'([^']+)'/)[1]);
+            // Add delete button
+            const deleteBtn = document.createElement('div');
+            deleteBtn.className = 'delete-btn';
+            deleteBtn.innerHTML = '×';
+            deleteBtn.addEventListener('click', (e) => {
+                e.stopPropagation(); // Prevent event bubbling
+                if (confirm('Hapus block ini?')) {
+                    newBlock.remove();
+                    gameState.blockCount--;
+                    updateStats();
+                    updateCode();
+                    
+                    // Show placeholder if section is empty
+                    const section = newBlock.parentElement;
+                    if (section && section.querySelectorAll('.workspace-block').length === 0) {
+                        const placeholder = document.createElement('div');
+                        placeholder.className = 'text-gray-500 text-sm text-center py-10';
+                        placeholder.textContent = section.dataset.section === 'setup' ? 
+                            'Drag blocks here for initialization code' : 
+                            'Drag blocks here for main loop code';
+                        placeholder.id = `${section.dataset.section}-placeholder`;
+                        section.appendChild(placeholder);
+                    }
+                }
+            });
+            newBlock.appendChild(deleteBtn);
+            
+            // Mencegah event bubbling dari input/select ke parent
+            newBlock.querySelectorAll('input, select').forEach(input => {
+                input.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                });
+                
+                input.addEventListener('mousedown', (e) => {
+                    e.stopPropagation();
+                });
+                
+                input.addEventListener('touchstart', (e) => {
+                    e.stopPropagation();
                 });
             });
             
-            // Setup drop zone
-            const canvas = document.getElementById('blocklyCanvas');
-            canvas.addEventListener('dragover', function(e) {
-                e.preventDefault();
+            // Update code when inputs change
+            newBlock.addEventListener('input', updateCode);
+            newBlock.addEventListener('change', updateCode);
+            
+            return newBlock;
+        }
+
+        // Update Code Generation
+        function updateCode() {
+            const codeLines = {
+                setup: [],
+                loop: [],
+                variables: [],
+                includes: []
+            };
+            
+            const usedPins = new Set();
+            let servoUsed = false;
+            let servoLoopIndex = 0;
+            
+            // Check if we need Servo library
+            const hasServo = document.querySelectorAll('[data-type="servo"], [data-type="servo-loop"]').length > 0;
+            if (hasServo) {
+                codeLines.includes.push('#include <Servo.h>');
+            }
+            
+            sections.forEach(section => {
+                const sectionName = section.dataset.section;
+                section.querySelectorAll('.workspace-block').forEach(block => {
+                    const type = block.dataset.type;
+                    
+                    if (type === 'led') {
+                        const pin = block.querySelector('input').value;
+                        codeLines[sectionName].push(`  digitalWrite(${pin}, HIGH);`);
+                        usedPins.add(pin);
+                        
+                    } else if (type === 'ledlow') {
+                        const pin = block.querySelector('input').value;
+                        codeLines[sectionName].push(`  digitalWrite(${pin}, LOW);`);
+                        usedPins.add(pin);
+                        
+                    } else if (type === 'delay') {
+                        const delay = block.querySelector('input').value;
+                        codeLines[sectionName].push(`  delay(${delay});`);
+                        
+                    } else if (type === 'servo') {
+                        const inputs = block.querySelectorAll('input');
+                        const angle = inputs[0].value;
+                        const pin = inputs[1].value;
+                        
+                        codeLines.setup.unshift(`  myservo.attach(${pin});`);
+                        codeLines[sectionName].push(`  myservo.write(${angle});`);
+                        servoUsed = true;
+                        usedPins.add(pin);
+                        
+                    } else if (type === 'servo-loop') {
+                        servoLoopIndex++;
+                        const inputs = block.querySelectorAll('input');
+                        const modeSelect = block.querySelector('select');
+                        
+                        const start = inputs[0].value;
+                        const end = inputs[1].value;
+                        const step = inputs[2].value;
+                        const loopDelay = inputs[3].value;
+                        const pin = inputs[4].value;
+                        const mode = modeSelect.value;
+                        
+                        servoUsed = true;
+                        usedPins.add(pin);
+                        
+                        // Add servo object
+                        codeLines.variables.push(`Servo servo${servoLoopIndex};`);
+                        codeLines.setup.unshift(`  servo${servoLoopIndex}.attach(${pin});`);
+                        
+                        // Generate loop code
+                        let loopCode = '';
+                        if (mode === 'sweep') {
+                            loopCode = `  // Sweep servo${servoLoopIndex} from ${start}° to ${end}°
+  for(int pos = ${start}; pos <= ${end}; pos += ${step}) {
+    servo${servoLoopIndex}.write(pos);
+    delay(${loopDelay});
+  }`;
+                        } else if (mode === 'sweep-back') {
+                            loopCode = `  // Sweep servo${servoLoopIndex} from ${start}° to ${end}° and back
+  for(int pos = ${start}; pos <= ${end}; pos += ${step}) {
+    servo${servoLoopIndex}.write(pos);
+    delay(${loopDelay});
+  }
+  for(int pos = ${end}; pos >= ${start}; pos -= ${step}) {
+    servo${servoLoopIndex}.write(pos);
+    delay(${loopDelay});
+  }`;
+                        } else if (mode === 'continuous') {
+                            loopCode = `  // Continuous rotation control for servo${servoLoopIndex}
+  // ${start} = stop, <${start} = CCW, >${start} = CW
+  for(int pos = ${start}; pos <= ${end}; pos += ${step}) {
+    servo${servoLoopIndex}.write(pos);
+    delay(${loopDelay});
+  }`;
+                        }
+                        
+                        codeLines[sectionName].push(loopCode);
+                    }
+                });
             });
             
-            canvas.addEventListener('drop', function(e) {
-                e.preventDefault();
-                const blockType = e.dataTransfer.getData('text/plain');
-                addBlock(blockType);
+            // Generate pinMode statements
+            if (usedPins.size > 0) {
+                const pinModes = Array.from(usedPins)
+                    .map(p => `  pinMode(${p}, OUTPUT);`)
+                    .join('\n');
+                codeLines.setup.unshift(pinModes);
+            }
+            
+            // Generate variable declarations
+            if (servoUsed && !servoLoopIndex) {
+                codeLines.variables.unshift('Servo myservo;');
+            }
+            
+            // Build final code
+            let finalCode = '';
+            
+            // Includes
+            if (codeLines.includes.length > 0) {
+                finalCode += codeLines.includes.join('\n') + '\n\n';
+            }
+            
+            // Variables
+            if (codeLines.variables.length > 0) {
+                finalCode += '// Servo Objects\n';
+                finalCode += codeLines.variables.join('\n') + '\n\n';
+            }
+            
+            // Setup function
+            finalCode += 'void setup() {\n';
+            if (codeLines.setup.length === 0) {
+                finalCode += '  // Initialization code\n';
+            } else {
+                finalCode += codeLines.setup.join('\n') + '\n';
+            }
+            finalCode += '}\n\n';
+            
+            // Loop function
+            finalCode += 'void loop() {\n';
+            if (codeLines.loop.length === 0) {
+                finalCode += '  // Main program loop\n';
+            } else {
+                finalCode += codeLines.loop.join('\n') + '\n';
+            }
+            finalCode += '}\n';
+            
+            // Update code display
+            codeOutput.textContent = finalCode;
+            
+            // Update stats
+            gameState.lineCount = finalCode.split('\n').length;
+            gameState.pinCount = usedPins.size;
+            updateStats();
+        }
+
+        // Update Statistics
+        function updateStats() {
+            blockCountDisplay.textContent = gameState.blockCount;
+            pinCountDisplay.textContent = gameState.pinCount;
+            lineCountDisplay.textContent = gameState.lineCount;
+        }
+
+        // Setup Event Listeners
+        function setupEventListeners() {
+            // Copy code button
+            copyBtn.addEventListener('click', () => {
+                navigator.clipboard.writeText(codeOutput.textContent)
+                    .then(() => {
+                        const originalText = copyBtn.innerHTML;
+                        copyBtn.innerHTML = '<i class="fas fa-check mr-2"></i> COPIED!';
+                        copyBtn.classList.remove('bg-white');
+                        copyBtn.classList.add('bg-green-100', 'text-green-600');
+                        
+                        setTimeout(() => {
+                            copyBtn.innerHTML = originalText;
+                            copyBtn.classList.remove('bg-green-100', 'text-green-600');
+                            copyBtn.classList.add('bg-white');
+                        }, 2000);
+                    });
             });
             
-            // Setup bottom nav
-            const navItems = document.querySelectorAll('.nav-item');
-            navItems.forEach(item => {
-                item.addEventListener('click', function() {
-                    navItems.forEach(nav => {
-                        nav.classList.remove('active');
-                        nav.querySelector('.nav-icon').classList.remove('active');
+            // Clear all button
+            clearBtn.addEventListener('click', () => {
+                if (confirm('Hapus semua blocks dari workspace?')) {
+                    document.querySelectorAll('.workspace-block').forEach(block => block.remove());
+                    gameState.blockCount = 0;
+                    gameState.servoLoopCount = 0;
+                    
+                    // Restore placeholders
+                    sections.forEach(section => {
+                        const placeholder = document.createElement('div');
+                        placeholder.className = 'text-gray-500 text-sm text-center py-10';
+                        placeholder.textContent = section.dataset.section === 'setup' ? 
+                            'Drag blocks here for initialization code' : 
+                            'Drag blocks here for main loop code';
+                        placeholder.id = `${section.dataset.section}-placeholder`;
+                        section.appendChild(placeholder);
                     });
                     
-                    this.classList.add('active');
-                    this.querySelector('.nav-icon').classList.add('active');
-                });
+                    updateStats();
+                    updateCode();
+                }
             });
             
-            // Load project jika ada
-            loadProject();
+            // Generate code button
+            generateBtn.addEventListener('click', () => {
+                updateCode();
+                codeOutput.classList.add('pulse');
+                setTimeout(() => codeOutput.classList.remove('pulse'), 1500);
+            });
             
-            // Update code secara berkala
-            workspace.addChangeListener(updateCode);
-        });
+            // Load example button
+            exampleBtn.addEventListener('click', loadExample);
+            
+            // Auto-update code on any change
+            document.addEventListener('input', updateCode);
+        }
+
+        // Load Example
+        function loadExample() {
+            if (confirm('Load contoh program LED blink dengan servo?')) {
+                // Clear existing blocks
+                document.querySelectorAll('.workspace-block').forEach(block => block.remove());
+                gameState.blockCount = 0;
+                gameState.servoLoopCount = 0;
+                
+                // Add example blocks to setup
+                const setupSection = document.querySelector('[data-section="setup"]');
+                const setupPlaceholder = setupSection.querySelector('.text-gray-500');
+                if (setupPlaceholder) setupPlaceholder.remove();
+                
+                // Add pinMode for LED
+                const ledBlock = createWorkspaceBlock('led');
+                setupSection.appendChild(ledBlock);
+                gameState.blockCount++;
+                
+                // Add example blocks to loop
+                const loopSection = document.querySelector('[data-section="loop"]');
+                const loopPlaceholder = loopSection.querySelector('.text-gray-500');
+                if (loopPlaceholder) loopPlaceholder.remove();
+                
+                // LED ON
+                const ledOnBlock = createWorkspaceBlock('led');
+                loopSection.appendChild(ledOnBlock);
+                gameState.blockCount++;
+                
+                // Delay
+                const delay1Block = createWorkspaceBlock('delay');
+                delay1Block.querySelector('input').value = 500;
+                loopSection.appendChild(delay1Block);
+                gameState.blockCount++;
+                
+                // LED OFF
+                const ledOffBlock = createWorkspaceBlock('ledlow');
+                loopSection.appendChild(ledOffBlock);
+                gameState.blockCount++;
+                
+                // Another delay
+                const delay2Block = createWorkspaceBlock('delay');
+                delay2Block.querySelector('input').value = 500;
+                loopSection.appendChild(delay2Block);
+                gameState.blockCount++;
+                
+                // Servo sweep
+                const servoLoopBlock = createWorkspaceBlock('servo-loop');
+                loopSection.appendChild(servoLoopBlock);
+                gameState.blockCount++;
+                
+                updateStats();
+                updateCode();
+            }
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
-  </html>
+</html>

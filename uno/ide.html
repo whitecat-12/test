@@ -826,8 +826,8 @@
                         const angle = inputs[0].value;
                         const pin = inputs[1].value;
                         
-                        codeLines.setup.unshift(`  myservo.attach(${pin});`);
-                        codeLines[sectionName].push(`  myservo.write(${angle});`);
+                        codeLines.setup.unshift(`  servo1.attach(${pin});`);
+                        codeLines[sectionName].push(`  servo1.write(${angle});`);
                         servoUsed = true;
                         usedPins.add(pin);
                         
@@ -892,7 +892,7 @@
             
             // Generate variable declarations
             if (servoUsed && !servoLoopIndex) {
-                codeLines.variables.unshift('Servo myservo;');
+                codeLines.variables.unshift('Servo servo1;');
             }
             
             // Build final code

@@ -5,14 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Forum Diskusi</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Cloudinary Upload Widget -->
-  <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
   <!-- KaTeX -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Cloudinary Widget -->
+  <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     :root {
@@ -80,7 +80,7 @@
       color: #9999ff;
     }
 
-    /* Thread styles */
+    /* Thread styles - IMPROVED FOR MOBILE */
     .thread-card { 
       transition: all 0.2s ease; 
       padding: 0.75rem;
@@ -101,6 +101,102 @@
       flex-shrink: 0;
     }
     .small-btn { font-size: 0.85rem; padding: .25rem .5rem; border-radius: .5rem; }
+    
+    /* Image styles */
+    .thread-image {
+      max-width: 100%;
+      max-height: 300px;
+      border-radius: 8px;
+      margin-top: 10px;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+    
+    .thread-image:hover {
+      transform: scale(1.02);
+    }
+    
+    .image-preview-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    
+    .image-preview {
+      position: relative;
+      width: 80px;
+      height: 80px;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    
+    .image-preview img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    
+    .remove-image-btn {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      background: rgba(255, 0, 0, 0.8);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      font-size: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .image-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    
+    .image-modal.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    
+    .image-modal img {
+      max-width: 90%;
+      max-height: 90%;
+      border-radius: 8px;
+    }
+    
+    .close-modal-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(255, 255, 255, 0.2);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      font-size: 20px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
     
     /* Improved mobile responsiveness */
     .thread-content {
@@ -148,63 +244,6 @@
       border-radius: 0.5rem;
       padding: 0.5rem 0.75rem;
       font-size: 0.875rem;
-    }
-    
-    /* Image preview styles */
-    .image-preview-container {
-      margin-top: 0.5rem;
-      position: relative;
-      display: inline-block;
-    }
-    
-    .image-preview {
-      max-width: 200px;
-      max-height: 200px;
-      border-radius: 0.5rem;
-      border: 1px solid #e2e8f0;
-    }
-    
-    .remove-image-btn {
-      position: absolute;
-      top: -8px;
-      right: -8px;
-      width: 24px;
-      height: 24px;
-      border-radius: 50%;
-      background: #ef4444;
-      color: white;
-      border: none;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-size: 0.75rem;
-    }
-    
-    .uploaded-image {
-      max-width: 100%;
-      max-height: 300px;
-      border-radius: 0.5rem;
-      margin-top: 0.5rem;
-      border: 1px solid #e2e8f0;
-    }
-    
-    .image-placeholder {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 100px;
-      height: 100px;
-      border: 2px dashed #cbd5e1;
-      border-radius: 0.5rem;
-      color: #64748b;
-      cursor: pointer;
-      transition: all 0.3s ease;
-    }
-    
-    .image-placeholder:hover {
-      border-color: #9999ff;
-      background-color: #f8fafc;
     }
     
     /* FAB Styles */
@@ -460,7 +499,7 @@
       100% { transform: rotate(360deg); }
     }
     
-    /* PERBAIKAN: Style khusus untuk bottom nav items */
+    /* Style khusus untuk bottom nav items */
     .nav-item {
       display: flex;
       flex-direction: column;
@@ -531,9 +570,13 @@
         font-size: 1.1rem;
       }
       
-      .uploaded-image {
-        max-width: 100%;
+      .thread-image {
         max-height: 200px;
+      }
+      
+      .image-preview {
+        width: 60px;
+        height: 60px;
       }
     }
   </style>
@@ -595,7 +638,15 @@
         </a>
       </div>
     </div>
-
+    
+    <!-- Image Modal -->
+    <div class="image-modal" id="imageModal">
+      <button class="close-modal-btn" id="closeModalBtn">
+        <i class="fas fa-times"></i>
+      </button>
+      <img id="modalImage" src="" alt="Gambar diperbesar">
+    </div>
+    
     <!-- Thread Container -->
     <main class="pb-20">
       <div id="threads" class="p-3 space-y-3"></div>
@@ -628,20 +679,12 @@
       ></textarea>
       
       <!-- Image preview container -->
-      <div id="imagePreviewContainer" class="mt-3" style="display: none;">
-        <div class="image-preview-container">
-          <img id="imagePreview" class="image-preview" src="" alt="Preview gambar">
-          <button type="button" id="removeImageBtn" class="remove-image-btn">
-            <i class="fas fa-times"></i>
-          </button>
-        </div>
-        <input type="hidden" id="imageUrl" value="">
-      </div>
+      <div id="imagePreviewContainer" class="image-preview-container" style="display: none;"></div>
       
       <div class="flex justify-between items-center mt-3">
         <div class="flex space-x-2" style="color: #9999ff;">
-          <!-- Upload image button -->
-          <button id="uploadImageBtn" class="p-2 rounded-full hover:bg-blue-50" title="Unggah gambar">
+          <!-- Image upload button -->
+          <button id="imageUploadBtn" class="p-2 rounded-full hover:bg-blue-50" title="Unggah gambar">
             <i class="fas fa-image"></i>
           </button>
           <button class="p-2 rounded-full hover:bg-blue-50"><i class="fas fa-code"></i></button>
@@ -705,17 +748,14 @@
       appId: "1:554913260457:web:bf988867ebfd902c651ab8"
     };
 
+    // 🔹 Cloudinary Configuration
+    const CLOUDINARY_CLOUD_NAME = "ddjzsvomj";
+    const CLOUDINARY_API_KEY = "846512428512365";
+    const CLOUDINARY_UPLOAD_PRESET = "forum_images"; // Anda perlu membuat upload preset di Cloudinary
+
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const db = getFirestore(app);
-
-    // Cloudinary Configuration (gunakan API key Anda)
-    const cloudName = "YOUR_CLOUD_NAME"; // Ganti dengan cloud name Cloudinary Anda
-    const cloudinaryApiKey = "846512428512365"; // API key yang Anda berikan
-    const cloudinaryApiSecret = "KwjuFuk0yaIymwboY7VbNKY-YgQ"; // API secret yang Anda berikan
-
-    // Upload preset (Anda perlu membuat ini di Cloudinary dashboard)
-    const uploadPreset = "forum_uploads"; // Ganti dengan upload preset Anda
 
     const threadsDiv = document.getElementById("threads");
     const userInitial = document.getElementById("userInitial");
@@ -729,19 +769,19 @@
     const fabFormOverlay = document.getElementById("fabFormOverlay");
     const fabMsgInput = document.getElementById("fabMsgInput");
     const fabSendBtn = document.getElementById("fabSendBtn");
-    
-    // Image upload elements
-    const uploadImageBtn = document.getElementById("uploadImageBtn");
+    const imageUploadBtn = document.getElementById("imageUploadBtn");
     const imagePreviewContainer = document.getElementById("imagePreviewContainer");
-    const imagePreview = document.getElementById("imagePreview");
-    const removeImageBtn = document.getElementById("removeImageBtn");
-    const imageUrlInput = document.getElementById("imageUrl");
     
     // Sidebar elements
     const hamburgerButton = document.getElementById("hamburgerButton");
     const closeSidebar = document.getElementById("closeSidebar");
     const sidebar = document.getElementById("sidebar");
     const sidebarOverlay = document.getElementById("sidebarOverlay");
+    
+    // Image modal elements
+    const imageModal = document.getElementById("imageModal");
+    const modalImage = document.getElementById("modalImage");
+    const closeModalBtn = document.getElementById("closeModalBtn");
 
     // Pagination variables
     const THREADS_PER_PAGE = 5;
@@ -755,68 +795,7 @@
 
     let currentUser = null;
     let currentProfile = null;
-    let cloudinaryWidget = null;
-
-    // Initialize Cloudinary Upload Widget
-    function initializeCloudinaryWidget() {
-      cloudinaryWidget = cloudinary.createUploadWidget({
-        cloudName: cloudName,
-        uploadPreset: uploadPreset,
-        sources: ['local', 'url', 'camera'],
-        multiple: false,
-        maxFileSize: 5000000, // 5MB
-        maxImageWidth: 2000,
-        maxImageHeight: 2000,
-        cropping: false,
-        showAdvancedOptions: true,
-        styles: {
-          palette: {
-            window: "#FFFFFF",
-            windowBorder: "#90A0B3",
-            tabIcon: "#9999ff",
-            menuIcons: "#5A616A",
-            textDark: "#000000",
-            textLight: "#FFFFFF",
-            link: "#9999ff",
-            action: "#9999ff",
-            inactiveTabIcon: "#0E2F5A",
-            error: "#F44235",
-            inProgress: "#9999ff",
-            complete: "#20B832",
-            sourceBg: "#E4EBF1"
-          },
-          fonts: {
-            default: null,
-            "'Baloo 2', cursive": {
-              url: "https://fonts.googleapis.com/css2?family=Baloo+2&display=swap",
-              active: true
-            }
-          }
-        }
-      }, (error, result) => {
-        if (!error && result && result.event === "success") {
-          console.log("Upload berhasil: ", result.info);
-          
-          // Tampilkan preview gambar
-          imagePreview.src = result.info.secure_url;
-          imagePreviewContainer.style.display = "block";
-          imageUrlInput.value = result.info.secure_url;
-          
-          // Tambahkan gambar ke textarea jika ada teks
-          if (fabMsgInput.value.trim()) {
-            fabMsgInput.value += `\n\n![Gambar](${result.info.secure_url})`;
-          } else {
-            fabMsgInput.value = `![Gambar](${result.info.secure_url})`;
-          }
-          
-          // Aktifkan tombol post
-          fabSendBtn.disabled = !fabMsgInput.value.trim();
-        } else if (error) {
-          console.error("Upload error: ", error);
-          alert("Gagal mengunggah gambar: " + error.message);
-        }
-      });
-    }
+    let uploadedImages = []; // Array untuk menyimpan URL gambar yang diunggah
 
     // Toggle sidebar
     function toggleSidebar() {
@@ -835,6 +814,25 @@
     closeSidebar.addEventListener("click", closeSidebarFunc);
     sidebarOverlay.addEventListener("click", closeSidebarFunc);
 
+    // Toggle image modal
+    function openImageModal(imageUrl) {
+      modalImage.src = imageUrl;
+      imageModal.classList.add("active");
+    }
+
+    function closeImageModal() {
+      imageModal.classList.remove("active");
+      modalImage.src = "";
+    }
+
+    // Event listeners for image modal
+    closeModalBtn.addEventListener("click", closeImageModal);
+    imageModal.addEventListener("click", (e) => {
+      if (e.target === imageModal) {
+        closeImageModal();
+      }
+    });
+
     // Toggle FAB form
     function toggleFabForm() {
       fabFormContainer.classList.toggle("active");
@@ -850,41 +848,135 @@
       fabFormContainer.classList.remove("active");
       fabFormOverlay.classList.remove("active");
       fabMsgInput.value = "";
-      imagePreviewContainer.style.display = "none";
-      imagePreview.src = "";
-      imageUrlInput.value = "";
       fabSendBtn.disabled = true;
+      // Clear image previews
+      clearImagePreviews();
+    }
+
+    // Clear image previews
+    function clearImagePreviews() {
+      uploadedImages = [];
+      imagePreviewContainer.innerHTML = "";
+      imagePreviewContainer.style.display = "none";
     }
 
     // Event listeners for FAB
     fabButton.addEventListener("click", toggleFabForm);
     fabFormOverlay.addEventListener("click", closeFabForm);
 
-    // Aktifkan tombol hanya kalau ada teks
+    // Aktifkan tombol hanya kalau ada teks atau gambar
     fabMsgInput.addEventListener('input', () => {
-      fabSendBtn.disabled = !fabMsgInput.value.trim();
+      const hasText = fabMsgInput.value.trim().length > 0;
+      const hasImages = uploadedImages.length > 0;
+      fabSendBtn.disabled = !(hasText || hasImages);
     });
 
-    // Remove image preview
-    removeImageBtn.addEventListener('click', () => {
-      imagePreviewContainer.style.display = "none";
-      imagePreview.src = "";
-      imageUrlInput.value = "";
+    // Initialize Cloudinary Upload Widget
+    function initializeCloudinaryWidget() {
+      const myWidget = cloudinary.createUploadWidget(
+        {
+          cloudName: CLOUDINARY_CLOUD_NAME,
+          uploadPreset: CLOUDINARY_UPLOAD_PRESET,
+          sources: ['local', 'url', 'camera'],
+          multiple: true,
+          maxFiles: 5,
+          clientAllowedFormats: ['jpg', 'jpeg', 'png', 'gif', 'webp'],
+          maxFileSize: 5000000, // 5MB
+          styles: {
+            palette: {
+              window: "#FFFFFF",
+              windowBorder: "#90A0B3",
+              tabIcon: "#9999ff",
+              menuIcons: "#5A616A",
+              textDark: "#000000",
+              textLight: "#FFFFFF",
+              link: "#9999ff",
+              action: "#FF620C",
+              inactiveTabIcon: "#0E2F5A",
+              error: "#F44235",
+              inProgress: "#9999ff",
+              complete: "#20B832",
+              sourceBg: "#E4EBF1"
+            }
+          }
+        },
+        (error, result) => {
+          if (!error && result && result.event === "success") {
+            console.log("Image uploaded successfully: ", result.info);
+            
+            // Add image URL to uploadedImages array
+            uploadedImages.push({
+              url: result.info.secure_url,
+              public_id: result.info.public_id
+            });
+            
+            // Update image preview
+            updateImagePreviews();
+            
+            // Enable send button if there are images
+            fabSendBtn.disabled = false;
+          }
+          
+          if (error) {
+            console.error("Cloudinary upload error:", error);
+            alert("Gagal mengunggah gambar: " + error.message);
+          }
+        }
+      );
+
+      // Add event listener to image upload button
+      imageUploadBtn.addEventListener("click", () => {
+        myWidget.open();
+      }, false);
+    }
+
+    // Update image previews in the form
+    function updateImagePreviews() {
+      imagePreviewContainer.innerHTML = "";
       
-      // Hapus referensi gambar dari textarea jika ada
-      const text = fabMsgInput.value;
-      const imageRegex = /!\[Gambar\]\(https?:\/\/[^\s]+\)/g;
-      fabMsgInput.value = text.replace(imageRegex, '').trim();
-    });
+      uploadedImages.forEach((image, index) => {
+        const previewDiv = document.createElement("div");
+        previewDiv.className = "image-preview";
+        
+        previewDiv.innerHTML = `
+          <img src="${image.url}" alt="Preview ${index + 1}">
+          <button class="remove-image-btn" data-index="${index}">
+            <i class="fas fa-times"></i>
+          </button>
+        `;
+        
+        imagePreviewContainer.appendChild(previewDiv);
+        
+        // Add click event to image
+        const img = previewDiv.querySelector('img');
+        img.addEventListener('click', () => {
+          openImageModal(image.url);
+        });
+      });
+      
+      // Show container if there are images
+      imagePreviewContainer.style.display = uploadedImages.length > 0 ? "flex" : "none";
+      
+      // Add event listeners to remove buttons
+      document.querySelectorAll('.remove-image-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const index = parseInt(btn.getAttribute('data-index'));
+          removeImage(index);
+        });
+      });
+    }
 
-    // Open Cloudinary widget untuk upload gambar
-    uploadImageBtn.addEventListener('click', () => {
-      if (cloudinaryWidget) {
-        cloudinaryWidget.open();
-      } else {
-        alert("Upload widget belum siap. Silakan refresh halaman.");
-      }
-    });
+    // Remove image from preview
+    function removeImage(index) {
+      uploadedImages.splice(index, 1);
+      updateImagePreviews();
+      
+      // Disable send button if no text and no images
+      const hasText = fabMsgInput.value.trim().length > 0;
+      const hasImages = uploadedImages.length > 0;
+      fabSendBtn.disabled = !(hasText || hasImages);
+    }
 
     // Ambil profil user (dari collection users -> field name)
     async function getUserProfile(uid) {
@@ -909,35 +1001,40 @@
         userInitial.textContent = initial;
         fabUserName.textContent = currentProfile?.name || user.email;
         
-        // Initialize Cloudinary setelah user login
+        // Initialize Cloudinary widget after user is authenticated
         initializeCloudinaryWidget();
-        
         await loadThreads();
       }
     });
 
-    // Post thread baru dari FAB form (dengan gambar)
+    // Post thread baru dari FAB form
     fabSendBtn.addEventListener("click", async () => {
-      if (!fabMsgInput.value.trim()) return;
+      const text = fabMsgInput.value.trim();
+      if (!text && uploadedImages.length === 0) return;
       
       try {
+        // Prepare thread data
         const threadData = {
           uid: currentUser.uid,
           email: currentUser.email,
           name: currentProfile?.name || currentUser.email,
-          teks: fabMsgInput.value,
+          teks: text,
           likes: 0,
           likedBy: [],
           createdAt: serverTimestamp()
         };
-
-        // Jika ada gambar, tambahkan ke data thread
-        if (imageUrlInput.value) {
-          threadData.imageUrl = imageUrlInput.value;
+        
+        // Add images if any
+        if (uploadedImages.length > 0) {
+          threadData.images = uploadedImages;
         }
-
+        
         await addDoc(collection(db, "threads"), threadData);
+        
+        // Reset form
         closeFabForm();
+        clearImagePreviews();
+        
         // Reset to first page after posting
         currentPage = 1;
         await loadThreads();
@@ -1111,7 +1208,7 @@
       threadsDiv.scrollIntoView({ behavior: 'smooth' });
     };
 
-    // Render Thread (dengan gambar jika ada)
+    // Render Thread (dengan tombol delete bila pemilik)
     function renderThread(id, data) {
       const div = document.createElement("div");
       div.className = "thread-card bg-white rounded-lg border border-gray-200";
@@ -1128,12 +1225,17 @@
         ? `<button onclick="deleteThread('${id}')" title="Hapus thread" class="ml-2 text-red-500 hover:text-red-700 text-sm"><i class="fas fa-trash"></i></button>`
         : "";
 
-      // Check if thread has image
-      const imageHtml = data.imageUrl 
-        ? `<div class="mt-2">
-            <img src="${data.imageUrl}" alt="Gambar thread" class="uploaded-image" onclick="viewImageFullscreen('${data.imageUrl}')" style="cursor: pointer;">
-           </div>`
-        : "";
+      // Prepare images HTML
+      let imagesHTML = "";
+      if (data.images && data.images.length > 0) {
+        imagesHTML = `<div class="mt-3">`;
+        data.images.forEach((img, idx) => {
+          imagesHTML += `
+            <img src="${img.url}" alt="Gambar ${idx + 1}" class="thread-image" onclick="openImageModal('${img.url}')">
+          `;
+        });
+        imagesHTML += `</div>`;
+      }
 
       div.innerHTML = `
         <div class="flex items-start gap-3">
@@ -1146,9 +1248,7 @@
               ${deleteThreadBtn}
             </div>
             <p class="mt-2 text-gray-800 thread-content">${escapeHtml(data.teks)}</p>
-            
-            ${imageHtml}
-            
+            ${imagesHTML}
             <div class="action-buttons">
               <button class="like-btn action-btn ${isLiked ? 'text-red-500' : 'text-gray-500'}" onclick="likeThread('${id}', ${isLiked})">
                 <i class="fas fa-heart ${isLiked ? 'text-red-500' : ''}"></i>
@@ -1243,35 +1343,6 @@
       `;
     }
 
-    // View image in fullscreen
-    window.viewImageFullscreen = function(imageUrl) {
-      const overlay = document.createElement('div');
-      overlay.style.position = 'fixed';
-      overlay.style.top = '0';
-      overlay.style.left = '0';
-      overlay.style.width = '100%';
-      overlay.style.height = '100%';
-      overlay.style.backgroundColor = 'rgba(0,0,0,0.9)';
-      overlay.style.zIndex = '9999';
-      overlay.style.display = 'flex';
-      overlay.style.alignItems = 'center';
-      overlay.style.justifyContent = 'center';
-      overlay.style.cursor = 'pointer';
-      
-      const img = document.createElement('img');
-      img.src = imageUrl;
-      img.style.maxWidth = '90%';
-      img.style.maxHeight = '90%';
-      img.style.borderRadius = '8px';
-      
-      overlay.appendChild(img);
-      overlay.addEventListener('click', () => {
-        document.body.removeChild(overlay);
-      });
-      
-      document.body.appendChild(overlay);
-    };
-
     // Balas thread (subkoleksi)
     window.replyToThread = async function(id) {
       const input = document.getElementById(`reply-${id}`);
@@ -1292,7 +1363,7 @@
       }
     };
 
-    // Delete reply
+    // Delete reply (only works if rules allow; UI already ensures only owner sees button)
     window.deleteReply = async function(threadId, replyId) {
       if (!confirm("Yakin ingin menghapus balasan ini?")) return;
       try {
@@ -1304,7 +1375,7 @@
       }
     };
 
-    // Delete thread + its replies (batch delete)
+    // Delete thread + its replies (batch delete). Only owner can delete (rules enforced server-side).
     window.deleteThread = async function(threadId) {
       if (!confirm("Yakin ingin menghapus thread ini beserta semua balasannya?")) return;
       try {
@@ -1328,7 +1399,7 @@
       }
     };
 
-    // Like / Unlike
+    // Like / Unlike (ke sederhana)
     window.likeThread = async function(id, isCurrentlyLiked) {
       try {
         const ref = doc(db, "threads", id);
@@ -1350,6 +1421,9 @@
       if (el) el.focus();
     };
     
+    // Open image modal
+    window.openImageModal = openImageModal;
+    
     // Open AI feature
     window.openAIFeature = function(feature) {
       alert(`Membuka fitur AI: ${feature}`);
@@ -1362,7 +1436,7 @@
       if (!date) return 'baru saja';
       const now = new Date(), diff = Math.floor((now - date)/1000);
       if (diff<60) return 'beberapa detik lalu';
-      if (diff<3600) return `${Math.floor(diff/60)} mennt lalu`;
+      if (diff<3600) return `${Math.floor(diff/60)} menit lalu`;
       if (diff<86400) return `${Math.floor(diff/3600)} jam lalu`;
       if (diff<2592000) return `${Math.floor(diff/86400)} hari lalu`;
       return date.toLocaleDateString('id-ID',{year:'numeric',month:'short',day:'numeric'});
@@ -1381,4 +1455,4 @@
 
   </script>
 </body>
-  </html>
+</html>

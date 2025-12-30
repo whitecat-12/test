@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Science Explorer - Puzzle Tabel Periodik</title>
+    <title>Game Tabel Periodik - TETA SAINS</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -32,7 +32,7 @@
             box-shadow: 0 0 20px rgba(0,0,0,0.1);
         }
         
-        /* NAVBAR YANG SUDAH DIPERBAIKI - SAMA DENGAN FILE CHAT */
+        /* NAVBAR - TIDAK DIUBAH */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -78,364 +78,148 @@
             color: var(--primary);
         }
         
-        .app-logo {
-            display: flex;
-            align-items: center;
-        }
-        
-        .app-logo-icon {
-            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
-            color: white;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 8px;
-        }
-        
-        .app-name {
-            font-weight: 700;
-            font-size: 1.25rem;
-            color: #60a5fa;
-        }
-
         /* GAME STYLES */
-        .game-container {
-            padding: 16px;
-            background: white;
-        }
-
-        .game-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            text-align: center;
-            margin-bottom: 20px;
-            color: #10b981;
-        }
-
-        .game-subtitle {
-            text-align: center;
-            color: #64748b;
-            margin-bottom: 24px;
-        }
-
-        /* GAME STATUS */
-        .game-status {
+        .element-card {
+            width: 50px;
+            height: 50px;
             display: flex;
-            justify-content: space-between;
-            background: #f1f5f9;
-            padding: 12px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-        }
-
-        .stat-box {
-            text-align: center;
-            flex: 1;
-        }
-
-        .stat-value {
-            font-size: 1.5rem;
-            font-weight: 700;
-        }
-
-        .stat-label {
-            font-size: 0.8rem;
-            color: #64748b;
-        }
-
-        /* PERIODIC TABLE PUZZLE */
-        .puzzle-container {
-            display: grid;
-            grid-template-columns: repeat(8, 1fr);
-            gap: 4px;
-            margin-bottom: 20px;
-        }
-
-        .puzzle-cell {
-            aspect-ratio: 1;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
+            border-radius: 8px;
             font-weight: bold;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            font-size: 0.9rem;
-        }
-
-        .puzzle-cell:hover {
-            transform: scale(1.05);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-
-        .puzzle-cell.empty {
-            background: #f8fafc;
-            border: 2px dashed #cbd5e1;
-            cursor: default;
-        }
-
-        .puzzle-cell.draggable {
             cursor: grab;
+            transition: all 0.2s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
         }
-
-        .puzzle-cell.dragging {
+        
+        .element-card.dragging {
             opacity: 0.7;
-            transform: scale(1.1);
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
         }
-
-        .puzzle-cell.correct {
-            border-color: #10b981;
-            background-color: #d1fae5;
-        }
-
-        .puzzle-cell.incorrect {
-            border-color: #ef4444;
-            background-color: #fee2e2;
-        }
-
-        /* ELEMENT CARDS */
-        .elements-container {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
-            margin-bottom: 20px;
-        }
-
-        .element-card {
-            background: white;
-            border: 2px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 12px;
-            text-align: center;
-            cursor: grab;
-            transition: all 0.2s ease;
-        }
-
-        .element-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
-        }
-
+        
         .element-symbol {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 4px;
+            font-size: 1.2rem;
+            font-weight: 800;
         }
-
-        .element-name {
-            font-size: 0.8rem;
-            color: #64748b;
-        }
-
+        
         .element-number {
             font-size: 0.7rem;
-            color: #94a3b8;
-            margin-top: 4px;
+            position: absolute;
+            top: 2px;
+            left: 4px;
         }
-
-        /* ELEMENT CATEGORY COLORS */
-        .alkali { background-color: #fef3c7 !important; border-color: #f59e0b !important; color: #92400e !important; }
-        .alkaline-earth { background-color: #dbeafe !important; border-color: #3b82f6 !important; color: #1e40af !important; }
-        .transition { background-color: #f0f9ff !important; border-color: #0ea5e9 !important; color: #0c4a6e !important; }
-        .basic-metal { background-color: #f3e8ff !important; border-color: #8b5cf6 !important; color: #5b21b6 !important; }
-        .semimetal { background-color: #fce7f3 !important; border-color: #ec4899 !important; color: #9d174d !important; }
-        .nonmetal { background-color: #dcfce7 !important; border-color: #10b981 !important; color: #065f46 !important; }
-        .halogen { background-color: #ffedd5 !important; border-color: #f97316 !important; color: #9a3412 !important; }
-        .noble-gas { background-color: #e0e7ff !important; border-color: #6366f1 !important; color: #3730a3 !important; }
-        .lanthanide { background-color: #fef2f2 !important; border-color: #ef4444 !important; color: #991b1b !important; }
-        .actinide { background-color: #f5f5f4 !important; border-color: #78716c !important; color: #44403c !important; }
-
-        /* GAME CONTROLS */
-        .game-controls {
-            display: flex;
-            gap: 12px;
-            margin-top: 20px;
+        
+        .element-name {
+            font-size: 0.6rem;
+            margin-top: 2px;
         }
-
-        .game-button {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            border-radius: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
+        
+        .slot {
+            width: 54px;
+            height: 54px;
+            border: 2px dashed #cbd5e1;
+            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            background-color: #f8fafc;
+            transition: all 0.3s;
         }
-
-        .game-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        
+        .slot.correct {
+            border-color: #10b981;
+            background-color: rgba(16, 185, 129, 0.1);
         }
-
-        .game-button.check {
-            background-color: #10b981;
-            color: white;
+        
+        .slot.incorrect {
+            border-color: #ef4444;
+            background-color: rgba(239, 68, 68, 0.1);
         }
-
-        .game-button.hint {
-            background-color: #f59e0b;
-            color: white;
+        
+        .slot.hover {
+            border-color: #3b82f6;
+            background-color: rgba(59, 130, 246, 0.1);
         }
-
-        .game-button.reset {
-            background-color: #ef4444;
-            color: white;
+        
+        .slot.filled {
+            border-style: solid;
         }
-
-        /* MODAL */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background-color: rgba(0,0,0,0.5);
-            z-index: 100;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-content {
-            background: white;
-            padding: 24px;
-            border-radius: 16px;
-            max-width: 320px;
-            width: 90%;
+        
+        .color-alkali { background-color: #FF6961; }
+        .color-alkaline-earth { background-color: #FFB347; }
+        .color-transition { background-color: #77DD77; }
+        .color-basic-metal { background-color: #AEC6CF; }
+        .color-metalloid { background-color: #FDFD96; }
+        .color-nonmetal { background-color: #84B6F4; }
+        .color-halogen { background-color: #FFB7C5; }
+        .color-noble-gas { background-color: #E6E6FA; }
+        .color-lanthanide { background-color: #C9A0DC; }
+        .color-actinide { background-color: #F49AC2; }
+        
+        .timer {
+            font-size: 2rem;
+            font-weight: bold;
             text-align: center;
-            animation: slideIn 0.3s ease;
+            color: #3b82f6;
         }
-
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .modal-title {
+        
+        .score-display {
             font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 12px;
+            font-weight: bold;
+            text-align: center;
             color: #10b981;
         }
-
-        .modal-message {
-            color: #64748b;
-            margin-bottom: 20px;
+        
+        .pulse {
+            animation: pulse 0.5s infinite alternate;
         }
-
-        .modal-button {
-            padding: 12px 24px;
-            background-color: #10b981;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
+        
+        @keyframes pulse {
+            from { transform: scale(1); }
+            to { transform: scale(1.05); }
         }
-
-        .modal-button:hover {
-            background-color: #059669;
-            transform: scale(1.05);
+        
+        .bounce {
+            animation: bounce 0.5s;
         }
-
-        /* LEVEL INDICATOR */
-        .level-indicator {
-            display: flex;
-            justify-content: center;
-            gap: 8px;
-            margin-bottom: 20px;
-        }
-
-        .level-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background-color: #cbd5e1;
-            transition: all 0.3s ease;
-        }
-
-        .level-dot.active {
-            background-color: #10b981;
-            transform: scale(1.2);
-        }
-
-        /* ACHIEVEMENT BADGE */
-        .achievement-badge {
-            position: fixed;
-            top: 80px;
-            right: 20px;
-            width: 60px;
-            height: 60px;
-            background: #f59e0b;
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
-            animation: bounce 2s infinite;
-            z-index: 5;
-        }
-
+        
         @keyframes bounce {
             0%, 100% { transform: translateY(0); }
             50% { transform: translateY(-10px); }
         }
-
-        /* SCORE ANIMATION */
-        .score-popup {
+        
+        .confetti {
             position: absolute;
-            font-weight: bold;
-            color: #10b981;
-            animation: floatUp 1s ease forwards;
-            pointer-events: none;
+            width: 10px;
+            height: 10px;
+            background-color: #f59e0b;
+            border-radius: 50%;
+            opacity: 0.7;
+            animation: confetti-fall 2s linear forwards;
         }
-
-        @keyframes floatUp {
+        
+        @keyframes confetti-fall {
             0% {
+                transform: translateY(-100px) rotate(0deg);
                 opacity: 1;
-                transform: translateY(0);
             }
             100% {
+                transform: translateY(500px) rotate(360deg);
                 opacity: 0;
-                transform: translateY(-30px);
             }
         }
-
-        /* RESPONSIVE */
-        @media (max-width: 414px) {
-            .bottom-nav {
-                height: 65px;
-            }
-            
-            .nav-icon {
-                font-size: 1.1rem;
-            }
-            
-            .puzzle-container {
-                grid-template-columns: repeat(8, 1fr);
-                gap: 3px;
-            }
-            
-            .elements-container {
-                grid-template-columns: repeat(4, 1fr);
-            }
+        
+        .game-complete {
+            animation: complete-glow 2s infinite alternate;
+        }
+        
+        @keyframes complete-glow {
+            from { box-shadow: 0 0 10px rgba(16, 185, 129, 0.5); }
+            to { box-shadow: 0 0 20px rgba(16, 185, 129, 0.8); }
         }
     </style>
 </head>
@@ -449,121 +233,152 @@
                     <div class="app-logo-icon" style="background: #9999ff; color: white;">
                         <i class="fas fa-atom"></i>
                     </div>
-                    <h1 class="app-name" style="color: #9999ff;">QUANTARA</h1>
+                    <h1 class="app-name" style="color: #9999ff;">TETA SAINS</h1>
                 </div>
                 <div class="flex items-center space-x-3">
-                    <i class="fas fa-gamepad"></i>
-                    <i class="fas fa-user-circle text-xl"></i>
+                    <a href="dashboad siswa.html" class="text-white">
+                        <i class="fas fa-home"></i>
+                    </a>
                 </div>
             </div>
         </header>
         
-        <!-- Main Game Content -->
+        <!-- Main Content Area -->
         <main class="pb-20">
-            <div class="game-container">
-                <h1 class="game-title">Puzzle Tabel Periodik</h1>
-                <p class="game-subtitle">Seret dan letakkan unsur kimia ke posisi yang benar!</p>
-                
-                <!-- Level Indicator -->
-                <div class="level-indicator">
-                    <div class="level-dot active"></div>
-                    <div class="level-dot"></div>
-                    <div class="level-dot"></div>
-                    <div class="level-dot"></div>
-                    <div class="level-dot"></div>
+            <!-- Game Header -->
+            <section class="p-4">
+                <div class="bg-white rounded-xl shadow-md p-4 mb-4 border-l-4" style="border-color: #10b981;">
+                    <div class="flex justify-between items-center mb-2">
+                        <h1 class="text-xl font-bold text-gray-800">
+                            <i class="fas fa-gamepad text-green-500 mr-2"></i>
+                            Game Tabel Periodik
+                        </h1>
+                        <span class="text-xs bg-green-500 text-white px-2 py-1 rounded-full">
+                            Level: <span id="currentLevel">1</span>/5
+                        </span>
+                    </div>
+                    <p class="text-sm text-gray-600">
+                        Susun unsur-unsur kimia pada posisi yang benar di tabel periodik!
+                    </p>
+                </div>
+            </section>
+            
+            <!-- Game Stats -->
+            <section class="px-4">
+                <div class="grid grid-cols-3 gap-3 mb-4">
+                    <div class="bg-blue-50 rounded-lg p-3 text-center border border-blue-200">
+                        <div class="timer" id="timer">02:00</div>
+                        <div class="text-xs text-blue-600">Waktu</div>
+                    </div>
+                    <div class="bg-green-50 rounded-lg p-3 text-center border border-green-200">
+                        <div class="score-display" id="score">0</div>
+                        <div class="text-xs text-green-600">Skor</div>
+                    </div>
+                    <div class="bg-purple-50 rounded-lg p-3 text-center border border-purple-200">
+                        <div id="correctCount" class="text-2xl font-bold text-purple-600">0</div>
+                        <div class="text-xs text-purple-600">Tepat</div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Game Area -->
+            <section class="p-4">
+                <!-- Unsur yang harus disusun -->
+                <div class="bg-yellow-50 rounded-xl p-4 mb-4 border border-yellow-200">
+                    <h3 class="font-bold text-gray-800 mb-2 flex items-center">
+                        <i class="fas fa-hand-point-right text-yellow-500 mr-2"></i>
+                        Unsur yang Harus Disusun:
+                    </h3>
+                    <div class="flex flex-wrap gap-2" id="elementsContainer">
+                        <!-- Elements will be generated here -->
+                    </div>
                 </div>
                 
-                <!-- Game Status -->
-                <div class="game-status">
-                    <div class="stat-box">
-                        <div class="stat-value" id="score">0</div>
-                        <div class="stat-label">Skor</div>
+                <!-- Tabel Periodik -->
+                <div class="bg-white rounded-xl shadow-lg p-4 border border-gray-200">
+                    <h3 class="font-bold text-gray-800 mb-3 text-center">
+                        <i class="fas fa-table text-blue-500 mr-2"></i>
+                        Tabel Periodik
+                    </h3>
+                    
+                    <div class="overflow-x-auto">
+                        <div id="periodicTable" class="inline-block mx-auto">
+                            <!-- Periodic table slots will be generated here -->
+                        </div>
                     </div>
-                    <div class="stat-box">
-                        <div class="stat-value" id="time">60</div>
-                        <div class="stat-label">Detik</div>
+                    
+                    <!-- Legend -->
+                    <div class="mt-4 pt-3 border-t border-gray-200">
+                        <h4 class="text-sm font-bold text-gray-700 mb-2">Keterangan Golongan:</h4>
+                        <div class="grid grid-cols-3 gap-2 text-xs">
+                            <div class="flex items-center">
+                                <div class="w-3 h-3 rounded-sm color-alkali mr-1"></div>
+                                <span>Alkali</span>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-3 h-3 rounded-sm color-alkaline-earth mr-1"></div>
+                                <span>Alkali Tanah</span>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-3 h-3 rounded-sm color-transition mr-1"></div>
+                                <span>Transisi</span>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-3 h-3 rounded-sm color-nonmetal mr-1"></div>
+                                <span>Non-Logam</span>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-3 h-3 rounded-sm color-halogen mr-1"></div>
+                                <span>Halogen</span>
+                            </div>
+                            <div class="flex items-center">
+                                <div class="w-3 h-3 rounded-sm color-noble-gas mr-1"></div>
+                                <span>Gas Mulia</span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="stat-box">
-                        <div class="stat-value" id="level">1</div>
-                        <div class="stat-label">Level</div>
-                    </div>
-                    <div class="stat-box">
-                        <div class="stat-value" id="hints">3</div>
-                        <div class="stat-label">Petunjuk</div>
-                    </div>
-                </div>
-                
-                <!-- Achievement Badge -->
-                <div class="achievement-badge" id="achievementBadge">
-                    <i class="fas fa-trophy"></i>
-                </div>
-                
-                <!-- Puzzle Grid -->
-                <div class="puzzle-container" id="puzzleGrid">
-                    <!-- Grid cells will be generated by JavaScript -->
-                </div>
-                
-                <!-- Element Cards -->
-                <h3 class="font-bold text-gray-800 mb-3 text-center">Unsur yang Tersedia</h3>
-                <div class="elements-container" id="elementsContainer">
-                    <!-- Element cards will be generated by JavaScript -->
                 </div>
                 
                 <!-- Game Controls -->
-                <div class="game-controls">
-                    <button class="game-button check" id="checkButton">
-                        <i class="fas fa-check-circle"></i> Cek Jawaban
+                <div class="mt-4 grid grid-cols-2 gap-3">
+                    <button id="checkButton" 
+                            class="py-3 bg-green-500 text-white rounded-lg font-bold flex items-center justify-center hover:bg-green-600 transition">
+                        <i class="fas fa-check-circle mr-2"></i> Periksa Jawaban
                     </button>
-                    <button class="game-button hint" id="hintButton">
-                        <i class="fas fa-lightbulb"></i> Petunjuk
+                    <button id="hintButton" 
+                            class="py-3 bg-blue-500 text-white rounded-lg font-bold flex items-center justify-center hover:bg-blue-600 transition">
+                        <i class="fas fa-lightbulb mr-2"></i> Petunjuk (3)
                     </button>
-                    <button class="game-button reset" id="resetButton">
-                        <i class="fas fa-redo"></i> Ulangi
+                    <button id="nextLevelButton" 
+                            class="py-3 bg-purple-500 text-white rounded-lg font-bold flex items-center justify-center hover:bg-purple-600 transition">
+                        <i class="fas fa-forward mr-2"></i> Level Berikutnya
+                    </button>
+                    <button id="resetButton" 
+                            class="py-3 bg-red-500 text-white rounded-lg font-bold flex items-center justify-center hover:bg-red-600 transition">
+                        <i class="fas fa-redo mr-2"></i> Ulangi Level
                     </button>
                 </div>
-                
-                <!-- Instructions -->
-                <div class="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                    <h4 class="font-bold text-blue-800 mb-2 flex items-center">
-                        <i class="fas fa-info-circle mr-2"></i> Cara Bermain
-                    </h4>
-                    <ol class="text-sm text-blue-700 list-decimal pl-4 space-y-1">
-                        <li>Seret kartu unsur ke tabel periodik</li>
-                        <li>Tempatkan unsur pada posisi yang benar</li>
-                        <li>Semakin cepat dan akurat, semakin tinggi skornya</li>
-                        <li>Gunakan petunjuk jika diperlukan</li>
-                    </ol>
-                </div>
-            </div>
+            </section>
             
-            <!-- Success Modal -->
-            <div class="modal" id="successModal">
-                <div class="modal-content">
-                    <div class="modal-title">Selamat! 🎉</div>
-                    <div class="modal-message" id="successMessage">
-                        Kamu berhasil menyelesaikan level 1!
-                    </div>
-                    <button class="modal-button" id="nextLevelButton">
-                        Lanjut Level Berikutnya
-                    </button>
+            <!-- Instructions -->
+            <section class="p-4 pt-0">
+                <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                    <h3 class="font-bold text-gray-800 mb-2 flex items-center">
+                        <i class="fas fa-info-circle text-blue-500 mr-2"></i>
+                        Cara Bermain:
+                    </h3>
+                    <ul class="text-sm text-gray-600 space-y-1">
+                        <li>1. Drag & drop unsur ke kotak tabel periodik</li>
+                        <li>2. Susun berdasarkan nomor atom dan golongan</li>
+                        <li>3. Warna unsur sesuai dengan golongannya</li>
+                        <li>4. Tekan "Periksa Jawaban" untuk mengecek</li>
+                        <li>5. Selesaikan dalam waktu yang ditentukan!</li>
+                    </ul>
                 </div>
-            </div>
-            
-            <!-- Game Over Modal -->
-            <div class="modal" id="gameOverModal">
-                <div class="modal-content">
-                    <div class="modal-title">Waktu Habis! ⏰</div>
-                    <div class="modal-message" id="gameOverMessage">
-                        Waktu bermain sudah habis.
-                    </div>
-                    <button class="modal-button" id="restartButton">
-                        Main Lagi
-                    </button>
-                </div>
-            </div>
+            </section>
         </main>
         
-        <!-- BOTTOM NAVIGATION YANG SUDAH DIPERBAIKI -->
+        <!-- BOTTOM NAVIGATION - TIDAK DIUBAH -->
         <nav class="bottom-nav">
             <a href="dashboad siswa.html" class="nav-item">
                 <i class="fas fa-home nav-icon"></i>
@@ -589,155 +404,207 @@
     </div>
 
     <script>
-        // Data Tabel Periodik
-        const periodicTable = {
-            1: { symbol: "H", name: "Hidrogen", number: 1, group: 1, period: 1, category: "nonmetal" },
-            2: { symbol: "He", name: "Helium", number: 2, group: 18, period: 1, category: "noble-gas" },
-            3: { symbol: "Li", name: "Litium", number: 3, group: 1, period: 2, category: "alkali" },
-            4: { symbol: "Be", name: "Berilium", number: 4, group: 2, period: 2, category: "alkaline-earth" },
-            5: { symbol: "B", name: "Boron", number: 5, group: 13, period: 2, category: "semimetal" },
-            6: { symbol: "C", name: "Karbon", number: 6, group: 14, period: 2, category: "nonmetal" },
-            7: { symbol: "N", name: "Nitrogen", number: 7, group: 15, period: 2, category: "nonmetal" },
-            8: { symbol: "O", name: "Oksigen", number: 8, group: 16, period: 2, category: "nonmetal" },
-            9: { symbol: "F", name: "Fluor", number: 9, group: 17, period: 2, category: "halogen" },
-            10: { symbol: "Ne", name: "Neon", number: 10, group: 18, period: 2, category: "noble-gas" },
-            11: { symbol: "Na", name: "Natrium", number: 11, group: 1, period: 3, category: "alkali" },
-            12: { symbol: "Mg", name: "Magnesium", number: 12, group: 2, period: 3, category: "alkaline-earth" },
-            13: { symbol: "Al", name: "Aluminium", number: 13, group: 13, period: 3, category: "basic-metal" },
-            14: { symbol: "Si", name: "Silikon", number: 14, group: 14, period: 3, category: "semimetal" },
-            15: { symbol: "P", name: "Fosfor", number: 15, group: 15, period: 3, category: "nonmetal" },
-            16: { symbol: "S", name: "Belerang", number: 16, group: 16, period: 3, category: "nonmetal" },
-            17: { symbol: "Cl", name: "Klor", number: 17, group: 17, period: 3, category: "halogen" },
-            18: { symbol: "Ar", name: "Argon", number: 18, group: 18, period: 3, category: "noble-gas" }
-        };
-
-        // Game State
-        let gameState = {
-            score: 0,
-            time: 60,
-            level: 1,
-            hints: 3,
-            timer: null,
-            placedElements: {},
-            currentElements: [],
-            correctPositions: {}
-        };
-
-        // Level Data
-        const levels = [
+        // Data unsur kimia untuk 5 level
+        const gameLevels = [
             {
-                name: "Level 1: Unsur Ringan",
-                elements: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
-                gridSize: 8,
-                timeLimit: 60
+                level: 1,
+                time: 120, // 2 menit
+                elements: [
+                    { symbol: "H", name: "Hidrogen", number: 1, group: "nonmetal", row: 1, col: 1 },
+                    { symbol: "He", name: "Helium", number: 2, group: "noble-gas", row: 1, col: 18 },
+                    { symbol: "Li", name: "Litium", number: 3, group: "alkali", row: 2, col: 1 },
+                    { symbol: "Na", name: "Natrium", number: 11, group: "alkali", row: 3, col: 1 },
+                    { symbol: "O", name: "Oksigen", number: 8, group: "nonmetal", row: 2, col: 16 }
+                ]
             },
             {
-                name: "Level 2: Periode 2 & 3",
-                elements: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18],
-                gridSize: 8,
-                timeLimit: 90
+                level: 2,
+                time: 150,
+                elements: [
+                    { symbol: "C", name: "Karbon", number: 6, group: "nonmetal", row: 2, col: 14 },
+                    { symbol: "N", name: "Nitrogen", number: 7, group: "nonmetal", row: 2, col: 15 },
+                    { symbol: "F", name: "Fluor", number: 9, group: "halogen", row: 2, col: 17 },
+                    { symbol: "Ne", name: "Neon", number: 10, group: "noble-gas", row: 2, col: 18 },
+                    { symbol: "Mg", name: "Magnesium", number: 12, group: "alkaline-earth", row: 3, col: 2 }
+                ]
+            },
+            {
+                level: 3,
+                time: 180,
+                elements: [
+                    { symbol: "Al", name: "Aluminium", number: 13, group: "basic-metal", row: 3, col: 13 },
+                    { symbol: "Si", name: "Silikon", number: 14, group: "metalloid", row: 3, col: 14 },
+                    { symbol: "P", name: "Fosfor", number: 15, group: "nonmetal", row: 3, col: 15 },
+                    { symbol: "S", name: "Belerang", number: 16, group: "nonmetal", row: 3, col: 16 },
+                    { symbol: "Cl", name: "Klor", number: 17, group: "halogen", row: 3, col: 17 },
+                    { symbol: "Ar", name: "Argon", number: 18, group: "noble-gas", row: 3, col: 18 }
+                ]
+            },
+            {
+                level: 4,
+                time: 210,
+                elements: [
+                    { symbol: "K", name: "Kalium", number: 19, group: "alkali", row: 4, col: 1 },
+                    { symbol: "Ca", name: "Kalsium", number: 20, group: "alkaline-earth", row: 4, col: 2 },
+                    { symbol: "Fe", name: "Besi", number: 26, group: "transition", row: 4, col: 8 },
+                    { symbol: "Cu", name: "Tembaga", number: 29, group: "transition", row: 4, col: 11 },
+                    { symbol: "Zn", name: "Seng", number: 30, group: "transition", row: 4, col: 12 },
+                    { symbol: "Br", name: "Brom", number: 35, group: "halogen", row: 4, col: 17 }
+                ]
+            },
+            {
+                level: 5,
+                time: 240,
+                elements: [
+                    { symbol: "Ag", name: "Perak", number: 47, group: "transition", row: 5, col: 11 },
+                    { symbol: "I", name: "Iodium", number: 53, group: "halogen", row: 5, col: 17 },
+                    { symbol: "Xe", name: "Xenon", number: 54, group: "noble-gas", row: 5, col: 18 },
+                    { symbol: "Au", name: "Emas", number: 79, group: "transition", row: 6, col: 11 },
+                    { symbol: "Hg", name: "Raksa", number: 80, group: "transition", row: 6, col: 12 },
+                    { symbol: "Pb", name: "Timbal", number: 82, group: "basic-metal", row: 6, col: 14 },
+                    { symbol: "U", name: "Uranium", number: 92, group: "actinide", row: 7, col: 6 }
+                ]
             }
         ];
 
-        // Initialize Game
+        // Game state
+        let currentLevel = 0;
+        let score = 0;
+        let timeLeft = 0;
+        let timerInterval = null;
+        let correctCount = 0;
+        let hintsLeft = 3;
+        let placedElements = new Map(); // Map slotId -> element
+        let elementPositions = new Map(); // Map elementId -> {row, col}
+
+        // DOM Elements
+        const elementsContainer = document.getElementById('elementsContainer');
+        const periodicTable = document.getElementById('periodicTable');
+        const timerElement = document.getElementById('timer');
+        const scoreElement = document.getElementById('score');
+        const correctCountElement = document.getElementById('correctCount');
+        const currentLevelElement = document.getElementById('currentLevel');
+        const checkButton = document.getElementById('checkButton');
+        const hintButton = document.getElementById('hintButton');
+        const nextLevelButton = document.getElementById('nextLevelButton');
+        const resetButton = document.getElementById('resetButton');
+
+        // Initialize game
         function initGame() {
-            const currentLevel = levels[gameState.level - 1];
-            gameState.currentElements = currentLevel.elements;
-            gameState.time = currentLevel.timeLimit;
-            gameState.placedElements = {};
-            gameState.correctPositions = {};
-            
-            updateUI();
-            createPuzzleGrid(currentLevel.gridSize);
-            createElementCards();
+            loadLevel(currentLevel);
+            setupEventListeners();
             startTimer();
-            
-            // Hide modals
-            document.getElementById('successModal').style.display = 'none';
-            document.getElementById('gameOverModal').style.display = 'none';
         }
 
-        // Create Puzzle Grid
-        function createPuzzleGrid(size) {
-            const grid = document.getElementById('puzzleGrid');
-            grid.innerHTML = '';
+        // Load a level
+        function loadLevel(levelIndex) {
+            const level = gameLevels[levelIndex];
             
-            // Create 8x8 grid (simplified periodic table)
-            for (let row = 0; row < 8; row++) {
-                for (let col = 0; col < 8; col++) {
-                    const cell = document.createElement('div');
-                    cell.className = 'puzzle-cell empty';
-                    cell.dataset.row = row;
-                    cell.dataset.col = col;
-                    
-                    // Mark correct positions for elements
-                    const elementAtPosition = findElementAtPosition(row, col);
-                    if (elementAtPosition) {
-                        gameState.correctPositions[`${row}-${col}`] = elementAtPosition.number;
-                        cell.classList.add('target');
-                    }
-                    
-                    // Drag and drop events
-                    cell.addEventListener('dragover', handleDragOver);
-                    cell.addEventListener('drop', handleDrop);
-                    cell.addEventListener('dragenter', handleDragEnter);
-                    cell.addEventListener('dragleave', handleDragLeave);
-                    
-                    grid.appendChild(cell);
-                }
-            }
-        }
-
-        // Find element at grid position
-        function findElementAtPosition(row, col) {
-            for (const num in periodicTable) {
-                const element = periodicTable[num];
-                // Simplified positioning logic
-                if (element.group === col + 1 && element.period === row + 1) {
-                    return element;
-                }
-            }
-            return null;
-        }
-
-        // Create Element Cards
-        function createElementCards() {
-            const container = document.getElementById('elementsContainer');
-            container.innerHTML = '';
+            // Update UI
+            currentLevelElement.textContent = level.level;
+            timeLeft = level.time;
+            updateTimerDisplay();
+            hintsLeft = 3;
+            updateHintButton();
+            placedElements.clear();
+            elementPositions.clear();
             
-            gameState.currentElements.forEach(elementNum => {
-                const element = periodicTable[elementNum];
-                const card = document.createElement('div');
-                card.className = `element-card ${element.category}`;
-                card.draggable = true;
-                card.dataset.element = elementNum;
+            // Clear containers
+            elementsContainer.innerHTML = '';
+            periodicTable.innerHTML = '';
+            
+            // Create element cards
+            level.elements.forEach((element, index) => {
+                const elementDiv = document.createElement('div');
+                elementDiv.className = `element-card color-${element.group}`;
+                elementDiv.id = `element-${element.symbol}`;
+                elementDiv.draggable = true;
+                elementDiv.dataset.elementId = element.symbol;
+                elementDiv.dataset.number = element.number;
+                elementDiv.dataset.group = element.group;
+                elementDiv.dataset.correctRow = element.row;
+                elementDiv.dataset.correctCol = element.col;
                 
-                card.innerHTML = `
+                elementDiv.innerHTML = `
+                    <div class="element-number">${element.number}</div>
                     <div class="element-symbol">${element.symbol}</div>
                     <div class="element-name">${element.name}</div>
-                    <div class="element-number">${element.number}</div>
                 `;
                 
-                // Drag events
-                card.addEventListener('dragstart', handleDragStart);
-                card.addEventListener('dragend', handleDragEnd);
+                elementsContainer.appendChild(elementDiv);
+            });
+            
+            // Create periodic table slots
+            // 7 baris x 18 kolom
+            for (let row = 1; row <= 7; row++) {
+                const rowDiv = document.createElement('div');
+                rowDiv.className = 'flex justify-center mb-1';
                 
-                container.appendChild(card);
+                for (let col = 1; col <= 18; col++) {
+                    const slotDiv = document.createElement('div');
+                    slotDiv.className = 'slot';
+                    slotDiv.id = `slot-${row}-${col}`;
+                    slotDiv.dataset.row = row;
+                    slotDiv.dataset.col = col;
+                    
+                    // Add label for first row and column
+                    if (row === 1 && col === 1) {
+                        const label = document.createElement('div');
+                        label.className = 'text-xs text-gray-500 absolute -top-4';
+                        label.textContent = 'Baris/Kolom';
+                        slotDiv.appendChild(label);
+                    }
+                    
+                    rowDiv.appendChild(slotDiv);
+                }
+                
+                periodicTable.appendChild(rowDiv);
+            }
+            
+            // Add row and column labels
+            for (let i = 1; i <= 7; i++) {
+                const label = document.createElement('div');
+                label.className = 'text-xs text-gray-600 text-center mr-1';
+                label.textContent = i;
+                label.style.alignSelf = 'center';
+                periodicTable.children[i-1].insertBefore(label, periodicTable.children[i-1].firstChild);
+            }
+            
+            // Setup drag and drop
+            setupDragAndDrop();
+        }
+
+        // Setup drag and drop
+        function setupDragAndDrop() {
+            const elements = document.querySelectorAll('.element-card');
+            const slots = document.querySelectorAll('.slot');
+            
+            elements.forEach(element => {
+                element.addEventListener('dragstart', handleDragStart);
+                element.addEventListener('dragend', handleDragEnd);
+            });
+            
+            slots.forEach(slot => {
+                slot.addEventListener('dragover', handleDragOver);
+                slot.addEventListener('dragenter', handleDragEnter);
+                slot.addEventListener('dragleave', handleDragLeave);
+                slot.addEventListener('drop', handleDrop);
             });
         }
 
-        // Drag and Drop Handlers
-        let draggedElement = null;
-
         function handleDragStart(e) {
-            draggedElement = e.target;
+            e.dataTransfer.setData('text/plain', e.target.dataset.elementId);
             e.target.classList.add('dragging');
-            e.dataTransfer.setData('text/plain', e.target.dataset.element);
+            
+            // Add ghost image
+            setTimeout(() => {
+                e.target.classList.add('opacity-30');
+            }, 0);
         }
 
         function handleDragEnd(e) {
             e.target.classList.remove('dragging');
-            draggedElement = null;
+            e.target.classList.remove('opacity-30');
         }
 
         function handleDragOver(e) {
@@ -745,226 +612,271 @@
         }
 
         function handleDragEnter(e) {
-            if (e.target.classList.contains('puzzle-cell')) {
-                e.target.classList.add('drag-over');
-            }
+            e.preventDefault();
+            e.target.classList.add('hover');
         }
 
         function handleDragLeave(e) {
-            if (e.target.classList.contains('puzzle-cell')) {
-                e.target.classList.remove('drag-over');
-            }
+            e.target.classList.remove('hover');
         }
 
         function handleDrop(e) {
             e.preventDefault();
-            e.target.classList.remove('drag-over');
+            e.target.classList.remove('hover');
             
-            const elementNum = e.dataTransfer.getData('text/plain');
-            const row = e.target.dataset.row;
-            const col = e.target.dataset.col;
+            const elementId = e.dataTransfer.getData('text/plain');
+            const element = document.getElementById(`element-${elementId}`);
+            const slot = e.target;
             
-            if (elementNum && !e.target.classList.contains('occupied')) {
-                placeElement(elementNum, row, col, e.target);
-            }
-        }
-
-        // Place Element on Grid
-        function placeElement(elementNum, row, col, cell) {
-            const element = periodicTable[elementNum];
-            
-            // Remove from cards container
-            const card = document.querySelector(`[data-element="${elementNum}"]`);
-            if (card) {
-                card.style.opacity = '0.5';
-                card.style.pointerEvents = 'none';
+            // Remove element from previous slot if exists
+            if (elementPositions.has(elementId)) {
+                const oldPos = elementPositions.get(elementId);
+                const oldSlot = document.getElementById(`slot-${oldPos.row}-${oldPos.col}`);
+                oldSlot.innerHTML = '';
+                oldSlot.classList.remove('filled');
             }
             
-            // Update cell
-            cell.classList.remove('empty');
-            cell.classList.add('occupied', 'draggable', element.category);
-            cell.innerHTML = `
-                <div style="font-weight: bold; font-size: 1.1rem;">${element.symbol}</div>
-                <div style="font-size: 0.6rem;">${element.number}</div>
-            `;
-            cell.dataset.element = elementNum;
+            // Place element in new slot
+            slot.innerHTML = '';
+            const elementClone = element.cloneNode(true);
+            elementClone.classList.remove('dragging');
+            elementClone.classList.remove('opacity-30');
+            elementClone.draggable = false;
+            elementClone.classList.add('cursor-default');
+            
+            slot.appendChild(elementClone);
+            slot.classList.add('filled');
             
             // Store placement
-            gameState.placedElements[elementNum] = { row, col };
-            
-            // Add score
-            addScore(10);
-            
-            // Show score animation
-            showScoreAnimation(cell, '+10');
-            
-            // Make placed element draggable for repositioning
-            cell.draggable = true;
-            cell.addEventListener('dragstart', (e) => {
-                e.dataTransfer.setData('text/plain', elementNum);
+            placedElements.set(slot.id, elementId);
+            elementPositions.set(elementId, {
+                row: parseInt(slot.dataset.row),
+                col: parseInt(slot.dataset.col)
             });
+            
+            // Visual feedback
+            slot.classList.add('bounce');
+            setTimeout(() => {
+                slot.classList.remove('bounce');
+            }, 500);
         }
 
-        // Check Answers
+        // Check answers
         function checkAnswers() {
             let correct = 0;
-            let total = gameState.currentElements.length;
+            const levelElements = gameLevels[currentLevel].elements;
+            
+            // Reset all slots styling
+            document.querySelectorAll('.slot').forEach(slot => {
+                slot.classList.remove('correct', 'incorrect');
+            });
             
             // Check each placed element
-            for (const elementNum in gameState.placedElements) {
-                const pos = gameState.placedElements[elementNum];
-                const correctPos = gameState.correctPositions[`${pos.row}-${pos.col}`];
+            placedElements.forEach((elementId, slotId) => {
+                const element = levelElements.find(e => e.symbol === elementId);
+                const [_, row, col] = slotId.split('-');
+                const slot = document.getElementById(slotId);
                 
-                const cell = document.querySelector(`[data-row="${pos.row}"][data-col="${pos.col}"]`);
-                
-                if (parseInt(elementNum) === correctPos) {
-                    cell.classList.add('correct');
+                if (element && 
+                    parseInt(row) === element.row && 
+                    parseInt(col) === element.col) {
+                    // Correct placement
+                    slot.classList.add('correct');
                     correct++;
-                    addScore(20);
                 } else {
-                    cell.classList.add('incorrect');
+                    // Incorrect placement
+                    slot.classList.add('incorrect');
                 }
-            }
+            });
             
-            // Show results
-            if (correct === total) {
-                levelComplete();
-            } else {
-                showMessage(`Kamu sudah benar ${correct} dari ${total} unsur. Lanjutkan!`);
-            }
-        }
-
-        // Level Complete
-        function levelComplete() {
-            clearInterval(gameState.timer);
-            addScore(100 * gameState.level);
-            
-            const modal = document.getElementById('successModal');
-            const message = document.getElementById('successMessage');
-            
-            message.textContent = `Level ${gameState.level} selesai! Skor: ${gameState.score}`;
-            modal.style.display = 'flex';
-            
-            // Achievement animation
-            const badge = document.getElementById('achievementBadge');
-            badge.style.background = '#f59e0b';
-            badge.innerHTML = '<i class="fas fa-trophy"></i>';
-        }
-
-        // Use Hint
-        function useHint() {
-            if (gameState.hints > 0) {
-                gameState.hints--;
-                
-                // Find first unplaced element
-                const unplaced = gameState.currentElements.find(num => !gameState.placedElements[num]);
-                if (unplaced) {
-                    const element = periodicTable[unplaced];
-                    showMessage(`Petunjuk: ${element.name} (${element.symbol}) berada di Golongan ${element.group}, Periode ${element.period}`);
-                }
-                
-                updateUI();
-            } else {
-                showMessage('Petunjuk sudah habis!');
-            }
-        }
-
-        // Timer
-        function startTimer() {
-            clearInterval(gameState.timer);
-            gameState.timer = setInterval(() => {
-                gameState.time--;
-                updateUI();
-                
-                if (gameState.time <= 0) {
-                    gameOver();
-                }
-            }, 1000);
-        }
-
-        // Game Over
-        function gameOver() {
-            clearInterval(gameState.timer);
-            
-            const modal = document.getElementById('gameOverModal');
-            const message = document.getElementById('gameOverMessage');
-            
-            message.textContent = `Waktu habis! Skor akhir: ${gameState.score}`;
-            modal.style.display = 'flex';
-        }
-
-        // Add Score
-        function addScore(points) {
-            gameState.score += points;
-            updateUI();
-        }
-
-        // Show Score Animation
-        function showScoreAnimation(element, text) {
-            const popup = document.createElement('div');
-            popup.className = 'score-popup';
-            popup.textContent = text;
-            popup.style.left = element.offsetLeft + 'px';
-            popup.style.top = element.offsetTop + 'px';
-            
-            document.querySelector('.game-container').appendChild(popup);
-            
+            // Update correct count
+            correctCount = correct;
+            correctCountElement.textContent = correctCount;
+            correctCountElement.classList.add('pulse');
             setTimeout(() => {
-                popup.remove();
-            }, 1000);
+                correctCountElement.classList.remove('pulse');
+            }, 500);
+            
+            // Update score
+            if (correct === levelElements.length) {
+                // All correct!
+                const levelScore = timeLeft * 10 + (hintsLeft * 5);
+                score += levelScore;
+                scoreElement.textContent = score;
+                scoreElement.classList.add('bounce');
+                
+                // Show celebration
+                showCelebration();
+                
+                // Enable next level button
+                nextLevelButton.disabled = false;
+                nextLevelButton.classList.remove('opacity-50');
+                
+                // Stop timer
+                clearInterval(timerInterval);
+                
+                // Show success message
+                setTimeout(() => {
+                    alert(`🎉 Level ${currentLevel + 1} selesai!\nSkor: +${levelScore}\nWaktu tersisa: ${timeLeft} detik`);
+                }, 500);
+            } else {
+                // Some incorrect
+                setTimeout(() => {
+                    alert(`⚠️ ${correct} dari ${levelElements.length} unsur tepat.\nCoba perbaiki penempatannya!`);
+                }, 300);
+            }
         }
 
-        // Show Message
-        function showMessage(text) {
-            // Create temporary message
-            const message = document.createElement('div');
-            message.className = 'fixed top-20 left-1/2 transform -translate-x-1/2 bg-blue-500 text-white px-4 py-2 rounded-lg shadow-lg z-50';
-            message.textContent = text;
-            message.style.animation = 'slideIn 0.3s ease';
+        // Provide hint
+        function provideHint() {
+            if (hintsLeft <= 0) return;
             
-            document.body.appendChild(message);
+            const levelElements = gameLevels[currentLevel].elements;
+            const unplacedElements = levelElements.filter(element => {
+                return !Array.from(placedElements.values()).includes(element.symbol);
+            });
             
+            if (unplacedElements.length === 0) return;
+            
+            const randomElement = unplacedElements[Math.floor(Math.random() * unplacedElements.length)];
+            const elementCard = document.getElementById(`element-${randomElement.symbol}`);
+            
+            // Highlight the element card
+            elementCard.classList.add('pulse');
+            elementCard.style.boxShadow = '0 0 10px #3b82f6';
+            
+            // Show hint message
+            alert(`💡 Petunjuk: ${randomElement.name} (${randomElement.symbol})\nNomor atom: ${randomElement.number}\nGolongan: ${getGroupName(randomElement.group)}`);
+            
+            // Reduce hints
+            hintsLeft--;
+            updateHintButton();
+            
+            // Remove highlight after 2 seconds
             setTimeout(() => {
-                message.style.animation = 'slideOut 0.3s ease';
-                setTimeout(() => message.remove(), 300);
+                elementCard.classList.remove('pulse');
+                elementCard.style.boxShadow = '';
             }, 2000);
         }
 
-        // Update UI
-        function updateUI() {
-            document.getElementById('score').textContent = gameState.score;
-            document.getElementById('time').textContent = gameState.time;
-            document.getElementById('level').textContent = gameState.level;
-            document.getElementById('hints').textContent = gameState.hints;
-            
-            // Update level dots
-            const dots = document.querySelectorAll('.level-dot');
-            dots.forEach((dot, index) => {
-                dot.classList.toggle('active', index < gameState.level);
-            });
+        function getGroupName(groupKey) {
+            const groupNames = {
+                'alkali': 'Alkali',
+                'alkaline-earth': 'Alkali Tanah',
+                'transition': 'Logam Transisi',
+                'basic-metal': 'Logam Dasar',
+                'metalloid': 'Metaloid',
+                'nonmetal': 'Non-Logam',
+                'halogen': 'Halogen',
+                'noble-gas': 'Gas Mulia',
+                'lanthanide': 'Lantanida',
+                'actinide': 'Aktinida'
+            };
+            return groupNames[groupKey] || groupKey;
         }
 
-        // Event Listeners
-        document.getElementById('checkButton').addEventListener('click', checkAnswers);
-        document.getElementById('hintButton').addEventListener('click', useHint);
-        document.getElementById('resetButton').addEventListener('click', initGame);
-        document.getElementById('nextLevelButton').addEventListener('click', () => {
-            if (gameState.level < levels.length) {
-                gameState.level++;
-                initGame();
+        function updateHintButton() {
+            hintButton.innerHTML = `<i class="fas fa-lightbulb mr-2"></i> Petunjuk (${hintsLeft})`;
+            hintButton.disabled = hintsLeft <= 0;
+            if (hintsLeft <= 0) {
+                hintButton.classList.add('opacity-50');
             } else {
-                showMessage('Selamat! Kamu telah menyelesaikan semua level!');
+                hintButton.classList.remove('opacity-50');
             }
-            document.getElementById('successModal').style.display = 'none';
-        });
-        document.getElementById('restartButton').addEventListener('click', () => {
-            gameState.score = 0;
-            gameState.level = 1;
-            initGame();
-            document.getElementById('gameOverModal').style.display = 'none';
-        });
+        }
 
-        // Bottom Navigation
+        // Next level
+        function nextLevel() {
+            if (currentLevel < gameLevels.length - 1) {
+                currentLevel++;
+                loadLevel(currentLevel);
+                startTimer();
+                nextLevelButton.disabled = true;
+                nextLevelButton.classList.add('opacity-50');
+            } else {
+                // Game completed
+                alert(`🎊 Selamat! Anda menyelesaikan semua level!\nSkor akhir: ${score}\nKembali ke menu utama.`);
+                window.location.href = "dashboad siswa.html";
+            }
+        }
+
+        // Reset current level
+        function resetLevel() {
+            if (confirm('Apakah Anda yakin ingin mengulang level ini?')) {
+                loadLevel(currentLevel);
+                startTimer();
+                correctCount = 0;
+                correctCountElement.textContent = '0';
+            }
+        }
+
+        // Timer functions
+        function startTimer() {
+            clearInterval(timerInterval);
+            
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    timeUp();
+                } else if (timeLeft <= 30) {
+                    // Last 30 seconds warning
+                    timerElement.style.color = '#ef4444';
+                    timerElement.classList.add('pulse');
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function timeUp() {
+            alert('⏰ Waktu habis! Level belum selesai.');
+            resetLevel();
+        }
+
+        // Celebration effects
+        function showCelebration() {
+            // Create confetti
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = `${Math.random() * 100}%`;
+                confetti.style.backgroundColor = getRandomColor();
+                document.querySelector('.app-container').appendChild(confetti);
+                
+                // Remove confetti after animation
+                setTimeout(() => {
+                    confetti.remove();
+                }, 2000);
+            }
+            
+            // Highlight periodic table
+            periodicTable.classList.add('game-complete');
+        }
+
+        function getRandomColor() {
+            const colors = ['#FF6961', '#77DD77', '#84B6F4', '#FDFD96', '#FFB7C5', '#E6E6FA'];
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            checkButton.addEventListener('click', checkAnswers);
+            hintButton.addEventListener('click', provideHint);
+            nextLevelButton.addEventListener('click', nextLevel);
+            resetButton.addEventListener('click', resetLevel);
+        }
+
+        // Initialize game when page loads
+        document.addEventListener('DOMContentLoaded', initGame);
+
+        // Simple navigation for bottom nav
         document.addEventListener('DOMContentLoaded', function() {
             const navItems = document.querySelectorAll('.nav-item');
             
@@ -979,31 +891,7 @@
                     this.querySelector('.nav-icon').classList.add('active');
                 });
             });
-            
-            // Initialize game
-            initGame();
         });
-
-        // Add CSS for slideOut animation
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes slideOut {
-                from {
-                    opacity: 1;
-                    transform: translate(-50%, 0);
-                }
-                to {
-                    opacity: 0;
-                    transform: translate(-50%, -20px);
-                }
-            }
-            
-            .drag-over {
-                border-color: #3b82f6 !important;
-                background-color: #dbeafe !important;
-            }
-        `;
-        document.head.appendChild(style);
     </script>
 </body>
 </html>

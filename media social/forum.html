@@ -224,7 +224,7 @@
     
     .reply-input-container {
       display: flex;
-      gap: 0.25rem;
+      gap: 0.5rem;
       margin-top: 0.75rem;
       align-items: center;
     }
@@ -242,22 +242,8 @@
       color: white;
       border: none;
       border-radius: 0.5rem;
-      width: 36px;
-      height: 36px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.2s ease;
-    }
-    
-    .send-reply-btn:hover {
-      background: #7a7ae6;
-    }
-    
-    .send-reply-btn:disabled {
-      background: #cbd5e0;
-      cursor: not-allowed;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.875rem;
     }
     
     /* FAB Styles */
@@ -658,11 +644,6 @@
       .image-preview {
         width: 60px;
         height: 60px;
-      }
-      
-      .send-reply-btn {
-        width: 32px;
-        height: 32px;
       }
     }
   </style>
@@ -1362,9 +1343,7 @@
                   <span>${(currentProfile?.name?.charAt(0) || currentUser.email.charAt(0)).toUpperCase()}</span>
                 </div>
                 <input id="reply-${id}" type="text" placeholder="Tulis balasan..." class="reply-input">
-                <button onclick="replyToThread('${id}')" class="send-reply-btn" id="send-reply-${id}" disabled>
-                  <i class="fas fa-paper-plane"></i>
-                </button>
+                <button onclick="replyToThread('${id}')" class="send-reply-btn">Kirim</button>
               </div>
             </div>
           </div>
@@ -1372,30 +1351,6 @@
       `;
 
       threadsDiv.appendChild(div);
-
-      // Setup reply input event listener
-      setTimeout(() => {
-        const replyInput = div.querySelector(`#reply-${id}`);
-        const sendReplyBtn = div.querySelector(`#send-reply-${id}`);
-        
-        if (replyInput && sendReplyBtn) {
-          // Enable/disable send button based on input
-          replyInput.addEventListener('input', () => {
-            const hasText = replyInput.value.trim().length > 0;
-            sendReplyBtn.disabled = !hasText;
-          });
-          
-          // Enter key untuk balas
-          replyInput.addEventListener("keydown", (e) => {
-            if (e.key === "Enter") {
-              e.preventDefault();
-              if (!sendReplyBtn.disabled) {
-                window.replyToThread(id);
-              }
-            }
-          });
-        }
-      }, 100);
 
       // Listener replies (subkoleksi), pass thread id to renderReply
       const repliesRef = collection(db, "threads", id, "replies");
@@ -1429,6 +1384,19 @@
       }, (err) => {
         console.error("replies snapshot error:", err);
       });
+
+      // Enter key untuk balas
+      setTimeout(() => {
+        const replyInput = div.querySelector(`#reply-${id}`);
+        if (replyInput) {
+          replyInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              window.replyToThread(id);
+            }
+          });
+        }
+      }, 100);
     }
 
     // Render single reply; include delete button only if owner
@@ -1485,7 +1453,6 @@
     window.replyToThread = async function(id) {
       const input = document.getElementById(`reply-${id}`);
       if (!input || !input.value.trim()) return;
-      
       try {
         const repliesRef = collection(db, "threads", id, "replies");
         await addDoc(repliesRef, {
@@ -1496,12 +1463,6 @@
           createdAt: serverTimestamp()
         });
         input.value = "";
-        
-        // Disable send button after sending
-        const sendReplyBtn = document.getElementById(`send-reply-${id}`);
-        if (sendReplyBtn) {
-          sendReplyBtn.disabled = true;
-        }
       } catch (err) {
         console.error("add reply error:", err);
         alert("Gagal menambah balasan: " + err.message);
@@ -1600,4 +1561,4 @@
 
   </script>
 </body>
-      </html>
+  </html>

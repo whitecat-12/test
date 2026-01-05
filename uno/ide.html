@@ -513,10 +513,10 @@
             'servo-loop': { 
                 start: 0, 
                 end: 180, 
-                step: 10, 
-                delay: 50, 
+                step: 1, 
+                delay: 15, 
                 pin: 9, 
-                mode: 'sweep' 
+                mode: 'sweep-back' 
             }
         };
 
@@ -686,7 +686,7 @@
                 const title = document.createElement('div');
                 title.className = 'font-bold flex items-center justify-between';
                 title.innerHTML = `
-                    <span><i class="fas fa-sync-alt mr-2"></i> SERVO LOOP #${gameState.servoLoopCount}</span>
+                    <span><i class="fas fa-sync-alt mr-2"></i> SERVO SWEEP LOOP #${gameState.servoLoopCount}</span>
                     <span class="text-xs font-normal bg-white bg-opacity-20 px-2 py-1 rounded">AUTO</span>
                 `;
                 
@@ -694,10 +694,10 @@
                 grid.className = 'grid grid-cols-2 gap-3';
                 
                 const params = [
-                    ['Start:', 'start', defaultValues[type].start, '0', '180'],
-                    ['End:', 'end', defaultValues[type].end, '0', '180'],
+                    ['Start (°):', 'start', defaultValues[type].start, '0', '180'],
+                    ['End (°):', 'end', defaultValues[type].end, '0', '180'],
                     ['Step:', 'step', defaultValues[type].step, '1', '180'],
-                    ['Delay:', 'delay', defaultValues[type].delay, '0', ''],
+                    ['Delay (ms):', 'delay', defaultValues[type].delay, '0', ''],
                     ['Pin:', 'pin', defaultValues[type].pin, '0', '13'],
                 ];
                 
@@ -719,8 +719,8 @@
                 modeDiv.innerHTML = `
                     <span class="text-sm">Mode:</span>
                     <select data-param="mode" class="block-select">
-                        <option value="sweep" ${defaultValues[type].mode === 'sweep' ? 'selected' : ''}>Sweep</option>
                         <option value="sweep-back" ${defaultValues[type].mode === 'sweep-back' ? 'selected' : ''}>Sweep & Back</option>
+                        <option value="sweep" ${defaultValues[type].mode === 'sweep' ? 'selected' : ''}>Sweep Only</option>
                         <option value="continuous" ${defaultValues[type].mode === 'continuous' ? 'selected' : ''}>Continuous</option>
                     </select>
                 `;
@@ -826,8 +826,13 @@
                         const angle = inputs[0].value;
                         const pin = inputs[1].value;
                         
-                        codeLines.setup.unshift(`  servo1.attach(${pin});`);
-                        codeLines[sectionName].push(`  servo1.write(${angle});`);
+                        if (sectionName === 'setup') {
+                            // In setup, attach servo
+                            codeLines.setup.unshift(`  myServo.attach(${pin});`);
+                        } else {
+                            // In loop, write angle
+                            codeLines[sectionName].push(`  myServo.write(${angle});`);
+                        }
                         servoUsed = true;
                         usedPins.add(pin);
                         
@@ -836,10 +841,10 @@
                         const inputs = block.querySelectorAll('input');
                         const modeSelect = block.querySelector('select');
                         
-                        const start = inputs[0].value;
-                        const end = inputs[1].value;
-                        const step = inputs[2].value;
-                        const loopDelay = inputs[3].value;
+                        const start = parseInt(inputs[0].value);
+                        const end = parseInt(inputs[1].value);
+                        const step = parseInt(inputs[2].value);
+                        const loopDelay = parseInt(inputs[3].value);
                         const pin = inputs[4].value;
                         const mode = modeSelect.value;
                         
@@ -847,52 +852,60 @@
                         usedPins.add(pin);
                         
                         // Add servo object
-                        codeLines.variables.push(`Servo servo${servoLoopIndex};`);
-                        codeLines.setup.unshift(`  servo${servoLoopIndex}.attach(${pin});`);
-                        
-                        // Generate loop code
-                        let loopCode = '';
-                        if (mode === 'sweep') {
-                            loopCode = `  // Sweep servo${servoLoopIndex} from ${start}° to ${end}°
-  for(int pos = ${start}; pos <= ${end}; pos += ${step}) {
-    servo${servoLoopIndex}.write(pos);
-    delay(${loopDelay});
-  }`;
-                        } else if (mode === 'sweep-back') {
-                            loopCode = `  // Sweep servo${servoLoopIndex} from ${start}° to ${end}° and back
-  for(int pos = ${start}; pos <= ${end}; pos += ${step}) {
-    servo${servoLoopIndex}.write(pos);
-    delay(${loopDelay});
-  }
-  for(int pos = ${end}; pos >= ${start}; pos -= ${step}) {
-    servo${servoLoopIndex}.write(pos);
-    delay(${loopDelay});
-  }`;
-                        } else if (mode === 'continuous') {
-                            loopCode = `  // Continuous rotation control for servo${servoLoopIndex}
-  // ${start} = stop, <${start} = CCW, >${start} = CW
-  for(int pos = ${start}; pos <= ${end}; pos += ${step}) {
-    servo${servoLoopIndex}.write(pos);
-    delay(${loopDelay});
-  }`;
+                        if (servoLoopIndex === 1) {
+                            codeLines.variables.push(`Servo myServo;`);
                         }
                         
-                        codeLines[sectionName].push(loopCode);
+                        if (sectionName === 'setup') {
+                            // In setup, attach servo
+                            codeLines.setup.unshift(`  myServo.attach(${pin});`);
+                        } else {
+                            // In loop, generate the sweep code
+                            let loopCode = '';
+                            
+                            if (mode === 'sweep') {
+                                loopCode = `  // Gerak dari ${start} ke ${end} derajat
+  for (int pos = ${start}; pos <= ${end}; pos += ${step}) {
+    myServo.write(pos);
+    delay(${loopDelay}); // makin besar makin lambat
+  }`;
+                            } else if (mode === 'sweep-back') {
+                                loopCode = `  // Gerak dari ${start} ke ${end} derajat
+  for (int pos = ${start}; pos <= ${end}; pos += ${step}) {
+    myServo.write(pos);
+    delay(${loopDelay}); // makin besar makin lambat
+  }
+  
+  // Gerak dari ${end} ke ${start} derajat
+  for (int pos = ${end}; pos >= ${start}; pos -= ${step}) {
+    myServo.write(pos);
+    delay(${loopDelay});
+  }`;
+                            } else if (mode === 'continuous') {
+                                loopCode = `  // Control rotasi kontinu servo
+  // ${start} = stop, <${start} = CCW, >${start} = CW
+  for (int pos = ${start}; pos <= ${end}; pos += ${step}) {
+    myServo.write(pos);
+    delay(${loopDelay});
+  }`;
+                            }
+                            
+                            codeLines[sectionName].push(loopCode);
+                        }
                     }
                 });
             });
             
-            // Generate pinMode statements
-            if (usedPins.size > 0) {
-                const pinModes = Array.from(usedPins)
+            // Generate pinMode statements for LED pins
+            const ledPins = Array.from(usedPins).filter(pin => 
+                document.querySelectorAll(`[data-type="led"], [data-type="ledlow"]`).length > 0
+            );
+            
+            if (ledPins.length > 0) {
+                const pinModes = ledPins
                     .map(p => `  pinMode(${p}, OUTPUT);`)
                     .join('\n');
                 codeLines.setup.unshift(pinModes);
-            }
-            
-            // Generate variable declarations
-            if (servoUsed && !servoLoopIndex) {
-                codeLines.variables.unshift('Servo servo1;');
             }
             
             // Build final code
@@ -905,7 +918,6 @@
             
             // Variables
             if (codeLines.variables.length > 0) {
-                finalCode += '// Servo Objects\n';
                 finalCode += codeLines.variables.join('\n') + '\n\n';
             }
             
@@ -914,7 +926,10 @@
             if (codeLines.setup.length === 0) {
                 finalCode += '  // Initialization code\n';
             } else {
-                finalCode += codeLines.setup.join('\n') + '\n';
+                // Sort setup lines: pinMode first, then servo attach
+                const pinModeLines = codeLines.setup.filter(line => line.includes('pinMode'));
+                const otherLines = codeLines.setup.filter(line => !line.includes('pinMode'));
+                finalCode += [...pinModeLines, ...otherLines].join('\n') + '\n';
             }
             finalCode += '}\n\n';
             
@@ -923,7 +938,7 @@
             if (codeLines.loop.length === 0) {
                 finalCode += '  // Main program loop\n';
             } else {
-                finalCode += codeLines.loop.join('\n') + '\n';
+                finalCode += codeLines.loop.join('\n\n') + '\n';
             }
             finalCode += '}\n';
             
@@ -993,59 +1008,51 @@
             });
             
             // Load example button
-            exampleBtn.addEventListener('click', loadExample);
+            exampleBtn.addEventListener('click', loadServoExample);
             
             // Auto-update code on any change
             document.addEventListener('input', updateCode);
         }
 
-        // Load Example
-        function loadExample() {
-            if (confirm('Load contoh program LED blink dengan servo?')) {
+        // Load Servo Sweep Example (matching your Arduino code)
+        function loadServoExample() {
+            if (confirm('Load contoh program servo sweep (0-180 derajat) seperti kode Arduino Anda?')) {
                 // Clear existing blocks
                 document.querySelectorAll('.workspace-block').forEach(block => block.remove());
                 gameState.blockCount = 0;
                 gameState.servoLoopCount = 0;
                 
-                // Add example blocks to setup
+                // Add servo block to setup section
                 const setupSection = document.querySelector('[data-section="setup"]');
                 const setupPlaceholder = setupSection.querySelector('.text-gray-500');
                 if (setupPlaceholder) setupPlaceholder.remove();
                 
-                // Add pinMode for LED
-                const ledBlock = createWorkspaceBlock('led');
-                setupSection.appendChild(ledBlock);
+                // Add servo block with pin 9 to setup
+                const servoSetupBlock = createWorkspaceBlock('servo');
+                const servoInputs = servoSetupBlock.querySelectorAll('input');
+                servoInputs[0].value = 90; // Default angle
+                servoInputs[1].value = 9;  // Pin 9
+                setupSection.appendChild(servoSetupBlock);
                 gameState.blockCount++;
                 
-                // Add example blocks to loop
+                // Add servo sweep loop to loop section
                 const loopSection = document.querySelector('[data-section="loop"]');
                 const loopPlaceholder = loopSection.querySelector('.text-gray-500');
                 if (loopPlaceholder) loopPlaceholder.remove();
                 
-                // LED ON
-                const ledOnBlock = createWorkspaceBlock('led');
-                loopSection.appendChild(ledOnBlock);
-                gameState.blockCount++;
-                
-                // Delay
-                const delay1Block = createWorkspaceBlock('delay');
-                delay1Block.querySelector('input').value = 500;
-                loopSection.appendChild(delay1Block);
-                gameState.blockCount++;
-                
-                // LED OFF
-                const ledOffBlock = createWorkspaceBlock('ledlow');
-                loopSection.appendChild(ledOffBlock);
-                gameState.blockCount++;
-                
-                // Another delay
-                const delay2Block = createWorkspaceBlock('delay');
-                delay2Block.querySelector('input').value = 500;
-                loopSection.appendChild(delay2Block);
-                gameState.blockCount++;
-                
-                // Servo sweep
+                // Add servo sweep loop
                 const servoLoopBlock = createWorkspaceBlock('servo-loop');
+                const loopInputs = servoLoopBlock.querySelectorAll('input');
+                const modeSelect = servoLoopBlock.querySelector('select');
+                
+                // Set values to match your Arduino code
+                loopInputs[0].value = 0;     // Start at 0°
+                loopInputs[1].value = 180;   // End at 180°
+                loopInputs[2].value = 1;     // Step 1
+                loopInputs[3].value = 15;    // Delay 15ms
+                loopInputs[4].value = 9;     // Pin 9
+                modeSelect.value = 'sweep-back'; // Sweep and back mode
+                
                 loopSection.appendChild(servoLoopBlock);
                 gameState.blockCount++;
                 
@@ -1058,4 +1065,4 @@
         document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
-</html>
+    </html>

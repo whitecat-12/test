@@ -199,6 +199,95 @@
       margin-bottom: 1.5rem;
     }
     
+    /* Kategori Styles */
+    .category-container {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+      margin-bottom: 1.5rem;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    
+    .category-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    
+    @media (min-width: 640px) {
+      .category-grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+    
+    .category-card {
+      background: white;
+      border-radius: 12px;
+      padding: 1.5rem;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: 2px solid #e5e7eb;
+    }
+    
+    .category-card:hover {
+      transform: translateY(-5px);
+      border-color: var(--primary);
+      box-shadow: 0 8px 25px rgba(150, 116, 212, 0.15);
+    }
+    
+    .category-icon {
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1rem;
+      font-size: 1.5rem;
+      color: white;
+    }
+    
+    .category-fisika {
+      background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    }
+    
+    .category-kimia {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    }
+    
+    .category-biologi {
+      background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    }
+    
+    .category-elektronika {
+      background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    }
+    
+    .category-astronomi {
+      background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);
+    }
+    
+    .back-button {
+      background: #e5e7eb;
+      color: var(--text-primary);
+      border-radius: 12px;
+      padding: 0.75rem 1.5rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+      margin-top: 1rem;
+      width: 100%;
+    }
+    
+    .back-button:hover {
+      background: #d1d5db;
+    }
+    
     @media (min-width: 640px) {
       .auth-container {
         padding: 2rem;
@@ -225,8 +314,8 @@
         <p class="text-lg text-gray-600">Belajar sains dengan cara menyenangkan</p>
       </div>
       
-      <!-- Content -->
-      <div class="tab-container">
+      <!-- Login/Register Content -->
+      <div id="authContent" class="tab-container">
         <!-- Tab Menu -->
         <div class="tab-menu">
           <button id="tabLogin" class="tab-btn flex-1 text-center active">Login</button>
@@ -294,6 +383,60 @@
         <div id="errorMsg" class="error-message hidden"></div>
         <div id="infoMsg" class="success-message hidden"></div>
       </div>
+
+      <!-- Category Selection -->
+      <div id="categoryContent" class="category-container hidden">
+        <div class="text-center mb-6">
+          <h2 class="text-2xl font-bold text-gray-800">Pilih Kategori Sains</h2>
+          <p class="text-gray-600 mt-2">Pilih salah satu kategori untuk melanjutkan</p>
+        </div>
+        
+        <div class="category-grid">
+          <div class="category-card" data-category="fisika" data-page="index.html">
+            <div class="category-icon category-fisika">
+              <i class="fas fa-atom"></i>
+            </div>
+            <h3 class="font-bold text-lg mb-1">Fisika</h3>
+            <p class="text-sm text-gray-600">Ilmu tentang alam semesta</p>
+          </div>
+          
+          <div class="category-card" data-category="kimia" data-page="index1.html">
+            <div class="category-icon category-kimia">
+              <i class="fas fa-flask"></i>
+            </div>
+            <h3 class="font-bold text-lg mb-1">Kimia</h3>
+            <p class="text-sm text-gray-600">Ilmu tentang zat dan reaksi</p>
+          </div>
+          
+          <div class="category-card" data-category="biologi" data-page="index2.html">
+            <div class="category-icon category-biologi">
+              <i class="fas fa-dna"></i>
+            </div>
+            <h3 class="font-bold text-lg mb-1">Biologi</h3>
+            <p class="text-sm text-gray-600">Ilmu tentang makhluk hidup</p>
+          </div>
+          
+          <div class="category-card" data-category="elektronika" data-page="index3.html">
+            <div class="category-icon category-elektronika">
+              <i class="fas fa-microchip"></i>
+            </div>
+            <h3 class="font-bold text-lg mb-1">Elektronika</h3>
+            <p class="text-sm text-gray-600">Ilmu tentang rangkaian elektronik</p>
+          </div>
+          
+          <div class="category-card" data-category="astronomi" data-page="index4.html">
+            <div class="category-icon category-astronomi">
+              <i class="fas fa-star"></i>
+            </div>
+            <h3 class="font-bold text-lg mb-1">Astronomi</h3>
+            <p class="text-sm text-gray-600">Ilmu tentang benda langit</p>
+          </div>
+        </div>
+        
+        <button id="backToAuth" class="back-button">
+          <i class="fas fa-arrow-left mr-2"></i> Kembali ke Login
+        </button>
+      </div>
     </div>
   </div>
 
@@ -303,7 +446,7 @@
       getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, 
       sendPasswordResetEmail, onAuthStateChanged, signOut 
     } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getFirestore, doc, setDoc, getDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     // Firebase Configuration
     const firebaseConfig = { 
@@ -322,6 +465,9 @@
     // DOM Elements
     const errorMsg = document.getElementById("errorMsg");
     const infoMsg = document.getElementById("infoMsg");
+    const authContent = document.getElementById("authContent");
+    const categoryContent = document.getElementById("categoryContent");
+    const backToAuth = document.getElementById("backToAuth");
     
     const forms = {
       login: document.getElementById("loginForm"),
@@ -368,10 +514,48 @@
       infoMsg.classList.add("hidden");
     }
 
+    // Show/Hide Auth and Category Content
+    function showAuthContent() {
+      authContent.classList.remove("hidden");
+      categoryContent.classList.add("hidden");
+    }
+
+    function showCategoryContent() {
+      authContent.classList.add("hidden");
+      categoryContent.classList.remove("hidden");
+    }
+
     // Tab Event Listeners
     tabs.login.addEventListener("click", () => showTab("login"));
     tabs.register.addEventListener("click", () => showTab("register"));
     tabs.reset.addEventListener("click", () => showTab("reset"));
+
+    // Back to Auth Button
+    backToAuth.addEventListener("click", showAuthContent);
+
+    // Category Selection
+    document.querySelectorAll('.category-card').forEach(card => {
+      card.addEventListener('click', async () => {
+        const category = card.dataset.category;
+        const page = card.dataset.page;
+        
+        // Save selected category to user profile in Firestore
+        const user = auth.currentUser;
+        if (user) {
+          try {
+            await updateDoc(doc(db, "users", user.uid), {
+              lastSelectedCategory: category,
+              lastAccess: new Date()
+            });
+          } catch (err) {
+            console.error("Error updating user category:", err);
+          }
+        }
+        
+        // Navigate to the selected category page
+        window.location.href = page;
+      });
+    });
 
     // Login Form Submission
     forms.login.addEventListener("submit", async (e) => {
@@ -388,6 +572,14 @@
       
       try {
         await signInWithEmailAndPassword(auth, email, password);
+        
+        // Login successful, show category selection
+        showCategoryContent();
+        
+        // Clear form
+        document.getElementById("loginEmail").value = "";
+        document.getElementById("loginPassword").value = "";
+        
       } catch (err) {
         errorMsg.textContent = translateError(err.code);
         errorMsg.classList.remove("hidden");
@@ -426,7 +618,8 @@
           name: name,
           email: cred.user.email,
           role: role,
-          createdAt: new Date()
+          createdAt: new Date(),
+          lastSelectedCategory: null
         });
         
         if (role === "pending") {
@@ -440,6 +633,12 @@
         
         // Switch to login tab after successful registration
         setTimeout(() => showTab("login"), 2000);
+        
+        // Clear form
+        document.getElementById("regName").value = "";
+        document.getElementById("regEmail").value = "";
+        document.getElementById("regPassword").value = "";
+        
       } catch (err) {
         errorMsg.textContent = translateError(err.code);
         errorMsg.classList.remove("hidden");
@@ -467,6 +666,9 @@
         infoMsg.textContent = "📩 Link reset password sudah dikirim ke email Anda.";
         infoMsg.classList.remove("hidden");
         errorMsg.classList.add("hidden");
+        
+        // Clear form
+        document.getElementById("resetEmail").value = "";
       } catch (err) {
         errorMsg.textContent = translateError(err.code);
         errorMsg.classList.remove("hidden");
@@ -483,16 +685,19 @@
         try {
           const userDoc = await getDoc(doc(db, "users", user.uid));
           if (userDoc.exists()) {
-            const role = userDoc.data().role;
+            const userData = userDoc.data();
+            const role = userData.role;
             
-            if (role === "guru") {
-              window.location.href = "dashboard guru/dashboard guru.html";
-            } else if (role === "siswa") {
-              window.location.href = "dashboard siswa.html";
-            } else if (role === "pending") {
+            // Check if user is pending (guru waiting approval)
+            if (role === "pending") {
               alert("Akun Anda masih menunggu persetujuan admin untuk menjadi Guru.");
               await signOut(auth);
+              return;
             }
+            
+            // Show category selection instead of direct redirect
+            showCategoryContent();
+            
           } else {
             alert("Data user tidak ditemukan di sistem.");
             await signOut(auth);
@@ -500,6 +705,9 @@
         } catch (err) {
           console.error("Error mengambil data user:", err);
         }
+      } else {
+        // User is not logged in, show auth content
+        showAuthContent();
       }
     });
 
@@ -516,6 +724,9 @@
         default: return "Terjadi kesalahan: " + code;
       }
     }
+
+    // Initialize: show auth content if not logged in
+    showAuthContent();
   </script>
 </body>
 </html>

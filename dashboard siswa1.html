@@ -405,7 +405,99 @@
         }
     </style>
 </head>
-      <body>
+<body>
+    <!-- Mobile App Container -->
+    <div class="app-container">
+        <!-- App Header -->
+        <header class="bg-gradient-to-r from-primary to-secondary p-4 text-white">
+            <div class="flex justify-between items-center">
+                <div class="app-logo">
+                    <div class="app-logo-icon" style="background: #9999ff; color: white;">
+                        <i class="fas fa-atom"></i>
+                    </div>
+                    <h1 class="app-name" style="color: #9999ff;">QUANTARA</h1>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-search"></i>
+                    <i class="fas fa-user-circle text-xl"></i>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Main Content Area -->
+        <main class="pb-20 islamic-pattern">
+            <!-- Improved Daily Dose Section -->
+           <section class="p-4 pb-0">
+
+                <div class="daily-dose-card" style="border: 2px solid C7CCFF;">
+                    <div class="daily-dose-header" style="background: linear-gradient(135deg, #9999ff, #b399ff, #d1b3ff);">
+                        <div>
+                          <div class="daily-dose-title" style="color: white;">Fakta Sains Harian</div>
+						  <div class="daily-dose-subtitle" style="color: white;">Temukan keajaiban sains setiap hari!</div>
+                        </div>
+                    </div>
+                    
+                    <div class="daily-dose-content">
+                        <div class="daily-dose-verse"> </div>
+                        
+                       
+                    </div>
+                </div>
+			</section>	
+		 <section class="p-4">			
+            <!-- New Features Section -->
+
+  <div class="bg-white rounded-xl shadow-lg border border-gray-200 p-4 mb-4 transition-shadow hover:shadow-xl">
+    <div class="flex justify-between items-center mb-3">
+      <h3 class="font-bold text-gray-800 flex items-center">
+        <i class="fas fa-flask text-yellow-500 mr-2"></i> Eksplorasi Sains
+      </h3>
+      <a href="#" class="text-xs text-primary hover:underline">Lihat semua</a>
+    </div>
+    
+    <div class="grid grid-cols-4 gap-2 text-center">
+      <a href="kimia/game.html" class="flex flex-col items-center transition transform hover:scale-105 hover:text-yellow-600">
+        <div class="achievement-badge bg-yellow-100 text-yellow-500 hover:bg-yellow-200 transition-colors p-3 rounded-full shadow-sm">
+          <i class="fas fa-flask"></i>
+        </div>
+        <span class="text-xs mt-1">Chemgames</span>
+      </a>
+
+      <a href="uno/ide.html" class="flex flex-col items-center transition transform hover:scale-105 hover:text-blue-600">
+        <div class="achievement-badge bg-blue-100 text-blue-500 hover:bg-blue-200 transition-colors p-3 rounded-full shadow-sm">
+          <i class="fas fa-microchip text-xl"></i>
+        </div>
+        <span class="text-xs mt-1">Elektronika</span>
+      </a>
+
+      <a href="ar/ar kategori.html" class="flex flex-col items-center transition transform hover:scale-105 hover:text-green-600">
+        <div class="achievement-badge bg-green-100 text-green-500 hover:bg-green-200 transition-colors p-3 rounded-full shadow-sm">
+          <i class="fas fa-satellite text-xl"></i>
+        </div>
+        <span class="text-xs mt-1">Astronomi</span>
+      </a>
+      
+      <a href="comingsoon" class="flex flex-col items-center transition transform hover:scale-105 hover:text-purple-600">
+        <div class="achievement-badge bg-purple-100 text-purple-500 hover:bg-purple-200 transition-colors p-3 rounded-full shadow-sm">
+          <i class="fa-solid fa-robot text-xl"></i>
+        </div>
+        <span class="text-xs mt-1">AI Connect</span>
+      </a>
+
+      <a href="kal/kalkulator.html" class="flex flex-col items-center transition transform hover:scale-105 hover:text-orange-600">
+        <div class="achievement-badge bg-orange-100 text-orange-500 hover:bg-orange-200 transition-colors p-3 rounded-full shadow-sm">
+          <i class="fas fa-calculator text-xl"></i>
+        </div>
+        <span class="text-xs mt-1">Kalkulator</span>
+      </a>
+
+      <a href="media social/forum.html" class="flex flex-col items-center transition transform hover:scale-105 hover:text-teal-600">
+        <div class="achievement-badge bg-teal-100 text-teal-500 hover:bg-teal-200 transition-colors p-3 rounded-full shadow-sm">
+          <i class="fas fa-mobile text-xl"></i>
+        </div>
+        <span class="text-xs mt-1">Forum</span>
+      </a>
+<body>
     <!-- Mobile App Container -->
     <div class="app-container">
         <!-- App Header -->
@@ -576,7 +668,32 @@
                     </div>
                 </div>
             </section>
-  </main>                  
+    </main>
+        
+        <!-- BOTTOM NAVIGATION YANG SUDAH DIPERBAIKI - SAMA DENGAN FILE CHAT -->
+        <nav class="bottom-nav">
+            <a href="dashboad siswa.html" class="nav-item">
+                <i class="fas fa-home nav-icon"></i>
+                <span>Beranda</span>
+            </a>
+            <a href="soal harian/dashboard soal.html" class="nav-item">
+                <i class="fas fa-flask nav-icon"></i>
+                <span>Soal Harian</span>
+            </a>
+            <a href="ai/nayra.html" class="nav-item">
+                <i class="fas fa-robot nav-icon"></i>
+                <span>Nayra AI</span>
+            </a>
+            <a href="materi harian/kategori materi.html" class="nav-item">
+                <i class="fas fa-chalkboard-teacher nav-icon"></i>
+                <span>Materi Harian</span>
+            </a>
+            <a href="profil/profil.html" class="nav-item">
+                <i class="fas fa-user nav-icon"></i>
+                <span>Profil</span>
+            </a>
+        </nav>
+    </div>
 
     <script type="module">
         // Import Firebase
@@ -682,4 +799,4 @@
         }
     </script>
 </body>
-  </html>
+    </html>

@@ -183,6 +183,1365 @@
             color: #64748b;
         }
         
+        .calc-btn.blue {
+            background: linear-gradient(180deg, #60a5fa, #3b82f6);
+            color: white;
+        }
+        
+        .calc-btn.green {
+            background: linear-gradient(180deg, #34d399, #10b981);
+            color: white;
+        }
+        
+        .calc-btn.purple {
+            background: linear-gradient(180deg, #8b5cf6, #7c3aed);
+            color: white;
+        }
+        
+        .small {
+            font-size: 12px;
+            padding: 8px;
+        }
+        
+        .top-controls {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .toggle {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 14px;
+        }
+        
+        .hint {
+            font-size: 12px;
+            color: #94a3b8;
+            margin-top: 8px;
+            text-align: center;
+        }
+        
+        /* Mode Selector */
+        .mode-selector {
+            display: flex;
+            gap: 4px;
+            margin-top: 10px;
+            margin-bottom: 15px;
+            background: #f1f5f9;
+            padding: 4px;
+            border-radius: 8px;
+        }
+        
+        .mode-btn {
+            flex: 1;
+            padding: 8px 4px;
+            border-radius: 6px;
+            border: none;
+            background: transparent;
+            color: #64748b;
+            cursor: pointer;
+            font-family: 'Baloo 2', cursive;
+            font-weight: 500;
+            font-size: 13px;
+            transition: all 0.3s;
+            white-space: nowrap;
+        }
+        
+        .mode-btn.active {
+            background: white;
+            color: #3b82f6;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        /* Statistika Panel */
+        .stats-panel {
+            display: none;
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .stats-panel.active {
+            display: block;
+        }
+        
+        .data-input-container {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .data-input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-family: 'Baloo 2', cursive;
+            font-size: 14px;
+        }
+        
+        .data-list {
+            max-height: 150px;
+            overflow-y: auto;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .data-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 10px;
+            border-bottom: 1px solid #f1f5f9;
+            font-size: 14px;
+        }
+        
+        .data-item:last-child {
+            border-bottom: none;
+        }
+        
+        .stats-results {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+        
+        .stat-item {
+            background: white;
+            padding: 8px;
+            border-radius: 6px;
+            text-align: center;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .stat-label {
+            font-size: 11px;
+            color: #64748b;
+            margin-bottom: 4px;
+        }
+        
+        .stat-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .stats-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 15px;
+        }
+        
+        /* Matrix Styles */
+        .matrix-container {
+            margin-top: 10px;
+        }
+        
+        .matrix-operation-select {
+            width: 100%;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #cbd5e1;
+            background: white;
+            font-family: 'Baloo 2', cursive;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+        
+        .matrix-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .matrix-input-group {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .matrix-title {
+            text-align: center;
+            font-weight: 600;
+            color: #3b82f6;
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+        
+        .matrix-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .matrix-cell {
+            flex: 1;
+            padding: 12px 8px;
+            text-align: center;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-family: 'Baloo 2', cursive;
+            font-size: 14px;
+            background: #f8fafc;
+        }
+        
+        .matrix-input {
+            width: 100%;
+            border: none;
+            background: transparent;
+            text-align: center;
+            font-size: 16px;
+            font-weight: 500;
+            font-family: 'Baloo 2', cursive;
+            color: #1e293b;
+            outline: none;
+        }
+        
+        .matrix-input:focus {
+            background: white;
+        }
+        
+        .matrix-label {
+            font-size: 11px;
+            color: #64748b;
+            text-align: center;
+            margin-top: 2px;
+        }
+        
+        .matrix-result-container {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 15px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .matrix-result-title {
+            text-align: center;
+            font-weight: 600;
+            color: #10b981;
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+        
+        .matrix-result-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .matrix-result-row {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .matrix-result-cell {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
+            border: 2px solid #bae6fd;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            color: #0369a1;
+        }
+        
+        .matrix-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        
+        .matrix-btn {
+            flex: 1;
+            padding: 14px;
+            border-radius: 8px;
+            border: none;
+            font-family: 'Baloo 2', cursive;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .matrix-btn.calculate {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+        }
+        
+        .matrix-btn.reset {
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px solid #cbd5e1;
+        }
+        
+        .matrix-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .matrix-btn:active {
+            transform: translateY(0);
+        }
+        
+        /* Responsive */
+        @media (max-width: 380px) {
+            .matrix-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+            
+            .matrix-result-cell {
+                width: 55px;
+                height: 55px;
+                font-size: 16px;
+            }
+            
+            .mode-btn {
+                font-size: 12px;
+                padding: 8px 2px;
+            }
+        }
+        
+        @media (max-width: 420px) {
+            .calc {
+                width: 100%;
+            }
+            
+            .stats-results {
+                grid-template-columns: 1fr;
+            }
+            
+            .matrix-result-row {
+                gap: 12px;
+            }
+        }
+        
+        /* Switch styling */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 40px;
+            height: 20px;
+        }
+        
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #cbd5e1;
+            transition: .4s;
+            border-radius: 20px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: #38b2ac;
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile App Container -->
+    <div class="app-container">
+        <!-- App Header -->
+        <header class="bg-gradient-to-r from-blue-100 to-blue-50 p-4 text-white">
+            <div class="flex justify-between items-center">
+                <div class="app-logo">
+                    <div class="app-logo-icon" style="background: #9999ff; color: white;">
+                        <i class="fas fa-atom"></i>
+                    </div>
+                    <h1 class="app-name" style="color: #9999ff;">QUANTARA</h1>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Main Content Area -->
+        <main class="pb-20">
+            <div class="calc-container">
+                <!-- Mode Selector -->
+                <div class="mode-selector">
+                    <button class="mode-btn active" data-mode="scientific">Kalkulator</button>
+                    <button class="mode-btn" data-mode="statistics">Statistika</button>
+                    <button class="mode-btn" data-mode="matrix">Matriks</button>
+                </div>
+                
+                <!-- Kalkulator Ilmiah -->
+                <div id="scientific-mode" class="calc" role="application" aria-label="Kalkulator Ilmiah">
+                    <div class="top-controls">
+                        <div class="toggle">
+                            <label for="deg">Deg</label>
+                            <label class="switch">
+                                <input id="deg" type="checkbox" title="Gunakan derajat (deg). Jika mati -> radian" />
+                                <span class="slider"></span>
+                            </label>
+                        </div>
+                        <div style="margin-left:auto;display:flex;gap:6px">
+                            <button id="mc" class="calc-btn small gray">MC</button>
+                            <button id="mr" class="calc-btn small gray">MR</button>
+                            <button id="mplus" class="calc-btn small gray">M+</button>
+                            <button id="mminus" class="calc-btn small gray">M-</button>
+                        </div>
+                    </div>
+
+                    <div class="display">
+                        <div id="expr" class="expr">0</div>
+                        <div id="out" class="out">0</div>
+                    </div>
+
+                    <div class="row">
+                        <button class="calc-btn gray" data-fn="clear">C</button>
+                        <button class="calc-btn gray" data-fn="back">⌫</button>
+                        <button class="calc-btn gray" data-in="(">(</button>
+                        <button class="calc-btn gray" data-in=")">)</button>
+                    </div>
+
+                    <div class="row">
+                        <button class="calc-btn" data-fn="func" data-val="sin">sin</button>
+                        <button class="calc-btn" data-fn="func" data-val="cos">cos</button>
+                        <button class="calc-btn" data-fn="func" data-val="tan">tan</button>
+                        <button class="calc-btn" data-fn="op" data-val="^">xʸ</button>
+                    </div>
+
+                    <div class="row">
+                        <button class="calc-btn" data-fn="func" data-val="asin">asin</button>
+                        <button class="calc-btn" data-fn="func" data-val="acos">acos</button>
+                        <button class="calc-btn" data-fn="func" data-val="atan">atan</button>
+                        <button class="calc-btn" data-fn="func" data-val="sqrt">√</button>
+                    </div>
+
+                    <div class="row">
+                        <button class="calc-btn" data-in="7">7</button>
+                        <button class="calc-btn" data-in="8">8</button>
+                        <button class="calc-btn" data-in="9">9</button>
+                        <button class="calc-btn" data-fn="op" data-val="/">÷</button>
+                    </div>
+
+                    <div class="row">
+                        <button class="calc-btn" data-in="4">4</button>
+                        <button class="calc-btn" data-in="5">5</button>
+                        <button class="calc-btn" data-in="6">6</button>
+                        <button class="calc-btn" data-fn="op" data-val="*">×</button>
+                    </div>
+
+                    <div class="row">
+                        <button class="calc-btn" data-in="1">1</button>
+                        <button class="calc-btn" data-in="2">2</button>
+                        <button class="calc-btn" data-in="3">3</button>
+                        <button class="calc-btn" data-fn="op" data-val="-">−</button>
+                    </div>
+
+                    <div class="row">
+                        <button class="calc-btn" data-in="0">0</button>
+                        <button class="calc-btn" data-in=".">.</button>
+                        <button class="calc-btn" data-fn="factorial">n!</button>
+                        <button class="calc-btn orange" data-fn="op" data-val="+">+</button>
+                    </div>
+
+                    <div class="row">
+                        <button class="calc-btn" data-fn="const" data-val="pi">π</button>
+                        <button class="calc-btn" data-fn="const" data-val="e">e</button>
+                        <button class="calc-btn" data-fn="log">log</button>
+                        <button id="equals" class="calc-btn wide orange">=</button>
+                    </div>
+
+                    <div class="hint">Keyboard: angka, + - * / ( ) .  Enter = evaluate  Backspace delete</div>
+                </div>
+                
+                <!-- Mode Statistika -->
+                <div id="statistics-mode" class="stats-panel">
+                    <h3 class="text-lg font-bold mb-3 text-center">Kalkulator Statistika</h3>
+                    
+                    <div class="data-input-container">
+                        <input type="number" id="data-input" class="data-input" placeholder="Masukkan angka" step="any">
+                        <button id="add-data" class="calc-btn green">Tambah</button>
+                    </div>
+                    
+                    <div class="data-list" id="data-list">
+                        <div class="data-item">
+                            <span>Data akan muncul di sini</span>
+                            <span>0 item</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stats-results" id="stats-results">
+                        <div class="stat-item">
+                            <div class="stat-label">Jumlah Data</div>
+                            <div class="stat-value" id="count">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Rata-rata</div>
+                            <div class="stat-value" id="mean">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Median</div>
+                            <div class="stat-value" id="median">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Modus</div>
+                            <div class="stat-value" id="mode">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Standar Deviasi</div>
+                            <div class="stat-value" id="std-dev">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Varians</div>
+                            <div class="stat-value" id="variance">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Min</div>
+                            <div class="stat-value" id="min">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Max</div>
+                            <div class="stat-value" id="max">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Jangkauan</div>
+                            <div class="stat-value" id="range">0</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-label">Jumlah</div>
+                            <div class="stat-value" id="sum">0</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stats-actions">
+                        <button id="clear-data" class="calc-btn gray" style="flex:1">Hapus Data</button>
+                        <button id="calculate-stats" class="calc-btn blue" style="flex:1">Hitung</button>
+                    </div>
+                </div>
+                
+                <!-- Mode Matriks -->
+                <div id="matrix-mode" class="stats-panel">
+                    <h3 class="text-lg font-bold mb-3 text-center">Kalkulator Matriks 2x2</h3>
+                    
+                    <select id="matrix-operation" class="matrix-operation-select">
+                        <option value="add">➕ Penjumlahan (A + B)</option>
+                        <option value="subtract">➖ Pengurangan (A - B)</option>
+                        <option value="multiply">✖️ Perkalian (A × B)</option>
+                        <option value="determinant">📐 Determinan</option>
+                        <option value="transpose">↔️ Transpose</option>
+                        <option value="inverse">🔁 Invers</option>
+                    </select>
+                    
+                    <div class="matrix-grid">
+                        <div class="matrix-input-group">
+                            <div class="matrix-title">Matriks A</div>
+                            <div id="matrix-a">
+                                <div class="matrix-row">
+                                    <div class="matrix-cell">
+                                        <input type="number" class="matrix-input" placeholder="0" value="1" data-row="0" data-col="0">
+                                        <div class="matrix-label">a₁₁</div>
+                                    </div>
+                                    <div class="matrix-cell">
+                                        <input type="number" class="matrix-input" placeholder="0" value="0" data-row="0" data-col="1">
+                                        <div class="matrix-label">a₁₂</div>
+                                    </div>
+                                </div>
+                                <div class="matrix-row">
+                                    <div class="matrix-cell">
+                                        <input type="number" class="matrix-input" placeholder="0" value="0" data-row="1" data-col="0">
+                                        <div class="matrix-label">a₂₁</div>
+                                    </div>
+                                    <div class="matrix-cell">
+                                        <input type="number" class="matrix-input" placeholder="0" value="1" data-row="1" data-col="1">
+                                        <div class="matrix-label">a₂₂</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="matrix-input-group">
+                            <div class="matrix-title">Matriks B</div>
+                            <div id="matrix-b">
+                                <div class="matrix-row">
+                                    <div class="matrix-cell">
+                                        <input type="number" class="matrix-input" placeholder="0" value="1" data-row="0" data-col="0">
+                                        <div class="matrix-label">b₁₁</div>
+                                    </div>
+                                    <div class="matrix-cell">
+                                        <input type="number" class="matrix-input" placeholder="0" value="0" data-row="0" data-col="1">
+                                        <div class="matrix-label">b₁₂</div>
+                                    </div>
+                                </div>
+                                <div class="matrix-row">
+                                    <div class="matrix-cell">
+                                        <input type="number" class="matrix-input" placeholder="0" value="0" data-row="1" data-col="0">
+                                        <div class="matrix-label">b₂₁</div>
+                                    </div>
+                                    <div class="matrix-cell">
+                                        <input type="number" class="matrix-input" placeholder="0" value="1" data-row="1" data-col="1">
+                                        <div class="matrix-label">b₂₂</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="matrix-result-container">
+                        <div class="matrix-result-title">Hasil</div>
+                        <div id="matrix-result" class="matrix-result-grid">
+                            <div class="text-gray-400">Pilih operasi dan klik hitung</div>
+                        </div>
+                    </div>
+                    
+                    <div class="matrix-actions">
+                        <button id="calculate-matrix" class="matrix-btn calculate">
+                            <i class="fas fa-calculator mr-2"></i>Hitung Matriks
+                        </button>
+                        <button id="reset-matrix" class="matrix-btn reset">
+                            <i class="fas fa-redo mr-2"></i>Reset
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <!-- BOTTOM NAVIGATION -->
+        <nav class="bottom-nav">
+            <a href="dashboad siswa.html" class="nav-item">
+                <i class="fas fa-home nav-icon"></i>
+                <span>Beranda</span>
+            </a>
+            <a href="soal harian/dashboard soal.html" class="nav-item">
+                <i class="fas fa-flask nav-icon"></i>
+                <span>Soal Harian</span>
+            </a>
+            <a href="ai/nayra.html" class="nav-item">
+                <i class="fas fa-robot nav-icon"></i>
+                <span>Nayra AI</span>
+            </a>
+            <a href="materi harian/kategori materi.html" class="nav-item">
+                <i class="fas fa-chalkboard-teacher nav-icon"></i>
+                <span>Materi Harian</span>
+            </a>
+            <a href="profil/profil.html" class="nav-item">
+                <i class="fas fa-user nav-icon"></i>
+                <span>Profil</span>
+            </a>
+        </nav>
+    </div>
+
+    <script>
+        // Fungsi Kalkulator Ilmiah
+        (function(){
+            const exprEl = document.getElementById('expr');
+            const outEl = document.getElementById('out');
+            const degToggle = document.getElementById('deg');
+            let expr = '';
+            let memory = 0;
+
+            function updateDisplay(){
+                exprEl.textContent = expr || '0';
+            }
+
+            function safeFactorial(n){
+                n = Math.floor(n);
+                if(n < 0) return NaN;
+                if(n > 170) return Infinity;
+                let r = 1;
+                for(let i=2;i<=n;i++) r *= i;
+                return r;
+            }
+
+            function applyFactorials(s){
+                return s.replace(/(\([^()]+\)|\d+(?:\.\d+)?)(!+)/g, (m, a, bangs)=>{
+                    let val;
+                    try{ val = evaluateExpression(a); }catch(e){ return m; }
+                    for(let i=0;i<bangs.length;i++) val = safeFactorial(val);
+                    return '('+String(val)+')';
+                });
+            }
+
+            function toJS(s){
+                s = s.replace(/\^/g,'**');
+                s = s.replace(/\blog\b(?!10)/g,'__log__');
+                s = s.replace(/\blog10\b/g,'Math.log10');
+                s = s.replace(/\bln\b/g,'Math.log');
+                s = s.replace(/\be\b/g,'Math.E');
+                s = s.replace(/\bpi\b/g,'Math.PI');
+                s = s.replace(/\bsqrt\(/g,'Math.sqrt(');
+                s = s.replace(/\bexp\b/g,'Math.exp');
+                return s;
+            }
+
+            function wrapTrig(s){
+                const isDeg = degToggle.checked;
+                const trig = ['sin','cos','tan','asin','acos','atan'];
+                trig.forEach(fn=>{
+                    const re = new RegExp(fn + '\\(','g');
+                    s = s.replace(re, (m)=> {
+                        if(isDeg && (fn.startsWith('a')===false)){
+                            return `__${fn}__(`;
+                        } else if(isDeg && fn.startsWith('a')){
+                            return `__${fn}__(`;
+                        } else {
+                            return `__${fn}__(`;
+                        }
+                    });
+                });
+                return s;
+            }
+
+            function evaluateExpression(s){
+                if(!s) return 0;
+                s = s.replace(/π/g,'pi');
+                s = s.replace(/×/g,'*').replace(/÷/g,'/').replace(/−/g,'-');
+                s = applyFactorials(s);
+                s = toJS(s);
+                s = wrapTrig(s);
+
+                const isDeg = degToggle.checked;
+                const map = {
+                    '__sin__': isDeg ? '(x=>Math.sin((x)*Math.PI/180))' : 'Math.sin',
+                    '__cos__': isDeg ? '(x=>Math.cos((x)*Math.PI/180))' : 'Math.cos',
+                    '__tan__': isDeg ? '(x=>Math.tan((x)*Math.PI/180))' : 'Math.tan',
+                    '__asin__': isDeg ? '(x=>Math.asin(x)*180/Math.PI)' : 'Math.asin',
+                    '__acos__': isDeg ? '(x=>Math.acos(x)*180/Math.PI)' : 'Math.acos',
+                    '__atan__': isDeg ? '(x=>Math.atan(x)*180/Math.PI)' : 'Math.atan',
+                    '__log__': 'Math.log10'
+                };
+
+                Object.keys(map).forEach(k=>{
+                    s = s.replace(new RegExp(k,'g'), map[k]);
+                });
+
+                try{
+                    const fn = new Function('return (' + s + ')');
+                    const res = fn();
+                    if(typeof res === 'number' && !isFinite(res)) return res;
+                    return Number(res);
+                }catch(e){
+                    throw e;
+                }
+            }
+
+            // Button handling untuk kalkulator
+            document.querySelectorAll('.calc-btn').forEach(btn=>{
+                if(btn.closest('#scientific-mode') || btn.id === 'equals' || btn.id === 'mc' || btn.id === 'mr' || btn.id === 'mplus' || btn.id === 'mminus') {
+                    btn.addEventListener('click', ()=>{
+                        const fin = btn.dataset.fn;
+                        const val = btn.dataset.val;
+                        const inp = btn.dataset.in;
+                        if(fin === 'clear') { expr = ''; outEl.textContent = '0'; updateDisplay(); return; }
+                        if(fin === 'back') { expr = expr.slice(0,-1); updateDisplay(); return; }
+                        if(fin === 'op') { expr += val; updateDisplay(); return; }
+                        if(fin === 'func') { expr += val + '('; updateDisplay(); return; }
+                        if(fin === 'const') { if(val==='pi') expr += 'pi'; else expr += 'e'; updateDisplay(); return; }
+                        if(fin === 'factorial') { expr += '!'; updateDisplay(); return; }
+                        if(fin === 'log') { expr += 'log('; updateDisplay(); return; }
+                        if(fin === 'mplus'){ try{ memory += Number(evaluateExpression(expr || outEl.textContent)); }catch(e){}; return; }
+                        if(fin === 'mminus'){ try{ memory -= Number(evaluateExpression(expr || outEl.textContent)); }catch(e){}; return; }
+                        if(btn.id === 'mr'){ expr = String(memory); updateDisplay(); return; }
+                        if(btn.id === 'mc'){ memory = 0; return; }
+                        if(btn.id === 'equals'){ try{ const r = evaluateExpression(expr); outEl.textContent = String(r); expr = String(r); updateDisplay(); }catch(e){ outEl.textContent = 'Error'; } return; }
+                        if(inp !== undefined){ expr += inp; updateDisplay(); return; }
+                    });
+                }
+            });
+
+            // Keyboard support
+            window.addEventListener('keydown', (e)=>{
+                if(document.getElementById('scientific-mode').style.display !== 'none') {
+                    if(e.key.match(/[0-9\.\(\)\+\-\*\/]/)) { expr += e.key; updateDisplay(); }
+                    else if(e.key === 'Enter' || e.key === '=') { document.getElementById('equals').click(); }
+                    else if(e.key === 'Backspace') { expr = expr.slice(0,-1); updateDisplay(); }
+                    else if(e.key === '^') { expr += '^'; updateDisplay(); }
+                }
+            });
+
+            updateDisplay();
+        })();
+
+        // Mode Selector
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mode switching
+            const modeBtns = document.querySelectorAll('.mode-btn');
+            const modes = {
+                'scientific': document.getElementById('scientific-mode'),
+                'statistics': document.getElementById('statistics-mode'),
+                'matrix': document.getElementById('matrix-mode')
+            };
+            
+            modeBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const mode = this.dataset.mode;
+                    
+                    // Update active button
+                    modeBtns.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Hide all modes
+                    Object.values(modes).forEach(m => {
+                        if(m) {
+                            m.style.display = 'none';
+                            if(m.classList.contains('stats-panel')) {
+                                m.classList.remove('active');
+                            }
+                        }
+                    });
+                    
+                    // Show selected mode
+                    if(mode === 'scientific') {
+                        modes.scientific.style.display = 'block';
+                    } else if(modes[mode]) {
+                        modes[mode].style.display = 'block';
+                        modes[mode].classList.add('active');
+                    }
+                });
+            });
+            
+            // Bottom nav interaction
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    navItems.forEach(nav => {
+                        nav.classList.remove('active');
+                        nav.querySelector('.nav-icon').classList.remove('active');
+                    });
+                    
+                    this.classList.add('active');
+                    this.querySelector('.nav-icon').classList.add('active');
+                });
+            });
+            
+            // Inisialisasi Statistika
+            initStatistics();
+            
+            // Inisialisasi Matriks
+            initMatrix();
+        });
+
+        // Fungsi Statistika
+        function initStatistics() {
+            let dataSet = [];
+            
+            // Load data dari localStorage jika ada
+            const savedData = localStorage.getItem('calculatorStatsData');
+            if(savedData) {
+                dataSet = JSON.parse(savedData);
+                updateDataList();
+                calculateStatistics();
+            }
+            
+            const dataInput = document.getElementById('data-input');
+            const addDataBtn = document.getElementById('add-data');
+            const clearDataBtn = document.getElementById('clear-data');
+            const calculateStatsBtn = document.getElementById('calculate-stats');
+            const dataList = document.getElementById('data-list');
+            
+            // Fungsi untuk menghitung statistika
+            function calculateStatistics() {
+                if(dataSet.length === 0) {
+                    updateStatsDisplay(0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+                    return;
+                }
+                
+                // Sort data untuk perhitungan
+                const sortedData = [...dataSet].sort((a, b) => a - b);
+                
+                // Jumlah data
+                const count = dataSet.length;
+                
+                // Jumlah total
+                const sum = dataSet.reduce((acc, val) => acc + val, 0);
+                
+                // Rata-rata
+                const mean = sum / count;
+                
+                // Median
+                let median;
+                const mid = Math.floor(count / 2);
+                if(count % 2 === 0) {
+                    median = (sortedData[mid - 1] + sortedData[mid]) / 2;
+                } else {
+                    median = sortedData[mid];
+                }
+                
+                // Modus
+                const frequency = {};
+                dataSet.forEach(val => {
+                    frequency[val] = (frequency[val] || 0) + 1;
+                });
+                
+                let maxFreq = 0;
+                let modes = [];
+                for(const val in frequency) {
+                    if(frequency[val] > maxFreq) {
+                        maxFreq = frequency[val];
+                        modes = [parseFloat(val)];
+                    } else if(frequency[val] === maxFreq) {
+                        modes.push(parseFloat(val));
+                    }
+                }
+                
+                const mode = modes.length === 1 ? modes[0] : modes.slice(0, 3).join(', ');
+                
+                // Varians dan Standar Deviasi
+                const variance = dataSet.reduce((acc, val) => acc + Math.pow(val - mean, 2), 0) / count;
+                const stdDev = Math.sqrt(variance);
+                
+                // Min, Max, Range
+                const min = sortedData[0];
+                const max = sortedData[count - 1];
+                const range = max - min;
+                
+                updateStatsDisplay(count, mean, median, mode, stdDev, variance, min, max, range, sum);
+            }
+            
+            function updateStatsDisplay(count, mean, median, mode, stdDev, variance, min, max, range, sum) {
+                document.getElementById('count').textContent = count;
+                document.getElementById('mean').textContent = mean.toFixed(4);
+                document.getElementById('median').textContent = median.toFixed(4);
+                document.getElementById('mode').textContent = mode;
+                document.getElementById('std-dev').textContent = stdDev.toFixed(4);
+                document.getElementById('variance').textContent = variance.toFixed(4);
+                document.getElementById('min').textContent = min.toFixed(4);
+                document.getElementById('max').textContent = max.toFixed(4);
+                document.getElementById('range').textContent = range.toFixed(4);
+                document.getElementById('sum').textContent = sum.toFixed(4);
+            }
+            
+            function updateDataList() {
+                dataList.innerHTML = '';
+                
+                if(dataSet.length === 0) {
+                    dataList.innerHTML = '<div class="data-item"><span>Data akan muncul di sini</span><span>0 item</span></div>';
+                    return;
+                }
+                
+                dataSet.forEach((value, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'data-item';
+                    item.innerHTML = `
+                        <span>Data ${index + 1}: ${value}</span>
+                        <button class="text-red-500 hover:text-red-700 delete-data" data-index="${index}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    `;
+                    dataList.appendChild(item);
+                });
+                
+                // Add delete event listeners
+                document.querySelectorAll('.delete-data').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const index = parseInt(this.dataset.index);
+                        dataSet.splice(index, 1);
+                        localStorage.setItem('calculatorStatsData', JSON.stringify(dataSet));
+                        updateDataList();
+                        calculateStatistics();
+                    });
+                });
+            }
+            
+            // Event Listeners
+            addDataBtn.addEventListener('click', function() {
+                const value = parseFloat(dataInput.value);
+                if(!isNaN(value)) {
+                    dataSet.push(value);
+                    localStorage.setItem('calculatorStatsData', JSON.stringify(dataSet));
+                    dataInput.value = '';
+                    updateDataList();
+                    calculateStatistics();
+                }
+            });
+            
+            dataInput.addEventListener('keypress', function(e) {
+                if(e.key === 'Enter') {
+                    addDataBtn.click();
+                }
+            });
+            
+            clearDataBtn.addEventListener('click', function() {
+                dataSet = [];
+                localStorage.removeItem('calculatorStatsData');
+                updateDataList();
+                calculateStatistics();
+            });
+            
+            calculateStatsBtn.addEventListener('click', calculateStatistics);
+        }
+
+        // Fungsi Matriks
+        function initMatrix() {
+            const matrixOperation = document.getElementById('matrix-operation');
+            const calculateMatrixBtn = document.getElementById('calculate-matrix');
+            const resetMatrixBtn = document.getElementById('reset-matrix');
+            const matrixResult = document.getElementById('matrix-result');
+            
+            // Fungsi untuk mendapatkan nilai matriks
+            function getMatrixValues(matrixId) {
+                const inputs = document.querySelectorAll(`#${matrixId} .matrix-input`);
+                const values = [];
+                inputs.forEach(input => {
+                    values.push(parseFloat(input.value) || 0);
+                });
+                
+                // Bentuk matriks 2x2
+                return [
+                    [values[0], values[1]],
+                    [values[2], values[3]]
+                ];
+            }
+            
+            // Fungsi untuk menampilkan matriks hasil
+            function displayMatrixResult(matrix, isSingleValue = false) {
+                if(!matrix) {
+                    matrixResult.innerHTML = '<div class="text-gray-400">Hasil akan muncul di sini</div>';
+                    return;
+                }
+                
+                if(isSingleValue) {
+                    // Untuk determinan (nilai tunggal)
+                    matrixResult.innerHTML = `
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-blue-600 mb-2">${matrix.toFixed(2)}</div>
+                            <div class="text-sm text-gray-500">Determinan Matriks A</div>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Untuk matriks 2x2
+                let html = `
+                    <div class="matrix-result-row">
+                        <div class="matrix-result-cell">${matrix[0][0].toFixed(2)}</div>
+                        <div class="matrix-result-cell">${matrix[0][1].toFixed(2)}</div>
+                    </div>
+                    <div class="matrix-result-row">
+                        <div class="matrix-result-cell">${matrix[1][0].toFixed(2)}</div>
+                        <div class="matrix-result-cell">${matrix[1][1].toFixed(2)}</div>
+                    </div>
+                `;
+                
+                matrixResult.innerHTML = html;
+            }
+            
+            // Operasi matriks
+            function addMatrices(a, b) {
+                return [
+                    [a[0][0] + b[0][0], a[0][1] + b[0][1]],
+                    [a[1][0] + b[1][0], a[1][1] + b[1][1]]
+                ];
+            }
+            
+            function subtractMatrices(a, b) {
+                return [
+                    [a[0][0] - b[0][0], a[0][1] - b[0][1]],
+                    [a[1][0] - b[1][0], a[1][1] - b[1][1]]
+                ];
+            }
+            
+            function multiplyMatrices(a, b) {
+                return [
+                    [
+                        a[0][0] * b[0][0] + a[0][1] * b[1][0],
+                        a[0][0] * b[0][1] + a[0][1] * b[1][1]
+                    ],
+                    [
+                        a[1][0] * b[0][0] + a[1][1] * b[1][0],
+                        a[1][0] * b[0][1] + a[1][1] * b[1][1]
+                    ]
+                ];
+            }
+            
+            function determinant(matrix) {
+                return matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0];
+            }
+            
+            function transpose(matrix) {
+                return [
+                    [matrix[0][0], matrix[1][0]],
+                    [matrix[0][1], matrix[1][1]]
+                ];
+            }
+            
+            function inverse(matrix) {
+                const det = determinant(matrix);
+                if(Math.abs(det) < 0.0001) {
+                    return null; // Matriks singular
+                }
+                return [
+                    [matrix[1][1] / det, -matrix[0][1] / det],
+                    [-matrix[1][0] / det, matrix[0][0] / det]
+                ];
+            }
+            
+            // Event Listeners
+            calculateMatrixBtn.addEventListener('click', function() {
+                const operation = matrixOperation.value;
+                const matrixA = getMatrixValues('matrix-a');
+                let result;
+                
+                try {
+                    switch(operation) {
+                        case 'add':
+                            const matrixB = getMatrixValues('matrix-b');
+                            result = addMatrices(matrixA, matrixB);
+                            displayMatrixResult(result);
+                            break;
+                        case 'subtract':
+                            const matrixB2 = getMatrixValues('matrix-b');
+                            result = subtractMatrices(matrixA, matrixB2);
+                            displayMatrixResult(result);
+                            break;
+                        case 'multiply':
+                            const matrixB3 = getMatrixValues('matrix-b');
+                            result = multiplyMatrices(matrixA, matrixB3);
+                            displayMatrixResult(result);
+                            break;
+                        case 'determinant':
+                            const det = determinant(matrixA);
+                            displayMatrixResult(det, true);
+                            break;
+                        case 'transpose':
+                            result = transpose(matrixA);
+                            displayMatrixResult(result);
+                            break;
+                        case 'inverse':
+                            result = inverse(matrixA);
+                            if(!result) {
+                                matrixResult.innerHTML = '<div class="text-red-500 text-center font-medium">Matriks singular (determinan = 0)</div>';
+                                return;
+                            }
+                            displayMatrixResult(result);
+                            break;
+                        default:
+                            matrixResult.innerHTML = '<div class="text-gray-400">Pilih operasi terlebih dahulu</div>';
+                    }
+                } catch(error) {
+                    matrixResult.innerHTML = `<div class="text-red-500 text-center font-medium">Error: ${error.message}</div>`;
+                }
+            });
+            
+            resetMatrixBtn.addEventListener('click', function() {
+                // Reset matriks A ke matriks identitas
+                const matrixAInputs = document.querySelectorAll('#matrix-a .matrix-input');
+                matrixAInputs[0].value = '1';
+                matrixAInputs[1].value = '0';
+                matrixAInputs[2].value = '0';
+                matrixAInputs[3].value = '1';
+                
+                // Reset matriks B ke matriks identitas
+                const matrixBInputs = document.querySelectorAll('#matrix-b .matrix-input');
+                matrixBInputs[0].value = '1';
+                matrixBInputs[1].value = '0';
+                matrixBInputs[2].value = '0';
+                matrixBInputs[3].value = '1';
+                
+                matrixResult.innerHTML = '<div class="text-gray-400">Pilih operasi dan klik hitung</div>';
+            });
+            
+            // Auto-hitung saat pilih operasi tertentu
+            matrixOperation.addEventListener('change', function() {
+                const op = this.value;
+                if(op === 'determinant' || op === 'transpose' || op === 'inverse') {
+                    // Untuk operasi yang hanya butuh matriks A, sembunyikan matriks B
+                    document.querySelector('.matrix-grid').style.gridTemplateColumns = '1fr';
+                    document.getElementById('matrix-b').parentElement.style.display = 'none';
+                } else {
+                    // Tampilkan kembali matriks B
+                    document.querySelector('.matrix-grid').style.gridTemplateColumns = '1fr 1fr';
+                    document.getElementById('matrix-b').parentElement.style.display = 'block';
+                }
+            });
+            
+            // Inisialisasi tampilan awal
+            matrixResult.innerHTML = '<div class="text-gray-400">Pilih operasi dan klik hitung</div>';
+        }
+    </script>
+</body>
+</html>            bottom: 0;
+            width: 100%;
+            max-width: 414px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            background: white;
+            z-index: 10;
+            height: 70px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+            text-decoration: none;
+            flex: 1;
+            height: 100%;
+            padding: 0.5rem 0;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item span {
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
+        
+        .nav-item.active {
+            color: var(--primary);
+        }
+        
+        .nav-icon {
+            transition: all 0.3s ease;
+            font-size: 1.25rem;
+        }
+        
+        .nav-icon.active {
+            transform: translateY(-5px);
+            color: var(--primary);
+        }
+        
+        .app-logo {
+            display: flex;
+            align-items: center;
+        }
+        
+        .app-logo-icon {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 8px;
+        }
+        
+        .app-name {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: #60a5fa;
+        }
+
+        /* Kalkulator Styles */
+        .calc-container {
+            padding: 1rem;
+            background: white;
+        }
+        
+        .calc {
+            width: 100%;
+            background: linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 8px 30px rgba(2, 6, 23, 0.15);
+            border: 1px solid #e2e8f0;
+        }
+        
+        .display {
+            background: rgba(255,255,255,0.03);
+            padding: 14px;
+            border-radius: 8px;
+            min-height: 64px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-end;
+            gap: 6px;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 1rem;
+        }
+        
+        .expr {
+            font-size: 14px;
+            color: #64748b;
+            word-break: break-all;
+        }
+        
+        .out {
+            font-size: 22px;
+            font-weight: 600;
+        }
+        
+        .row {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .calc-btn {
+            flex: 1;
+            padding: 12px;
+            border-radius: 8px;
+            border: 0;
+            background: #f1f5f9;
+            color: #334155;
+            font-size: 14px;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            transition: all 0.2s;
+            font-family: 'Baloo 2', cursive;
+        }
+        
+        .calc-btn:hover {
+            background: #e2e8f0;
+        }
+        
+        .calc-btn:active {
+            transform: translateY(1px);
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        .calc-btn.wide {
+            flex: 2;
+        }
+        
+        .calc-btn.orange {
+            background: linear-gradient(180deg, #ff9f43, #ff7a18);
+            color: #06121a;
+        }
+        
+        .calc-btn.gray {
+            background: #f8fafc;
+            color: #64748b;
+        }
+        
         .small {
             font-size: 12px;
             padding: 8px;

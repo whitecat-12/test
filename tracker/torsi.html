@@ -1,0 +1,2744 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QUANTARA - Analisis Torsi dengan OpenCV.js</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Load OpenCV.js dari CDN yang lebih stabil -->
+    <script async src="https://docs.opencv.org/4.8.0/opencv.js" onload="onOpenCvReady();" type="text/javascript"></script>
+    
+    <style>
+        :root {
+            --primary: #38b2ac;
+            --secondary: #0e7490;
+            --accent: #f59e0b;
+        }
+        
+        body {
+            font-family: 'Baloo 2', cursive;
+            background-color: #f8fafc;
+        }
+        
+        .app-container {
+            max-width: 414px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        /* NAVBAR */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            max-width: 414px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            background: white;
+            z-index: 10;
+            height: 70px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+            text-decoration: none;
+            flex: 1;
+            height: 100%;
+            padding: 0.5rem 0;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item span {
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
+        
+        .nav-item.active {
+            color: var(--primary);
+        }
+        
+        .nav-icon {
+            transition: all 0.3s ease;
+            font-size: 1.25rem;
+        }
+        
+        .nav-icon.active {
+            transform: translateY(-5px);
+            color: var(--primary);
+        }
+        
+        /* Video Container */
+        .video-container {
+            position: relative;
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            height: 300px;
+        }
+        
+        #video-preview {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        
+        /* Canvas untuk analisis */
+        .analysis-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100% !important;
+            height: 100% !important;
+            pointer-events: none;
+        }
+        
+        /* Torsi Meter */
+        .torque-meter {
+            height: 12px;
+            background: linear-gradient(to right, #10b981, #f59e0b, #ef4444);
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .torque-indicator {
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.7);
+            width: 4px;
+            position: absolute;
+            top: 0;
+            transform: translateX(-50%);
+            transition: left 0.3s ease;
+        }
+        
+        /* PERUBAHAN BESAR: Chart Container yang diperbesar */
+        .chart-container {
+            height: 280px !important; /* Diperbesar dari 200px */
+            position: relative;
+            background: white;
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        /* Chart Controls */
+        .chart-controls {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .chart-btn {
+            padding: 4px 10px;
+            font-size: 11px;
+            border-radius: 6px;
+            background: #f3f4f6;
+            border: 1px solid #d1d5db;
+            color: #374151;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .chart-btn:hover {
+            background: #e5e7eb;
+        }
+        
+        .chart-btn.active {
+            background: #38b2ac;
+            color: white;
+            border-color: #38b2ac;
+        }
+        
+        /* Animasi putaran */
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .rotating {
+            animation: rotate 2s linear infinite;
+        }
+        
+        /* Data panel */
+        .data-panel {
+            transition: all 0.3s ease;
+        }
+        
+        .data-panel.collapsed {
+            max-height: 60px;
+            overflow: hidden;
+        }
+        
+        /* Custom Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+        
+        /* Detection Status */
+        .detection-status {
+            font-size: 11px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            display: inline-block;
+        }
+        
+        .detection-good {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+        
+        .detection-fair {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+        
+        .detection-poor {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+        
+        /* Loading Spinner */
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #38b2ac;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Point selection cursor */
+        .canvas-point-selection {
+            cursor: crosshair !important;
+        }
+        
+        /* Error Message */
+        .error-message {
+            background-color: #fee2e2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+            display: none;
+        }
+        
+        /* PERUBAHAN BESAR: Table Styles yang diperbesar dan rapi */
+        .data-table {
+            width: 100%;
+            font-size: 12px !important; /* Diperbesar dari 11px */
+            border-collapse: collapse;
+            background: white;
+        }
+        
+        .data-table th {
+            background-color: #38b2ac !important;
+            color: white !important;
+            padding: 10px 12px !important; /* Diperbesar */
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid #2c9c96;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .data-table td {
+            padding: 8px 12px !important; /* Diperbesar */
+            border-bottom: 1px solid #f1f5f9;
+            color: #475569;
+        }
+        
+        .data-table tr:hover {
+            background-color: #f8fafc;
+        }
+        
+        /* Striped rows untuk readability lebih baik */
+        .data-table tr:nth-child(even) {
+            background-color: #f9fafb;
+        }
+        
+        .data-table tr:nth-child(even):hover {
+            background-color: #f3f4f6;
+        }
+        
+        /* Export Buttons */
+        .export-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .export-btn {
+            flex: 1;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            transition: all 0.2s;
+        }
+        
+        .export-btn-chart {
+            background-color: #38b2ac;
+            color: white;
+        }
+        
+        .export-btn-chart:hover {
+            background-color: #319795;
+        }
+        
+        .export-btn-data {
+            background-color: #8b5cf6;
+            color: white;
+        }
+        
+        .export-btn-data:hover {
+            background-color: #7c3aed;
+        }
+        
+        /* PERUBAHAN BESAR: Scrollable Table Container yang lebih tinggi */
+        .table-container {
+            max-height: 300px !important; /* Diperbesar dari 200px */
+            overflow-y: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            margin-top: 10px;
+            background: white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+        }
+        
+        /* Advanced Calibration */
+        .calibration-section {
+            background-color: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 10px;
+        }
+        
+        .calibration-input {
+            width: 100%;
+            padding: 6px 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 12px;
+        }
+        
+        /* Section header yang lebih kecil */
+        .section-header {
+            font-size: 13px !important;
+            font-weight: 600;
+        }
+        
+        /* Result value yang lebih kecil */
+        .result-value {
+            font-size: 14px !important;
+        }
+        
+        /* Perbaikan untuk mobile readability */
+        @media (max-width: 380px) {
+            .chart-container {
+                height: 250px !important;
+            }
+            
+            .data-table {
+                font-size: 11px !important;
+            }
+            
+            .data-table th,
+            .data-table td {
+                padding: 8px 10px !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile App Container -->
+    <div class="app-container">
+        <!-- App Header -->
+        <header class="bg-gradient-to-r from-primary to-secondary p-4 text-white">
+            <div class="flex justify-between items-center">
+                <div class="app-logo">
+                    <div class="app-logo-icon">
+                        <i class="fas fa-sync-alt"></i>
+                    </div>
+                    <h1 class="app-name">QUANTARA</h1>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-info-circle text-xl" id="info-btn"></i>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Loading Indicator for OpenCV -->
+        <div id="opencv-loading" class="fixed inset-0 bg-white bg-opacity-90 flex flex-col items-center justify-center z-50">
+            <div class="loading-spinner mb-4"></div>
+            <p class="text-gray-700 font-medium">Memuat OpenCV.js...</p>
+            <p class="text-gray-500 text-sm mt-2">Harap tunggu beberapa saat</p>
+            <div class="mt-4 text-xs text-gray-600 max-w-xs text-center">
+                OpenCV.js sedang dimuat dari server. Proses ini mungkin memerlukan beberapa detik.
+            </div>
+        </div>
+        
+        <!-- Error Message -->
+        <div id="error-message" class="error-message m-4 hidden">
+            <div class="flex items-center">
+                <i class="fas fa-exclamation-triangle mr-3"></i>
+                <div>
+                    <p class="font-medium" id="error-title">Terjadi Kesalahan</p>
+                    <p class="text-sm" id="error-detail"></p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <main class="pb-24 p-4 custom-scrollbar" style="max-height: calc(100vh - 70px); overflow-y: auto;">
+            <!-- Page Title - Text diperkecil -->
+            <div class="mb-4">
+                <h1 class="text-lg font-bold text-gray-800 mb-1">
+                    <i class="fas fa-video text-teal-500 mr-2"></i> Analisis Torsi Presisi
+                </h1>
+                <p class="text-gray-600 text-xs">
+                    Deteksi rotasi otomatis dengan perhitungan torsi yang akurat
+                </p>
+            </div>
+            
+            <!-- OpenCV Status -->
+            <div id="opencv-status" class="hidden mb-4 p-3 bg-blue-50 border border-blue-200 rounded-xl">
+                <div class="flex items-center">
+                    <i class="fas fa-cogs text-blue-500 mr-2"></i>
+                    <p class="text-sm text-blue-700">OpenCV.js siap untuk analisis presisi</p>
+                </div>
+            </div>
+            
+            <!-- Video Upload Section -->
+            <div class="mb-6 p-4 bg-white border border-gray-200 rounded-xl shadow-sm">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="section-header text-gray-700 flex items-center">
+                        <i class="fas fa-upload text-blue-500 mr-2 text-xs"></i> Upload Video
+                    </h3>
+                    <div class="text-xs text-gray-500">
+                        MP4, Max 50MB
+                    </div>
+                </div>
+                
+                <!-- Upload Area -->
+                <div id="upload-area" class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center mb-4 cursor-pointer hover:border-teal-400 transition-colors">
+                    <div class="flex flex-col items-center">
+                        <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"></i>
+                        <p class="text-sm text-gray-600 font-medium">Klik atau tarik video MP4 ke sini</p>
+                        <p class="text-xs text-gray-500 mt-1">Untuk hasil terbaik: gunakan video dengan objek rotasi yang jelas</p>
+                        <p class="text-xs text-teal-600 mt-2">Format: MP4, AVI, MOV | Maks: 50MB</p>
+                    </div>
+                    <input type="file" id="video-input" accept="video/mp4,video/x-m4v,video/*" class="hidden">
+                </div>
+                
+                <!-- Video Info -->
+                <div id="video-info" class="hidden">
+                    <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                        <div class="flex items-center">
+                            <i class="fas fa-video text-teal-500 mr-3"></i>
+                            <div>
+                                <p id="video-name" class="text-sm font-medium text-gray-800 truncate max-w-[200px]"></p>
+                                <p id="video-size" class="text-xs text-gray-500"></p>
+                                <p id="video-duration" class="text-xs text-gray-400"></p>
+                            </div>
+                        </div>
+                        <button id="remove-video" class="text-red-500 hover:text-red-700">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Video Preview -->
+                <div id="video-preview-container" class="hidden mt-4">
+                    <div class="video-container">
+                        <video id="video-preview" class="w-full rounded-xl" playsinline>
+                            Your browser does not support the video tag.
+                        </video>
+                        <canvas id="video-canvas" class="analysis-canvas w-full rounded-xl"></canvas>
+                        <div id="canvas-overlay" class="absolute inset-0 pointer-events-none"></div>
+                    </div>
+                    
+                    <!-- Video Controls -->
+                    <div class="flex items-center justify-between mt-3">
+                        <div class="flex items-center space-x-2">
+                            <button id="btn-play" class="w-8 h-8 rounded-full bg-teal-100 text-teal-700 flex items-center justify-center">
+                                <i class="fas fa-play text-xs"></i>
+                            </button>
+                            <div class="text-xs text-gray-500">
+                                <span id="current-time">0:00</span> / <span id="total-time">0:00</span>
+                            </div>
+                        </div>
+                        <div class="text-xs text-gray-500">
+                            <span id="video-resolution">-</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Detection Info -->
+                    <div id="detection-info" class="mt-3 hidden">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <i class="fas fa-eye text-teal-500 mr-2"></i>
+                                <span class="text-xs text-gray-700">Status Deteksi:</span>
+                                <span id="detection-status-text" class="detection-status detection-good ml-2">Baik</span>
+                            </div>
+                            <div class="text-xs text-gray-500">
+                                <span id="feature-count">0</span> fitur terdeteksi
+                            </div>
+                        </div>
+                        <div class="mt-2 text-xs text-gray-600" id="tracking-status">
+                            <i class="fas fa-sync-alt animate-spin mr-1"></i>
+                            <span>Mempersiapkan pelacakan...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Advanced Calibration Section - Text diperkecil -->
+            <div class="mb-6 p-4 bg-white border border-gray-200 rounded-xl shadow-sm">
+                <h3 class="section-header text-gray-700 flex items-center mb-4">
+                    <i class="fas fa-tachometer-alt text-purple-500 mr-2 text-xs"></i> Kalibrasi Presisi
+                </h3>
+                
+                <div class="space-y-4">
+                    <!-- Frame Rate Settings -->
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-2">
+                            Frame Rate Video: <span id="frame-rate-value" class="text-teal-600">30</span> fps
+                        </label>
+                        <input type="range" id="frame-rate-slider" min="15" max="60" value="30" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                        <div class="flex justify-between text-xs text-gray-500 mt-1">
+                            <span>15 fps</span>
+                            <span>30 fps</span>
+                            <span>60 fps</span>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-1">Atur sesuai frame rate video asli untuk akurasi waktu</p>
+                    </div>
+                    
+                    <!-- Pixel Calibration -->
+                    <div class="calibration-section">
+                        <label class="block text-xs font-medium text-gray-700 mb-2">
+                            <i class="fas fa-ruler-combined mr-1"></i> Kalibrasi Pixel
+                        </label>
+                        <div class="grid grid-cols-2 gap-2 mb-2">
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Panjang Objek (m)</label>
+                                <input type="number" id="object-length" value="0.1" step="0.01" min="0.01" class="calibration-input">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Pixel Objek</label>
+                                <input type="number" id="object-pixels" value="50" step="1" min="10" class="calibration-input">
+                            </div>
+                        </div>
+                        <div class="text-xs text-gray-600">
+                            <i class="fas fa-info-circle mr-1"></i> Ukur panjang objek dalam meter dan pixel
+                        </div>
+                        <button id="btn-calibrate" class="mt-2 w-full py-2 bg-purple-100 text-purple-700 rounded-lg text-xs font-medium hover:bg-purple-200">
+                            <i class="fas fa-calculator mr-1"></i> Kalibrasi Skala
+                        </button>
+                        <div id="calibration-result" class="mt-2 text-xs text-green-600 hidden">
+                            <i class="fas fa-check-circle mr-1"></i>
+                            Skala: <span id="scale-result">0.002</span> m/pixel
+                        </div>
+                    </div>
+                    
+                    <!-- Smoothing Settings -->
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-2">
+                            Smoothing Data: <span id="smoothing-value" class="text-teal-600">0.7</span>
+                        </label>
+                        <input type="range" id="smoothing-slider" min="0" max="100" value="70" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                        <div class="flex justify-between text-xs text-gray-500 mt-1">
+                            <span>Tanpa Filter</span>
+                            <span>Sedang</span>
+                            <span>Smooth Maksimal</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Detection Settings - Text diperkecil -->
+            <div class="mb-6 p-4 bg-white border border-gray-200 rounded-xl shadow-sm">
+                <h3 class="section-header text-gray-700 flex items-center mb-4">
+                    <i class="fas fa-cog text-purple-500 mr-2 text-xs"></i> Pengaturan Deteksi
+                </h3>
+                
+                <div class="space-y-4">
+                    <!-- Detection Method -->
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-2">Metode Deteksi</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button id="method-feature" class="py-2 px-3 bg-teal-100 text-teal-700 rounded-lg text-xs font-medium transition-colors hover:bg-teal-200 active:bg-teal-300">
+                                <i class="fas fa-dot-circle mr-1"></i> Feature Tracking
+                            </button>
+                            <button id="method-template" class="py-2 px-3 bg-gray-100 text-gray-700 rounded-lg text-xs font-medium transition-colors hover:bg-gray-200 active:bg-gray-300">
+                                <i class="fas fa-search mr-1"></i> Template Matching
+                            </button>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1" id="method-description">Feature Tracking lebih cocok untuk objek dengan tekstur</p>
+                    </div>
+                    
+                    <!-- Feature Settings -->
+                    <div id="feature-settings">
+                        <label class="block text-xs font-medium text-gray-700 mb-2">Pengaturan Fitur</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Jumlah Fitur</label>
+                                <select id="feature-count-select" class="w-full p-2 border border-gray-300 rounded-lg text-xs">
+                                    <option value="100">100</option>
+                                    <option value="200" selected>200</option>
+                                    <option value="300">300</option>
+                                    <option value="500">500</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Kualitas</label>
+                                <select id="feature-quality" class="w-full p-2 border border-gray-300 rounded-lg text-xs">
+                                    <option value="0.005">Presisi Tinggi</option>
+                                    <option value="0.01" selected>Presisi Sedang</option>
+                                    <option value="0.03">Presisi Rendah</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Manual Point Selection -->
+                    <div id="manual-selection" class="pt-4 border-t border-gray-100">
+                        <label class="block text-xs font-medium text-gray-700 mb-2">Pilih Titik pada Video</label>
+                        <div class="text-xs text-gray-600 mb-2">
+                            Klik pada objek yang berotasi di video untuk menandainya
+                        </div>
+                        <div class="flex space-x-2">
+                            <button id="btn-select-point" class="flex-1 py-2 bg-blue-100 text-blue-700 rounded-lg text-xs font-medium transition-colors hover:bg-blue-200">
+                                <i class="fas fa-mouse-pointer mr-1"></i> Pilih Titik
+                            </button>
+                            <button id="btn-clear-points" class="flex-1 py-2 bg-gray-100 text-gray-700 rounded-lg text-xs font-medium transition-colors hover:bg-gray-200">
+                                <i class="fas fa-trash-alt mr-1"></i> Hapus
+                            </button>
+                        </div>
+                        <div id="selected-points-info" class="mt-2 text-xs text-gray-500 hidden">
+                            <i class="fas fa-check-circle text-green-500 mr-1"></i>
+                            <span id="points-count">0</span> titik dipilih
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Physics Parameters - Text diperkecil -->
+            <div class="mb-6 p-4 bg-white border border-gray-200 rounded-xl shadow-sm">
+                <h3 class="section-header text-gray-700 flex items-center mb-4">
+                    <i class="fas fa-calculator text-orange-500 mr-2 text-xs"></i> Parameter Fisika
+                </h3>
+                
+                <div class="grid grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-xs text-gray-600 mb-1">Jari-jari (m)</label>
+                        <input type="number" id="radius-input" value="0.05" step="0.001" min="0.001" class="w-full p-2 border border-gray-300 rounded-lg text-sm">
+                        <p class="text-xs text-gray-400 mt-1">Jarak dari pusat rotasi</p>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-600 mb-1">Massa (kg)</label>
+                        <input type="number" id="mass-input" value="0.1" step="0.001" min="0.001" class="w-full p-2 border border-gray-300 rounded-lg text-sm">
+                        <p class="text-xs text-gray-400 mt-1">Massa objek yang berotasi</p>
+                    </div>
+                </div>
+                
+                <!-- Advanced Parameters -->
+                <div id="advanced-params" class="mt-4 hidden">
+                    <div class="grid grid-cols-2 gap-4 mb-4">
+                        <div>
+                            <label class="block text-xs text-gray-600 mb-1">Momen Inersia (kg·m²)</label>
+                            <input type="number" id="inertia-input" value="0.000125" step="0.000001" min="0.000001" class="w-full p-2 border border-gray-300 rounded-lg text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gray-600 mb-1">Gaya (N)</label>
+                            <input type="number" id="force-input" value="0.1" step="0.01" min="0.001" class="w-full p-2 border border-gray-300 rounded-lg text-sm">
+                        </div>
+                    </div>
+                    
+                    <!-- Additional Parameters -->
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs text-gray-600 mb-1">Koefisien Gesek</label>
+                            <input type="number" id="friction-input" value="0.01" step="0.001" min="0" class="w-full p-2 border border-gray-300 rounded-lg text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gray-600 mb-1">Densitas (kg/m³)</label>
+                            <input type="number" id="density-input" value="1000" step="10" min="1" class="w-full p-2 border border-gray-300 rounded-lg text-sm">
+                        </div>
+                    </div>
+                </div>
+                
+                <button id="toggle-advanced" class="mt-3 text-xs text-teal-600 hover:text-teal-800">
+                    <i class="fas fa-sliders-h mr-1"></i> Parameter Lanjutan
+                </button>
+            </div>
+            
+            <!-- Control Buttons -->
+            <div class="mb-6 grid grid-cols-3 gap-2">
+                <button id="btn-analyze" class="py-3 bg-gradient-to-r from-teal-500 to-teal-600 text-white rounded-lg text-sm font-medium transition-all hover:from-teal-600 hover:to-teal-700 active:scale-95">
+                    <i class="fas fa-play mr-1"></i> Analisis
+                </button>
+                <button id="btn-pause" class="py-3 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors hover:bg-gray-300 active:scale-95">
+                    <i class="fas fa-pause mr-1"></i> Jeda
+                </button>
+                <button id="btn-reset" class="py-3 bg-red-100 text-red-700 rounded-lg text-sm font-medium transition-colors hover:bg-red-200 active:scale-95">
+                    <i class="fas fa-redo mr-1"></i> Reset
+                </button>
+            </div>
+            
+            <!-- Torque Analysis Results -->
+            <div id="results-section" class="hidden mb-6">
+                <div class="data-panel p-4 bg-white border border-gray-200 rounded-xl shadow-sm">
+                    <!-- Panel Header -->
+                    <div class="flex items-center justify-between mb-4 cursor-pointer" id="results-header">
+                        <div class="flex items-center">
+                            <i class="fas fa-chart-line text-orange-500 mr-2 text-xs"></i>
+                            <h3 class="section-header text-gray-700">Hasil Analisis Torsi</h3>
+                        </div>
+                        <i class="fas fa-chevron-down text-gray-400 transition-transform" id="results-toggle-icon"></i>
+                    </div>
+                    
+                    <!-- Results Content -->
+                    <div id="results-content">
+                        <!-- Real-time Torque Display -->
+                        <div class="mb-6">
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="text-sm font-medium text-gray-700">Torsi Saat Ini</span>
+                                <span id="current-torque" class="text-lg font-bold text-teal-600">0.00 N·m</span>
+                            </div>
+                            <div class="torque-meter relative">
+                                <div id="torque-indicator" class="torque-indicator" style="left: 50%;"></div>
+                            </div>
+                            <div class="flex justify-between text-xs text-gray-500 mt-1">
+                                <span>0 N·m</span>
+                                <span>Sedang</span>
+                                <span>Tinggi</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Torque Statistics -->
+                        <div class="grid grid-cols-3 gap-3 mb-4">
+                            <div class="bg-teal-50 p-3 rounded-lg text-center">
+                                <p class="text-xs text-teal-700 font-medium">Min</p>
+                                <p id="torque-min" class="result-value font-bold text-teal-800">0.00</p>
+                                <p class="text-xs text-teal-600">N·m</p>
+                            </div>
+                            <div class="bg-blue-50 p-3 rounded-lg text-center">
+                                <p class="text-xs text-blue-700 font-medium">Rata-rata</p>
+                                <p id="torque-avg" class="result-value font-bold text-blue-800">0.00</p>
+                                <p class="text-xs text-blue-600">N·m</p>
+                            </div>
+                            <div class="bg-red-50 p-3 rounded-lg text-center">
+                                <p class="text-xs text-red-700 font-medium">Max</p>
+                                <p id="torque-max" class="result-value font-bold text-red-800">0.00</p>
+                                <p class="text-xs text-red-600">N·m</p>
+                            </div>
+                        </div>
+                        
+                        <!-- Angular Motion -->
+                        <div class="mb-4">
+                            <div class="flex justify-between items-center mb-3">
+                                <span class="text-sm font-medium text-gray-700">Gerak Sudut</span>
+                                <div class="flex items-center">
+                                    <div class="w-6 h-6 rounded-full border-2 border-t-purple-500 border-r-purple-300 border-b-purple-300 border-l-purple-300 mr-2" id="rotation-indicator"></div>
+                                    <span id="angular-velocity" class="result-value font-bold text-purple-600">0.00 rad/s</span>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-3 gap-2">
+                                <div class="bg-purple-50 p-2 rounded-lg">
+                                    <p class="text-xs text-purple-600">Periode</p>
+                                    <p id="rotation-period" class="result-value font-bold text-purple-800">0.00 s</p>
+                                </div>
+                                <div class="bg-indigo-50 p-2 rounded-lg">
+                                    <p class="text-xs text-indigo-600">Frekuensi</p>
+                                    <p id="rotation-frequency" class="result-value font-bold text-indigo-800">0.00 Hz</p>
+                                </div>
+                                <div class="bg-blue-50 p-2 rounded-lg">
+                                    <p class="text-xs text-blue-600">Percepatan</p>
+                                    <p id="angular-acceleration" class="result-value font-bold text-blue-800">0.00 rad/s²</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Energy Analysis -->
+                        <div class="p-3 bg-amber-50 rounded-lg mb-4">
+                            <h4 class="text-xs font-bold text-gray-700 mb-2 flex items-center">
+                                <i class="fas fa-bolt text-amber-500 mr-1"></i> Analisis Energi
+                            </h4>
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <p class="text-xs text-amber-600">Energi Kinetik Rotasi</p>
+                                    <p id="kinetic-energy" class="result-value font-bold text-amber-800">0.00 J</p>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-amber-600">Daya</p>
+                                    <p id="power" class="result-value font-bold text-amber-800">0.00 W</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Chart Container - DIPERBESAR -->
+                        <div class="mb-6">
+                            <div class="flex justify-between items-center mb-3">
+                                <span class="section-header text-gray-700">Grafik Analisis Torsi</span>
+                                <div class="chart-controls">
+                                    <button class="chart-btn active" id="btn-chart-torque">
+                                        Torsi
+                                    </button>
+                                    <button class="chart-btn" id="btn-chart-velocity">
+                                        Kecepatan
+                                    </button>
+                                    <button class="chart-btn" id="btn-chart-acceleration">
+                                        Percepatan
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="chart-container" id="chart-area">
+                                <canvas id="torque-chart"></canvas>
+                            </div>
+                            <!-- Export Chart Button -->
+                            <div class="export-buttons mt-3">
+                                <button id="btn-download-chart" class="export-btn export-btn-chart">
+                                    <i class="fas fa-download"></i> Download Grafik (PNG)
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Data Table Section - DIPERBESAR -->
+                        <div class="mb-6">
+                            <div class="flex justify-between items-center mb-3">
+                                <span class="section-header text-gray-700">Data Analisis Torsi</span>
+                                <div class="flex space-x-2">
+                                    <button class="text-xs px-3 py-1 bg-gray-100 rounded hover:bg-gray-200" id="table-toggle">
+                                        Tampilkan Tabel
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="hidden" id="table-area">
+                                <div class="table-container">
+                                    <table class="data-table" id="torque-table">
+                                        <thead>
+                                            <tr>
+                                                <th>No</th>
+                                                <th>Waktu (s)</th>
+                                                <th>Torsi (N·m)</th>
+                                                <th>ω (rad/s)</th>
+                                                <th>α (rad/s²)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="table-body">
+                                            <!-- Data rows will be inserted here -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <!-- Export Data Button -->
+                                <div class="export-buttons mt-4">
+                                    <button id="btn-download-csv" class="export-btn export-btn-data">
+                                        <i class="fas fa-file-csv"></i> Download Data (CSV)
+                                    </button>
+                                    <button id="btn-download-pdf" class="export-btn export-btn-data">
+                                        <i class="fas fa-file-pdf"></i> Download Laporan (PDF)
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Detection Analysis -->
+                        <div class="p-3 bg-gray-50 rounded-lg mb-4">
+                            <h4 class="text-xs font-bold text-gray-700 mb-2 flex items-center">
+                                <i class="fas fa-chart-bar text-teal-500 mr-1"></i> Analisis Presisi
+                            </h4>
+                            <div class="text-xs text-gray-600 space-y-1">
+                                <div class="flex justify-between">
+                                    <span>Akurasi Deteksi:</span>
+                                    <span id="detection-accuracy" class="font-medium">0%</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Frame Berhasil:</span>
+                                    <span id="successful-frames" class="font-medium">0/0</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Kecepatan Analisis:</span>
+                                    <span id="analysis-fps" class="font-medium">0 FPS</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>RMS Error:</span>
+                                    <span id="rms-error" class="font-medium">0.000</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Physics Formula -->
+                        <div class="p-3 bg-teal-50 rounded-lg">
+                            <h4 class="text-xs font-bold text-gray-700 mb-2 flex items-center">
+                                <i class="fas fa-calculator text-teal-500 mr-1"></i> Rumus Torsi Presisi
+                            </h4>
+                            <div class="text-center mb-2">
+                                <p class="text-sm font-bold text-gray-800">τ = I × α + F<sub>gesek</sub> × r</p>
+                            </div>
+                            <div class="text-xs text-gray-600 space-y-1">
+                                <p>• τ = Torsi total (N·m)</p>
+                                <p>• I = Momen inersia (kg·m²)</p>
+                                <p>• α = Percepatan sudut (rad/s²)</p>
+                                <p>• F<sub>gesek</sub> = Gaya gesek (N)</p>
+                                <p>• r = Jari-jari (m)</p>
+                                <p>• I = ½ × m × r² (cakram)</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Information Panel -->
+            <div class="mb-6 p-4 bg-gradient-to-r from-blue-50 to-teal-50 border border-blue-100 rounded-xl">
+                <h3 class="section-header text-gray-700 mb-2 flex items-center">
+                    <i class="fas fa-info-circle text-blue-500 mr-2 text-xs"></i> Teknik Presisi
+                </h3>
+                <div class="text-xs text-gray-700 space-y-2">
+                    <p><span class="font-bold">Kalibrasi Skala:</span> Konversi pixel ke meter untuk akurasi spasial.</p>
+                    <p><span class="font-bold">Filter Kalman:</span> Mengurangi noise dan meningkatkan akurasi tracking.</p>
+                    <p><span class="font-bold">Sub-pixel Accuracy:</span> Presisi deteksi hingga 0.1 pixel.</p>
+                    <p><span class="font-bold">Analisis Error:</span> Menghitung RMS error untuk validasi data.</p>
+                </div>
+            </div>
+        </main>
+        
+        <!-- BOTTOM NAVIGATION -->
+        <nav class="bottom-nav">
+            <a href="dashboad siswa.html" class="nav-item">
+                <i class="fas fa-home nav-icon"></i>
+                <span>Beranda</span>
+            </a>
+            <a href="soal harian/dashboard soal.html" class="nav-item">
+                <i class="fas fa-flask nav-icon"></i>
+                <span>Soal Harian</span>
+            </a>
+            <a href="ai/nayra.html" class="nav-item">
+                <i class="fas fa-robot nav-icon"></i>
+                <span>Nayra AI</span>
+            </a>
+            <a href="materi harian/kategori materi.html" class="nav-item">
+                <i class="fas fa-chalkboard-teacher nav-icon"></i>
+                <span>Materi Harian</span>
+            </a>
+            <a href="profil/profil.html" class="nav-item">
+                <i class="fas fa-user nav-icon"></i>
+                <span>Profil</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Chart.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- jsPDF for PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- Simple Statistics for error calculations -->
+    <script src="https://cdn.jsdelivr.net/npm/simple-statistics@7.8.3/dist/simple-statistics.min.js"></script>
+    
+    <script>
+        // DOM Elements
+        const videoInput = document.getElementById('video-input');
+        const uploadArea = document.getElementById('upload-area');
+        const videoInfo = document.getElementById('video-info');
+        const videoName = document.getElementById('video-name');
+        const videoSize = document.getElementById('video-size');
+        const videoDuration = document.getElementById('video-duration');
+        const removeVideoBtn = document.getElementById('remove-video');
+        const videoPreviewContainer = document.getElementById('video-preview-container');
+        const videoPreview = document.getElementById('video-preview');
+        const videoCanvas = document.getElementById('video-canvas');
+        const canvasContext = videoCanvas.getContext('2d');
+        const btnPlay = document.getElementById('btn-play');
+        const currentTime = document.getElementById('current-time');
+        const totalTime = document.getElementById('total-time');
+        const videoResolution = document.getElementById('video-resolution');
+        
+        // Calibration Elements
+        const frameRateSlider = document.getElementById('frame-rate-slider');
+        const frameRateValue = document.getElementById('frame-rate-value');
+        const objectLengthInput = document.getElementById('object-length');
+        const objectPixelsInput = document.getElementById('object-pixels');
+        const btnCalibrate = document.getElementById('btn-calibrate');
+        const calibrationResult = document.getElementById('calibration-result');
+        const scaleResult = document.getElementById('scale-result');
+        const smoothingSlider = document.getElementById('smoothing-slider');
+        const smoothingValue = document.getElementById('smoothing-value');
+        
+        // Control Elements
+        const btnAnalyze = document.getElementById('btn-analyze');
+        const btnPause = document.getElementById('btn-pause');
+        const btnReset = document.getElementById('btn-reset');
+        const radiusInput = document.getElementById('radius-input');
+        const massInput = document.getElementById('mass-input');
+        const inertiaInput = document.getElementById('inertia-input');
+        const forceInput = document.getElementById('force-input');
+        const frictionInput = document.getElementById('friction-input');
+        const densityInput = document.getElementById('density-input');
+        const methodFeature = document.getElementById('method-feature');
+        const methodTemplate = document.getElementById('method-template');
+        const methodDescription = document.getElementById('method-description');
+        const featureCountSelect = document.getElementById('feature-count-select');
+        const featureQuality = document.getElementById('feature-quality');
+        const btnSelectPoint = document.getElementById('btn-select-point');
+        const btnClearPoints = document.getElementById('btn-clear-points');
+        const manualSelection = document.getElementById('manual-selection');
+        const selectedPointsInfo = document.getElementById('selected-points-info');
+        const pointsCount = document.getElementById('points-count');
+        const toggleAdvanced = document.getElementById('toggle-advanced');
+        const advancedParams = document.getElementById('advanced-params');
+        
+        // Results Elements
+        const resultsSection = document.getElementById('results-section');
+        const currentTorque = document.getElementById('current-torque');
+        const torqueIndicator = document.getElementById('torque-indicator');
+        const torqueMin = document.getElementById('torque-min');
+        const torqueAvg = document.getElementById('torque-avg');
+        const torqueMax = document.getElementById('torque-max');
+        const angularVelocity = document.getElementById('angular-velocity');
+        const angularAcceleration = document.getElementById('angular-acceleration');
+        const rotationPeriod = document.getElementById('rotation-period');
+        const rotationFrequency = document.getElementById('rotation-frequency');
+        const rotationIndicator = document.getElementById('rotation-indicator');
+        const kineticEnergy = document.getElementById('kinetic-energy');
+        const power = document.getElementById('power');
+        const rmsError = document.getElementById('rms-error');
+        const resultsHeader = document.getElementById('results-header');
+        const resultsContent = document.getElementById('results-content');
+        const resultsToggleIcon = document.getElementById('results-toggle-icon');
+        const chartArea = document.getElementById('chart-area');
+        const detectionAccuracy = document.getElementById('detection-accuracy');
+        const successfulFrames = document.getElementById('successful-frames');
+        const analysisFps = document.getElementById('analysis-fps');
+        const detectionInfo = document.getElementById('detection-info');
+        const detectionStatusText = document.getElementById('detection-status-text');
+        const featureCount = document.getElementById('feature-count');
+        const trackingStatus = document.getElementById('tracking-status');
+        
+        // Chart Controls
+        const btnChartTorque = document.getElementById('btn-chart-torque');
+        const btnChartVelocity = document.getElementById('btn-chart-velocity');
+        const btnChartAcceleration = document.getElementById('btn-chart-acceleration');
+        
+        // Export and Table Elements
+        const tableToggle = document.getElementById('table-toggle');
+        const tableArea = document.getElementById('table-area');
+        const tableBody = document.getElementById('table-body');
+        const btnDownloadChart = document.getElementById('btn-download-chart');
+        const btnDownloadCSV = document.getElementById('btn-download-csv');
+        const btnDownloadPDF = document.getElementById('btn-download-pdf');
+        
+        // OpenCV Elements
+        const opencvLoading = document.getElementById('opencv-loading');
+        const opencvStatus = document.getElementById('opencv-status');
+        const errorMessage = document.getElementById('error-message');
+        const errorTitle = document.getElementById('error-title');
+        const errorDetail = document.getElementById('error-detail');
+        
+        // Variables
+        let videoFile = null;
+        let isPlaying = false;
+        let isAnalyzing = false;
+        let animationFrameId = null;
+        let torqueData = [];
+        let timeData = [];
+        let angularVelocityData = [];
+        let angularAccelerationData = [];
+        let analysisStartTime = null;
+        let lastFrameTime = null;
+        let rotationAngle = 0;
+        let lastAngle = 0;
+        let angularVelocityValue = 0;
+        let angularAccelerationValue = 0;
+        let lastAngularVelocity = 0;
+        let torqueChart = null;
+        let isResultsExpanded = true;
+        let cv = null;
+        let isOpenCVLoaded = false;
+        let currentChartType = 'torque'; // 'torque', 'velocity', 'acceleration'
+        
+        // Calibration Variables
+        let pixelScale = 0.002; // Default: 0.002 m/pixel (2 mm/pixel)
+        let frameRate = 30;
+        let smoothingFactor = 0.7;
+        
+        // OpenCV Variables
+        let prevGray = null;
+        let currGray = null;
+        let prevPts = null;
+        let currPts = null;
+        let status = null;
+        let err = null;
+        let detectedFeatures = 0;
+        let successfulDetections = 0;
+        let totalFrames = 0;
+        let featureDetector = null;
+        let selectedPoints = [];
+        let isSelectingPoints = false;
+        let detectionMethod = 'feature';
+        let videoReady = false;
+        let firstFrameProcessed = false;
+        
+        // Error and Statistics
+        let angleHistory = [];
+        let velocityHistory = [];
+        let rmsErrorValue = 0;
+        
+        // Kalman Filter for smoothing
+        class SimpleKalmanFilter {
+            constructor(processNoise = 0.01, measurementNoise = 0.1, estimatedError = 1) {
+                this.processNoise = processNoise;
+                this.measurementNoise = measurementNoise;
+                this.estimatedError = estimatedError;
+                this.currentEstimate = 0;
+                this.lastEstimate = 0;
+            }
+            
+            update(measurement) {
+                // Prediction update
+                const kalmanGain = this.estimatedError / (this.estimatedError + this.measurementNoise);
+                this.currentEstimate = this.lastEstimate + kalmanGain * (measurement - this.lastEstimate);
+                
+                // Error update
+                this.estimatedError = (1 - kalmanGain) * this.estimatedError + Math.abs(this.lastEstimate - this.currentEstimate) * this.processNoise;
+                this.lastEstimate = this.currentEstimate;
+                
+                return this.currentEstimate;
+            }
+        }
+        
+        const angleFilter = new SimpleKalmanFilter(0.001, 0.05, 0.1);
+        const velocityFilter = new SimpleKalmanFilter(0.005, 0.1, 0.2);
+        
+        // Error Handling
+        function showError(title, message) {
+            errorTitle.textContent = title;
+            errorDetail.textContent = message;
+            errorMessage.classList.remove('hidden');
+            
+            setTimeout(() => {
+                errorMessage.classList.add('hidden');
+            }, 5000);
+        }
+        
+        // Initialize OpenCV
+        function onOpenCvReady() {
+            cv = window.cv;
+            if (cv) {
+                isOpenCVLoaded = true;
+                opencvLoading.classList.add('hidden');
+                opencvStatus.classList.remove('hidden');
+                console.log('OpenCV.js berhasil dimuat versi:', cv.getBuildInformation().split('\n')[0]);
+                
+                try {
+                    featureDetector = new cv.ORB();
+                    console.log('ORB detector berhasil diinisialisasi');
+                } catch (e) {
+                    console.warn('ORB tidak tersedia:', e.message);
+                    featureDetector = null;
+                }
+            } else {
+                showError('OpenCV Gagal Dimuat', 'OpenCV.js tidak dapat dimuat. Silakan refresh halaman.');
+            }
+        }
+        
+        // Fallback jika OpenCV gagal
+        setTimeout(() => {
+            if (!isOpenCVLoaded && !cv) {
+                opencvLoading.innerHTML = `
+                    <div class="text-center">
+                        <i class="fas fa-exclamation-triangle text-yellow-500 text-3xl mb-4"></i>
+                        <p class="text-gray-700 font-medium">OpenCV.js Gagal Dimuat</p>
+                        <p class="text-gray-500 text-sm mt-2">Menggunakan fallback mode simulasi</p>
+                        <button onclick="initializeFallbackMode()" class="mt-4 px-4 py-2 bg-teal-500 text-white rounded-lg text-sm">
+                            Gunakan Mode Simulasi
+                        </button>
+                    </div>
+                `;
+            }
+        }, 10000);
+        
+        function initializeFallbackMode() {
+            isOpenCVLoaded = true;
+            cv = { mock: true };
+            opencvLoading.classList.add('hidden');
+            opencvStatus.classList.remove('hidden');
+            showError('Mode Simulasi', 'Menggunakan mode simulasi karena OpenCV gagal dimuat.');
+        }
+        
+        // Initialize Chart - DIPERBESAR dan DIKONFIGURASI ULANG
+        function initChart() {
+            const ctx = document.getElementById('torque-chart').getContext('2d');
+            
+            if (torqueChart) {
+                torqueChart.destroy();
+            }
+            
+            // Konfigurasi chart yang lebih besar dan rapi
+            torqueChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: timeData,
+                    datasets: [
+                        {
+                            label: 'Torsi (N·m)',
+                            data: torqueData,
+                            borderColor: '#38b2ac',
+                            backgroundColor: 'rgba(56, 178, 172, 0.15)',
+                            borderWidth: 3, // Lebih tebal
+                            fill: currentChartType === 'torque',
+                            tension: 0.3,
+                            yAxisID: 'y',
+                            pointRadius: currentChartType === 'torque' ? 3 : 0,
+                            pointHoverRadius: 6,
+                            pointBackgroundColor: '#38b2ac',
+                            pointBorderColor: '#ffffff',
+                            pointBorderWidth: 1,
+                            hidden: currentChartType !== 'torque'
+                        },
+                        {
+                            label: 'Kecepatan Sudut (rad/s)',
+                            data: angularVelocityData,
+                            borderColor: '#8b5cf6',
+                            backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                            borderWidth: 2.5,
+                            fill: currentChartType === 'velocity',
+                            tension: 0.3,
+                            yAxisID: 'y1',
+                            pointRadius: currentChartType === 'velocity' ? 3 : 0,
+                            pointHoverRadius: 5,
+                            pointBackgroundColor: '#8b5cf6',
+                            pointBorderColor: '#ffffff',
+                            pointBorderWidth: 1,
+                            hidden: currentChartType !== 'velocity'
+                        },
+                        {
+                            label: 'Percepatan Sudut (rad/s²)',
+                            data: angularAccelerationData,
+                            borderColor: '#ef4444',
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            borderWidth: 2.5,
+                            fill: currentChartType === 'acceleration',
+                            tension: 0.3,
+                            yAxisID: 'y2',
+                            pointRadius: currentChartType === 'acceleration' ? 3 : 0,
+                            pointHoverRadius: 5,
+                            pointBackgroundColor: '#ef4444',
+                            pointBorderColor: '#ffffff',
+                            pointBorderWidth: 1,
+                            hidden: currentChartType !== 'acceleration'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                font: {
+                                    size: 12, // Font legend lebih besar
+                                    family: "'Baloo 2', cursive"
+                                },
+                                padding: 15,
+                                usePointStyle: true,
+                                pointStyle: 'circle'
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: getChartTitle(),
+                            font: {
+                                size: 14, // Font title lebih besar
+                                weight: 'bold',
+                                family: "'Baloo 2', cursive"
+                            },
+                            padding: {
+                                top: 5,
+                                bottom: 15
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleFont: {
+                                size: 12
+                            },
+                            bodyFont: {
+                                size: 11
+                            },
+                            padding: 10,
+                            cornerRadius: 6,
+                            displayColors: true,
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        // Format angka dengan presisi berbeda berdasarkan jenis data
+                                        if (label.includes('Torsi')) {
+                                            label += context.parsed.y.toFixed(6) + ' N·m';
+                                        } else if (label.includes('Kecepatan')) {
+                                            label += context.parsed.y.toFixed(4) + ' rad/s';
+                                        } else {
+                                            label += context.parsed.y.toFixed(4) + ' rad/s²';
+                                        }
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Waktu (s)',
+                                font: {
+                                    size: 12,
+                                    weight: 'bold',
+                                    family: "'Baloo 2', cursive"
+                                },
+                                padding: {top: 5, bottom: 10}
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)',
+                                drawBorder: false
+                            },
+                            ticks: {
+                                font: {
+                                    size: 11,
+                                    family: "'Baloo 2', cursive"
+                                },
+                                maxRotation: 45
+                            }
+                        },
+                        y: {
+                            type: 'linear',
+                            display: currentChartType === 'torque',
+                            position: 'left',
+                            title: {
+                                display: currentChartType === 'torque',
+                                text: 'Torsi (N·m)',
+                                font: {
+                                    size: 12,
+                                    weight: 'bold',
+                                    family: "'Baloo 2', cursive"
+                                },
+                                padding: {top: 5, bottom: 10}
+                            },
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            },
+                            ticks: {
+                                font: {
+                                    size: 11,
+                                    family: "'Baloo 2', cursive"
+                                },
+                                callback: function(value) {
+                                    return value.toFixed(6); // Presisi tinggi untuk torsi
+                                }
+                            }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: currentChartType === 'velocity',
+                            position: currentChartType === 'torque' ? 'right' : 'left',
+                            title: {
+                                display: currentChartType === 'velocity',
+                                text: 'Kecepatan Sudut (rad/s)',
+                                font: {
+                                    size: 12,
+                                    weight: 'bold',
+                                    family: "'Baloo 2', cursive"
+                                },
+                                padding: {top: 5, bottom: 10}
+                            },
+                            beginAtZero: true,
+                            grid: {
+                                drawOnChartArea: currentChartType === 'velocity',
+                                color: 'rgba(0, 0, 0, 0.03)'
+                            },
+                            ticks: {
+                                font: {
+                                    size: 11,
+                                    family: "'Baloo 2', cursive"
+                                }
+                            }
+                        },
+                        y2: {
+                            type: 'linear',
+                            display: currentChartType === 'acceleration',
+                            position: currentChartType === 'torque' || currentChartType === 'velocity' ? 'right' : 'left',
+                            title: {
+                                display: currentChartType === 'acceleration',
+                                text: 'Percepatan Sudut (rad/s²)',
+                                font: {
+                                    size: 12,
+                                    weight: 'bold',
+                                    family: "'Baloo 2', cursive"
+                                },
+                                padding: {top: 5, bottom: 10}
+                            },
+                            beginAtZero: true,
+                            grid: {
+                                drawOnChartArea: currentChartType === 'acceleration',
+                                color: 'rgba(0, 0, 0, 0.03)'
+                            },
+                            ticks: {
+                                font: {
+                                    size: 11,
+                                    family: "'Baloo 2', cursive"
+                                }
+                            }
+                        }
+                    },
+                    layout: {
+                        padding: {
+                            left: 15,
+                            right: 15,
+                            top: 10,
+                            bottom: 15
+                        }
+                    },
+                    animation: {
+                        duration: 300,
+                        easing: 'easeInOutQuart'
+                    }
+                }
+            });
+        }
+        
+        function getChartTitle() {
+            switch(currentChartType) {
+                case 'torque': return 'Grafik Torsi vs Waktu';
+                case 'velocity': return 'Grafik Kecepatan Sudut vs Waktu';
+                case 'acceleration': return 'Grafik Percepatan Sudut vs Waktu';
+                default: return 'Grafik Analisis Torsi';
+            }
+        }
+        
+        // Update table with data - TABEL DIPERBESAR
+        function updateTable() {
+            tableBody.innerHTML = '';
+            
+            if (timeData.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td colspan="5" class="text-center py-6 text-gray-500">
+                        <i class="fas fa-database text-2xl mb-2 block text-gray-300"></i>
+                        <p class="text-sm">Tidak ada data analisis</p>
+                        <p class="text-xs mt-1">Mulai analisis untuk melihat data</p>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+                return;
+            }
+            
+            // Tampilkan 15 data terbaru untuk tampilan yang lebih baik
+            const startIndex = Math.max(0, timeData.length - 15);
+            
+            for (let i = startIndex; i < timeData.length; i++) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td class="font-medium">${i + 1}</td>
+                    <td>${parseFloat(timeData[i]).toFixed(3)}</td>
+                    <td class="font-semibold text-teal-700">${torqueData[i].toFixed(6)}</td>
+                    <td class="font-semibold text-purple-700">${angularVelocityData[i].toFixed(4)}</td>
+                    <td class="font-semibold text-red-700">${angularAccelerationData[i].toFixed(4)}</td>
+                `;
+                tableBody.appendChild(row);
+            }
+            
+            // Tambahkan summary row di bawah
+            if (timeData.length > 0) {
+                const summaryRow = document.createElement('tr');
+                summaryRow.className = 'bg-gray-50 font-semibold';
+                const minTorque = torqueData.length > 0 ? Math.min(...torqueData).toFixed(6) : '0.000000';
+                const maxTorque = torqueData.length > 0 ? Math.max(...torqueData).toFixed(6) : '0.000000';
+                const avgTorque = torqueData.length > 0 ? (torqueData.reduce((a, b) => a + b, 0) / torqueData.length).toFixed(6) : '0.000000';
+                
+                summaryRow.innerHTML = `
+                    <td colspan="2" class="text-xs py-2">
+                        <span class="text-gray-600">Rata-rata:</span>
+                    </td>
+                    <td class="text-teal-700 text-xs py-2">${avgTorque}</td>
+                    <td colspan="2" class="text-xs py-2">
+                        <span class="text-gray-600">Min: ${minTorque} | Max: ${maxTorque}</span>
+                    </td>
+                `;
+                tableBody.appendChild(summaryRow);
+            }
+        }
+        
+        // Calculate pixel scale from calibration
+        function calculatePixelScale() {
+            const lengthMeters = parseFloat(objectLengthInput.value);
+            const lengthPixels = parseFloat(objectPixelsInput.value);
+            
+            if (lengthMeters > 0 && lengthPixels > 0) {
+                pixelScale = lengthMeters / lengthPixels;
+                scaleResult.textContent = pixelScale.toFixed(6);
+                calibrationResult.classList.remove('hidden');
+                showError('Kalibrasi Berhasil', `Skala: ${pixelScale.toFixed(6)} m/pixel`);
+                
+                // Update radius based on new scale
+                const currentRadius = parseFloat(radiusInput.value);
+                if (currentRadius > 0) {
+                    const radiusPixels = currentRadius / pixelScale;
+                    console.log(`Radius ${currentRadius}m = ${radiusPixels.toFixed(1)} pixels`);
+                }
+            } else {
+                showError('Kalibrasi Gagal', 'Masukkan nilai yang valid untuk panjang dan pixel');
+            }
+        }
+        
+        // Calculate moment of inertia based on shape
+        function calculateMomentOfInertia() {
+            const mass = parseFloat(massInput.value) || 0.1;
+            const radius = parseFloat(radiusInput.value) || 0.05;
+            
+            // For solid disk: I = 1/2 * m * r²
+            const inertia = 0.5 * mass * radius * radius;
+            inertiaInput.value = inertia.toFixed(9);
+            
+            return inertia;
+        }
+        
+        // Calculate torque with improved accuracy
+        function calculateTorquePrecise(angularAccel) {
+            const radius = parseFloat(radiusInput.value) || 0.05;
+            const mass = parseFloat(massInput.value) || 0.1;
+            const force = parseFloat(forceInput.value) || 0.1;
+            const friction = parseFloat(frictionInput.value) || 0.01;
+            const inertia = parseFloat(inertiaInput.value) || calculateMomentOfInertia();
+            
+            // Method 1: τ = I × α (rotational dynamics)
+            const torqueFromAcceleration = inertia * angularAccel;
+            
+            // Method 2: τ = r × F (force applied at radius)
+            const torqueFromForce = radius * force;
+            
+            // Method 3: Add friction torque (opposing motion)
+            const frictionTorque = friction * radius * Math.sign(angularVelocityValue);
+            
+            // Combined torque calculation
+            let torqueValue = torqueFromAcceleration + frictionTorque;
+            
+            // Use force-based torque as reference if acceleration is too small
+            if (Math.abs(torqueFromAcceleration) < 0.000001) {
+                torqueValue = torqueFromForce + frictionTorque;
+            }
+            
+            // Apply correction based on angular velocity (centrifugal effects)
+            const centrifugalCorrection = 0.1 * mass * radius * angularVelocityValue * angularVelocityValue;
+            torqueValue += centrifugalCorrection;
+            
+            // Ensure positive value for display
+            torqueValue = Math.abs(torqueValue);
+            
+            // Apply noise reduction
+            if (torqueData.length > 1) {
+                const lastTorque = torqueData[torqueData.length - 1];
+                const torqueChange = torqueValue - lastTorque;
+                
+                // Limit sudden changes
+                if (Math.abs(torqueChange) > 0.01) {
+                    torqueValue = lastTorque + Math.sign(torqueChange) * 0.01;
+                }
+            }
+            
+            return Math.max(0, torqueValue);
+        }
+        
+        // Calculate kinetic energy and power
+        function calculateEnergyAndPower() {
+            const inertia = parseFloat(inertiaInput.value) || calculateMomentOfInertia();
+            
+            // Rotational kinetic energy: K = 1/2 × I × ω²
+            const kinetic = 0.5 * inertia * angularVelocityValue * angularVelocityValue;
+            
+            // Power: P = τ × ω
+            const currentPower = torqueData.length > 0 ? 
+                torqueData[torqueData.length - 1] * angularVelocityValue : 0;
+            
+            kineticEnergy.textContent = kinetic.toFixed(6) + ' J';
+            power.textContent = currentPower.toFixed(6) + ' W';
+        }
+        
+        // Calculate RMS error
+        function calculateRMSError() {
+            if (angleHistory.length < 10) return 0;
+            
+            const errors = [];
+            for (let i = 1; i < angleHistory.length; i++) {
+                const predicted = angleHistory[i-1] + (angleHistory[i-1] - (i>1 ? angleHistory[i-2] : 0));
+                const actual = angleHistory[i];
+                errors.push(Math.pow(actual - predicted, 2));
+            }
+            
+            if (errors.length > 0) {
+                const mse = errors.reduce((a, b) => a + b, 0) / errors.length;
+                return Math.sqrt(mse);
+            }
+            return 0;
+        }
+        
+        // Event Listeners untuk chart controls
+        btnChartTorque.addEventListener('click', () => {
+            currentChartType = 'torque';
+            btnChartTorque.classList.add('active');
+            btnChartVelocity.classList.remove('active');
+            btnChartAcceleration.classList.remove('active');
+            if (torqueChart) {
+                torqueChart.destroy();
+                initChart();
+            }
+        });
+        
+        btnChartVelocity.addEventListener('click', () => {
+            currentChartType = 'velocity';
+            btnChartTorque.classList.remove('active');
+            btnChartVelocity.classList.add('active');
+            btnChartAcceleration.classList.remove('active');
+            if (torqueChart) {
+                torqueChart.destroy();
+                initChart();
+            }
+        });
+        
+        btnChartAcceleration.addEventListener('click', () => {
+            currentChartType = 'acceleration';
+            btnChartTorque.classList.remove('active');
+            btnChartVelocity.classList.remove('active');
+            btnChartAcceleration.classList.add('active');
+            if (torqueChart) {
+                torqueChart.destroy();
+                initChart();
+            }
+        });
+        
+        // Event Listeners lainnya...
+        frameRateSlider.addEventListener('input', (e) => {
+            frameRateValue.textContent = e.target.value;
+            frameRate = parseInt(e.target.value);
+        });
+        
+        smoothingSlider.addEventListener('input', (e) => {
+            const value = parseInt(e.target.value);
+            smoothingValue.textContent = (value / 100).toFixed(1);
+            smoothingFactor = value / 100;
+        });
+        
+        btnCalibrate.addEventListener('click', calculatePixelScale);
+        
+        radiusInput.addEventListener('change', () => {
+            calculateMomentOfInertia();
+        });
+        
+        massInput.addEventListener('change', () => {
+            calculateMomentOfInertia();
+        });
+        
+        // Rest of event listeners remain similar but updated for new functions
+        uploadArea.addEventListener('click', () => videoInput.click());
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('border-teal-400', 'bg-teal-50');
+        });
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('border-teal-400', 'bg-teal-50');
+        });
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('border-teal-400', 'bg-teal-50');
+            
+            if (e.dataTransfer.files.length) {
+                handleVideoFile(e.dataTransfer.files[0]);
+            }
+        });
+        
+        videoInput.addEventListener('change', (e) => {
+            if (e.target.files.length) {
+                handleVideoFile(e.target.files[0]);
+            }
+        });
+        
+        videoPreview.addEventListener('loadeddata', () => {
+            if (videoPreview.videoWidth > 0) {
+                videoReady = true;
+                videoResolution.textContent = `${videoPreview.videoWidth}×${videoPreview.videoHeight}`;
+                videoDuration.textContent = formatTime(videoPreview.duration);
+                totalTime.textContent = formatTime(videoPreview.duration);
+                
+                setupCanvasDimensions();
+            }
+        });
+        
+        videoPreview.addEventListener('timeupdate', () => {
+            currentTime.textContent = formatTime(videoPreview.currentTime);
+        });
+        
+        videoPreview.addEventListener('ended', () => {
+            if (isAnalyzing) {
+                pauseAnalysis();
+            }
+        });
+        
+        btnPlay.addEventListener('click', () => {
+            if (videoPreview.paused) {
+                videoPreview.play();
+                btnPlay.innerHTML = '<i class="fas fa-pause text-xs"></i>';
+            } else {
+                videoPreview.pause();
+                btnPlay.innerHTML = '<i class="fas fa-play text-xs"></i>';
+            }
+        });
+        
+        removeVideoBtn.addEventListener('click', () => {
+            videoFile = null;
+            videoInfo.classList.add('hidden');
+            videoPreviewContainer.classList.add('hidden');
+            videoPreview.src = '';
+            detectionInfo.classList.add('hidden');
+            resetAnalysis();
+            URL.revokeObjectURL(videoPreview.src);
+        });
+        
+        btnAnalyze.addEventListener('click', startAnalysis);
+        btnPause.addEventListener('click', pauseAnalysis);
+        btnReset.addEventListener('click', resetAnalysis);
+        
+        methodFeature.addEventListener('click', () => {
+            detectionMethod = 'feature';
+            methodFeature.classList.remove('bg-gray-100', 'text-gray-700');
+            methodFeature.classList.add('bg-teal-100', 'text-teal-700');
+            methodTemplate.classList.remove('bg-teal-100', 'text-teal-700');
+            methodTemplate.classList.add('bg-gray-100', 'text-gray-700');
+            methodDescription.textContent = 'Feature Tracking lebih cocok untuk objek dengan tekstur';
+            manualSelection.classList.remove('hidden');
+        });
+        
+        methodTemplate.addEventListener('click', () => {
+            detectionMethod = 'template';
+            methodTemplate.classList.remove('bg-gray-100', 'text-gray-700');
+            methodTemplate.classList.add('bg-teal-100', 'text-teal-700');
+            methodFeature.classList.remove('bg-teal-100', 'text-teal-700');
+            methodFeature.classList.add('bg-gray-100', 'text-gray-700');
+            methodDescription.textContent = 'Template Matching cocok untuk objek dengan pola yang jelas';
+            manualSelection.classList.add('hidden');
+        });
+        
+        btnSelectPoint.addEventListener('click', () => {
+            isSelectingPoints = !isSelectingPoints;
+            if (isSelectingPoints) {
+                btnSelectPoint.innerHTML = '<i class="fas fa-check mr-1"></i> Selesai Memilih';
+                btnSelectPoint.classList.remove('bg-blue-100', 'text-blue-700');
+                btnSelectPoint.classList.add('bg-green-100', 'text-green-700');
+                videoCanvas.style.pointerEvents = 'auto';
+                videoCanvas.classList.add('canvas-point-selection');
+            } else {
+                btnSelectPoint.innerHTML = '<i class="fas fa-mouse-pointer mr-1"></i> Pilih Titik';
+                btnSelectPoint.classList.remove('bg-green-100', 'text-green-700');
+                btnSelectPoint.classList.add('bg-blue-100', 'text-blue-700');
+                videoCanvas.style.pointerEvents = 'none';
+                videoCanvas.classList.remove('canvas-point-selection');
+            }
+        });
+        
+        btnClearPoints.addEventListener('click', () => {
+            selectedPoints = [];
+            updateSelectedPointsInfo();
+            clearCanvas();
+        });
+        
+        videoCanvas.addEventListener('click', (e) => {
+            if (!isSelectingPoints || !videoReady) return;
+            
+            const rect = videoCanvas.getBoundingClientRect();
+            const scaleX = videoCanvas.width / rect.width;
+            const scaleY = videoCanvas.height / rect.height;
+            
+            const x = (e.clientX - rect.left) * scaleX;
+            const y = (e.clientY - rect.top) * scaleY;
+            
+            selectedPoints.push({x: x, y: y});
+            updateSelectedPointsInfo();
+            
+            drawSelectedPoint(x, y);
+        });
+        
+        toggleAdvanced.addEventListener('click', () => {
+            if (advancedParams.classList.contains('hidden')) {
+                advancedParams.classList.remove('hidden');
+                toggleAdvanced.innerHTML = '<i class="fas fa-sliders-h mr-1"></i> Sembunyikan Parameter';
+            } else {
+                advancedParams.classList.add('hidden');
+                toggleAdvanced.innerHTML = '<i class="fas fa-sliders-h mr-1"></i> Parameter Lanjutan';
+            }
+        });
+        
+        resultsHeader.addEventListener('click', () => {
+            isResultsExpanded = !isResultsExpanded;
+            
+            if (isResultsExpanded) {
+                resultsContent.classList.remove('hidden');
+                resultsToggleIcon.classList.remove('fa-chevron-up');
+                resultsToggleIcon.classList.add('fa-chevron-down');
+                resultsSection.querySelector('.data-panel').classList.remove('collapsed');
+            } else {
+                resultsContent.classList.add('hidden');
+                resultsToggleIcon.classList.remove('fa-chevron-down');
+                resultsToggleIcon.classList.add('fa-chevron-up');
+                resultsSection.querySelector('.data-panel').classList.add('collapsed');
+            }
+        });
+        
+        tableToggle.addEventListener('click', () => {
+            if (tableArea.classList.contains('hidden')) {
+                tableArea.classList.remove('hidden');
+                tableToggle.textContent = 'Sembunyikan Tabel';
+                updateTable();
+            } else {
+                tableArea.classList.add('hidden');
+                tableToggle.textContent = 'Tampilkan Tabel';
+            }
+        });
+        
+        // Export functions
+        btnDownloadChart.addEventListener('click', downloadChartAsPNG);
+        btnDownloadCSV.addEventListener('click', downloadDataAsCSV);
+        btnDownloadPDF.addEventListener('click', downloadReportAsPDF);
+        
+        // Format functions
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+        }
+        
+        function formatTime(seconds) {
+            if (isNaN(seconds)) return '0:00';
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+        
+        function updateSelectedPointsInfo() {
+            pointsCount.textContent = selectedPoints.length;
+            if (selectedPoints.length > 0) {
+                selectedPointsInfo.classList.remove('hidden');
+            } else {
+                selectedPointsInfo.classList.add('hidden');
+            }
+        }
+        
+        function drawSelectedPoint(x, y) {
+            const ctx = videoCanvas.getContext('2d');
+            const scaleX = videoCanvas.width / videoCanvas.offsetWidth;
+            const scaleY = videoCanvas.height / videoCanvas.offsetHeight;
+            
+            ctx.beginPath();
+            ctx.arc(x, y, 5, 0, 2 * Math.PI);
+            ctx.fillStyle = '#ef4444';
+            ctx.fill();
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            ctx.beginPath();
+            ctx.arc(x, y, 10, 0, 2 * Math.PI);
+            ctx.strokeStyle = 'rgba(239, 68, 68, 0.3)';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+        
+        function clearCanvas() {
+            canvasContext.clearRect(0, 0, videoCanvas.width, videoCanvas.height);
+            if (!videoPreview.paused && videoReady) {
+                canvasContext.drawImage(videoPreview, 0, 0, videoCanvas.width, videoCanvas.height);
+            }
+        }
+        
+        function setupCanvasDimensions() {
+            if (videoPreview.videoWidth > 0 && videoPreview.videoHeight > 0) {
+                const containerWidth = videoPreviewContainer.clientWidth;
+                const aspectRatio = videoPreview.videoHeight / videoPreview.videoWidth;
+                
+                videoCanvas.width = containerWidth;
+                videoCanvas.height = containerWidth * aspectRatio;
+                
+                videoCanvas.style.width = '100%';
+                videoCanvas.style.height = 'auto';
+            }
+        }
+        
+        // Start analysis with improved accuracy
+        async function startAnalysis() {
+            if (!videoFile) {
+                showError('Video Tidak Ditemukan', 'Silakan upload video terlebih dahulu');
+                return;
+            }
+            
+            if (!videoReady) {
+                showError('Video Belum Siap', 'Tunggu hingga video selesai dimuat');
+                return;
+            }
+            
+            if (!isOpenCVLoaded) {
+                showError('OpenCV Belum Siap', 'OpenCV.js sedang dimuat. Harap tunggu...');
+                return;
+            }
+            
+            if (isAnalyzing) return;
+            
+            isAnalyzing = true;
+            isPlaying = true;
+            
+            // Calculate initial inertia
+            calculateMomentOfInertia();
+            
+            videoPreview.play();
+            btnPlay.innerHTML = '<i class="fas fa-pause text-xs"></i>';
+            
+            // Reset analysis data
+            torqueData = [];
+            angularVelocityData = [];
+            angularAccelerationData = [];
+            timeData = [];
+            angleHistory = [];
+            velocityHistory = [];
+            analysisStartTime = Date.now();
+            lastFrameTime = Date.now();
+            
+            setupCanvasDimensions();
+            initOpenCVMatrices();
+            analysisLoop();
+            
+            btnAnalyze.disabled = true;
+            btnAnalyze.innerHTML = '<i class="fas fa-sync-alt mr-1 animate-spin"></i> Menganalisis';
+            btnAnalyze.classList.remove('from-teal-500', 'to-teal-600');
+            btnAnalyze.classList.add('from-gray-400', 'to-gray-500');
+            
+            resultsSection.classList.remove('hidden');
+            trackingStatus.innerHTML = '<i class="fas fa-sync-alt animate-spin mr-1"></i><span>Memulai analisis presisi...</span>';
+            
+            // Tampilkan chart area otomatis
+            chartArea.classList.remove('hidden');
+            initChart();
+        }
+        
+        function analysisLoop() {
+            if (!isAnalyzing) return;
+            
+            if (videoPreview.paused || videoPreview.ended) {
+                pauseAnalysis();
+                return;
+            }
+            
+            analyzeFrameWithPrecision();
+            animationFrameId = requestAnimationFrame(analysisLoop);
+        }
+        
+        function initOpenCVMatrices() {
+            if (!cv || cv.mock) return;
+            
+            try {
+                if (prevGray) prevGray.delete();
+                if (currGray) currGray.delete();
+                if (prevPts) prevPts.delete();
+                if (currPts) currPts.delete();
+                if (status) status.delete();
+                if (err) err.delete();
+                
+                prevGray = new cv.Mat();
+                currGray = new cv.Mat();
+                prevPts = new cv.Mat();
+                currPts = new cv.Mat();
+                status = new cv.Mat();
+                err = new cv.Mat();
+                
+                detectedFeatures = 0;
+                successfulDetections = 0;
+                totalFrames = 0;
+                firstFrameProcessed = false;
+                
+            } catch (e) {
+                console.error('Error initializing OpenCV matrices:', e);
+                showError('OpenCV Error', 'Gagal menginisialisasi matriks OpenCV');
+            }
+        }
+        
+        async function analyzeFrameWithPrecision() {
+            if (!isAnalyzing || !videoReady || videoPreview.paused || videoPreview.ended) {
+                return;
+            }
+            
+            const currentTime = Date.now();
+            const elapsedTime = (currentTime - analysisStartTime) / 1000;
+            const deltaTime = (currentTime - lastFrameTime) / 1000;
+            lastFrameTime = currentTime;
+            
+            totalFrames++;
+            
+            try {
+                canvasContext.clearRect(0, 0, videoCanvas.width, videoCanvas.height);
+                canvasContext.drawImage(videoPreview, 0, 0, videoCanvas.width, videoCanvas.height);
+                
+                let rotationDetected = false;
+                let avgAngleChange = 0;
+                
+                if (cv.mock) {
+                    // Simulated data for testing
+                    avgAngleChange = (Math.sin(elapsedTime * 2) * 0.05);
+                    rotationDetected = true;
+                    successfulDetections++;
+                    detectedFeatures = 50;
+                    
+                } else if (cv) {
+                    const src = cv.imread(videoCanvas);
+                    cv.cvtColor(src, currGray, cv.COLOR_RGBA2GRAY);
+                    
+                    if (!firstFrameProcessed) {
+                        detectInitialFeatures();
+                        firstFrameProcessed = true;
+                        trackingStatus.innerHTML = '<i class="fas fa-check-circle text-green-500 mr-1"></i><span>Pelacakan presisi dimulai</span>';
+                    } else if (prevGray.rows > 0 && currGray.rows > 0) {
+                        avgAngleChange = trackFeaturesWithPrecision();
+                        rotationDetected = true;
+                    }
+                    
+                    currGray.copyTo(prevGray);
+                    src.delete();
+                }
+                
+                if (rotationDetected) {
+                    updateRotationDataPrecise(avgAngleChange, deltaTime);
+                }
+                
+                const torqueValue = calculateTorquePrecise(angularAccelerationValue);
+                
+                updateAnalysisData(torqueValue, angularVelocityValue, angularAccelerationValue, elapsedTime);
+                drawAnalysisOverlayPrecise(torqueValue, angularVelocityValue);
+                updateTrackingStatusPrecise();
+                calculateEnergyAndPower();
+                
+                // Calculate RMS error
+                rmsErrorValue = calculateRMSError();
+                rmsError.textContent = rmsErrorValue.toFixed(6);
+                
+            } catch (e) {
+                console.error('Error in precision analysis:', e);
+                if (totalFrames > 10 && successfulDetections === 0) {
+                    showError('Pelacakan Gagal', 'Tidak dapat melacak objek. Coba atur titik manual atau ganti video.');
+                }
+            }
+        }
+        
+        function detectInitialFeatures() {
+            if (!cv || cv.mock) return;
+            
+            try {
+                const maxFeatures = parseInt(featureCountSelect.value);
+                const quality = parseFloat(featureQuality.value);
+                
+                const features = new cv.Mat();
+                cv.goodFeaturesToTrack(
+                    currGray,
+                    features,
+                    maxFeatures,
+                    quality,
+                    5,  // Minimum distance between features
+                    new cv.Mat(),  // Mask
+                    3,   // Block size
+                    false,  // Use Harris detector
+                    0.04  // Harris parameter
+                );
+                
+                detectedFeatures = features.rows;
+                prevPts = features;
+                
+                // Draw detected features with sub-pixel refinement
+                if (features.rows > 0) {
+                    const corners = new cv.Mat();
+                    cv.cornerSubPix(
+                        currGray,
+                        features,
+                        new cv.Size(3, 3),
+                        new cv.Size(-1, -1),
+                        new cv.TermCriteria(cv.TERM_CRITERIA_EPS | cv.TERM_CRITERIA_COUNT, 30, 0.01)
+                    );
+                    
+                    for (let i = 0; i < detectedFeatures; i++) {
+                        const x = corners.data32F[i * 2];
+                        const y = corners.data32F[i * 2 + 1];
+                        
+                        canvasContext.beginPath();
+                        canvasContext.arc(x, y, 2, 0, 2 * Math.PI);
+                        canvasContext.fillStyle = '#3b82f6';
+                        canvasContext.fill();
+                        
+                        canvasContext.beginPath();
+                        canvasContext.arc(x, y, 4, 0, 2 * Math.PI);
+                        canvasContext.strokeStyle = 'rgba(59, 130, 246, 0.3)';
+                        canvasContext.stroke();
+                    }
+                    
+                    corners.delete();
+                }
+                
+                updateDetectionStatus(detectedFeatures);
+                
+            } catch (e) {
+                console.error('Error detecting features:', e);
+            }
+        }
+        
+        function trackFeaturesWithPrecision() {
+            if (!cv || cv.mock || prevPts.rows === 0) return 0;
+            
+            try {
+                cv.calcOpticalFlowPyrLK(
+                    prevGray,
+                    currGray,
+                    prevPts,
+                    currPts,
+                    status,
+                    err,
+                    new cv.Size(31, 31),  // Larger window for better accuracy
+                    4,  // Pyramid levels
+                    new cv.TermCriteria(cv.TERM_CRITERIA_EPS | cv.TERM_CRITERIA_COUNT, 50, 0.03),
+                    0,  // Flags
+                    0.001  // Minimum eigen value
+                );
+                
+                const goodNew = [];
+                const goodOld = [];
+                const centerX = videoCanvas.width / 2;
+                const centerY = videoCanvas.height / 2;
+                let validPoints = 0;
+                let totalAngleChange = 0;
+                let totalDistance = 0;
+                
+                for (let i = 0; i < prevPts.rows; i++) {
+                    if (status.data[i] === 1) {
+                        const newX = currPts.data32F[i * 2];
+                        const newY = currPts.data32F[i * 2 + 1];
+                        const oldX = prevPts.data32F[i * 2];
+                        const oldY = prevPts.data32F[i * 2 + 1];
+                        
+                        // Calculate distance moved
+                        const dx = newX - oldX;
+                        const dy = newY - oldY;
+                        const distance = Math.sqrt(dx * dx + dy * dy);
+                        
+                        // Filter by movement distance (remove outliers)
+                        if (distance < 20) {
+                            // Calculate angle change from center
+                            const oldAngle = Math.atan2(oldY - centerY, oldX - centerX);
+                            const newAngle = Math.atan2(newY - centerY, newX - centerX);
+                            let angleChange = newAngle - oldAngle;
+                            
+                            // Normalize angle
+                            angleChange = ((angleChange + Math.PI) % (2 * Math.PI)) - Math.PI;
+                            
+                            totalAngleChange += angleChange;
+                            totalDistance += distance;
+                            validPoints++;
+                            
+                            goodNew.push([newX, newY]);
+                            goodOld.push([oldX, oldY]);
+                            
+                            // Draw tracking with gradient based on confidence
+                            const confidence = 1 - (distance / 20);
+                            canvasContext.beginPath();
+                            canvasContext.moveTo(oldX, oldY);
+                            canvasContext.lineTo(newX, newY);
+                            canvasContext.strokeStyle = `rgba(34, 197, 94, ${0.3 + confidence * 0.4})`;
+                            canvasContext.lineWidth = 1 + confidence;
+                            canvasContext.stroke();
+                            
+                            canvasContext.beginPath();
+                            canvasContext.arc(newX, newY, 1 + confidence, 0, 2 * Math.PI);
+                            canvasContext.fillStyle = `rgba(16, 185, 129, ${0.5 + confidence * 0.5})`;
+                            canvasContext.fill();
+                        }
+                    }
+                }
+                
+                if (validPoints > 0) {
+                    successfulDetections++;
+                    
+                    if (goodNew.length > 0) {
+                        const newPts = new cv.Mat(goodNew.length, 1, cv.CV_32FC2);
+                        for (let i = 0; i < goodNew.length; i++) {
+                            newPts.data32F[i * 2] = goodNew[i][0];
+                            newPts.data32F[i * 2 + 1] = goodNew[i][1];
+                        }
+                        
+                        prevPts.delete();
+                        prevPts = newPts;
+                        detectedFeatures = goodNew.length;
+                    }
+                    
+                    const avgDistance = totalDistance / validPoints;
+                    const avgAngle = totalAngleChange / validPoints;
+                    
+                    // Apply distance-based weighting
+                    return avgAngle * (1 + avgDistance / 100);
+                }
+                
+            } catch (e) {
+                console.error('Error in precision tracking:', e);
+            }
+            
+            return 0;
+        }
+        
+        function updateRotationDataPrecise(angleChange, deltaTime) {
+            // Apply Kalman filter
+            const filteredAngleChange = angleFilter.update(angleChange);
+            
+            // Update angle with smoothing
+            rotationAngle += filteredAngleChange;
+            
+            // Calculate angular velocity
+            const rawAngularVelocity = filteredAngleChange / deltaTime;
+            angularVelocityValue = velocityFilter.update(rawAngularVelocity);
+            
+            // Calculate angular acceleration
+            if (deltaTime > 0) {
+                angularAccelerationValue = (angularVelocityValue - lastAngularVelocity) / deltaTime;
+                lastAngularVelocity = angularVelocityValue;
+            }
+            
+            // Store history for error calculation
+            angleHistory.push(rotationAngle);
+            velocityHistory.push(angularVelocityValue);
+            
+            // Keep history manageable
+            if (angleHistory.length > 100) {
+                angleHistory.shift();
+                velocityHistory.shift();
+            }
+        }
+        
+        function updateAnalysisData(torqueValue, angularVel, angularAccel, elapsedTime) {
+            torqueData.push(torqueValue);
+            angularVelocityData.push(angularVel);
+            angularAccelerationData.push(angularAccel);
+            timeData.push(elapsedTime.toFixed(3));
+            
+            if (torqueData.length > 200) {
+                torqueData.shift();
+                angularVelocityData.shift();
+                angularAccelerationData.shift();
+                timeData.shift();
+            }
+            
+            updateResults(torqueValue, angularVel, angularAccel, elapsedTime);
+            
+            if (torqueChart) {
+                torqueChart.data.labels = timeData;
+                torqueChart.data.datasets[0].data = torqueData;
+                torqueChart.data.datasets[1].data = angularVelocityData;
+                torqueChart.data.datasets[2].data = angularAccelerationData;
+                torqueChart.update('none');
+            }
+            
+            if (!tableArea.classList.contains('hidden')) {
+                updateTable();
+            }
+        }
+        
+        function updateResults(torque, angularVel, angularAccel, elapsedTime) {
+            currentTorque.textContent = torque.toFixed(6) + ' N·m';
+            
+            const torquePercent = Math.min(torque / 0.1, 1) * 100;
+            torqueIndicator.style.left = torquePercent + '%';
+            
+            if (torqueData.length > 0) {
+                const minTorque = Math.min(...torqueData);
+                const maxTorque = Math.max(...torqueData);
+                const sumTorque = torqueData.reduce((a, b) => a + b, 0);
+                const avgTorque = sumTorque / torqueData.length;
+                
+                torqueMin.textContent = minTorque.toFixed(6);
+                torqueAvg.textContent = avgTorque.toFixed(6);
+                torqueMax.textContent = maxTorque.toFixed(6);
+            }
+            
+            angularVelocity.textContent = angularVel.toFixed(4) + ' rad/s';
+            angularAcceleration.textContent = angularAccel.toFixed(4) + ' rad/s²';
+            
+            if (Math.abs(angularVel) > 0.01) {
+                const period = (2 * Math.PI) / Math.abs(angularVel);
+                const frequency = 1 / period;
+                
+                rotationPeriod.textContent = period.toFixed(4) + ' s';
+                rotationFrequency.textContent = frequency.toFixed(4) + ' Hz';
+                
+                rotationIndicator.style.transform = `rotate(${rotationAngle}rad)`;
+                if (angularVel > 0.1) {
+                    rotationIndicator.classList.add('rotating');
+                } else {
+                    rotationIndicator.classList.remove('rotating');
+                }
+            } else {
+                rotationPeriod.textContent = '∞ s';
+                rotationFrequency.textContent = '0 Hz';
+                rotationIndicator.classList.remove('rotating');
+            }
+            
+            const accuracy = totalFrames > 0 ? Math.round((successfulDetections / totalFrames) * 100) : 0;
+            detectionAccuracy.textContent = accuracy + '%';
+            successfulFrames.textContent = successfulDetections + '/' + totalFrames;
+            
+            const fps = elapsedTime > 0 ? Math.round(totalFrames / elapsedTime) : 0;
+            analysisFps.textContent = fps + ' FPS';
+        }
+        
+        function updateDetectionStatus(featureCountValue) {
+            featureCount.textContent = featureCountValue;
+            
+            if (featureCountValue >= 50) {
+                detectionStatusText.textContent = 'Sangat Baik';
+                detectionStatusText.className = 'detection-status detection-good';
+            } else if (featureCountValue >= 20) {
+                detectionStatusText.textContent = 'Baik';
+                detectionStatusText.className = 'detection-status detection-good';
+            } else if (featureCountValue >= 10) {
+                detectionStatusText.textContent = 'Cukup';
+                detectionStatusText.className = 'detection-status detection-fair';
+            } else {
+                detectionStatusText.textContent = 'Kurang';
+                detectionStatusText.className = 'detection-status detection-poor';
+            }
+        }
+        
+        function updateTrackingStatusPrecise() {
+            const accuracy = totalFrames > 0 ? Math.round((successfulDetections / totalFrames) * 100) : 0;
+            
+            if (accuracy >= 90 && rmsErrorValue < 0.01) {
+                trackingStatus.innerHTML = `<i class="fas fa-check-circle text-green-500 mr-1"></i><span>Presisi Tinggi (${accuracy}%, RMS: ${rmsErrorValue.toFixed(4)})</span>`;
+            } else if (accuracy >= 70) {
+                trackingStatus.innerHTML = `<i class="fas fa-exclamation-circle text-yellow-500 mr-1"></i><span>Presisi Sedang (${accuracy}%, RMS: ${rmsErrorValue.toFixed(4)})</span>`;
+            } else {
+                trackingStatus.innerHTML = `<i class="fas fa-times-circle text-red-500 mr-1"></i><span>Presisi Rendah (${accuracy}%, RMS: ${rmsErrorValue.toFixed(4)})</span>`;
+            }
+        }
+        
+        function drawAnalysisOverlayPrecise(torque, angularVel) {
+            const ctx = canvasContext;
+            const width = videoCanvas.width;
+            const height = videoCanvas.height;
+            
+            if (Math.abs(angularVel) > 0.01) {
+                const centerX = width / 2;
+                const centerY = height / 2;
+                const radius = Math.min(width, height) * 0.15;
+                
+                // Draw precision circle
+                ctx.beginPath();
+                ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+                ctx.strokeStyle = 'rgba(56, 178, 172, 0.8)';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                
+                // Draw radius line with arrow
+                ctx.beginPath();
+                ctx.moveTo(centerX, centerY);
+                const endX = centerX + radius * Math.cos(rotationAngle);
+                const endY = centerY + radius * Math.sin(rotationAngle);
+                ctx.lineTo(endX, endY);
+                ctx.strokeStyle = angularVel > 0 ? 'rgba(239, 68, 68, 0.9)' : 'rgba(59, 130, 246, 0.9)';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+                
+                // Draw arrow head
+                ctx.beginPath();
+                const arrowLength = 8;
+                const angle = Math.atan2(endY - centerY, endX - centerX);
+                ctx.moveTo(endX, endY);
+                ctx.lineTo(endX - arrowLength * Math.cos(angle - Math.PI/6), endY - arrowLength * Math.sin(angle - Math.PI/6));
+                ctx.lineTo(endX - arrowLength * Math.cos(angle + Math.PI/6), endY - arrowLength * Math.sin(angle + Math.PI/6));
+                ctx.closePath();
+                ctx.fillStyle = angularVel > 0 ? '#ef4444' : '#3b82f6';
+                ctx.fill();
+            }
+            
+            // Draw info overlay
+            ctx.font = 'bold 12px Arial';
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+            ctx.fillRect(10, 10, 200, 80);
+            
+            ctx.fillStyle = 'white';
+            ctx.textAlign = 'left';
+            ctx.font = 'bold 10px Arial';
+            ctx.fillText(`Torsi: ${torque.toFixed(6)} N·m`, 20, 30);
+            ctx.fillText(`ω: ${angularVel.toFixed(4)} rad/s`, 20, 50);
+            ctx.fillText(`α: ${angularAccelerationValue.toFixed(4)} rad/s²`, 20, 70);
+            ctx.fillText(`Fitur: ${detectedFeatures}`, 20, 90);
+        }
+        
+        function pauseAnalysis() {
+            if (!isAnalyzing) return;
+            
+            isAnalyzing = false;
+            isPlaying = false;
+            
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+                animationFrameId = null;
+            }
+            
+            videoPreview.pause();
+            btnPlay.innerHTML = '<i class="fas fa-play text-xs"></i>';
+            
+            btnAnalyze.disabled = false;
+            btnAnalyze.innerHTML = '<i class="fas fa-play mr-1"></i> Lanjutkan';
+            btnAnalyze.classList.remove('from-gray-400', 'to-gray-500');
+            btnAnalyze.classList.add('from-teal-500', 'to-teal-600');
+            
+            trackingStatus.innerHTML = '<i class="fas fa-pause mr-1"></i><span>Analisis dijeda</span>';
+        }
+        
+        function resetAnalysis() {
+            pauseAnalysis();
+            
+            torqueData = [];
+            angularVelocityData = [];
+            angularAccelerationData = [];
+            timeData = [];
+            analysisStartTime = null;
+            lastFrameTime = null;
+            rotationAngle = 0;
+            lastAngle = 0;
+            angularVelocityValue = 0;
+            angularAccelerationValue = 0;
+            lastAngularVelocity = 0;
+            angleHistory = [];
+            velocityHistory = [];
+            rmsErrorValue = 0;
+            
+            if (cv && !cv.mock) {
+                try {
+                    if (prevGray) prevGray.delete();
+                    if (currGray) currGray.delete();
+                    if (prevPts) prevPts.delete();
+                    if (currPts) currPts.delete();
+                    if (status) status.delete();
+                    if (err) err.delete();
+                    
+                    prevGray = null;
+                    currGray = null;
+                    prevPts = null;
+                    currPts = null;
+                    status = null;
+                    err = null;
+                } catch (e) {
+                    console.error('Error resetting OpenCV matrices:', e);
+                }
+            }
+            
+            selectedPoints = [];
+            updateSelectedPointsInfo();
+            detectedFeatures = 0;
+            successfulDetections = 0;
+            totalFrames = 0;
+            firstFrameProcessed = false;
+            
+            btnAnalyze.disabled = false;
+            btnAnalyze.innerHTML = '<i class="fas fa-play mr-1"></i> Analisis';
+            btnAnalyze.classList.remove('from-gray-400', 'to-gray-500');
+            btnAnalyze.classList.add('from-teal-500', 'to-teal-600');
+            
+            currentTorque.textContent = '0.000000 N·m';
+            torqueIndicator.style.left = '50%';
+            torqueMin.textContent = '0.000000';
+            torqueAvg.textContent = '0.000000';
+            torqueMax.textContent = '0.000000';
+            angularVelocity.textContent = '0.0000 rad/s';
+            angularAcceleration.textContent = '0.0000 rad/s²';
+            rotationPeriod.textContent = '0.0000 s';
+            rotationFrequency.textContent = '0.0000 Hz';
+            rotationIndicator.classList.remove('rotating');
+            kineticEnergy.textContent = '0.000000 J';
+            power.textContent = '0.000000 W';
+            rmsError.textContent = '0.000000';
+            
+            detectionAccuracy.textContent = '0%';
+            successfulFrames.textContent = '0/0';
+            analysisFps.textContent = '0 FPS';
+            
+            clearCanvas();
+            
+            if (torqueChart) {
+                torqueChart.destroy();
+                torqueChart = null;
+            }
+            
+            tableBody.innerHTML = '';
+            tableArea.classList.add('hidden');
+            tableToggle.textContent = 'Tampilkan Tabel';
+            
+            trackingStatus.innerHTML = '<i class="fas fa-sync-alt mr-1"></i><span>Siap untuk analisis presisi</span>';
+        }
+        
+        function handleVideoFile(file) {
+            if (!file.type.startsWith('video/')) {
+                showError('Format Tidak Didukung', 'Hanya file video yang diizinkan (MP4, AVI, MOV)');
+                return;
+            }
+            
+            if (file.size > 50 * 1024 * 1024) {
+                showError('File Terlalu Besar', 'Ukuran file maksimal 50MB');
+                return;
+            }
+            
+            videoFile = file;
+            videoReady = false;
+            
+            videoName.textContent = file.name;
+            videoSize.textContent = formatFileSize(file.size);
+            videoInfo.classList.remove('hidden');
+            
+            const videoURL = URL.createObjectURL(file);
+            videoPreview.src = videoURL;
+            videoPreview.load();
+            videoPreviewContainer.classList.remove('hidden');
+            
+            resetAnalysis();
+            detectionInfo.classList.remove('hidden');
+            trackingStatus.innerHTML = '<i class="fas fa-hourglass-half mr-1"></i><span>Menunggu video dimuat...</span>';
+        }
+        
+        // Export functions
+        function downloadChartAsPNG() {
+            if (!torqueChart) {
+                showError('Grafik Tidak Tersedia', 'Tidak ada grafik untuk diunduh');
+                return;
+            }
+            
+            const chartCanvas = document.getElementById('torque-chart');
+            const link = document.createElement('a');
+            link.download = `grafik-torsi-presisi-${new Date().toISOString().slice(0, 10)}.png`;
+            link.href = chartCanvas.toDataURL('image/png');
+            link.click();
+            
+            showError('Berhasil', 'Grafik presisi berhasil diunduh sebagai PNG');
+        }
+        
+        function downloadDataAsCSV() {
+            if (timeData.length === 0) {
+                showError('Data Tidak Tersedia', 'Tidak ada data untuk diunduh');
+                return;
+            }
+            
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "No,Waktu (s),Torsi (N·m),Kecepatan Sudut (rad/s),Percepatan Sudut (rad/s²)\n";
+            
+            for (let i = 0; i < timeData.length; i++) {
+                const row = [
+                    i + 1,
+                    timeData[i],
+                    torqueData[i].toFixed(9),
+                    angularVelocityData[i].toFixed(6),
+                    angularAccelerationData[i].toFixed(6)
+                ].join(',');
+                csvContent += row + "\n";
+            }
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement('a');
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `data-torsi-presisi-${new Date().toISOString().slice(0, 10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showError('Berhasil', 'Data presisi berhasil diunduh sebagai CSV');
+        }
+        
+        function downloadReportAsPDF() {
+            if (timeData.length === 0) {
+                showError('Data Tidak Tersedia', 'Tidak ada data untuk laporan');
+                return;
+            }
+            
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                doc.setFontSize(16);
+                doc.text('LAPORAN ANALISIS TORSI PRESISI', 105, 15, null, null, 'center');
+                
+                doc.setFontSize(10);
+                doc.text(`Tanggal: ${new Date().toLocaleDateString('id-ID')}`, 105, 23, null, null, 'center');
+                
+                let yPos = 35;
+                if (videoFile) {
+                    doc.setFontSize(12);
+                    doc.text('Informasi Video:', 20, yPos);
+                    yPos += 7;
+                    
+                    doc.setFontSize(10);
+                    doc.text(`Nama: ${videoName.textContent}`, 20, yPos);
+                    yPos += 5;
+                    doc.text(`Ukuran: ${videoSize.textContent}`, 20, yPos);
+                    yPos += 5;
+                    doc.text(`Durasi: ${videoDuration.textContent}`, 20, yPos);
+                    yPos += 10;
+                }
+                
+                doc.setFontSize(12);
+                doc.text('Kalibrasi:', 20, yPos);
+                yPos += 7;
+                
+                doc.setFontSize(10);
+                doc.text(`Skala: ${pixelScale.toFixed(6)} m/pixel`, 20, yPos);
+                yPos += 5;
+                doc.text(`Frame Rate: ${frameRate} fps`, 20, yPos);
+                yPos += 5;
+                doc.text(`Smoothing: ${smoothingFactor}`, 20, yPos);
+                yPos += 10;
+                
+                doc.setFontSize(12);
+                doc.text('Parameter Fisika:', 20, yPos);
+                yPos += 7;
+                
+                doc.setFontSize(10);
+                doc.text(`Jari-jari: ${radiusInput.value} m`, 20, yPos);
+                yPos += 5;
+                doc.text(`Massa: ${massInput.value} kg`, 20, yPos);
+                yPos += 5;
+                doc.text(`Momen Inersia: ${inertiaInput.value} kg·m²`, 20, yPos);
+                yPos += 5;
+                doc.text(`Koef. Gesek: ${frictionInput.value}`, 20, yPos);
+                yPos += 10;
+                
+                const minTorque = torqueData.length > 0 ? Math.min(...torqueData).toFixed(6) : '0.000000';
+                const maxTorque = torqueData.length > 0 ? Math.max(...torqueData).toFixed(6) : '0.000000';
+                const avgTorque = torqueData.length > 0 ? (torqueData.reduce((a, b) => a + b, 0) / torqueData.length).toFixed(6) : '0.000000';
+                
+                doc.setFontSize(12);
+                doc.text('Statistik Presisi:', 20, yPos);
+                yPos += 7;
+                
+                doc.setFontSize(10);
+                doc.text(`Torsi Minimum: ${minTorque} N·m`, 20, yPos);
+                yPos += 5;
+                doc.text(`Torsi Rata-rata: ${avgTorque} N·m`, 20, yPos);
+                yPos += 5;
+                doc.text(`Torsi Maksimum: ${maxTorque} N·m`, 20, yPos);
+                yPos += 5;
+                doc.text(`RMS Error: ${rmsErrorValue.toFixed(6)}`, 20, yPos);
+                yPos += 10;
+                
+                doc.setFontSize(12);
+                doc.text('Data Torsi (10 data terakhir):', 20, yPos);
+                yPos += 7;
+                
+                const headers = ['Waktu (s)', 'Torsi (N·m)', 'ω (rad/s)', 'α (rad/s²)'];
+                const columnWidths = [25, 40, 35, 35];
+                let xPos = 20;
+                
+                doc.setFontSize(9);
+                headers.forEach((header, i) => {
+                    doc.text(header, xPos, yPos);
+                    xPos += columnWidths[i];
+                });
+                
+                yPos += 2;
+                doc.line(20, yPos, 155, yPos);
+                yPos += 3;
+                
+                const startIndex = Math.max(0, torqueData.length - 10);
+                doc.setFontSize(8);
+                
+                for (let i = startIndex; i < torqueData.length; i++) {
+                    xPos = 20;
+                    doc.text(timeData[i], xPos, yPos);
+                    xPos += columnWidths[0];
+                    doc.text(torqueData[i].toFixed(6), xPos, yPos);
+                    xPos += columnWidths[1];
+                    doc.text(angularVelocityData[i].toFixed(4), xPos, yPos);
+                    xPos += columnWidths[2];
+                    doc.text(angularAccelerationData[i].toFixed(4), xPos, yPos);
+                    yPos += 5;
+                    
+                    if (yPos > 270 && i < torqueData.length - 1) {
+                        doc.addPage();
+                        yPos = 20;
+                    }
+                }
+                
+                doc.save(`laporan-torsi-presisi-${new Date().toISOString().slice(0, 10)}.pdf`);
+                
+                showError('Berhasil', 'Laporan presisi berhasil diunduh sebagai PDF');
+                
+            } catch (error) {
+                console.error('Error generating PDF:', error);
+                showError('Error PDF', 'Gagal membuat laporan PDF');
+            }
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            methodFeature.click();
+            initChart();
+            calculateMomentOfInertia();
+            
+            window.addEventListener('resize', setupCanvasDimensions);
+            
+            setTimeout(() => {
+                if (!videoFile) {
+                    showError('Petunjuk Penggunaan', 'Upload video dengan objek berotasi untuk analisis torsi presisi');
+                }
+            }, 2000);
+        });
+    </script>
+</body>
+</html>

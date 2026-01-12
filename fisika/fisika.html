@@ -190,6 +190,7 @@
             border-left: 4px solid;
             position: relative;
             overflow: hidden;
+            cursor: pointer;
         }
         
         .material-category:hover {
@@ -296,6 +297,17 @@
             justify-content: center;
             margin-right: 12px;
         }
+        
+        /* Link styles */
+        .material-link {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+        
+        .material-link:hover {
+            text-decoration: none;
+        }
     </style>
 </head>
 <body>
@@ -360,40 +372,44 @@
                 </div>
                 
                 <!-- GLB dan GLBB -->
-                <div class="material-category bg-white rounded-lg shadow-sm p-4 mb-4 border-l-blue-500" onclick="openMaterial('glb')">
-                    <div class="flex justify-between items-center">
-                        <div class="flex items-center">
-                            <div class="bg-blue-100 text-blue-600 p-3 rounded-lg mr-3 material-icon">
-                                <i class="fas fa-car"></i>
+                <a href="tracker/glb-glbb.html" class="material-link">
+                    <div class="material-category bg-white rounded-lg shadow-sm p-4 mb-4 border-l-blue-500">
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center">
+                                <div class="bg-blue-100 text-blue-600 p-3 rounded-lg mr-3 material-icon">
+                                    <i class="fas fa-car"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-gray-800">1. GLB dan GLBB</h3>
+                                    <p class="text-xs text-gray-500">Gerak Lurus Beraturan dan Gerak Lurus Berubah Beraturan</p>
+                                </div>
                             </div>
-                            <div>
-                                <h3 class="font-bold text-gray-800">1. GLB dan GLBB</h3>
-                                <p class="text-xs text-gray-500">Gerak Lurus Beraturan dan Gerak Lurus Berubah Beraturan</p>
+                            <div class="text-gray-400">
+                                <i class="fas fa-chevron-right"></i>
                             </div>
-                        </div>
-                        <div class="text-gray-400">
-                            <i class="fas fa-chevron-right"></i>
                         </div>
                     </div>
-                </div>
+                </a>
                 
                 <!-- Torsi -->
-                <div class="material-category bg-white rounded-lg shadow-sm p-4 mb-4 border-l-purple-500" onclick="openMaterial('torsi')">
-                    <div class="flex justify-between items-center">
-                        <div class="flex items-center">
-                            <div class="bg-purple-100 text-purple-600 p-3 rounded-lg mr-3 material-icon">
-                                <i class="fas fa-cog"></i>
+                <a href="tracker/torsi.html" class="material-link">
+                    <div class="material-category bg-white rounded-lg shadow-sm p-4 mb-4 border-l-purple-500">
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center">
+                                <div class="bg-purple-100 text-purple-600 p-3 rounded-lg mr-3 material-icon">
+                                    <i class="fas fa-cog"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-gray-800">2. Torsi</h3>
+                                    <p class="text-xs text-gray-500">Momen gaya dan rotasi benda</p>
+                                </div>
                             </div>
-                            <div>
-                                <h3 class="font-bold text-gray-800">2. Torsi</h3>
-                                <p class="text-xs text-gray-500">Momen gaya dan rotasi benda</p>
+                            <div class="text-gray-400">
+                                <i class="fas fa-chevron-right"></i>
                             </div>
-                        </div>
-                        <div class="text-gray-400">
-                            <i class="fas fa-chevron-right"></i>
                         </div>
                     </div>
-                </div>
+                </a>
             </section>
             
             <!-- TOOLS Section -->
@@ -409,76 +425,84 @@
                 </div>
                 
                 <!-- Oscilloscope -->
-                <div class="material-category bg-white rounded-lg shadow-sm p-4 mb-4 border-l-green-500" onclick="openTool('oscilogram')">
-                    <div class="flex justify-between items-center">
-                        <div class="flex items-center">
-                            <div class="bg-green-100 text-green-600 p-3 rounded-lg mr-3 material-icon">
-                                <i class="fas fa-wave-square"></i>
+                <a href="tools/oscilloscope.html" class="material-link">
+                    <div class="material-category bg-white rounded-lg shadow-sm p-4 mb-4 border-l-green-500">
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center">
+                                <div class="bg-green-100 text-green-600 p-3 rounded-lg mr-3 material-icon">
+                                    <i class="fas fa-wave-square"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-gray-800">1. Oscilloscope</h3>
+                                    <p class="text-xs text-gray-500">Alat pengukur dan visualisasi gelombang</p>
+                                </div>
                             </div>
-                            <div>
-                                <h3 class="font-bold text-gray-800">1. Oscilloscope</h3>
-                                <p class="text-xs text-gray-500">Alat pengukur dan visualisasi gelombang</p>
+                            <div class="text-gray-400">
+                                <i class="fas fa-chevron-right"></i>
                             </div>
-                        </div>
-                        <div class="text-gray-400">
-                            <i class="fas fa-chevron-right"></i>
                         </div>
                     </div>
-                </div>
+                </a>
                 
                 <!-- Luxmeter -->
-                <div class="material-category bg-white rounded-lg shadow-sm p-4 mb-4 border-l-yellow-500" onclick="openTool('luxmeter')">
-                    <div class="flex justify-between items-center">
-                        <div class="flex items-center">
-                            <div class="bg-yellow-100 text-yellow-600 p-3 rounded-lg mr-3 material-icon">
-                                <i class="fas fa-sun"></i>
+                <a href="tools/luxmeter.html" class="material-link">
+                    <div class="material-category bg-white rounded-lg shadow-sm p-4 mb-4 border-l-yellow-500">
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center">
+                                <div class="bg-yellow-100 text-yellow-600 p-3 rounded-lg mr-3 material-icon">
+                                    <i class="fas fa-sun"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-gray-800">2. Luxmeter</h3>
+                                    <p class="text-xs text-gray-500">Pengukur intensitas cahaya</p>
+                                </div>
                             </div>
-                            <div>
-                                <h3 class="font-bold text-gray-800">2. Luxmeter</h3>
-                                <p class="text-xs text-gray-500">Pengukur intensitas cahaya</p>
+                            <div class="text-gray-400">
+                                <i class="fas fa-chevron-right"></i>
                             </div>
-                        </div>
-                        <div class="text-gray-400">
-                            <i class="fas fa-chevron-right"></i>
                         </div>
                     </div>
-                </div>
+                </a>
                 
                 <!-- Gyroscope -->
-                <div class="material-category bg-white rounded-lg shadow-sm p-4 mb-4 border-l-red-500" onclick="openTool('gyroscope')">
-                    <div class="flex justify-between items-center">
-                        <div class="flex items-center">
-                            <div class="bg-red-100 text-red-600 p-3 rounded-lg mr-3 material-icon">
-                                <i class="fas fa-compass"></i>
+                <a href="tools/gyroscope.html" class="material-link">
+                    <div class="material-category bg-white rounded-lg shadow-sm p-4 mb-4 border-l-red-500">
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center">
+                                <div class="bg-red-100 text-red-600 p-3 rounded-lg mr-3 material-icon">
+                                    <i class="fas fa-compass"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-gray-800">3. Gyroscope</h3>
+                                    <p class="text-xs text-gray-500">Alat pengukur orientasi dan rotasi</p>
+                                </div>
                             </div>
-                            <div>
-                                <h3 class="font-bold text-gray-800">3. Gyroscope</h3>
-                                <p class="text-xs text-gray-500">Alat pengukur orientasi dan rotasi</p>
+                            <div class="text-gray-400">
+                                <i class="fas fa-chevron-right"></i>
                             </div>
-                        </div>
-                        <div class="text-gray-400">
-                            <i class="fas fa-chevron-right"></i>
                         </div>
                     </div>
-                </div>
+                </a>
                 
                 <!-- Accelerometer -->
-                <div class="material-category bg-white rounded-lg shadow-sm p-4 mb-4 border-l-indigo-500" onclick="openTool('accelerometer')">
-                    <div class="flex justify-between items-center">
-                        <div class="flex items-center">
-                            <div class="bg-indigo-100 text-indigo-600 p-3 rounded-lg mr-3 material-icon">
-                                <i class="fas fa-running"></i>
+                <a href="tools/accelerometer.html" class="material-link">
+                    <div class="material-category bg-white rounded-lg shadow-sm p-4 mb-4 border-l-indigo-500">
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center">
+                                <div class="bg-indigo-100 text-indigo-600 p-3 rounded-lg mr-3 material-icon">
+                                    <i class="fas fa-running"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-gray-800">4. Accelerometer</h3>
+                                    <p class="text-xs text-gray-500">Pengukur percepatan benda</p>
+                                </div>
                             </div>
-                            <div>
-                                <h3 class="font-bold text-gray-800">4. Accelerometer</h3>
-                                <p class="text-xs text-gray-500">Pengukur percepatan benda</p>
+                            <div class="text-gray-400">
+                                <i class="fas fa-chevron-right"></i>
                             </div>
-                        </div>
-                        <div class="text-gray-400">
-                            <i class="fas fa-chevron-right"></i>
                         </div>
                     </div>
-                </div>
+                </a>
             </section>
             
             <!-- MENU SIMULASI FISIKA Section -->
@@ -493,131 +517,145 @@
                     </div>
                 </div>
                 
-                <!-- Getaran Gelombang -->
-                <div class="material-category bg-white rounded-lg shadow-sm p-4 mb-4 border-l-pink-500" onclick="openSimulation('getaran')">
-                    <div class="flex justify-between items-center">
-                        <div class="flex items-center">
-                            <div class="bg-pink-100 text-pink-600 p-3 rounded-lg mr-3 material-icon">
-                                <i class="fas fa-water"></i>
+                <!-- Getaran Gelombang 1 -->
+                <a href="simulasi/getaran-gelombang-1.html" class="material-link">
+                    <div class="material-category bg-white rounded-lg shadow-sm p-4 mb-4 border-l-pink-500">
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center">
+                                <div class="bg-pink-100 text-pink-600 p-3 rounded-lg mr-3 material-icon">
+                                    <i class="fas fa-water"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-gray-800">1. Simulasi Getaran Gelombang</h3>
+                                    <p class="text-xs text-gray-500">Visualisasi getaran dan perambatan gelombang</p>
+                                </div>
                             </div>
-                            <div>
-                                <h3 class="font-bold text-gray-800">1. Simulasi Getaran Gelombang</h3>
-                                <p class="text-xs text-gray-500">Visualisasi getaran dan perambatan gelombang</p>
+                            <div class="text-gray-400">
+                                <i class="fas fa-chevron-right"></i>
                             </div>
-                        </div>
-                        <div class="text-gray-400">
-                            <i class="fas fa-chevron-right"></i>
                         </div>
                     </div>
-                </div>
+                </a>
                 
                 <!-- GLB GLBB -->
-                <div class="material-category bg-white rounded-lg shadow-sm p-4 mb-4 border-l-blue-600" onclick="openSimulation('glb-glbb')">
-                    <div class="flex justify-between items-center">
-                        <div class="flex items-center">
-                            <div class="bg-blue-100 text-blue-700 p-3 rounded-lg mr-3 material-icon">
-                                <i class="fas fa-tachometer-alt"></i>
+                <a href="simulasi/glb-glbb.html" class="material-link">
+                    <div class="material-category bg-white rounded-lg shadow-sm p-4 mb-4 border-l-blue-600">
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center">
+                                <div class="bg-blue-100 text-blue-700 p-3 rounded-lg mr-3 material-icon">
+                                    <i class="fas fa-tachometer-alt"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-gray-800">2. Simulasi GLB GLBB</h3>
+                                    <p class="text-xs text-gray-500">Simulasi gerak lurus beraturan dan berubah beraturan</p>
+                                </div>
                             </div>
-                            <div>
-                                <h3 class="font-bold text-gray-800">2. Simulasi GLB GLBB</h3>
-                                <p class="text-xs text-gray-500">Simulasi gerak lurus beraturan dan berubah beraturan</p>
+                            <div class="text-gray-400">
+                                <i class="fas fa-chevron-right"></i>
                             </div>
-                        </div>
-                        <div class="text-gray-400">
-                            <i class="fas fa-chevron-right"></i>
                         </div>
                     </div>
-                </div>
+                </a>
                 
                 <!-- Hukum Newton -->
-                <div class="material-category bg-white rounded-lg shadow-sm p-4 mb-4 border-l-orange-500" onclick="openSimulation('newton')">
-                    <div class="flex justify-between items-center">
-                        <div class="flex items-center">
-                            <div class="bg-orange-100 text-orange-600 p-3 rounded-lg mr-3 material-icon">
-                                <i class="fas fa-balance-scale"></i>
+                <a href="simulasi/hukum-newton.html" class="material-link">
+                    <div class="material-category bg-white rounded-lg shadow-sm p-4 mb-4 border-l-orange-500">
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center">
+                                <div class="bg-orange-100 text-orange-600 p-3 rounded-lg mr-3 material-icon">
+                                    <i class="fas fa-balance-scale"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-gray-800">3. Simulasi Hukum Newton</h3>
+                                    <p class="text-xs text-gray-500">Visualisasi hukum gerak Newton</p>
+                                </div>
                             </div>
-                            <div>
-                                <h3 class="font-bold text-gray-800">3. Simulasi Hukum Newton</h3>
-                                <p class="text-xs text-gray-500">Visualisasi hukum gerak Newton</p>
+                            <div class="text-gray-400">
+                                <i class="fas fa-chevron-right"></i>
                             </div>
-                        </div>
-                        <div class="text-gray-400">
-                            <i class="fas fa-chevron-right"></i>
                         </div>
                     </div>
-                </div>
+                </a>
                 
                 <!-- Hukum Termodinamika -->
-                <div class="material-category bg-white rounded-lg shadow-sm p-4 mb-4 border-l-red-600" onclick="openSimulation('termodinamika')">
-                    <div class="flex justify-between items-center">
-                        <div class="flex items-center">
-                            <div class="bg-red-100 text-red-700 p-3 rounded-lg mr-3 material-icon">
-                                <i class="fas fa-fire"></i>
+                <a href="simulasi/termodinamika.html" class="material-link">
+                    <div class="material-category bg-white rounded-lg shadow-sm p-4 mb-4 border-l-red-600">
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center">
+                                <div class="bg-red-100 text-red-700 p-3 rounded-lg mr-3 material-icon">
+                                    <i class="fas fa-fire"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-gray-800">4. Simulasi Hukum Termodinamika</h3>
+                                    <p class="text-xs text-gray-500">Simulasi panas, suhu, dan energi termal</p>
+                                </div>
                             </div>
-                            <div>
-                                <h3 class="font-bold text-gray-800">4. Simulasi Hukum Termodinamika</h3>
-                                <p class="text-xs text-gray-500">Simulasi panas, suhu, dan energi termal</p>
+                            <div class="text-gray-400">
+                                <i class="fas fa-chevron-right"></i>
                             </div>
-                        </div>
-                        <div class="text-gray-400">
-                            <i class="fas fa-chevron-right"></i>
                         </div>
                     </div>
-                </div>
+                </a>
                 
                 <!-- Medan Magnet -->
-                <div class="material-category bg-white rounded-lg shadow-sm p-4 mb-4 border-l-purple-600" onclick="openSimulation('magnet')">
-                    <div class="flex justify-between items-center">
-                        <div class="flex items-center">
-                            <div class="bg-purple-100 text-purple-700 p-3 rounded-lg mr-3 material-icon">
-                                <i class="fas fa-magnet"></i>
+                <a href="simulasi/medan-magnet.html" class="material-link">
+                    <div class="material-category bg-white rounded-lg shadow-sm p-4 mb-4 border-l-purple-600">
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center">
+                                <div class="bg-purple-100 text-purple-700 p-3 rounded-lg mr-3 material-icon">
+                                    <i class="fas fa-magnet"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-gray-800">5. Simulasi Medan Magnet</h3>
+                                    <p class="text-xs text-gray-500">Visualisasi garis gaya magnet</p>
+                                </div>
                             </div>
-                            <div>
-                                <h3 class="font-bold text-gray-800">5. Simulasi Medan Magnet</h3>
-                                <p class="text-xs text-gray-500">Visualisasi garis gaya magnet</p>
+                            <div class="text-gray-400">
+                                <i class="fas fa-chevron-right"></i>
                             </div>
-                        </div>
-                        <div class="text-gray-400">
-                            <i class="fas fa-chevron-right"></i>
                         </div>
                     </div>
-                </div>
+                </a>
                 
-                <!-- Getaran Gelombang (duplicate - keeping as per request) -->
-                <div class="material-category bg-white rounded-lg shadow-sm p-4 mb-4 border-l-teal-500" onclick="openSimulation('gelombang')">
-                    <div class="flex justify-between items-center">
-                        <div class="flex items-center">
-                            <div class="bg-teal-100 text-teal-600 p-3 rounded-lg mr-3 material-icon">
-                                <i class="fas fa-wave-square"></i>
+                <!-- Getaran Gelombang 2 (duplicate) -->
+                <a href="simulasi/getaran-gelombang-2.html" class="material-link">
+                    <div class="material-category bg-white rounded-lg shadow-sm p-4 mb-4 border-l-teal-500">
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center">
+                                <div class="bg-teal-100 text-teal-600 p-3 rounded-lg mr-3 material-icon">
+                                    <i class="fas fa-wave-square"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-gray-800">6. Simulasi Getaran Gelombang</h3>
+                                    <p class="text-xs text-gray-500">Simulasi karakteristik gelombang</p>
+                                </div>
                             </div>
-                            <div>
-                                <h3 class="font-bold text-gray-800">6. Simulasi Getaran Gelombang</h3>
-                                <p class="text-xs text-gray-500">Simulasi karakteristik gelombang</p>
+                            <div class="text-gray-400">
+                                <i class="fas fa-chevron-right"></i>
                             </div>
-                        </div>
-                        <div class="text-gray-400">
-                            <i class="fas fa-chevron-right"></i>
                         </div>
                     </div>
-                </div>
+                </a>
                 
                 <!-- Parabola -->
-                <div class="material-category bg-white rounded-lg shadow-sm p-4 border-l-cyan-500" onclick="openSimulation('parabola')">
-                    <div class="flex justify-between items-center">
-                        <div class="flex items-center">
-                            <div class="bg-cyan-100 text-cyan-600 p-3 rounded-lg mr-3 material-icon">
-                                <i class="fas fa-basketball-ball"></i>
+                <a href="simulasi/parabola.html" class="material-link">
+                    <div class="material-category bg-white rounded-lg shadow-sm p-4 border-l-cyan-500">
+                        <div class="flex justify-between items-center">
+                            <div class="flex items-center">
+                                <div class="bg-cyan-100 text-cyan-600 p-3 rounded-lg mr-3 material-icon">
+                                    <i class="fas fa-basketball-ball"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold text-gray-800">7. Simulasi Parabola</h3>
+                                    <p class="text-xs text-gray-500">Simulasi gerak parabola dan peluru</p>
+                                </div>
                             </div>
-                            <div>
-                                <h3 class="font-bold text-gray-800">7. Simulasi Parabola</h3>
-                                <p class="text-xs text-gray-500">Simulasi gerak parabola dan peluru</p>
+                            <div class="text-gray-400">
+                                <i class="fas fa-chevron-right"></i>
                             </div>
-                        </div>
-                        <div class="text-gray-400">
-                            <i class="fas fa-chevron-right"></i>
                         </div>
                     </div>
-                </div>
+                </a>
             </section>
             
         </main>
@@ -671,42 +709,19 @@
             }
         });
         
+        // Jika ingin tetap mempertahankan fungsi JavaScript untuk alert (opsional)
         function openMaterial(material) {
-            const materialNames = {
-                'glb': 'GLB dan GLBB',
-                'torsi': 'Torsi'
-            };
-            
-            alert(`Membuka materi: ${materialNames[material]}`);
-            // In a real app, this would navigate to the material page
+            // Fungsi ini tetap ada untuk kompatibilitas
+            console.log(`Membuka materi: ${material}`);
         }
         
         function openTool(tool) {
-            const toolNames = {
-                'oscilogram': 'Oscilloscope',
-                'luxmeter': 'Luxmeter',
-                'gyroscope': 'Gyroscope',
-                'accelerometer': 'Accelerometer'
-            };
-            
-            alert(`Membuka alat: ${toolNames[tool]}`);
-            // In a real app, this would open the tool interface
+            console.log(`Membuka alat: ${tool}`);
         }
         
         function openSimulation(simulation) {
-            const simulationNames = {
-                'getaran': 'Simulasi Getaran Gelombang',
-                'glb-glbb': 'Simulasi GLB GLBB',
-                'newton': 'Simulasi Hukum Newton',
-                'termodinamika': 'Simulasi Hukum Termodinamika',
-                'magnet': 'Simulasi Medan Magnet',
-                'gelombang': 'Simulasi Getaran Gelombang',
-                'parabola': 'Simulasi Parabola'
-            };
-            
-            alert(`Membuka simulasi: ${simulationNames[simulation]}`);
-            // In a real app, this would launch the simulation
+            console.log(`Membuka simulasi: ${simulation}`);
         }
     </script>
 </body>
-</html>
+                                                                                                </html>

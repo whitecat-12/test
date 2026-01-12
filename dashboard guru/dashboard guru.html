@@ -11,8 +11,8 @@
     onload="renderMathInElement(document.body);"></script>
 </head>
 <body class="bg-gray-100 min-h-screen p-6">
-  <div class="max-w-4xl mx-auto">
-    <h1 class="text-3xl font-bold text-center mb-8 text-teal-700">Dashboard Guru - Upload Soal & Materi</h1>
+  <div class="max-w-6xl mx-auto">
+    <h1 class="text-3xl font-bold text-center mb-8 text-teal-700">Dashboard Guru - QUANTARA</h1>
 
     <!-- Loading Indicator -->
     <div id="loading" class="text-center py-8">
@@ -24,143 +24,261 @@
 
     <!-- Content Area (initially hidden) -->
     <div id="content" class="hidden">
-      <!-- Form input soal -->
-      <div class="bg-white p-6 rounded-2xl shadow-lg mb-8">
-        <h2 class="text-xl font-bold text-teal-700 mb-4">Tambah Soal Baru</h2>
-        <form id="soalForm" class="space-y-4">
-          <input type="hidden" id="soalId">
-
-          <div>
-            <label class="block font-semibold mb-1">Mata Pelajaran:</label>
-            <div class="flex gap-2 mb-2">
-              <input type="text" id="mapelInput" class="w-full border p-2 rounded-lg focus:ring-1 focus:ring-teal-400" placeholder="Ketik nama mata pelajaran">
-              <button type="button" id="tambahMapel" class="bg-teal-500 text-white px-3 py-2 rounded-lg hover:bg-teal-600 transition">+</button>
+      <!-- Statistik Dashboard -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div class="bg-white p-4 rounded-xl shadow">
+          <div class="flex items-center">
+            <div class="bg-teal-100 p-3 rounded-lg mr-3">
+              <i class="fas fa-question-circle text-teal-600 text-xl"></i>
             </div>
-            <div id="daftarMapel" class="flex flex-wrap gap-2"></div>
-          </div>
-
-          <div>
-            <label class="block font-semibold mb-1">Pertanyaan:</label>
-            <textarea id="pertanyaan" class="w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-400" placeholder="Gunakan $...$ untuk inline atau $$...$$ untuk display math" required></textarea>
-          </div>
-
-          <div>
-            <label class="block font-semibold mb-1">Opsi Jawaban:</label>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <input type="text" id="opsiA" placeholder="A" class="border p-2 rounded-lg focus:ring-1 focus:ring-teal-400" required>
-              <input type="text" id="opsiB" placeholder="B" class="border p-2 rounded-lg focus:ring-1 focus:ring-teal-400" required>
-              <input type="text" id="opsiC" placeholder="C" class="border p-2 rounded-lg focus:ring-1 focus:ring-teal-400" required>
-              <input type="text" id="opsiD" placeholder="D" class="border p-2 rounded-lg focus:ring-1 focus:ring-teal-400" required>
-            </div>
-          </div>
-
-          <div>
-            <label class="block font-semibold mb-1">Jawaban Benar:</label>
-            <select id="jawaban" class="w-full border p-2 rounded-lg focus:ring-1 focus:ring-teal-400">
-              <option value="A">A</option>
-              <option value="B">B</option>
-              <option value="C">C</option>
-              <option value="D">D</option>
-            </select>
-          </div>
-
-          <div>
-            <label class="block font-semibold mb-1">Penjelasan:</label>
-            <textarea id="penjelasan" class="w-full border p-3 rounded-lg focus:ring-1 focus:ring-teal-400" placeholder="Gunakan $...$ untuk inline atau $$...$$ untuk display math"></textarea>
-          </div>
-
-          <button type="submit" class="w-full bg-teal-600 text-white p-3 rounded-lg hover:bg-teal-700 transition font-semibold flex justify-center items-center gap-2">
-            <i class="fa-solid fa-floppy-disk"></i> Simpan Soal
-          </button>
-        </form>
-      </div>
-
-      <!-- 🔹 Form Tambah Materi -->
-      <div class="bg-white p-6 rounded-2xl shadow-lg mb-8">
-        <h2 class="text-xl font-bold text-teal-700 mb-4">Tambah Materi Baru</h2>
-        <form id="materiForm" class="space-y-4">
-          <input type="hidden" id="materiId">
-
-          <div>
-            <label class="block font-semibold mb-1">Mata Pelajaran:</label>
-            <input type="text" id="materiMapel" class="w-full border p-2 rounded-lg focus:ring-1 focus:ring-teal-400" placeholder="Ketik nama mata pelajaran" required>
-          </div>
-
-          <div>
-            <label class="block font-semibold mb-1">Judul Materi:</label>
-            <input type="text" id="judulMateri" class="w-full border p-2 rounded-lg focus:ring-1 focus:ring-teal-400" placeholder="Contoh: Hukum Newton" required>
-          </div>
-
-          <div>
-            <label class="block font-semibold mb-1">Deskripsi Singkat:</label>
-            <textarea id="deskripsiMateri" class="w-full border p-3 rounded-lg focus:ring-1 focus:ring-teal-400" placeholder="Deskripsi singkat tentang materi ini" required></textarea>
-          </div>
-
-          <div>
-            <label class="block font-semibold mb-1">Konten Materi:</label>
-            <textarea id="kontenMateri" class="w-full border p-3 rounded-lg focus:ring-1 focus:ring-teal-400" rows="6" placeholder="Tulis konten materi lengkap di sini. Gunakan $...$ untuk inline atau $$...$$ untuk display math" required></textarea>
-          </div>
-
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label class="block font-semibold mb-1">Tingkat Kesulitan:</label>
-              <select id="tingkatMateri" class="w-full border p-2 rounded-lg focus:ring-1 focus:ring-teal-400">
-                <option value="mudah">Mudah</option>
-                <option value="menengah">Menengah</option>
-                <option value="sulit">Sulit</option>
-              </select>
-            </div>
-
-            <div>
-              <label class="block font-semibold mb-1">Durasi Belajar (menit):</label>
-              <input type="number" id="durasiMateri" class="w-full border p-2 rounded-lg focus:ring-1 focus:ring-teal-400" value="15" min="5" max="120">
-            </div>
-
-            <div>
-              <label class="block font-semibold mb-1">Jenis Materi:</label>
-              <select id="jenisMateri" class="w-full border p-2 rounded-lg focus:ring-1 focus:ring-teal-400">
-                <option value="teori">Teori</option>
-                <option value="contoh">Contoh Soal</option>
-                <option value="video">Video</option>
-                <option value="latihan">Latihan</option>
-              </select>
+              <p class="text-sm text-gray-500">Total Soal</p>
+              <h3 class="text-xl font-bold" id="totalSoal">0</h3>
             </div>
           </div>
-
-          <button type="submit" class="w-full bg-indigo-600 text-white p-3 rounded-lg hover:bg-indigo-700 transition font-semibold flex justify-center items-center gap-2">
-            <i class="fa-solid fa-book"></i> Simpan Materi
-          </button>
-        </form>
+        </div>
+        
+        <div class="bg-white p-4 rounded-xl shadow">
+          <div class="flex items-center">
+            <div class="bg-blue-100 p-3 rounded-lg mr-3">
+              <i class="fas fa-book text-blue-600 text-xl"></i>
+            </div>
+            <div>
+              <p class="text-sm text-gray-500">Total Materi</p>
+              <h3 class="text-xl font-bold" id="totalMateri">0</h3>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-white p-4 rounded-xl shadow">
+          <div class="flex items-center">
+            <div class="bg-purple-100 p-3 rounded-lg mr-3">
+              <i class="fas fa-layer-group text-purple-600 text-xl"></i>
+            </div>
+            <div>
+              <p class="text-sm text-gray-500">Mapel Aktif</p>
+              <h3 class="text-xl font-bold" id="totalMapel">0</h3>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-white p-4 rounded-xl shadow">
+          <div class="flex items-center">
+            <div class="bg-green-100 p-3 rounded-lg mr-3">
+              <i class="fas fa-user-graduate text-green-600 text-xl"></i>
+            </div>
+            <div>
+              <p class="text-sm text-gray-500">Nilai Siswa</p>
+              <h3 class="text-xl font-bold" id="totalNilai">0</h3>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <!-- 🔹 Form Fakta Harian -->
-      <div class="bg-white p-6 rounded-2xl shadow-lg mb-8">
-        <h2 class="text-xl font-bold text-teal-700 mb-4">Fakta Sains Harian</h2>
-        <form id="faktaForm" class="space-y-4">
-          <textarea id="faktaInput" class="w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-400"
-            placeholder="Masukkan fakta sains harian di sini..." required></textarea>
-          <input type="text" id="sumberInput" class="w-full border p-2 rounded-lg focus:ring-1 focus:ring-teal-400" placeholder="Sumber fakta (contoh: Sains Daily)">
-          <button type="submit" class="w-full bg-teal-600 text-white p-3 rounded-lg hover:bg-teal-700 transition font-semibold flex justify-center items-center gap-2">
-            <i class="fa-solid fa-floppy-disk"></i> Simpan Fakta
-          </button>
-        </form>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Kolom Kiri: Form Input -->
+        <div>
+          <!-- Form input soal -->
+          <div class="bg-white p-6 rounded-2xl shadow-lg mb-6">
+            <h2 class="text-xl font-bold text-teal-700 mb-4">
+              <i class="fas fa-plus-circle mr-2"></i>Tambah Soal Baru
+            </h2>
+            <form id="soalForm" class="space-y-4">
+              <input type="hidden" id="soalId">
+
+              <div>
+                <label class="block font-semibold mb-1">Mata Pelajaran:</label>
+                <div class="relative">
+                  <input type="text" id="mapelInput" list="mapelList" class="w-full border p-3 rounded-lg focus:ring-2 focus:ring-teal-400 focus:outline-none" placeholder="Ketik atau pilih mata pelajaran" required>
+                  <datalist id="mapelList"></datalist>
+                </div>
+                <div class="flex flex-wrap gap-2 mt-2">
+                  <span class="bg-teal-100 text-teal-700 px-3 py-1 rounded-full text-sm">Fisika</span>
+                  <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm">Kimia</span>
+                  <span class="bg-purple-100 text-purple-700 px-3 py-1 rounded-full text-sm">Biologi</span>
+                  <span class="bg-pink-100 text-pink-700 px-3 py-1 rounded-full text-sm">Astronomi</span>
+                  <span class="bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-sm">Matematika</span>
+                  <span class="bg-indigo-100 text-indigo-700 px-3 py-1 rounded-full text-sm">Lainnya</span>
+                </div>
+              </div>
+
+              <div>
+                <label class="block font-semibold mb-1">Pertanyaan:</label>
+                <textarea id="pertanyaan" class="w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-400" rows="3" placeholder="Gunakan $...$ untuk inline atau $$...$$ untuk display math" required></textarea>
+              </div>
+
+              <div>
+                <label class="block font-semibold mb-1">Opsi Jawaban:</label>
+                <div class="grid grid-cols-1 gap-3">
+                  <div class="flex items-center gap-2">
+                    <span class="bg-gray-200 w-8 h-8 rounded-full flex items-center justify-center font-bold">A</span>
+                    <input type="text" id="opsiA" placeholder="Opsi A" class="flex-1 border p-2 rounded-lg focus:ring-1 focus:ring-teal-400" required>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="bg-gray-200 w-8 h-8 rounded-full flex items-center justify-center font-bold">B</span>
+                    <input type="text" id="opsiB" placeholder="Opsi B" class="flex-1 border p-2 rounded-lg focus:ring-1 focus:ring-teal-400" required>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="bg-gray-200 w-8 h-8 rounded-full flex items-center justify-center font-bold">C</span>
+                    <input type="text" id="opsiC" placeholder="Opsi C" class="flex-1 border p-2 rounded-lg focus:ring-1 focus:ring-teal-400" required>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="bg-gray-200 w-8 h-8 rounded-full flex items-center justify-center font-bold">D</span>
+                    <input type="text" id="opsiD" placeholder="Opsi D" class="flex-1 border p-2 rounded-lg focus:ring-1 focus:ring-teal-400" required>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label class="block font-semibold mb-1">Jawaban Benar:</label>
+                <div class="grid grid-cols-4 gap-2">
+                  <button type="button" data-jawaban="A" class="jawaban-btn bg-gray-200 text-gray-700 p-3 rounded-lg hover:bg-gray-300 font-bold">A</button>
+                  <button type="button" data-jawaban="B" class="jawaban-btn bg-gray-200 text-gray-700 p-3 rounded-lg hover:bg-gray-300 font-bold">B</button>
+                  <button type="button" data-jawaban="C" class="jawaban-btn bg-gray-200 text-gray-700 p-3 rounded-lg hover:bg-gray-300 font-bold">C</button>
+                  <button type="button" data-jawaban="D" class="jawaban-btn bg-gray-200 text-gray-700 p-3 rounded-lg hover:bg-gray-300 font-bold">D</button>
+                </div>
+                <input type="hidden" id="jawaban" value="A">
+              </div>
+
+              <div>
+                <label class="block font-semibold mb-1">Penjelasan (Opsional):</label>
+                <textarea id="penjelasan" class="w-full border p-3 rounded-lg focus:ring-1 focus:ring-teal-400" rows="2" placeholder="Penjelasan untuk jawaban yang benar"></textarea>
+              </div>
+
+              <div class="flex gap-2">
+                <button type="submit" class="flex-1 bg-teal-600 text-white p-3 rounded-lg hover:bg-teal-700 transition font-semibold flex justify-center items-center gap-2">
+                  <i class="fa-solid fa-floppy-disk"></i> Simpan Soal
+                </button>
+                <button type="button" id="resetSoal" class="bg-gray-200 text-gray-700 p-3 rounded-lg hover:bg-gray-300 transition font-semibold">
+                  Reset
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- 🔹 Form Tambah Materi -->
+          <div class="bg-white p-6 rounded-2xl shadow-lg mb-6">
+            <h2 class="text-xl font-bold text-indigo-700 mb-4">
+              <i class="fas fa-book-medical mr-2"></i>Tambah Materi Baru
+            </h2>
+            <form id="materiForm" class="space-y-4">
+              <input type="hidden" id="materiId">
+
+              <div>
+                <label class="block font-semibold mb-1">Mata Pelajaran:</label>
+                <input type="text" id="materiMapel" list="mapelList2" class="w-full border p-3 rounded-lg focus:ring-2 focus:ring-indigo-400" placeholder="Ketik atau pilih mata pelajaran" required>
+                <datalist id="mapelList2"></datalist>
+              </div>
+
+              <div>
+                <label class="block font-semibold mb-1">Judul Materi:</label>
+                <input type="text" id="judulMateri" class="w-full border p-3 rounded-lg focus:ring-1 focus:ring-indigo-400" placeholder="Contoh: Hukum Newton" required>
+              </div>
+
+              <div>
+                <label class="block font-semibold mb-1">Deskripsi Singkat:</label>
+                <textarea id="deskripsiMateri" class="w-full border p-3 rounded-lg focus:ring-1 focus:ring-indigo-400" rows="2" placeholder="Deskripsi singkat tentang materi ini" required></textarea>
+              </div>
+
+              <div>
+                <label class="block font-semibold mb-1">Konten Materi:</label>
+                <textarea id="kontenMateri" class="w-full border p-3 rounded-lg focus:ring-1 focus:ring-indigo-400" rows="4" placeholder="Tulis konten materi lengkap di sini. Gunakan $...$ untuk inline atau $$...$$ untuk display math" required></textarea>
+              </div>
+
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label class="block font-semibold mb-1">Tingkat Kesulitan:</label>
+                  <select id="tingkatMateri" class="w-full border p-2 rounded-lg focus:ring-1 focus:ring-indigo-400">
+                    <option value="mudah">Mudah</option>
+                    <option value="menengah">Menengah</option>
+                    <option value="sulit">Sulit</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label class="block font-semibold mb-1">Durasi (menit):</label>
+                  <input type="number" id="durasiMateri" class="w-full border p-2 rounded-lg focus:ring-1 focus:ring-indigo-400" value="15" min="5" max="120">
+                </div>
+
+                <div>
+                  <label class="block font-semibold mb-1">Jenis Materi:</label>
+                  <select id="jenisMateri" class="w-full border p-2 rounded-lg focus:ring-1 focus:ring-indigo-400">
+                    <option value="teori">Teori</option>
+                    <option value="contoh">Contoh Soal</option>
+                    <option value="video">Video</option>
+                    <option value="latihan">Latihan</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="flex gap-2">
+                <button type="submit" class="flex-1 bg-indigo-600 text-white p-3 rounded-lg hover:bg-indigo-700 transition font-semibold flex justify-center items-center gap-2">
+                  <i class="fa-solid fa-book"></i> Simpan Materi
+                </button>
+                <button type="button" id="resetMateri" class="bg-gray-200 text-gray-700 p-3 rounded-lg hover:bg-gray-300 transition font-semibold">
+                  Reset
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Kolom Kanan: Data dan Fakta -->
+        <div>
+          <!-- 🔹 Form Fakta Harian -->
+          <div class="bg-white p-6 rounded-2xl shadow-lg mb-6">
+            <h2 class="text-xl font-bold text-purple-700 mb-4">
+              <i class="fas fa-lightbulb mr-2"></i>Fakta Sains Harian
+            </h2>
+            <form id="faktaForm" class="space-y-4">
+              <textarea id="faktaInput" class="w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-400" rows="3"
+                placeholder="Masukkan fakta sains harian di sini..." required></textarea>
+              <input type="text" id="sumberInput" class="w-full border p-3 rounded-lg focus:ring-1 focus:ring-purple-400" placeholder="Sumber fakta (contoh: Sains Daily)">
+              <button type="submit" class="w-full bg-purple-600 text-white p-3 rounded-lg hover:bg-purple-700 transition font-semibold flex justify-center items-center gap-2">
+                <i class="fa-solid fa-floppy-disk"></i> Simpan Fakta Harian
+              </button>
+            </form>
+          </div>
+
+          <!-- Daftar soal -->
+          <div class="bg-white p-6 rounded-2xl shadow-lg mb-6">
+            <div class="flex justify-between items-center mb-4">
+              <h2 class="text-xl font-bold text-teal-700">
+                <i class="fas fa-list-check mr-2"></i>Daftar Soal
+              </h2>
+              <button id="refreshSoal" class="bg-gray-100 text-gray-700 px-3 py-1 rounded-lg hover:bg-gray-200">
+                <i class="fas fa-redo"></i>
+              </button>
+            </div>
+            <div class="mb-4">
+              <input type="text" id="searchSoal" class="w-full border p-2 rounded-lg" placeholder="Cari soal atau mata pelajaran...">
+            </div>
+            <div id="daftarSoal" class="space-y-4 max-h-96 overflow-y-auto pr-2"></div>
+          </div>
+
+          <!-- Daftar materi -->
+          <div class="bg-white p-6 rounded-2xl shadow-lg">
+            <div class="flex justify-between items-center mb-4">
+              <h2 class="text-xl font-bold text-indigo-700">
+                <i class="fas fa-book-open mr-2"></i>Daftar Materi
+              </h2>
+              <button id="refreshMateri" class="bg-gray-100 text-gray-700 px-3 py-1 rounded-lg hover:bg-gray-200">
+                <i class="fas fa-redo"></i>
+              </button>
+            </div>
+            <div class="mb-4">
+              <input type="text" id="searchMateri" class="w-full border p-2 rounded-lg" placeholder="Cari materi atau mata pelajaran...">
+            </div>
+            <div id="daftarMateri" class="space-y-4 max-h-96 overflow-y-auto pr-2"></div>
+          </div>
+        </div>
       </div>
 
-      <!-- Daftar soal -->
-      <div class="mb-8">
-        <h2 class="text-2xl font-bold text-teal-700 mb-4">Daftar Soal</h2>
-        <div id="daftarSoal" class="space-y-6"></div>
+      <div class="mt-8">
+        <button id="logoutBtn" class="w-full bg-red-500 text-white p-3 rounded-lg hover:bg-red-600 transition font-semibold flex justify-center items-center gap-2">
+          <i class="fa-solid fa-right-from-bracket"></i> Logout
+        </button>
       </div>
-
-      <!-- Daftar materi -->
-      <div class="mb-8">
-        <h2 class="text-2xl font-bold text-teal-700 mb-4">Daftar Materi</h2>
-        <div id="daftarMateri" class="space-y-6"></div>
-      </div>
-
-      <button id="logoutBtn" class="mt-6 w-full bg-red-500 text-white p-3 rounded-lg hover:bg-red-600 transition font-semibold flex justify-center items-center gap-2">
-        <i class="fa-solid fa-right-from-bracket"></i> Logout
-      </button>
     </div>
 
     <!-- Error Message -->
@@ -171,7 +289,20 @@
 
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { 
+      getFirestore, 
+      collection, 
+      addDoc, 
+      getDocs, 
+      doc, 
+      updateDoc, 
+      deleteDoc, 
+      getDoc, 
+      setDoc,
+      query,
+      orderBy,
+      where 
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
     const firebaseConfig = {
@@ -199,19 +330,32 @@
     const daftarSoal = document.getElementById('daftarSoal');
     const daftarMateri = document.getElementById('daftarMateri');
     const logoutBtn = document.getElementById('logoutBtn');
+    const refreshSoal = document.getElementById('refreshSoal');
+    const refreshMateri = document.getElementById('refreshMateri');
+    const searchSoal = document.getElementById('searchSoal');
+    const searchMateri = document.getElementById('searchMateri');
+    const resetSoal = document.getElementById('resetSoal');
+    const resetMateri = document.getElementById('resetMateri');
 
     const mapelInput = document.getElementById("mapelInput");
-    const tambahMapelBtn = document.getElementById("tambahMapel");
-    const daftarMapelDiv = document.getElementById("daftarMapel");
+    const mapelList = document.getElementById("mapelList");
+    const mapelList2 = document.getElementById("mapelList2");
     const materiMapelInput = document.getElementById("materiMapel");
 
     const faktaForm = document.getElementById("faktaForm");
     const faktaInput = document.getElementById("faktaInput");
     const sumberInput = document.getElementById("sumberInput");
 
-    let daftarMapel = [];
+    // Statistik
+    const totalSoalEl = document.getElementById("totalSoal");
+    const totalMateriEl = document.getElementById("totalMateri");
+    const totalMapelEl = document.getElementById("totalMapel");
+    const totalNilaiEl = document.getElementById("totalNilai");
+
     let currentUser = null;
     let userRole = null;
+    let soalData = [];
+    let materiData = [];
 
     // Show error message
     function showError(message) {
@@ -239,6 +383,7 @@
       }
     }
 
+    // Initialize dashboard
     onAuthStateChanged(auth, async (user) => {
       if (!user) {
         window.location.href = "login.html";
@@ -264,14 +409,143 @@
       loadFakta();
       loadSoal();
       loadMateri();
+      loadStatistik();
+      loadMapelOptions();
     });
 
+    // Logout
     logoutBtn.addEventListener("click", async () => {
       await signOut(auth);
       window.location.href = "login.html";
     });
 
-    // 🔹 Load fakta saat dashboard dibuka
+    // Refresh buttons
+    refreshSoal.addEventListener("click", () => {
+      loadSoal();
+      loadStatistik();
+    });
+
+    refreshMateri.addEventListener("click", () => {
+      loadMateri();
+      loadStatistik();
+    });
+
+    // Search functionality
+    searchSoal.addEventListener("input", (e) => {
+      filterSoal(e.target.value);
+    });
+
+    searchMateri.addEventListener("input", (e) => {
+      filterMateri(e.target.value);
+    });
+
+    // Reset buttons
+    resetSoal.addEventListener("click", () => {
+      soalForm.reset();
+      document.getElementById("soalId").value = "";
+      document.getElementById("jawaban").value = "A";
+      resetJawabanButtons();
+    });
+
+    resetMateri.addEventListener("click", () => {
+      materiForm.reset();
+      document.getElementById("materiId").value = "";
+      document.getElementById("durasiMateri").value = "15";
+    });
+
+    // Jawaban button selection
+    document.querySelectorAll('.jawaban-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const jawaban = btn.dataset.jawaban;
+        document.getElementById('jawaban').value = jawaban;
+        
+        // Reset all buttons
+        document.querySelectorAll('.jawaban-btn').forEach(b => {
+          b.classList.remove('bg-teal-600', 'text-white');
+          b.classList.add('bg-gray-200', 'text-gray-700');
+        });
+        
+        // Highlight selected button
+        btn.classList.remove('bg-gray-200', 'text-gray-700');
+        btn.classList.add('bg-teal-600', 'text-white');
+      });
+    });
+
+    function resetJawabanButtons() {
+      document.querySelectorAll('.jawaban-btn').forEach(b => {
+        b.classList.remove('bg-teal-600', 'text-white');
+        b.classList.add('bg-gray-200', 'text-gray-700');
+      });
+      document.querySelector('.jawaban-btn[data-jawaban="A"]').classList.add('bg-teal-600', 'text-white');
+    }
+
+    // 🔹 Load statistik
+    async function loadStatistik() {
+      try {
+        // Total soal
+        const soalSnapshot = await getDocs(collection(db, "soal"));
+        totalSoalEl.textContent = soalSnapshot.size;
+        
+        // Total materi
+        const materiSnapshot = await getDocs(collection(db, "materi"));
+        totalMateriEl.textContent = materiSnapshot.size;
+        
+        // Total mapel unik
+        const mapelSet = new Set();
+        soalSnapshot.forEach(doc => {
+          const data = doc.data();
+          if (data.mapel) mapelSet.add(data.mapel);
+        });
+        totalMapelEl.textContent = mapelSet.size;
+        
+        // Total nilai (try-catch karena collection mungkin belum ada)
+        try {
+          const nilaiSnapshot = await getDocs(collection(db, "nilai"));
+          totalNilaiEl.textContent = nilaiSnapshot.size;
+        } catch (error) {
+          totalNilaiEl.textContent = "0";
+        }
+        
+      } catch (error) {
+        console.error("Error loading statistics:", error);
+      }
+    }
+
+    // 🔹 Load mata pelajaran options
+    async function loadMapelOptions() {
+      try {
+        const snapshot = await getDocs(collection(db, "soal"));
+        const mapels = new Set();
+        
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          if (data.mapel) mapels.add(data.mapel);
+        });
+        
+        // Add default mapels
+        const defaultMapels = ["Fisika", "Kimia", "Biologi", "Astronomi", "Matematika", "Lainnya"];
+        defaultMapels.forEach(mapel => mapels.add(mapel));
+        
+        // Clear and populate datalist
+        mapelList.innerHTML = '';
+        mapelList2.innerHTML = '';
+        
+        Array.from(mapels).forEach(mapel => {
+          const option1 = document.createElement('option');
+          option1.value = mapel;
+          mapelList.appendChild(option1);
+          
+          const option2 = document.createElement('option');
+          option2.value = mapel;
+          mapelList2.appendChild(option2);
+        });
+        
+      } catch (error) {
+        console.error("Error loading mapel options:", error);
+      }
+    }
+
+    // 🔹 Load fakta harian
     async function loadFakta() {
       try {
         const snap = await getDoc(doc(db, "beranda", "faktaHarian"));
@@ -281,68 +555,43 @@
         }
       } catch (error) {
         console.error("Error loading fakta:", error);
-        showError("Gagal memuat fakta harian");
       }
     }
 
-    // 🔹 Simpan fakta baru/ubah fakta lama
+    // 🔹 Simpan fakta harian
     faktaForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       try {
         await setDoc(doc(db, "beranda", "faktaHarian"), {
           teks: faktaInput.value,
           sumber: sumberInput.value || "Sumber tidak diketahui",
-          updatedAt: new Date()
+          updatedAt: new Date(),
+          updatedBy: currentUser.uid
         });
-        alert("Fakta sains harian berhasil disimpan ✅");
+        showNotification("Fakta sains harian berhasil disimpan ✅", "success");
       } catch (error) {
         console.error("Error saving fakta:", error);
-        alert("Gagal menyimpan fakta sains harian");
+        showNotification("Gagal menyimpan fakta sains harian", "error");
       }
     });
 
-    // Tambah mata pelajaran (untuk form soal)
-    tambahMapelBtn.addEventListener("click", () => {
-      const namaMapel = mapelInput.value.trim();
-      if (!namaMapel) return;
-      if (daftarMapel.includes(namaMapel)) return alert("Mata pelajaran sudah ada!");
-      daftarMapel.push(namaMapel);
-
-      const span = document.createElement("span");
-      span.className = "bg-teal-100 text-teal-700 px-3 py-1 rounded-full flex items-center gap-2";
-      span.innerHTML = `${namaMapel} <i class="fa-solid fa-xmark cursor-pointer"></i>`;
-      span.querySelector("i").addEventListener("click", () => {
-        daftarMapel = daftarMapel.filter(m => m !== namaMapel);
-        daftarMapelDiv.removeChild(span);
-      });
-
-      daftarMapelDiv.appendChild(span);
-      mapelInput.value = "";
-    });
-
-    // 🔹 Form soal - MENYIMPAN SETIAP SOAL TERPISAH
+    // 🔹 Form soal
     soalForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       
       if (userRole !== "guru") {
-        alert("Anda tidak memiliki izin untuk menambah soal");
+        showNotification("Anda tidak memiliki izin untuk menambah soal", "error");
         return;
       }
 
       const soalId = document.getElementById("soalId").value;
+      const mapel = mapelInput.value.trim();
 
-      if (daftarMapel.length === 0) {
-        alert("Silakan tambahkan minimal satu mata pelajaran!");
+      if (!mapel) {
+        showNotification("Silakan isi mata pelajaran!", "error");
         return;
       }
 
-      const mapel = daftarMapel[daftarMapel.length - 1];
-      
-      // Generate unique ID untuk setiap soal jika tidak ada ID
-      const timestamp = Date.now();
-      const randomId = Math.random().toString(36).substring(2, 9);
-      const soalDocId = soalId || `${mapel.toLowerCase().replace(/\s+/g, '_')}_${timestamp}_${randomId}`;
-      
       const soalData = {
         mapel: mapel,
         pertanyaan: document.getElementById("pertanyaan").value,
@@ -357,28 +606,39 @@
         createdAt: new Date(),
         updatedAt: new Date(),
         createdBy: currentUser.uid,
-        soalId: soalDocId // ID unik untuk setiap soal
+        createdByName: currentUser.displayName || currentUser.email
       };
 
       try {
         if (soalId) {
-          // Update soal yang sudah ada
+          // Update existing soal
           await updateDoc(doc(db, "soal", soalId), soalData);
-          alert("Soal berhasil diperbarui ✅");
+          showNotification("Soal berhasil diperbarui ✅", "success");
         } else {
-          // Simpan sebagai dokumen baru dengan ID yang sudah ditentukan
+          // Generate unique ID
+          const timestamp = Date.now();
+          const randomId = Math.random().toString(36).substring(2, 9);
+          const soalDocId = `${mapel.toLowerCase().replace(/\s+/g, '_')}_${timestamp}_${randomId}`;
+          
+          // Add new soal
           await setDoc(doc(db, "soal", soalDocId), soalData);
-          alert("Soal berhasil ditambahkan ✅");
+          showNotification("Soal berhasil ditambahkan ✅", "success");
         }
 
+        // Reset form
         soalForm.reset();
         document.getElementById("soalId").value = "";
-        daftarMapel = [];
-        daftarMapelDiv.innerHTML = "";
+        document.getElementById("jawaban").value = "A";
+        resetJawabanButtons();
+        
+        // Reload data
         loadSoal();
+        loadStatistik();
+        loadMapelOptions();
+        
       } catch (error) {
         console.error("Error menyimpan soal:", error);
-        alert("Terjadi kesalahan saat menyimpan soal: " + error.message);
+        showNotification("Terjadi kesalahan saat menyimpan soal: " + error.message, "error");
       }
     });
 
@@ -387,7 +647,7 @@
       e.preventDefault();
       
       if (userRole !== "guru") {
-        alert("Anda tidak memiliki izin untuk menambah materi");
+        showNotification("Anda tidak memiliki izin untuk menambah materi", "error");
         return;
       }
 
@@ -395,7 +655,7 @@
       const mapelMateri = materiMapelInput.value.trim();
 
       if (!mapelMateri) {
-        alert("Silakan isi nama mata pelajaran!");
+        showNotification("Silakan isi nama mata pelajaran!", "error");
         return;
       }
 
@@ -409,188 +669,235 @@
         jenis: document.getElementById("jenisMateri").value,
         createdAt: new Date(),
         updatedAt: new Date(),
-        createdBy: currentUser.uid
+        createdBy: currentUser.uid,
+        createdByName: currentUser.displayName || currentUser.email
       };
 
       try {
         if (materiId) {
           await updateDoc(doc(db, "materi", materiId), materiData);
-          alert("Materi berhasil diperbarui ✅");
+          showNotification("Materi berhasil diperbarui ✅", "success");
         } else {
-          // Generate unique ID untuk materi
+          // Generate unique ID
           const timestamp = Date.now();
           const randomId = Math.random().toString(36).substring(2, 9);
           const materiDocId = `${mapelMateri.toLowerCase().replace(/\s+/g, '_')}_materi_${timestamp}_${randomId}`;
           
           await setDoc(doc(db, "materi", materiDocId), materiData);
-          alert("Materi berhasil ditambahkan ✅");
+          showNotification("Materi berhasil ditambahkan ✅", "success");
         }
 
         materiForm.reset();
         document.getElementById("materiId").value = "";
         document.getElementById("durasiMateri").value = "15";
+        
         loadMateri();
+        loadStatistik();
+        loadMapelOptions();
+        
       } catch (error) {
         console.error("Error menyimpan materi:", error);
-        alert("Terjadi kesalahan saat menyimpan materi: " + error.message);
+        showNotification("Terjadi kesalahan saat menyimpan materi: " + error.message, "error");
       }
     });
 
-    // 🔹 Load soal - SETIAP SOAL DITAMPILKAN SECARA TERPISAH
+    // 🔹 Load soal
     async function loadSoal() {
       try {
-        daftarSoal.innerHTML = "";
-        const snapshot = await getDocs(collection(db, "soal"));
+        daftarSoal.innerHTML = '<div class="text-center py-4"><i class="fas fa-spinner fa-spin text-teal-600"></i> Memuat soal...</div>';
         
-        if (snapshot.empty) {
+        const q = query(collection(db, "soal"), orderBy("createdAt", "desc"));
+        const snapshot = await getDocs(q);
+        
+        soalData = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        
+        if (soalData.length === 0) {
           daftarSoal.innerHTML = `
-            <div class="bg-white p-8 rounded-2xl shadow text-center">
-              <i class="fas fa-clipboard-question text-4xl text-gray-300 mb-4"></i>
-              <h3 class="text-xl font-semibold text-gray-600 mb-2">Belum Ada Soal</h3>
-              <p class="text-gray-500">Tambahkan soal pertama Anda menggunakan form di atas.</p>
-            </div>
-          `;
+            <div class="text-center py-8 text-gray-500">
+              <i class="fas fa-clipboard-question text-4xl mb-3"></i>
+              <p>Belum ada soal. Tambahkan soal pertama Anda!</p>
+            </div>`;
           return;
         }
-
-        // Kelompokkan soal berdasarkan mata pelajaran
-        const grouped = {};
         
-        snapshot.forEach(docSnap => {
-          const data = docSnap.data();
-          const mapel = data.mapel || "Tanpa Kategori";
-          
-          if (!grouped[mapel]) grouped[mapel] = [];
-          grouped[mapel].push({ 
-            id: docSnap.id, 
-            ...data,
-            index: grouped[mapel].length + 1
-          });
-        });
-
-        // Tampilkan soal per mata pelajaran
-        Object.keys(grouped).forEach(mapel => {
-          const container = document.createElement("div");
-          container.className = "bg-white rounded-2xl shadow mb-6";
-          container.id = `mapel-${mapel.toLowerCase().replace(/\s+/g, '-')}`;
-
-          const jumlahSoal = grouped[mapel].length;
-          container.innerHTML = `
-            <div class="p-4 bg-teal-600 text-white rounded-t-2xl cursor-pointer flex justify-between items-center">
-              <div class="flex items-center gap-3">
-                <i class="fa-solid fa-book-open"></i>
-                <h2 class="text-lg font-semibold">${mapel}</h2>
-                <span class="bg-teal-500 text-white text-xs px-2 py-1 rounded-full">${jumlahSoal} soal</span>
-              </div>
-              <i class="fa-solid fa-chevron-down transition-transform duration-300"></i>
-            </div>
-            <div class="p-4 space-y-4 hidden soal-container"></div>
-          `;
-          
-          const soalList = container.querySelector(".soal-container");
-
-          // Tampilkan setiap soal secara terpisah
-          grouped[mapel].forEach((item, idx) => {
-            const soalCard = document.createElement("div");
-            soalCard.className = "bg-gray-50 p-4 rounded-xl shadow border border-gray-200";
-            soalCard.id = `soal-${item.id}`;
-            
-            soalCard.innerHTML = `
-              <div class="mb-4">
-                <div class="flex justify-between items-start mb-3">
-                  <div class="flex items-center gap-2">
-                    <span class="bg-teal-100 text-teal-700 px-2 py-1 rounded text-sm font-medium">Soal #${idx + 1}</span>
-                    <span class="text-xs text-gray-500">ID: ${item.id.substring(0, 8)}...</span>
-                  </div>
-                  <div class="flex gap-2">
-                    <button data-id="${item.id}" class="editSoalBtn bg-blue-500 text-white px-3 py-1 rounded-lg hover:bg-blue-600 transition flex items-center gap-1 text-sm">
-                      <i class="fa-solid fa-pen text-xs"></i> Edit
-                    </button>
-                    <button data-id="${item.id}" class="deleteSoalBtn bg-red-500 text-white px-3 py-1 rounded-lg hover:bg-red-600 transition flex items-center gap-1 text-sm">
-                      <i class="fa-solid fa-trash text-xs"></i> Hapus
-                    </button>
-                  </div>
-                </div>
-                
-                <div class="mb-4">
-                  <p class="font-semibold text-gray-800 mb-2">Pertanyaan:</p>
-                  <div class="bg-white p-3 rounded-lg border border-gray-300 katex-content">${item.pertanyaan}</div>
-                </div>
-                
-                <div class="mb-4">
-                  <p class="font-semibold text-gray-800 mb-2">Opsi Jawaban:</p>
-                  <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
-                    <div class="flex items-center gap-2 p-2 rounded ${item.jawaban === 'A' ? 'bg-green-50 border border-green-200' : 'bg-gray-100'}">
-                      <span class="font-bold ${item.jawaban === 'A' ? 'text-green-600' : 'text-gray-600'}">A.</span>
-                      <span class="katex-content">${item.opsi.A}</span>
-                      ${item.jawaban === 'A' ? '<span class="ml-auto bg-green-500 text-white text-xs px-2 py-1 rounded">Benar</span>' : ''}
-                    </div>
-                    <div class="flex items-center gap-2 p-2 rounded ${item.jawaban === 'B' ? 'bg-green-50 border border-green-200' : 'bg-gray-100'}">
-                      <span class="font-bold ${item.jawaban === 'B' ? 'text-green-600' : 'text-gray-600'}">B.</span>
-                      <span class="katex-content">${item.opsi.B}</span>
-                      ${item.jawaban === 'B' ? '<span class="ml-auto bg-green-500 text-white text-xs px-2 py-1 rounded">Benar</span>' : ''}
-                    </div>
-                    <div class="flex items-center gap-2 p-2 rounded ${item.jawaban === 'C' ? 'bg-green-50 border border-green-200' : 'bg-gray-100'}">
-                      <span class="font-bold ${item.jawaban === 'C' ? 'text-green-600' : 'text-gray-600'}">C.</span>
-                      <span class="katex-content">${item.opsi.C}</span>
-                      ${item.jawaban === 'C' ? '<span class="ml-auto bg-green-500 text-white text-xs px-2 py-1 rounded">Benar</span>' : ''}
-                    </div>
-                    <div class="flex items-center gap-2 p-2 rounded ${item.jawaban === 'D' ? 'bg-green-50 border border-green-200' : 'bg-gray-100'}">
-                      <span class="font-bold ${item.jawaban === 'D' ? 'text-green-600' : 'text-gray-600'}">D.</span>
-                      <span class="katex-content">${item.opsi.D}</span>
-                      ${item.jawaban === 'D' ? '<span class="ml-auto bg-green-500 text-white text-xs px-2 py-1 rounded">Benar</span>' : ''}
-                    </div>
-                  </div>
-                </div>
-                
-                ${item.penjelasan ? `
-                <div class="mb-4">
-                  <p class="font-semibold text-gray-800 mb-2">Penjelasan:</p>
-                  <div class="bg-white p-3 rounded-lg border border-gray-300 katex-content">${item.penjelasan}</div>
-                </div>
-                ` : ''}
-                
-                <div class="text-xs text-gray-500 flex justify-between items-center pt-2 border-t border-gray-200">
-                  <span>Dibuat: ${new Date(item.createdAt?.toDate() || item.createdAt).toLocaleDateString('id-ID')}</span>
-                  <span class="bg-gray-200 px-2 py-1 rounded">ID: ${item.id}</span>
-                </div>
-              </div>
-            `;
-            
-            soalList.appendChild(soalCard);
-            
-            // Render MathJax untuk konten soal
-            renderMathInElement(soalCard, {
-              delimiters: [
-                {left: "$$", right: "$$", display: true},
-                {left: "$", right: "$", display: false}
-              ],
-              throwOnError: false
-            });
-          });
-
-          // Toggle show/hide untuk container mapel
-          container.querySelector("div:first-child").addEventListener("click", (e) => {
-            const icon = e.currentTarget.querySelector(".fa-chevron-down");
-            icon.classList.toggle("rotate-180");
-            soalList.classList.toggle("hidden");
-          });
-
-          daftarSoal.appendChild(container);
-        });
-
-        // Setup event listeners untuk edit dan hapus soal
-        setupSoalEventListeners();
+        renderSoalList(soalData);
         
       } catch (error) {
         console.error("Error loading soal:", error);
-        showError("Gagal memuat daftar soal");
+        daftarSoal.innerHTML = `
+          <div class="text-center py-8 text-red-500">
+            <i class="fas fa-exclamation-triangle text-2xl mb-2"></i>
+            <p>Gagal memuat soal</p>
+          </div>`;
       }
     }
 
-    // 🔹 Setup event listeners untuk edit dan hapus soal
+    function renderSoalList(soalArray) {
+      daftarSoal.innerHTML = '';
+      
+      soalArray.forEach((item, index) => {
+        const soalCard = document.createElement("div");
+        soalCard.className = "bg-gray-50 p-4 rounded-xl border border-gray-200 hover:border-teal-300 transition-colors";
+        
+        const mapelColor = getMapelColor(item.mapel);
+        
+        soalCard.innerHTML = `
+          <div class="flex justify-between items-start mb-2">
+            <div class="flex items-center gap-2">
+              <span class="${mapelColor.bg} ${mapelColor.text} text-xs font-medium px-2 py-1 rounded-full">${item.mapel || 'Umum'}</span>
+              <span class="text-xs text-gray-500">#${index + 1}</span>
+            </div>
+            <div class="flex gap-1">
+              <button data-id="${item.id}" class="editSoalBtn bg-blue-100 text-blue-700 hover:bg-blue-200 w-8 h-8 rounded-full flex items-center justify-center">
+                <i class="fas fa-pen text-xs"></i>
+              </button>
+              <button data-id="${item.id}" class="deleteSoalBtn bg-red-100 text-red-700 hover:bg-red-200 w-8 h-8 rounded-full flex items-center justify-center">
+                <i class="fas fa-trash text-xs"></i>
+              </button>
+            </div>
+          </div>
+          
+          <div class="mb-3">
+            <p class="text-sm font-medium text-gray-700 line-clamp-2">${item.pertanyaan.substring(0, 100)}${item.pertanyaan.length > 100 ? '...' : ''}</p>
+          </div>
+          
+          <div class="flex justify-between items-center text-xs text-gray-500">
+            <div class="flex items-center gap-2">
+              <span class="bg-gray-200 px-2 py-1 rounded">Jawaban: ${item.jawaban}</span>
+              ${item.penjelasan ? '<i class="fas fa-comment text-teal-500" title="Ada penjelasan"></i>' : ''}
+            </div>
+            <span>${new Date(item.createdAt?.toDate() || item.createdAt).toLocaleDateString('id-ID')}</span>
+          </div>
+        `;
+        
+        daftarSoal.appendChild(soalCard);
+        
+        // Render MathJax
+        renderMathInElement(soalCard, {
+          delimiters: [
+            {left: "$$", right: "$$", display: true},
+            {left: "$", right: "$", display: false}
+          ],
+          throwOnError: false
+        });
+      });
+      
+      setupSoalEventListeners();
+    }
+
+    function filterSoal(keyword) {
+      if (!keyword.trim()) {
+        renderSoalList(soalData);
+        return;
+      }
+      
+      const filtered = soalData.filter(item => 
+        item.pertanyaan.toLowerCase().includes(keyword.toLowerCase()) ||
+        item.mapel.toLowerCase().includes(keyword.toLowerCase()) ||
+        item.penjelasan?.toLowerCase().includes(keyword.toLowerCase())
+      );
+      
+      renderSoalList(filtered);
+    }
+
+    // 🔹 Load materi
+    async function loadMateri() {
+      try {
+        daftarMateri.innerHTML = '<div class="text-center py-4"><i class="fas fa-spinner fa-spin text-indigo-600"></i> Memuat materi...</div>';
+        
+        const q = query(collection(db, "materi"), orderBy("createdAt", "desc"));
+        const snapshot = await getDocs(q);
+        
+        materiData = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        
+        if (materiData.length === 0) {
+          daftarMateri.innerHTML = `
+            <div class="text-center py-8 text-gray-500">
+              <i class="fas fa-book text-4xl mb-3"></i>
+              <p>Belum ada materi. Tambahkan materi pertama Anda!</p>
+            </div>`;
+          return;
+        }
+        
+        renderMateriList(materiData);
+        
+      } catch (error) {
+        console.error("Error loading materi:", error);
+        daftarMateri.innerHTML = `
+          <div class="text-center py-8 text-red-500">
+            <i class="fas fa-exclamation-triangle text-2xl mb-2"></i>
+            <p>Gagal memuat materi</p>
+          </div>`;
+      }
+    }
+
+    function renderMateriList(materiArray) {
+      daftarMateri.innerHTML = '';
+      
+      materiArray.forEach((item, index) => {
+        const materiCard = document.createElement("div");
+        materiCard.className = "bg-gray-50 p-4 rounded-xl border border-gray-200 hover:border-indigo-300 transition-colors";
+        
+        const mapelColor = getMapelColor(item.mapel);
+        const difficultyColor = getDifficultyColor(item.tingkat);
+        
+        materiCard.innerHTML = `
+          <div class="flex justify-between items-start mb-2">
+            <div class="flex items-center gap-2">
+              <span class="${mapelColor.bg} ${mapelColor.text} text-xs font-medium px-2 py-1 rounded-full">${item.mapel || 'Umum'}</span>
+              <span class="${difficultyColor.bg} ${difficultyColor.text} text-xs font-medium px-2 py-1 rounded-full">${item.tingkat}</span>
+            </div>
+            <div class="flex gap-1">
+              <button data-id="${item.id}" class="editMateriBtn bg-blue-100 text-blue-700 hover:bg-blue-200 w-8 h-8 rounded-full flex items-center justify-center">
+                <i class="fas fa-pen text-xs"></i>
+              </button>
+              <button data-id="${item.id}" class="deleteMateriBtn bg-red-100 text-red-700 hover:bg-red-200 w-8 h-8 rounded-full flex items-center justify-center">
+                <i class="fas fa-trash text-xs"></i>
+              </button>
+            </div>
+          </div>
+          
+          <h3 class="font-medium text-gray-800 mb-1">${item.judul}</h3>
+          <p class="text-sm text-gray-600 mb-3 line-clamp-2">${item.deskripsi}</p>
+          
+          <div class="flex justify-between items-center text-xs text-gray-500">
+            <div class="flex items-center gap-2">
+              <span class="bg-gray-200 px-2 py-1 rounded">${item.durasi} menit</span>
+              <span class="bg-gray-200 px-2 py-1 rounded">${item.jenis}</span>
+            </div>
+            <span>${new Date(item.createdAt?.toDate() || item.createdAt).toLocaleDateString('id-ID')}</span>
+          </div>
+        `;
+        
+        daftarMateri.appendChild(materiCard);
+      });
+      
+      setupMateriEventListeners();
+    }
+
+    function filterMateri(keyword) {
+      if (!keyword.trim()) {
+        renderMateriList(materiData);
+        return;
+      }
+      
+      const filtered = materiData.filter(item => 
+        item.judul.toLowerCase().includes(keyword.toLowerCase()) ||
+        item.mapel.toLowerCase().includes(keyword.toLowerCase()) ||
+        item.deskripsi.toLowerCase().includes(keyword.toLowerCase())
+      );
+      
+      renderMateriList(filtered);
+    }
+
+    // 🔹 Setup event listeners untuk soal
     function setupSoalEventListeners() {
-      // Edit soal
       document.querySelectorAll(".editSoalBtn").forEach(btn => {
         btn.addEventListener("click", async () => {
           const docId = btn.dataset.id;
@@ -601,18 +908,7 @@
             
             // Isi form edit
             document.getElementById("soalId").value = docId;
-            
-            // Kosongkan dan isi ulang daftar mapel
-            daftarMapel = [];
-            daftarMapelDiv.innerHTML = "";
-            daftarMapel.push(data.mapel);
-            
-            const span = document.createElement("span");
-            span.className = "bg-teal-100 text-teal-700 px-3 py-1 rounded-full flex items-center gap-2";
-            span.innerHTML = `${data.mapel} <i class="fa-solid fa-xmark cursor-pointer"></i>`;
-            daftarMapelDiv.appendChild(span);
-            
-            // Isi field lainnya
+            mapelInput.value = data.mapel;
             document.getElementById("pertanyaan").value = data.pertanyaan;
             document.getElementById("opsiA").value = data.opsi.A;
             document.getElementById("opsiB").value = data.opsi.B;
@@ -621,186 +917,138 @@
             document.getElementById("jawaban").value = data.jawaban;
             document.getElementById("penjelasan").value = data.penjelasan || "";
             
-            // Scroll ke form
-            window.scrollTo({ top: 0, behavior: 'smooth' });
+            // Update jawaban button
+            resetJawabanButtons();
+            const selectedBtn = document.querySelector(`.jawaban-btn[data-jawaban="${data.jawaban}"]`);
+            selectedBtn.classList.remove('bg-gray-200', 'text-gray-700');
+            selectedBtn.classList.add('bg-teal-600', 'text-white');
             
-            // Update judul button
+            // Update submit button
             const submitBtn = soalForm.querySelector("button[type='submit']");
             submitBtn.innerHTML = '<i class="fa-solid fa-pen"></i> Update Soal';
-            submitBtn.className = "w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition font-semibold flex justify-center items-center gap-2";
+            submitBtn.className = "flex-1 bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition font-semibold flex justify-center items-center gap-2";
+            
+            // Scroll to form
+            soalForm.scrollIntoView({ behavior: 'smooth' });
           }
         });
       });
 
-      // Hapus soal
       document.querySelectorAll(".deleteSoalBtn").forEach(btn => {
         btn.addEventListener("click", async () => {
           const docId = btn.dataset.id;
           
-          if (confirm("Yakin ingin menghapus soal ini?\nSoal akan dihapus secara permanen.")) {
+          if (confirm("Yakin ingin menghapus soal ini?")) {
             try {
               await deleteDoc(doc(db, "soal", docId));
-              alert("Soal berhasil dihapus ✅");
+              showNotification("Soal berhasil dihapus ✅", "success");
               loadSoal();
+              loadStatistik();
             } catch (error) {
               console.error("Error deleting soal:", error);
-              alert("Gagal menghapus soal: " + error.message);
+              showNotification("Gagal menghapus soal", "error");
             }
           }
         });
       });
     }
 
-    // 🔹 Load materi
-    async function loadMateri() {
-      try {
-        daftarMateri.innerHTML = "";
-        const snapshot = await getDocs(collection(db, "materi"));
-        
-        if (snapshot.empty) {
-          daftarMateri.innerHTML = `
-            <div class="bg-white p-8 rounded-2xl shadow text-center">
-              <i class="fas fa-book text-4xl text-gray-300 mb-4"></i>
-              <h3 class="text-xl font-semibold text-gray-600 mb-2">Belum Ada Materi</h3>
-              <p class="text-gray-500">Tambahkan materi pertama Anda menggunakan form di atas.</p>
-            </div>
-          `;
-          return;
-        }
-        
-        const grouped = {};
-        snapshot.forEach(docSnap => {
-          const data = docSnap.data();
-          if (!grouped[data.mapel]) grouped[data.mapel] = [];
-          grouped[data.mapel].push({ id: docSnap.id, ...data });
-        });
-
-        Object.keys(grouped).forEach(mapel => {
-          const container = document.createElement("div");
-          container.className = "bg-white rounded-2xl shadow";
-
-          container.innerHTML = `
-            <div class="p-4 bg-indigo-600 text-white rounded-t-2xl cursor-pointer flex justify-between items-center">
-              <h2 class="text-lg font-semibold">${mapel} (${grouped[mapel].length} materi)</h2>
-              <i class="fa-solid fa-chevron-down"></i>
-            </div>
-            <div class="p-4 space-y-4 hidden"></div>
-          `;
-          const materiList = container.querySelector("div:last-child");
-
-          grouped[mapel].forEach(item => {
-            const li = document.createElement("div");
-            li.className = "bg-gray-50 p-4 rounded-xl shadow flex flex-col md:flex-row md:justify-between md:items-start gap-4 border border-gray-200";
+    // 🔹 Setup event listeners untuk materi
+    function setupMateriEventListeners() {
+      document.querySelectorAll(".editMateriBtn").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const docId = btn.dataset.id;
+          const docSnap = await getDoc(doc(db, "materi", docId));
+          
+          if (docSnap.exists()) {
+            const data = docSnap.data();
             
-            // Tentukan warna badge berdasarkan tingkat kesulitan
-            let difficultyClass = "bg-green-100 text-green-800";
-            if (item.tingkat === "menengah") {
-              difficultyClass = "bg-yellow-100 text-yellow-800";
-            } else if (item.tingkat === "sulit") {
-              difficultyClass = "bg-red-100 text-red-800";
-            }
+            document.getElementById("materiId").value = docId;
+            document.getElementById("materiMapel").value = data.mapel;
+            document.getElementById("judulMateri").value = data.judul;
+            document.getElementById("deskripsiMateri").value = data.deskripsi;
+            document.getElementById("kontenMateri").value = data.konten;
+            document.getElementById("tingkatMateri").value = data.tingkat;
+            document.getElementById("durasiMateri").value = data.durasi;
+            document.getElementById("jenisMateri").value = data.jenis;
             
-            li.innerHTML = `
-              <div class="flex-grow">
-                <h3 class="font-bold text-lg mb-1">${item.judul}</h3>
-                <p class="text-gray-600 mb-2">${item.deskripsi}</p>
-                <div class="flex flex-wrap gap-2 text-sm mb-3">
-                  <span class="${difficultyClass} px-2 py-1 rounded-full">${item.tingkat}</span>
-                  <span class="bg-blue-100 text-blue-800 px-2 py-1 rounded-full">${item.durasi} menit</span>
-                  <span class="bg-purple-100 text-purple-800 px-2 py-1 rounded-full">${item.jenis}</span>
-                </div>
-                <div class="text-xs text-gray-500">ID: ${item.id.substring(0, 10)}...</div>
-              </div>
-              <div class="flex gap-2">
-                <button data-id="${item.id}" class="editMateriBtn bg-blue-500 text-white px-3 py-2 rounded-lg hover:bg-blue-600 transition flex items-center gap-1">
-                  <i class="fa-solid fa-pen"></i> Edit
-                </button>
-                <button data-id="${item.id}" class="deleteMateriBtn bg-red-500 text-white px-3 py-2 rounded-lg hover:bg-red-600 transition flex items-center gap-1">
-                  <i class="fa-solid fa-trash"></i> Hapus
-                </button>
-              </div>
-            `;
-            materiList.appendChild(li);
-          });
-
-          container.querySelector("div:first-child").addEventListener("click", () => {
-            materiList.classList.toggle("hidden");
-          });
-
-          daftarMateri.appendChild(container);
+            // Update submit button
+            const submitBtn = materiForm.querySelector("button[type='submit']");
+            submitBtn.innerHTML = '<i class="fa-solid fa-pen"></i> Update Materi';
+            submitBtn.className = "flex-1 bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition font-semibold flex justify-center items-center gap-2";
+            
+            // Scroll to form
+            materiForm.scrollIntoView({ behavior: 'smooth' });
+          }
         });
+      });
 
-        // Edit & Hapus materi
-        document.querySelectorAll(".editMateriBtn").forEach(btn => {
-          btn.addEventListener("click", async () => {
-            const docId = btn.dataset.id;
-            const docSnap = await getDoc(doc(db, "materi", docId));
-            if (docSnap.exists()) {
-              const data = docSnap.data();
-              document.getElementById("materiId").value = docId;
-              document.getElementById("materiMapel").value = data.mapel;
-              document.getElementById("judulMateri").value = data.judul;
-              document.getElementById("deskripsiMateri").value = data.deskripsi;
-              document.getElementById("kontenMateri").value = data.konten;
-              document.getElementById("tingkatMateri").value = data.tingkat;
-              document.getElementById("durasiMateri").value = data.durasi;
-              document.getElementById("jenisMateri").value = data.jenis;
-              
-              // Update button
-              const submitBtn = materiForm.querySelector("button[type='submit']");
-              submitBtn.innerHTML = '<i class="fa-solid fa-pen"></i> Update Materi';
-              submitBtn.className = "w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 transition font-semibold flex justify-center items-center gap-2";
-              
-              window.scrollTo({ top: 0, behavior: 'smooth' });
+      document.querySelectorAll(".deleteMateriBtn").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          if (confirm("Yakin ingin menghapus materi ini?")) {
+            try {
+              await deleteDoc(doc(db, "materi", btn.dataset.id));
+              showNotification("Materi berhasil dihapus ✅", "success");
+              loadMateri();
+              loadStatistik();
+            } catch (error) {
+              console.error("Error deleting materi:", error);
+              showNotification("Gagal menghapus materi", "error");
             }
-          });
+          }
         });
+      });
+    }
 
-        document.querySelectorAll(".deleteMateriBtn").forEach(btn => {
-          btn.addEventListener("click", async () => {
-            if (confirm("Yakin ingin menghapus materi ini?")) {
-              try {
-                await deleteDoc(doc(db, "materi", btn.dataset.id));
-                loadMateri();
-              } catch (error) {
-                console.error("Error deleting materi:", error);
-                alert("Gagal menghapus materi: " + error.message);
-              }
-            }
-          });
-        });
-      } catch (error) {
-        console.error("Error loading materi:", error);
-        showError("Gagal memuat daftar materi");
+    // Helper functions
+    function getMapelColor(mapel) {
+      const mapelLower = mapel?.toLowerCase() || '';
+      
+      if (mapelLower.includes('fisik')) return { bg: 'bg-blue-100', text: 'text-blue-800' };
+      if (mapelLower.includes('kimia')) return { bg: 'bg-green-100', text: 'text-green-800' };
+      if (mapelLower.includes('biolog')) return { bg: 'bg-purple-100', text: 'text-purple-800' };
+      if (mapelLower.includes('astronom')) return { bg: 'bg-pink-100', text: 'text-pink-800' };
+      if (mapelLower.includes('matematik')) return { bg: 'bg-yellow-100', text: 'text-yellow-800' };
+      return { bg: 'bg-gray-100', text: 'text-gray-800' };
+    }
+
+    function getDifficultyColor(tingkat) {
+      switch(tingkat) {
+        case 'mudah': return { bg: 'bg-green-100', text: 'text-green-800' };
+        case 'menengah': return { bg: 'bg-yellow-100', text: 'text-yellow-800' };
+        case 'sulit': return { bg: 'bg-red-100', text: 'text-red-800' };
+        default: return { bg: 'bg-gray-100', text: 'text-gray-800' };
       }
     }
 
-    // Reset form ketika klik mapel input (untuk soal baru)
-    mapelInput.addEventListener("focus", () => {
-      const submitBtn = soalForm.querySelector("button[type='submit']");
-      if (document.getElementById("soalId").value) {
-        // Jika sedang edit, reset ke mode tambah
-        document.getElementById("soalId").value = "";
-        submitBtn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Simpan Soal';
-        submitBtn.className = "w-full bg-teal-600 text-white p-3 rounded-lg hover:bg-teal-700 transition font-semibold flex justify-center items-center gap-2";
-        soalForm.reset();
-        daftarMapel = [];
-        daftarMapelDiv.innerHTML = "";
-      }
-    });
-
-    // Reset form ketika klik materi mapel input (untuk materi baru)
-    materiMapelInput.addEventListener("focus", () => {
-      if (document.getElementById("materiId").value) {
-        // Jika sedang edit, reset ke mode tambah
-        document.getElementById("materiId").value = "";
-        const submitBtn = materiForm.querySelector("button[type='submit']");
-        submitBtn.innerHTML = '<i class="fa-solid fa-book"></i> Simpan Materi';
-        submitBtn.className = "w-full bg-indigo-600 text-white p-3 rounded-lg hover:bg-indigo-700 transition font-semibold flex justify-center items-center gap-2";
-        materiForm.reset();
-        document.getElementById("durasiMateri").value = "15";
-      }
-    });
+    function showNotification(message, type = 'info') {
+      // Create notification element
+      const notification = document.createElement('div');
+      notification.className = `fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg text-white font-medium transform transition-all duration-300 ${
+        type === 'success' ? 'bg-green-500' :
+        type === 'error' ? 'bg-red-500' :
+        'bg-blue-500'
+      }`;
+      notification.innerHTML = `
+        <div class="flex items-center gap-3">
+          <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+          <span>${message}</span>
+        </div>
+      `;
+      
+      document.body.appendChild(notification);
+      
+      // Remove after 3 seconds
+      setTimeout(() => {
+        notification.style.opacity = '0';
+        notification.style.transform = 'translateY(-20px)';
+        setTimeout(() => {
+          if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+          }
+        }, 300);
+      }, 3000);
+    }
   </script>
   
   <style>
@@ -809,19 +1057,30 @@
       transition: transform 0.3s ease;
     }
     
-    /* Style untuk KaTeX rendering */
-    .katex-content .katex {
-      font-size: 1.1em;
+    .line-clamp-2 {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
     }
     
-    /* Animasi untuk card soal */
-    .soal-card {
-      transition: all 0.3s ease;
+    /* Scrollbar styling */
+    .overflow-y-auto::-webkit-scrollbar {
+      width: 6px;
     }
     
-    .soal-card:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    .overflow-y-auto::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 10px;
+    }
+    
+    .overflow-y-auto::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 10px;
+    }
+    
+    .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+      background: #a1a1a1;
     }
   </style>
 </body>

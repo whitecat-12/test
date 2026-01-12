@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teta Sains</title>
+    <title>Science Explorer - Aplikasi Belajar Fisika & Sains</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -12,7 +12,11 @@
             --primary: #38b2ac;
             --secondary: #0e7490;
             --accent: #f59e0b;
-            --logo-color: #9999ff; /* Warna baru untuk logo */
+            --physics: #3b82f6;
+            --chemistry: #10b981;
+            --biology: #8b5cf6;
+            --astronomy: #ec4899;
+            --logo-color: #9999ff;
         }
         
         body {
@@ -26,9 +30,9 @@
             background: white;
             min-height: 100vh;
             position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
         }
         
-        /* NAVBAR YANG SUDAH DISAMAKAN */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -37,12 +41,11 @@
             box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
             background: white;
             z-index: 10;
-            height: 70px; /* TINGGI SAMA */
+            height: 70px;
             display: flex;
             align-items: center;
         }
         
-        /* STYLE NAV ITEM YANG SAMA */
         .nav-item {
             display: flex;
             flex-direction: column;
@@ -67,11 +70,11 @@
         
         .nav-icon {
             transition: all 0.3s ease;
-            font-size: 1.25rem; /* UKURAN SAMA */
+            font-size: 1.25rem;
         }
         
         .nav-icon.active {
-            transform: translateY(-5px); /* EFEK SAMA */
+            transform: translateY(-5px);
             color: var(--primary);
         }
         
@@ -81,7 +84,7 @@
         }
         
         .app-logo-icon {
-            background: var(--logo-color); /* Warna diubah ke #9999ff */
+            background: var(--logo-color);
             color: white;
             width: 36px;
             height: 36px;
@@ -95,100 +98,111 @@
         .app-name {
             font-weight: 700;
             font-size: 1.25rem;
-            color: var(--logo-color); /* Warna diubah ke #9999ff */
+            color: var(--logo-color);
         }
 
-        /* Animasi untuk kartu */
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-5px); }
-            100% { transform: translateY(0px); }
-        }
-
-        .card-hover {
-            transition: all 0.3s ease;
-        }
-
-        .card-hover:hover {
-            animation: float 2s ease-in-out infinite;
-        }
-
-        /* Search Bar Styles */
-        .search-container {
-            position: relative;
-            margin: 16px 0;
+        .lavender-bg {
+            background-color: #e6e6fa;
         }
         
-        .search-input {
-            width: 100%;
-            padding: 12px 16px 12px 44px;
+        .lavender-border {
+            border-color: #e6e6fa;
+        }
+        
+        .lavender-text {
+            color: #9370db;
+        }
+        
+        .option:hover {
+            background-color: #f3f4ff !important;
+            transform: translateY(-2px);
+            transition: all 0.2s ease;
+        }
+        
+        .quiz-container {
+            box-shadow: 0 10px 25px rgba(147, 112, 219, 0.15);
+            border-radius: 16px;
+        }
+        
+        .nav-button {
+            transition: all 0.3s ease;
             border-radius: 12px;
-            border: 1px solid #e2e8f0;
-            background-color: #f8fafc;
-            font-family: 'Baloo 2', cursive;
-            font-size: 16px;
+            font-weight: 500;
+        }
+        
+        .nav-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .option {
+            transition: all 0.2s ease;
+            border-radius: 12px;
+            border: 2px solid #f1f1f1;
+        }
+        
+        .correct-answer {
+            background-color: #d4edda !important;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+        
+        .wrong-answer {
+            background-color: #f8d7da !important;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+        
+        .score-display {
+            background: linear-gradient(135deg, #e6e6fa 0%, #ffffff 100%);
+            border-radius: 16px;
+        }
+        
+        .mapel-selector {
+            border-radius: 12px;
             transition: all 0.3s ease;
         }
         
-        .search-input:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(56, 178, 172, 0.1);
+        .mapel-selector:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
         
-        .search-icon {
-            position: absolute;
-            left: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #94a3b8;
-        }
+        .physics-bg { background-color: #dbeafe; }
+        .physics-text { color: #1e40af; }
+        .physics-border { border-color: #3b82f6; }
         
-        .clear-search {
-            position: absolute;
-            right: 16px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: none;
-            border: none;
-            color: #94a3b8;
-            cursor: pointer;
-            display: none;
-        }
+        .chemistry-bg { background-color: #d1fae5; }
+        .chemistry-text { color: #065f46; }
+        .chemistry-border { border-color: #10b981; }
         
-        .clear-search:hover {
-            color: #64748b;
-        }
+        .biology-bg { background-color: #f3e8ff; }
+        .biology-text { color: #6b21a8; }
+        .biology-border { border-color: #8b5cf6; }
         
-        .no-results {
-            text-align: center;
-            padding: 40px 20px;
-            color: #64748b;
-        }
+        .astronomy-bg { background-color: #fce7f3; }
+        .astronomy-text { color: #9d174d; }
+        .astronomy-border { border-color: #ec4899; }
         
-        .no-results i {
-            font-size: 48px;
-            margin-bottom: 16px;
-            color: #cbd5e1;
-        }
-
-        /* RESPONSIVE SAMA */
-        @media (max-width: 414px) {
-            .bottom-nav {
-                height: 65px;
-            }
-            
-            .nav-icon {
-                font-size: 1.1rem;
-            }
-        }
+        .math-bg { background-color: #fef3c7; }
+        .math-text { color: #92400e; }
+        .math-border { border-color: #f59e0b; }
     </style>
+
+    <!-- 🔹 MathJax -->
+    <script>
+        window.MathJax = {
+            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+            svg: { fontCache: 'global' }
+        };
+    </script>
+    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 </head>
 <body>
     <!-- Mobile App Container -->
     <div class="app-container">
         <!-- App Header -->
-        <header class="bg-white p-4 border-b border-gray-200">
+        <header class="bg-gradient-to-r from-primary to-secondary p-4 text-white">
             <div class="flex justify-between items-center">
                 <div class="app-logo">
                     <div class="app-logo-icon">
@@ -196,52 +210,96 @@
                     </div>
                     <h1 class="app-name">QUANTARA</h1>
                 </div>
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-search"></i>
+                    <i class="fas fa-user-circle text-xl"></i>
+                </div>
             </div>
         </header>
         
         <!-- Main Content Area -->
         <main class="pb-20">
+            <!-- Quiz Container -->
             <div class="p-4">
-                <!-- Search Bar -->
-                <div class="search-container">
-                    <i class="fas fa-search search-icon"></i>
-                    <input type="text" id="searchInput" class="search-input" placeholder="Cari mata pelajaran...">
-                    <button id="clearSearch" class="clear-search">
-                        <i class="fas fa-times"></i>
+                <div class="bg-white quiz-container p-4">
+                    <!-- Header -->
+                    <div class="text-center mb-6">
+                        <h1 class="text-2xl font-bold lavender-text">Quiz Siswa</h1>
+                        <div class="w-20 h-1 lavender-bg mx-auto mt-2 rounded-full"></div>
+                        <p class="text-gray-600 mt-2 text-sm">Pilih mata pelajaran untuk mulai quiz!</p>
+                    </div>
+
+                    <!-- Pilih Mata Pelajaran (Tampilan Awal) -->
+                    <div id="mapelSelection" class="space-y-4 mb-6">
+                        <!-- Mapel options akan di-generate dari database -->
+                        <div id="mapelOptions" class="grid grid-cols-2 gap-3">
+                            <div class="text-center py-8">
+                                <i class="fas fa-spinner fa-spin text-2xl text-teal-600 mb-2"></i>
+                                <p class="text-sm text-gray-500">Memuat mata pelajaran...</p>
+                            </div>
+                        </div>
+                        
+                        <div class="text-center mt-4">
+                            <button id="startQuizBtn" class="bg-teal-500 text-white px-6 py-3 rounded-full font-semibold hover:bg-teal-600 transition-all shadow-lg">
+                                <i class="fas fa-play mr-2"></i> Mulai Quiz
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Progress indicator (akan ditampilkan setelah pilih mapel) -->
+                    <div id="progressContainer" class="mb-6 hidden">
+                        <div class="flex justify-between items-center mb-2">
+                            <div class="flex items-center">
+                                <span id="selectedMapel" class="text-sm font-medium mr-3"></span>
+                                <span class="text-sm font-medium lavender-text">Progress</span>
+                            </div>
+                            <span class="text-sm font-medium text-gray-600" id="progress-text">1/10</span>
+                        </div>
+                        <div class="bg-gray-200 rounded-full h-2.5">
+                            <div class="lavender-bg h-2.5 rounded-full" id="progress-bar" style="width: 10%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Tempat soal -->
+                    <div id="quiz" class="space-y-6 mb-6"></div>
+
+                    <!-- Navigasi soal -->
+                    <div id="navContainer" class="flex justify-between mt-6 hidden">
+                        <button id="prevBtn" class="nav-button bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm" disabled>
+                            ← Sebelumnya
+                        </button>
+                        <button id="nextBtn" class="nav-button lavender-bg text-white px-4 py-2 rounded-lg text-sm">
+                            Selanjutnya →
+                        </button>
+                    </div>
+
+                    <!-- Logout -->
+                    <button id="logoutBtn" class="mt-6 w-full bg-white lavender-text border lavender-border p-3 rounded-lg font-medium hover:bg-lavender hover:text-white transition-all text-sm">
+                        Logout
                     </button>
-                </div>
-                
-                <!-- Container Rak -->
-                <div id="rakMapel" class="grid grid-cols-1 gap-5"></div>
-                
-                <!-- No Results Message -->
-                <div id="noResults" class="no-results hidden">
-                    <i class="fas fa-search"></i>
-                    <h3 class="text-lg font-semibold mb-2">Tidak ada hasil ditemukan</h3>
-                    <p>Coba gunakan kata kunci yang berbeda</p>
                 </div>
             </div>
         </main>
         
-        <!-- BOTTOM NAVIGATION YANG SUDAH DISAMAKAN -->
+        <!-- BOTTOM NAVIGATION -->
         <nav class="bottom-nav">
-            <a href="../dashboard siswa.html" class="nav-item">
+            <a href="index.html" class="nav-item">
                 <i class="fas fa-home nav-icon"></i>
                 <span>Beranda</span>
             </a>
-            <a href="dashboard soal.html" class="nav-item">
-                <i class="fas fa-flask nav-icon active"></i>
+            <a href="soal harian/dashboard soal.html" class="nav-item active">
+                <i class="fas fa-flask nav-icon"></i>
                 <span>Soal Harian</span>
             </a>
-            <a href="../ai/nayra.html" class="nav-item">
+            <a href="ai/index.html" class="nav-item">
                 <i class="fas fa-robot nav-icon"></i>
                 <span>Nayra AI</span>
             </a>
-            <a href="../materi harian/kategori materi.html" class="nav-item">
+            <a href="kategori/kategori materi.html" class="nav-item">
                 <i class="fas fa-chalkboard-teacher nav-icon"></i>
                 <span>Materi Harian</span>
             </a>
-            <a href="../profil/profil.html" class="nav-item">
+            <a href="profil.html" class="nav-item">
                 <i class="fas fa-user nav-icon"></i>
                 <span>Profil</span>
             </a>
@@ -250,128 +308,522 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, getDocs, addDoc, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAJ5I8k2MzAyDLt9fUcXHRNtRVjKB_ETLY",
             authDomain: "projectid-81104.firebaseapp.com",
             projectId: "projectid-81104",
-            storageBucket: "projectid-81104.appspot.com",
+            storageBucket: "projectid-81104.firebasestorage.app",
             messagingSenderId: "554913260457",
-            appId: "1:554913260457:web:bf988867ebfd902c651ab8"
+            appId: "1:554913260457:web:bf988867ebfd902c651ab8",
+            measurementId: "G-8WFHQW5WGN"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        const auth = getAuth(app);
+        const auth = getAuth();
 
-        const rakMapel = document.getElementById("rakMapel");
-        const searchInput = document.getElementById("searchInput");
-        const clearSearch = document.getElementById("clearSearch");
-        const noResults = document.getElementById("noResults");
+        const quizEl = document.getElementById("quiz");
+        const nextBtn = document.getElementById("nextBtn");
+        const prevBtn = document.getElementById("prevBtn");
+        const logoutBtn = document.getElementById("logoutBtn");
+        const progressBar = document.getElementById("progress-bar");
+        const progressText = document.getElementById("progress-text");
+        const mapelSelection = document.getElementById("mapelSelection");
+        const progressContainer = document.getElementById("progressContainer");
+        const navContainer = document.getElementById("navContainer");
+        const startQuizBtn = document.getElementById("startQuizBtn");
+        const selectedMapelEl = document.getElementById("selectedMapel");
+        const mapelOptions = document.getElementById("mapelOptions");
 
-        let allSubjects = [];
+        let soalList = [];
+        let currentIndex = 0;
+        let score = 0;                 
+        let answered = {};             
+        let currentUser = null;
+        let selectedMapel = null;
 
+        // 🔹 Logout
+        logoutBtn.addEventListener("click", async () => {
+            await signOut(auth);
+            window.location.href = "login.html";
+        });
+
+        // 🔹 Cek login user
         onAuthStateChanged(auth, (user) => {
             if (!user) {
                 window.location.href = "login.html";
             } else {
-                loadRak();
+                currentUser = user;
+                loadMapelOptions();
             }
         });
 
-        async function loadRak() {
-            const snapshot = await getDocs(collection(db, "soal"));
-            const mapelSet = new Set();
-
-            snapshot.forEach(docSnap => {
-                const data = docSnap.data();
-                if (data.mapel) mapelSet.add(data.mapel);
-            });
-
-            allSubjects = [...mapelSet];
-            renderSubjects(allSubjects);
+        // 🔹 Load daftar mata pelajaran dari database
+        async function loadMapelOptions() {
+            try {
+                // Ambil semua soal untuk mendapatkan daftar mapel
+                const q = query(collection(db, "soal"), orderBy("createdAt", "desc"));
+                const snapshot = await getDocs(q);
+                
+                const mapelSet = new Set();
+                
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    if (data.mapel && data.mapel.trim() !== "") {
+                        mapelSet.add(data.mapel);
+                    }
+                });
+                
+                // Jika tidak ada mapel di database, gunakan default
+                if (mapelSet.size === 0) {
+                    const defaultMapels = ["Fisika", "Kimia", "Biologi", "Astronomi", "Matematika", "Lainnya"];
+                    defaultMapels.forEach(mapel => mapelSet.add(mapel));
+                }
+                
+                renderMapelOptions(Array.from(mapelSet));
+                
+            } catch (err) {
+                console.error("Error load mapel options:", err);
+                // Gunakan default jika error
+                const defaultMapels = ["Fisika", "Kimia", "Biologi", "Astronomi", "Matematika", "Lainnya"];
+                renderMapelOptions(defaultMapels);
+            }
         }
 
-        function renderSubjects(subjects) {
-            rakMapel.innerHTML = "";
-            noResults.classList.add("hidden");
+        function renderMapelOptions(mapels) {
+            mapelOptions.innerHTML = '';
+            
+            mapels.forEach(mapel => {
+                const mapelLower = mapel.toLowerCase();
+                let bgClass = 'lavender-bg';
+                let textClass = 'lavender-text';
+                let borderClass = 'lavender-border';
+                let icon = 'fas fa-book';
+                
+                // Tentukan warna berdasarkan mapel
+                if (mapelLower.includes('fisik')) {
+                    bgClass = 'physics-bg';
+                    textClass = 'physics-text';
+                    borderClass = 'physics-border';
+                    icon = 'fas fa-atom';
+                } else if (mapelLower.includes('kimia')) {
+                    bgClass = 'chemistry-bg';
+                    textClass = 'chemistry-text';
+                    borderClass = 'chemistry-border';
+                    icon = 'fas fa-flask';
+                } else if (mapelLower.includes('biolog')) {
+                    bgClass = 'biology-bg';
+                    textClass = 'biology-text';
+                    borderClass = 'biology-border';
+                    icon = 'fas fa-dna';
+                } else if (mapelLower.includes('astronom')) {
+                    bgClass = 'astronomy-bg';
+                    textClass = 'astronomy-text';
+                    borderClass = 'astronomy-border';
+                    icon = 'fas fa-moon';
+                } else if (mapelLower.includes('matematik')) {
+                    bgClass = 'math-bg';
+                    textClass = 'math-text';
+                    borderClass = 'math-border';
+                    icon = 'fas fa-calculator';
+                }
+                
+                const div = document.createElement('div');
+                div.className = `mapel-selector ${bgClass} p-4 rounded-xl border ${borderClass} cursor-pointer text-center`;
+                div.dataset.mapel = mapel;
+                
+                div.innerHTML = `
+                    <i class="${icon} text-2xl ${textClass} mb-2"></i>
+                    <h3 class="font-bold ${textClass}">${mapel}</h3>
+                    <p class="text-xs text-gray-600 mt-1">Klik untuk memilih</p>
+                `;
+                
+                mapelOptions.appendChild(div);
+            });
+            
+            setupMapelSelection();
+        }
 
-            if (subjects.length === 0) {
-                noResults.classList.remove("hidden");
+        function setupMapelSelection() {
+            document.querySelectorAll('.mapel-selector').forEach(item => {
+                item.addEventListener('click', () => {
+                    // Hapus semua seleksi
+                    document.querySelectorAll('.mapel-selector').forEach(el => {
+                        el.style.boxShadow = 'none';
+                        el.style.transform = 'translateY(0)';
+                        el.style.borderWidth = '1px';
+                    });
+                    
+                    // Tandai yang dipilih
+                    selectedMapel = item.dataset.mapel;
+                    item.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+                    item.style.transform = 'translateY(-2px)';
+                    item.style.borderWidth = '3px';
+                    
+                    // Update tombol start
+                    startQuizBtn.disabled = false;
+                    startQuizBtn.innerHTML = `<i class="fas fa-play mr-2"></i> Mulai Quiz ${selectedMapel}`;
+                });
+            });
+        }
+
+        // 🔹 Mulai Quiz
+        startQuizBtn.addEventListener('click', async () => {
+            if (!selectedMapel) {
+                showAlert("Silakan pilih mata pelajaran terlebih dahulu!", "error");
+                return;
+            }
+            
+            // Sembunyikan pemilih mapel
+            mapelSelection.classList.add('hidden');
+            
+            // Tampilkan progress dan navigasi
+            progressContainer.classList.remove('hidden');
+            navContainer.classList.remove('hidden');
+            selectedMapelEl.textContent = `📚 ${selectedMapel}`;
+            
+            // Load soal berdasarkan mapel yang dipilih
+            await loadSoalByMapel(selectedMapel);
+        });
+
+        // 🔹 Ambil soal dari Firestore BERDASARKAN MAPEL
+        async function loadSoalByMapel(mapel) {
+            try {
+                quizEl.innerHTML = `
+                    <div class="text-center py-8">
+                        <i class="fas fa-spinner fa-spin text-3xl text-teal-600 mb-3"></i>
+                        <p class="text-gray-600">Memuat soal ${mapel}...</p>
+                    </div>
+                `;
+                
+                // Query untuk mengambil soal dengan mapel tertentu
+                // Gunakan case-insensitive matching dengan '=='
+                const q = query(collection(db, "soal"), where("mapel", "==", mapel));
+                const snapshot = await getDocs(q);
+                
+                soalList = snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+
+                console.log(`Ditemukan ${soalList.length} soal untuk mapel: ${mapel}`);
+                
+                if (soalList.length === 0) {
+                    // Coba dengan case insensitive
+                    const allSoalSnapshot = await getDocs(collection(db, "soal"));
+                    const allSoal = allSoalSnapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }));
+                    
+                    // Filter manual dengan case insensitive
+                    const filteredSoal = allSoal.filter(item => 
+                        item.mapel && item.mapel.toLowerCase() === mapel.toLowerCase()
+                    );
+                    
+                    if (filteredSoal.length === 0) {
+                        quizEl.innerHTML = `
+                            <div class="text-center py-8">
+                                <div class="text-5xl mb-4">📝</div>
+                                <h3 class="text-lg font-bold text-gray-700 mb-2">Belum Ada Soal</h3>
+                                <p class="text-gray-500 mb-4">Belum ada soal untuk mata pelajaran <span class="font-semibold">${mapel}</span>.</p>
+                                <p class="text-sm text-gray-400 mb-4">Silakan hubungi guru untuk menambahkan soal.</p>
+                                <button id="backToMapel" class="bg-teal-500 text-white px-4 py-2 rounded-lg">
+                                    <i class="fas fa-arrow-left mr-2"></i> Kembali Pilih Mapel
+                                </button>
+                            </div>`;
+                        
+                        document.getElementById('backToMapel').addEventListener('click', () => {
+                            window.location.reload();
+                        });
+                        
+                        progressContainer.classList.add('hidden');
+                        navContainer.classList.add('hidden');
+                        return;
+                    }
+                    
+                    soalList = filteredSoal;
+                }
+                
+                // Acak urutan soal
+                soalList = shuffleArray(soalList);
+                
+                // Batasi maksimal 10 soal
+                if (soalList.length > 10) {
+                    soalList = soalList.slice(0, 10);
+                }
+                
+                // Reset state
+                currentIndex = 0;
+                score = 0;
+                answered = {};
+                
+                updateProgress();
+                renderSoal();
+                
+            } catch (err) {
+                console.error("Error load soal:", err);
+                quizEl.innerHTML = `
+                    <div class="text-center py-8">
+                        <div class="text-5xl mb-4 text-red-500">❌</div>
+                        <h3 class="text-lg font-bold text-red-700 mb-2">Terjadi Kesalahan</h3>
+                        <p class="text-red-500 mb-4">${err.message}</p>
+                        <button onclick="window.location.reload()" class="bg-teal-500 text-white px-4 py-2 rounded-lg">
+                            <i class="fas fa-redo mr-2"></i> Coba Lagi
+                        </button>
+                    </div>`;
+                progressContainer.classList.add('hidden');
+                navContainer.classList.add('hidden');
+            }
+        }
+
+        // Fungsi untuk mengacak array
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // Update progress bar
+        function updateProgress() {
+            const progress = ((currentIndex + 1) / soalList.length) * 100;
+            progressBar.style.width = `${progress}%`;
+            progressText.textContent = `${currentIndex + 1}/${soalList.length}`;
+        }
+
+        // 🔹 Tampilkan soal
+        function renderSoal() {
+            const data = soalList[currentIndex];
+            updateProgress();
+
+            // Pastikan data ada dan struktur sesuai
+            if (!data || !data.pertanyaan || !data.opsi) {
+                console.error("Data soal tidak valid:", data);
+                quizEl.innerHTML = `
+                    <div class="text-center py-8 text-red-500">
+                        <i class="fas fa-exclamation-triangle text-3xl mb-3"></i>
+                        <p>Format soal tidak valid. Silakan pilih mapel lain.</p>
+                        <button onclick="window.location.reload()" class="mt-4 bg-gray-200 text-gray-700 px-4 py-2 rounded-lg">
+                            Kembali
+                        </button>
+                    </div>`;
                 return;
             }
 
-            // Warna-warna cerah dan ramah anak tanpa gradien
-            const colorSchemes = [
-                { bg: "bg-blue-100", border: "border-l-8 border-blue-400", text: "text-blue-800", icon: "flask", iconColor: "text-blue-500" },
-                { bg: "bg-green-100", border: "border-l-8 border-green-400", text: "text-green-800", icon: "atom", iconColor: "text-green-500" },
-                { bg: "bg-yellow-100", border: "border-l-8 border-yellow-400", text: "text-yellow-800", icon: "bolt", iconColor: "text-yellow-500" },
-                { bg: "bg-red-100", border: "border-l-8 border-red-400", text: "text-red-800", icon: "dna", iconColor: "text-red-500" },
-                { bg: "bg-purple-100", border: "border-l-8 border-purple-400", text: "text-purple-800", icon: "calculator", iconColor: "text-purple-500" },
-                { bg: "bg-pink-100", border: "border-l-8 border-pink-400", text: "text-pink-800", icon: "star", iconColor: "text-pink-500" },
-                { bg: "bg-indigo-100", border: "border-l-8 border-indigo-400", text: "text-indigo-800", icon: "microscope", iconColor: "text-indigo-500" }
-            ];
-
-            let i = 0;
-            subjects.forEach(mapel => {
-                const scheme = colorSchemes[i % colorSchemes.length];
-                i++;
-
-                const card = document.createElement("div");
-                card.className = `flex items-center gap-5 ${scheme.bg} ${scheme.border} ${scheme.text} p-6 rounded-2xl shadow-md cursor-pointer card-hover`;
-
-                card.innerHTML = `
-                    <div class="flex-shrink-0">
-                        <i class="fas fa-${scheme.icon} text-3xl ${scheme.iconColor}"></i>
+            quizEl.innerHTML = `
+                <div class="p-4 bg-white border border-gray-100 rounded-xl shadow-sm">
+                    <div class="flex justify-between items-start mb-3">
+                        <h2 class="font-semibold text-base lavender-text">Soal ${currentIndex + 1}:</h2>
+                        <span class="text-xs bg-lavender text-white px-2 py-1 rounded-full">${data.mapel || 'Umum'}</span>
                     </div>
-                    <div class="flex-grow">
-                        <h2 class="text-xl font-bold mb-1">${mapel}</h2>
-                        <p class="text-sm opacity-80">Kumpulan soal ${mapel} yang seru!</p>
+                    <p class="mb-4 text-gray-700 text-base">${data.pertanyaan}</p>
+                    <div class="space-y-3">
+                        ${["A","B","C","D"].map(opt => `
+                            <div class="option bg-white p-3 rounded-lg cursor-pointer shadow-sm hover:shadow-md text-sm"
+                                data-opt="${opt}" data-correct="${opt === data.jawaban}">
+                                <span class="font-medium mr-2">${opt}.</span> ${data.opsi[opt] || ''}
+                            </div>
+                        `).join("")}
                     </div>
-                    <div class="flex-shrink-0">
-                        <i class="fas fa-chevron-right opacity-60"></i>
-                    </div>
-                `;
+                    <p id="feedback" class="mt-4 p-3 rounded-lg hidden text-sm"></p>
+                </div>
+            `;
 
-                card.addEventListener("click", () => {
-                    window.location.href = `quiz.html?mapel=${encodeURIComponent(mapel)}`;
+            if (window.MathJax) {
+                try {
+                    MathJax.typesetPromise();
+                } catch (e) {
+                    console.log("MathJax error:", e);
+                }
+            }
+
+            document.querySelectorAll(".option").forEach(optEl => {
+                optEl.addEventListener("click", () => {
+                    const opt = optEl.dataset.opt;
+                    const benar = optEl.dataset.correct === "true";
+                    const feedback = document.getElementById("feedback");
+                    feedback.classList.remove("hidden");
+
+                    if (!answered[currentIndex]) {   
+                        answered[currentIndex] = opt;
+                        if (benar) {
+                            score += (100 / soalList.length);
+                        }
+                    }
+
+                    if (benar) {
+                        optEl.classList.add("correct-answer");
+                        feedback.innerHTML = "✅ <span class='font-medium'>Jawaban Benar!</span> " + (data.penjelasan || "");
+                        feedback.className = "mt-4 p-3 rounded-lg bg-green-50 text-green-700 border border-green-200 text-sm";
+                    } else {
+                        optEl.classList.add("wrong-answer");
+                        // Tandai juga jawaban yang benar
+                        document.querySelectorAll(".option").forEach(o => {
+                            if (o.dataset.correct === "true") {
+                                o.classList.add("correct-answer");
+                            }
+                        });
+                        feedback.innerHTML = "❌ <span class='font-medium'>Jawaban Salah.</span> " + (data.penjelasan || "");
+                        feedback.className = "mt-4 p-3 rounded-lg bg-red-50 text-red-700 border border-red-200 text-sm";
+                    }
+
+                    if (window.MathJax) {
+                        try {
+                            MathJax.typesetPromise([feedback]);
+                        } catch (e) {
+                            console.log("MathJax feedback error:", e);
+                        }
+                    }
+
+                    document.querySelectorAll(".option").forEach(o => {
+                        o.style.pointerEvents = "none";
+                    });
                 });
-
-                rakMapel.appendChild(card);
             });
+
+            prevBtn.disabled = currentIndex === 0;
+            nextBtn.textContent = currentIndex === soalList.length - 1 ? "Selesai 🎯" : "Selanjutnya →";
+            nextBtn.className = currentIndex === soalList.length - 1 
+                ? "nav-button bg-green-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-600" 
+                : "nav-button lavender-bg text-white px-4 py-2 rounded-lg text-sm";
         }
 
-        // Fungsi pencarian
-        function searchSubjects(query) {
-            const filteredSubjects = allSubjects.filter(subject => 
-                subject.toLowerCase().includes(query.toLowerCase())
-            );
-            renderSubjects(filteredSubjects);
-        }
-
-        // Event listener untuk pencarian
-        searchInput.addEventListener("input", function() {
-            const query = this.value.trim();
-            
-            if (query.length > 0) {
-                clearSearch.style.display = "block";
-                searchSubjects(query);
+        // 🔹 Navigasi soal
+        nextBtn.addEventListener("click", () => {
+            if (currentIndex < soalList.length - 1) {
+                currentIndex++;
+                renderSoal();
             } else {
-                clearSearch.style.display = "none";
-                renderSubjects(allSubjects);
+                showResult();
             }
         });
 
-        // Event listener untuk tombol hapus pencarian
-        clearSearch.addEventListener("click", function() {
-            searchInput.value = "";
-            clearSearch.style.display = "none";
-            renderSubjects(allSubjects);
+        prevBtn.addEventListener("click", () => {
+            if (currentIndex > 0) {
+                currentIndex--;
+                renderSoal();
+            }
         });
 
-        // INTERAKSI NAVBAR YANG SUDAH DISAMAKAN
+        // 🔹 Tampilkan hasil & simpan ke Firestore
+        async function showResult() {
+            const finalScore = Math.round(score);
+            
+            // Sembunyikan progress bar dan navigasi
+            progressContainer.classList.add('hidden');
+            navContainer.classList.add('hidden');
+            
+            const benarCount = Object.values(answered).filter((ans, idx) => ans === soalList[idx].jawaban).length;
+            const salahCount = Object.values(answered).filter((ans, idx) => ans !== soalList[idx].jawaban).length;
+            
+            quizEl.innerHTML = `
+                <div class="score-display p-6 text-center border border-lavender rounded-xl">
+                    <div class="text-4xl mb-3">🎉</div>
+                    <h2 class="text-xl font-bold mb-2 lavender-text">Quiz Selesai!</h2>
+                    <p class="text-base text-gray-600 mb-3">Hasil quiz untuk <span class="font-semibold">${selectedMapel}</span></p>
+                    
+                    <div class="inline-block bg-white rounded-full px-5 py-3 shadow-md mb-4">
+                        <span class="text-gray-600 text-sm">Nilai akhir:</span>
+                        <span class="text-2xl font-bold lavender-text"> ${finalScore}</span>
+                        <span class="text-gray-400 text-sm">/100</span>
+                    </div>
+                    
+                    <div class="mt-4 space-y-2 bg-white p-4 rounded-lg">
+                        <div class="flex justify-between text-sm">
+                            <span>Total Soal:</span>
+                            <span class="font-semibold">${soalList.length}</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span>Jawaban Benar:</span>
+                            <span class="font-semibold text-green-600">${benarCount}</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span>Jawaban Salah:</span>
+                            <span class="font-semibold text-red-600">${salahCount}</span>
+                        </div>
+                        <div class="flex justify-between text-sm mt-2 pt-2 border-t">
+                            <span>Persentase:</span>
+                            <span class="font-semibold">${Math.round((benarCount / soalList.length) * 100)}%</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 flex flex-col gap-2">
+                        <button id="restartQuiz" class="bg-teal-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-teal-600 transition-all">
+                            <i class="fas fa-redo mr-2"></i> Ulang Quiz
+                        </button>
+                        <button id="chooseOtherMapel" class="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg font-semibold hover:bg-gray-300 transition-all">
+                            <i class="fas fa-book mr-2"></i> Pilih Mapel Lain
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            // Setup button listeners untuk hasil
+            document.getElementById('restartQuiz').addEventListener('click', () => {
+                currentIndex = 0;
+                score = 0;
+                answered = {};
+                soalList = shuffleArray(soalList); // Acak lagi
+                progressContainer.classList.remove('hidden');
+                navContainer.classList.remove('hidden');
+                updateProgress();
+                renderSoal();
+            });
+
+            document.getElementById('chooseOtherMapel').addEventListener('click', () => {
+                window.location.reload();
+            });
+
+            try {
+                await addDoc(collection(db, "nilai"), {
+                    uid: currentUser.uid,
+                    email: currentUser.email,
+                    mapel: selectedMapel,
+                    score: finalScore,
+                    totalSoal: soalList.length,
+                    benar: benarCount,
+                    salah: salahCount,
+                    persentase: Math.round((benarCount / soalList.length) * 100),
+                    createdAt: new Date()
+                });
+                console.log("Nilai tersimpan");
+            } catch (err) {
+                console.error("Gagal simpan nilai:", err);
+            }
+        }
+
+        // Helper function untuk alert
+        function showAlert(message, type = 'info') {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `fixed top-4 left-1/2 transform -translate-x-1/2 z-50 px-6 py-3 rounded-lg shadow-lg text-white font-medium ${
+                type === 'error' ? 'bg-red-500' : 'bg-teal-500'
+            }`;
+            alertDiv.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <i class="fas fa-${type === 'error' ? 'exclamation-triangle' : 'info-circle'}"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                alertDiv.style.opacity = '0';
+                alertDiv.style.transform = 'translate(-50%, -20px)';
+                setTimeout(() => {
+                    if (alertDiv.parentNode) {
+                        alertDiv.parentNode.removeChild(alertDiv);
+                    }
+                }, 300);
+            }, 3000);
+        }
+
+        // INTERAKSI NAVBAR
         document.addEventListener('DOMContentLoaded', function() {
             const navItems = document.querySelectorAll('.nav-item');
             

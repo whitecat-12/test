@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TETA SAINS - Simulasi Fisika</title>
+    <title>Sains Explorer - Menu Fisika</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -12,10 +12,10 @@
             --primary: #9999ff;
             --secondary: #9999ff;
             --accent: #f59e0b;
-            --physics: #6366f1;
-            --mechanics: #10b981;
-            --thermo: #ef4444;
-            --electro: #8b5cf6;
+            --quran: #10b981;
+            --fiqh: #3b82f6;
+            --hadith: #8b5cf6;
+            --islamic: #ec4899;
         }
         
         body {
@@ -32,6 +32,7 @@
             box-shadow: 0 0 20px rgba(0,0,0,0.1);
         }
         
+        /* NAVBAR YANG SUDAH DIPERBAIKI - SAMA DENGAN FILE UTAMA */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -40,11 +41,12 @@
             box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
             background: white;
             z-index: 10;
-            height: 70px;
+            height: 70px; /* TINGGI KONSISTEN */
             display: flex;
             align-items: center;
         }
         
+        /* STYLE UNTUK NAV ITEM - SAMA DENGAN FILE UTAMA */
         .nav-item {
             display: flex;
             flex-direction: column;
@@ -69,11 +71,11 @@
         
         .nav-icon {
             transition: all 0.3s ease;
-            font-size: 1.25rem;
+            font-size: 1.25rem; /* UKURAN KONSISTEN */
         }
         
         .nav-icon.active {
-            transform: translateY(-5px);
+            transform: translateY(-5px); /* EFEK YANG SAMA */
             color: var(--primary);
         }
         
@@ -87,6 +89,15 @@
             100% { transform: translateY(0px); }
         }
         
+        .bounce {
+            animation: bounce 2s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        
         .card-hover {
             transition: all 0.3s ease;
         }
@@ -94,6 +105,11 @@
         .card-hover:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
+        }
+        
+        .islamic-pattern {
+            background-image: radial-gradient(rgba(153, 153, 255, 0.1) 1px, transparent 1px);
+            background-size: 20px 20px;
         }
         
         .section-content {
@@ -113,6 +129,35 @@
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .progress-bar {
+            height: 6px;
+            border-radius: 3px;
+            background-color: #e5e7eb;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.5s ease;
+        }
+        
+        .sticker {
+            position: absolute;
+            right: -10px;
+            top: -10px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 12px;
+            transform: rotate(15deg);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
         }
         
         .app-logo {
@@ -140,35 +185,33 @@
             -webkit-text-fill-color: transparent;
         }
         
-        .simulation-card {
+        .material-category {
             transition: all 0.3s ease;
             border-left: 4px solid;
             position: relative;
             overflow: hidden;
-            cursor: pointer;
-            border-radius: 10px;
-            text-decoration: none;
-            display: block;
-            color: inherit;
         }
         
-        .simulation-card:hover {
+        .material-category:hover {
             transform: translateX(5px);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.1);
         }
         
-        .simulation-icon {
+        .material-category::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0));
+            z-index: 1;
+        }
+        
+        .material-icon {
             transition: all 0.3s ease;
-            width: 50px;
-            height: 50px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.25rem;
         }
         
-        .simulation-card:hover .simulation-icon {
+        .material-category:hover .material-icon {
             transform: scale(1.1);
         }
         
@@ -192,70 +235,66 @@
         }
         
         .daily-tip {
-            background-color: #f8fafc;
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
             border-left: 4px solid var(--primary);
         }
         
+        /* Improved mobile styles untuk konsistensi */
         @media (max-width: 414px) {
             .bottom-nav {
-                height: 65px;
+                height: 65px; /* SAMA DENGAN FILE UTAMA */
             }
             
             .nav-icon {
-                font-size: 1.1rem;
+                font-size: 1.1rem; /* SAMA DENGAN FILE UTAMA */
             }
         }
 
+        /* Style untuk tombol download */
+        .download-btn {
+            background: linear-gradient(135deg, #9999ff, #9999ff);
+            color: white;
+            border-radius: 12px;
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(153, 153, 255, 0.3);
+            margin-bottom: 16px;
+        }
+        
+        .download-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(153, 153, 255, 0.4);
+        }
+        
+        .download-btn i {
+            margin-right: 8px;
+            font-size: 1.1rem;
+        }
+        
+        /* Styles untuk kategori */
         .category-header {
-            background-color: #f1f5f9;
-            border-radius: 8px;
-            padding: 12px;
-            margin-bottom: 15px;
-            border-left: 4px solid var(--primary);
+            background: linear-gradient(135deg, var(--primary), #6666cc);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
         }
         
-        .physics-bg {
-            background-color: rgba(99, 102, 241, 0.05);
-        }
-        
-        .mechanics-bg {
-            background-color: rgba(16, 185, 129, 0.05);
-        }
-        
-        .thermo-bg {
-            background-color: rgba(239, 68, 68, 0.05);
-        }
-        
-        .electro-bg {
-            background-color: rgba(139, 92, 246, 0.05);
-        }
-        
-        .wave-bg {
-            background-color: rgba(14, 165, 233, 0.05);
-        }
-        
-        .level-indicator {
-            display: inline-block;
-            font-size: 0.7rem;
-            padding: 2px 6px;
+        .category-icon {
+            background: rgba(255, 255, 255, 0.2);
+            width: 40px;
+            height: 40px;
             border-radius: 10px;
-            font-weight: bold;
-            margin-left: 5px;
-        }
-        
-        .level-basic {
-            background-color: #10b981;
-            color: white;
-        }
-        
-        .level-intermediate {
-            background-color: #f59e0b;
-            color: white;
-        }
-        
-        .level-advanced {
-            background-color: #ef4444;
-            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
         }
     </style>
 </head>
@@ -272,23 +311,23 @@
                     <h1 class="app-name">QUANTARA</h1>
                 </div>
                 <div class="flex items-center space-x-3">
-                    <i class="fas fa-search"></i>
+                    <i class="fas fa-bell"></i>
                     <i class="fas fa-user-circle text-xl"></i>
                 </div>
             </div>
         </header>
         
         <!-- Main Content Area -->
-        <main class="pb-20">
+        <main class="pb-20 islamic-pattern">
             <!-- Page Title -->
             <section class="p-4">
                 <div class="flex items-center justify-between">
                     <div>
-                        <h2 class="text-2xl font-bold text-gray-800">Simulasi Fisika</h2>
-                        <p class="text-sm text-gray-600">15 simulasi interaktif untuk memahami konsep fisika</p>
+                        <h2 class="text-2xl font-bold text-gray-800">Menu Fisika</h2>
+                        <p class="text-sm text-gray-600">Eksplorasi materi, simulasi, dan alat fisika</p>
                     </div>
                     <div class="bg-primary/10 text-primary p-3 rounded-full">
-                        <i class="fas fa-cube text-xl"></i>
+                        <i class="fas fa-flask text-xl"></i>
                     </div>
                 </div>
             </section>
@@ -301,355 +340,289 @@
                             <i class="fas fa-lightbulb"></i>
                         </div>
                         <div>
-                            <h3 class="font-bold text-gray-800">Tip Interaktif</h3>
-                            <p class="text-sm text-gray-600 mt-1">"Gunakan simulasi untuk melihat konsep fisika dari berbagai sudut pandang. Kamu bisa mengontrol parameter dan melihat efeknya secara real-time!"</p>
+                            <h3 class="font-bold text-gray-800">Tips Belajar Fisika</h3>
+                            <p class="text-sm text-gray-600 mt-1">"Gunakan simulasi untuk memahami konsep yang sulit. Visualisasi membantu pemahaman lebih baik daripada hanya teori."</p>
                         </div>
                     </div>
                 </div>
             </section>
-            
-            <!-- Simulation Cards -->
+           
+            <!-- TRACKER Section -->
             <section class="p-4">
-                <!-- 1. Getaran dan Gelombang -->
-                <a href="getarangelombang.html" class="simulation-card bg-white rounded-lg shadow-sm p-4 mb-4 border-l-blue-500 physics-bg">
-                    <div class="flex justify-between items-center">
-                        <div class="flex items-center">
-                            <div class="simulation-icon bg-blue-100 text-blue-600">
-                                <i class="fas fa-wave-square"></i>
-                            </div>
-                            <div class="ml-3">
-                                <div class="flex items-center">
-                                    <h3 class="font-bold text-gray-800">Getaran & Gelombang</h3>
-                                    <span class="level-indicator level-basic">Dasar</span>
-                                </div>
-                                <p class="text-xs text-gray-500 mt-1">Simulasi osilasi, gelombang transversal & longitudinal</p>
-                            </div>
-                        </div>
-                        <div class="text-gray-400">
-                            <i class="fas fa-chevron-right"></i>
-                        </div>
+                <div class="category-header">
+                    <div class="category-icon">
+                        <i class="fas fa-chart-line"></i>
                     </div>
-                </a>
+                    <div>
+                        <h3 class="font-bold text-lg">TRACKER</h3>
+                        <p class="text-sm opacity-90">Pelacak pembelajaran dan konsep fisika</p>
+                    </div>
+                </div>
                 
-                <!-- 2. GLB dan GLBB -->
-                <a href="glbglbb.html" class="simulation-card bg-white rounded-lg shadow-sm p-4 mb-4 border-l-green-500 mechanics-bg">
+                <!-- GLB dan GLBB -->
+                <div class="material-category bg-white rounded-lg shadow-sm p-4 mb-4 border-l-blue-500" onclick="openMaterial('glb')">
                     <div class="flex justify-between items-center">
                         <div class="flex items-center">
-                            <div class="simulation-icon bg-green-100 text-green-600">
+                            <div class="bg-blue-100 text-blue-600 p-3 rounded-lg mr-3 material-icon">
                                 <i class="fas fa-car"></i>
                             </div>
-                            <div class="ml-3">
-                                <div class="flex items-center">
-                                    <h3 class="font-bold text-gray-800">GLB & GLBB</h3>
-                                    <span class="level-indicator level-basic">Dasar</span>
-                                </div>
-                                <p class="text-xs text-gray-500 mt-1">Gerak lurus beraturan dan berubah beraturan</p>
+                            <div>
+                                <h3 class="font-bold text-gray-800">1. GLB dan GLBB</h3>
+                                <p class="text-xs text-gray-500">Gerak Lurus Beraturan dan Gerak Lurus Berubah Beraturan</p>
                             </div>
                         </div>
                         <div class="text-gray-400">
                             <i class="fas fa-chevron-right"></i>
                         </div>
                     </div>
-                </a>
+                </div>
                 
-                <!-- 3. Termodinamika -->
-                <a href="termodinamika.html" class="simulation-card bg-white rounded-lg shadow-sm p-4 mb-4 border-l-red-500 thermo-bg">
+                <!-- Torsi -->
+                <div class="material-category bg-white rounded-lg shadow-sm p-4 mb-4 border-l-purple-500" onclick="openMaterial('torsi')">
                     <div class="flex justify-between items-center">
                         <div class="flex items-center">
-                            <div class="simulation-icon bg-red-100 text-red-600">
-                                <i class="fas fa-temperature-high"></i>
+                            <div class="bg-purple-100 text-purple-600 p-3 rounded-lg mr-3 material-icon">
+                                <i class="fas fa-cog"></i>
                             </div>
-                            <div class="ml-3">
-                                <div class="flex items-center">
-                                    <h3 class="font-bold text-gray-800">Termodinamika</h3>
-                                    <span class="level-indicator level-intermediate">Menengah</span>
-                                </div>
-                                <p class="text-xs text-gray-500 mt-1">Hukum termodinamika, siklus panas, dan entropi</p>
+                            <div>
+                                <h3 class="font-bold text-gray-800">2. Torsi</h3>
+                                <p class="text-xs text-gray-500">Momen gaya dan rotasi benda</p>
                             </div>
                         </div>
                         <div class="text-gray-400">
                             <i class="fas fa-chevron-right"></i>
-                        </div>
-                    </div>
-                </a>
-                
-                <!-- 4. Medan Magnet -->
-                <a href="medanmagnet.html" class="simulation-card bg-white rounded-lg shadow-sm p-4 mb-4 border-l-purple-500 electro-bg">
-                    <div class="flex justify-between items-center">
-                        <div class="flex items-center">
-                            <div class="simulation-icon bg-purple-100 text-purple-600">
-                                <i class="fas fa-magnet"></i>
-                            </div>
-                            <div class="ml-3">
-                                <div class="flex items-center">
-                                    <h3 class="font-bold text-gray-800">Medan Magnet</h3>
-                                    <span class="level-indicator level-intermediate">Menengah</span>
-                                </div>
-                                <p class="text-xs text-gray-500 mt-1">Garis gaya magnet, induksi elektromagnetik</p>
-                            </div>
-                        </div>
-                        <div class="text-gray-400">
-                            <i class="fas fa-chevron-right"></i>
-                        </div>
-                    </div>
-                </a>
-                
-                <!-- 5. Optika Geometri -->
-                <a href="optikageometri.html" class="simulation-card bg-white rounded-lg shadow-sm p-4 mb-4 border-l-yellow-500 wave-bg">
-                    <div class="flex justify-between items-center">
-                        <div class="flex items-center">
-                            <div class="simulation-icon bg-yellow-100 text-yellow-600">
-                                <i class="fas fa-sun"></i>
-                            </div>
-                            <div class="ml-3">
-                                <div class="flex items-center">
-                                    <h3 class="font-bold text-gray-800">Optika Geometri</h3>
-                                    <span class="level-indicator level-intermediate">Menengah</span>
-                                </div>
-                                <p class="text-xs text-gray-500 mt-1">Pemantulan, pembiasan, lensa, dan cermin</p>
-                            </div>
-                        </div>
-                        <div class="text-gray-400">
-                            <i class="fas fa-chevron-right"></i>
-                        </div>
-                    </div>
-                </a>
-                
-                <!-- 6. Listrik Dinamis -->
-                <a href="listrikdinamis.html" class="simulation-card bg-white rounded-lg shadow-sm p-4 mb-4 border-l-indigo-500 electro-bg">
-                    <div class="flex justify-between items-center">
-                        <div class="flex items-center">
-                            <div class="simulation-icon bg-indigo-100 text-indigo-600">
-                                <i class="fas fa-bolt"></i>
-                            </div>
-                            <div class="ml-3">
-                                <div class="flex items-center">
-                                    <h3 class="font-bold text-gray-800">Listrik Dinamis</h3>
-                                    <span class="level-indicator level-intermediate">Menengah</span>
-                                </div>
-                                <p class="text-xs text-gray-500 mt-1">Rangkaian listrik, hukum Ohm, dan Kirchhoff</p>
-                            </div>
-                        </div>
-                        <div class="text-gray-400">
-                            <i class="fas fa-chevron-right"></i>
-                        </div>
-                    </div>
-                </a>
-                
-                <!-- 7. Mekanika Fluida -->
-                <a href="mekanikafluida.html" class="simulation-card bg-white rounded-lg shadow-sm p-4 mb-4 border-l-cyan-500 physics-bg">
-                    <div class="flex justify-between items-center">
-                        <div class="flex items-center">
-                            <div class="simulation-icon bg-cyan-100 text-cyan-600">
-                                <i class="fas fa-water"></i>
-                            </div>
-                            <div class="ml-3">
-                                <div class="flex items-center">
-                                    <h3 class="font-bold text-gray-800">Mekanika Fluida</h3>
-                                    <span class="level-indicator level-advanced">Lanjut</span>
-                                </div>
-                                <p class="text-xs text-gray-500 mt-1">Tekanan hidrostatis, hukum Bernoulli, viskositas</p>
-                            </div>
-                        </div>
-                        <div class="text-gray-400">
-                            <i class="fas fa-chevron-right"></i>
-                        </div>
-                    </div>
-                </a>
-                
-                <!-- 8. Gerak Parabola -->
-                <a href="gerakparabola.html" class="simulation-card bg-white rounded-lg shadow-sm p-4 mb-4 border-l-emerald-500 mechanics-bg">
-                    <div class="flex justify-between items-center">
-                        <div class="flex items-center">
-                            <div class="simulation-icon bg-emerald-100 text-emerald-600">
-                                <i class="fas fa-basketball-ball"></i>
-                            </div>
-                            <div class="ml-3">
-                                <div class="flex items-center">
-                                    <h3 class="font-bold text-gray-800">Gerak Parabola</h3>
-                                    <span class="level-indicator level-basic">Dasar</span>
-                                </div>
-                                <p class="text-xs text-gray-500 mt-1">Peluru, sudut elevasi, dan jangkauan maksimum</p>
-                                <div class="new-badge">BARU</div>
-                            </div>
-                        </div>
-                        <div class="text-gray-400">
-                            <i class="fas fa-chevron-right"></i>
-                        </div>
-                    </div>
-                </a>
-                
-                <!-- 9. Gelombang Bunyi -->
-                <a href="gelombangbunyi.html" class="simulation-card bg-white rounded-lg shadow-sm p-4 mb-4 border-l-blue-400 wave-bg">
-                    <div class="flex justify-between items-center">
-                        <div class="flex items-center">
-                            <div class="simulation-icon bg-blue-50 text-blue-500">
-                                <i class="fas fa-volume-up"></i>
-                            </div>
-                            <div class="ml-3">
-                                <div class="flex items-center">
-                                    <h3 class="font-bold text-gray-800">Gelombang Bunyi</h3>
-                                    <span class="level-indicator level-intermediate">Menengah</span>
-                                </div>
-                                <p class="text-xs text-gray-500 mt-1">Resonansi, efek Doppler, intensitas bunyi</p>
-                            </div>
-                        </div>
-                        <div class="text-gray-400">
-                            <i class="fas fa-chevron-right"></i>
-                        </div>
-                    </div>
-                </a>
-                
-                <!-- 10. Fisika Modern -->
-                <a href="fisikamodern.html" class="simulation-card bg-white rounded-lg shadow-sm p-4 mb-4 border-l-gray-700 physics-bg">
-                    <div class="flex justify-between items-center">
-                        <div class="flex items-center">
-                            <div class="simulation-icon bg-gray-100 text-gray-700">
-                                <i class="fas fa-atom"></i>
-                            </div>
-                            <div class="ml-3">
-                                <div class="flex items-center">
-                                    <h3 class="font-bold text-gray-800">Fisika Modern</h3>
-                                    <span class="level-indicator level-advanced">Lanjut</span>
-                                </div>
-                                <p class="text-xs text-gray-500 mt-1">Relativitas, fisika kuantum, dualisme gelombang-partikel</p>
-                            </div>
-                        </div>
-                        <div class="text-gray-400">
-                            <i class="fas fa-chevron-right"></i>
-                        </div>
-                    </div>
-                </a>
-                
-                <!-- 11. Gerak Harmonik Sederhana -->
-                <a href="gerakharmonik.html" class="simulation-card bg-white rounded-lg shadow-sm p-4 mb-4 border-l-pink-500 wave-bg">
-                    <div class="flex justify-between items-center">
-                        <div class="flex items-center">
-                            <div class="simulation-icon bg-pink-100 text-pink-600">
-                                <i class="fas fa-weight-hanging"></i>
-                            </div>
-                            <div class="ml-3">
-                                <div class="flex items-center">
-                                    <h3 class="font-bold text-gray-800">Gerak Harmonik Sederhana</h3>
-                                    <span class="level-indicator level-intermediate">Menengah</span>
-                                </div>
-                                <p class="text-xs text-gray-500 mt-1">Pegas, bandul, dan osilasi teredam</p>
-                            </div>
-                        </div>
-                        <div class="text-gray-400">
-                            <i class="fas fa-chevron-right"></i>
-                        </div>
-                    </div>
-                </a>
-                
-                <!-- 12. Hukum Newton -->
-                <a href="hukumnewton.html" class="simulation-card bg-white rounded-lg shadow-sm p-4 mb-4 border-l-orange-500 mechanics-bg">
-                    <div class="flex justify-between items-center">
-                        <div class="flex items-center">
-                            <div class="simulation-icon bg-orange-100 text-orange-600">
-                                <i class="fas fa-balance-scale"></i>
-                            </div>
-                            <div class="ml-3">
-                                <div class="flex items-center">
-                                    <h3 class="font-bold text-gray-800">Hukum Newton</h3>
-                                    <span class="level-indicator level-basic">Dasar</span>
-                                </div>
-                                <p class="text-xs text-gray-500 mt-1">Hukum gerak, gaya aksi-reaksi, gesekan</p>
-                            </div>
-                        </div>
-                        <div class="text-gray-400">
-                            <i class="fas fa-chevron-right"></i>
-                        </div>
-                    </div>
-                </a>
-                
-                <!-- 13. Listrik Statis -->
-                <a href="listrikstatis.html" class="simulation-card bg-white rounded-lg shadow-sm p-4 mb-4 border-l-violet-500 electro-bg">
-                    <div class="flex justify-between items-center">
-                        <div class="flex items-center">
-                            <div class="simulation-icon bg-violet-100 text-violet-600">
-                                <i class="fas fa-bolt-lightning"></i>
-                            </div>
-                            <div class="ml-3">
-                                <div class="flex items-center">
-                                    <h3 class="font-bold text-gray-800">Listrik Statis</h3>
-                                    <span class="level-indicator level-basic">Dasar</span>
-                                </div>
-                                <p class="text-xs text-gray-500 mt-1">Muatan listrik, hukum Coulomb, medan listrik</p>
-                            </div>
-                        </div>
-                        <div class="text-gray-400">
-                            <i class="fas fa-chevron-right"></i>
-                        </div>
-                    </div>
-                </a>
-                
-                <!-- 14. Kalor dan Perpindahan Panas -->
-                <a href="kalordanpanas.html" class="simulation-card bg-white rounded-lg shadow-sm p-4 mb-4 border-l-rose-500 thermo-bg">
-                    <div class="flex justify-between items-center">
-                        <div class="flex items-center">
-                            <div class="simulation-icon bg-rose-100 text-rose-600">
-                                <i class="fas fa-fire"></i>
-                            </div>
-                            <div class="ml-3">
-                                <div class="flex items-center">
-                                    <h3 class="font-bold text-gray-800">Kalor & Perpindahan Panas</h3>
-                                    <span class="level-indicator level-intermediate">Menengah</span>
-                                </div>
-                                <p class="text-xs text-gray-500 mt-1">Konduksi, konveksi, radiasi, dan kalor laten</p>
-                            </div>
-                        </div>
-                        <div class="text-gray-400">
-                            <i class="fas fa-chevron-right"></i>
-                        </div>
-                    </div>
-                </a>
-                
-                <!-- 15. Usaha dan Energi -->
-                <a href="usahadanenergi.html" class="simulation-card bg-white rounded-lg shadow-sm p-4 mb-4 border-l-lime-500 mechanics-bg">
-                    <div class="flex justify-between items-center">
-                        <div class="flex items-center">
-                            <div class="simulation-icon bg-lime-100 text-lime-600">
-                                <i class="fas fa-battery-full"></i>
-                            </div>
-                            <div class="ml-3">
-                                <div class="flex items-center">
-                                    <h3 class="font-bold text-gray-800">Usaha dan Energi</h3>
-                                    <span class="level-indicator level-basic">Dasar</span>
-                                </div>
-                                <p class="text-xs text-gray-500 mt-1">Energi kinetik, potensial, kekekalan energi, daya</p>
-                            </div>
-                        </div>
-                        <div class="text-gray-400">
-                            <i class="fas fa-chevron-right"></i>
-                        </div>
-                    </div>
-                </a>
-            </section>
-            
-            <!-- Quick Stats -->
-            <section class="p-4">
-                <div class="bg-gradient-to-r from-gray-50 to-slate-100 rounded-lg p-4 shadow-sm">
-                    <h3 class="font-bold text-gray-800 mb-3">Statistik Simulasi</h3>
-                    <div class="grid grid-cols-3 gap-3">
-                        <div class="bg-white rounded-lg p-3 text-center">
-                            <div class="text-primary font-bold text-xl">15</div>
-                            <div class="text-xs text-gray-600">Total Simulasi</div>
-                        </div>
-                        <div class="bg-white rounded-lg p-3 text-center">
-                            <div class="text-green-600 font-bold text-xl">6</div>
-                            <div class="text-xs text-gray-600">Tingkat Dasar</div>
-                        </div>
-                        <div class="bg-white rounded-lg p-3 text-center">
-                            <div class="text-purple-600 font-bold text-xl">7</div>
-                            <div class="text-xs text-gray-600">Tingkat Menengah</div>
                         </div>
                     </div>
                 </div>
             </section>
+            
+            <!-- TOOLS Section -->
+            <section class="p-4">
+                <div class="category-header">
+                    <div class="category-icon">
+                        <i class="fas fa-tools"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-lg">TOOLS</h3>
+                        <p class="text-sm opacity-90">Alat-alat pengukuran dan eksperimen fisika</p>
+                    </div>
+                </div>
+                
+                <!-- Oscilloscope -->
+                <div class="material-category bg-white rounded-lg shadow-sm p-4 mb-4 border-l-green-500" onclick="openTool('oscilogram')">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center">
+                            <div class="bg-green-100 text-green-600 p-3 rounded-lg mr-3 material-icon">
+                                <i class="fas fa-wave-square"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-800">1. Oscilloscope</h3>
+                                <p class="text-xs text-gray-500">Alat pengukur dan visualisasi gelombang</p>
+                            </div>
+                        </div>
+                        <div class="text-gray-400">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Luxmeter -->
+                <div class="material-category bg-white rounded-lg shadow-sm p-4 mb-4 border-l-yellow-500" onclick="openTool('luxmeter')">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center">
+                            <div class="bg-yellow-100 text-yellow-600 p-3 rounded-lg mr-3 material-icon">
+                                <i class="fas fa-sun"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-800">2. Luxmeter</h3>
+                                <p class="text-xs text-gray-500">Pengukur intensitas cahaya</p>
+                            </div>
+                        </div>
+                        <div class="text-gray-400">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Gyroscope -->
+                <div class="material-category bg-white rounded-lg shadow-sm p-4 mb-4 border-l-red-500" onclick="openTool('gyroscope')">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center">
+                            <div class="bg-red-100 text-red-600 p-3 rounded-lg mr-3 material-icon">
+                                <i class="fas fa-compass"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-800">3. Gyroscope</h3>
+                                <p class="text-xs text-gray-500">Alat pengukur orientasi dan rotasi</p>
+                            </div>
+                        </div>
+                        <div class="text-gray-400">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Accelerometer -->
+                <div class="material-category bg-white rounded-lg shadow-sm p-4 mb-4 border-l-indigo-500" onclick="openTool('accelerometer')">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center">
+                            <div class="bg-indigo-100 text-indigo-600 p-3 rounded-lg mr-3 material-icon">
+                                <i class="fas fa-running"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-800">4. Accelerometer</h3>
+                                <p class="text-xs text-gray-500">Pengukur percepatan benda</p>
+                            </div>
+                        </div>
+                        <div class="text-gray-400">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- MENU SIMULASI FISIKA Section -->
+            <section class="p-4">
+                <div class="category-header">
+                    <div class="category-icon">
+                        <i class="fas fa-laptop-code"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-bold text-lg">MENU SIMULASI FISIKA</h3>
+                        <p class="text-sm opacity-90">Simulasi interaktif konsep fisika</p>
+                    </div>
+                </div>
+                
+                <!-- Getaran Gelombang -->
+                <div class="material-category bg-white rounded-lg shadow-sm p-4 mb-4 border-l-pink-500" onclick="openSimulation('getaran')">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center">
+                            <div class="bg-pink-100 text-pink-600 p-3 rounded-lg mr-3 material-icon">
+                                <i class="fas fa-water"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-800">1. Simulasi Getaran Gelombang</h3>
+                                <p class="text-xs text-gray-500">Visualisasi getaran dan perambatan gelombang</p>
+                            </div>
+                        </div>
+                        <div class="text-gray-400">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- GLB GLBB -->
+                <div class="material-category bg-white rounded-lg shadow-sm p-4 mb-4 border-l-blue-600" onclick="openSimulation('glb-glbb')">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center">
+                            <div class="bg-blue-100 text-blue-700 p-3 rounded-lg mr-3 material-icon">
+                                <i class="fas fa-tachometer-alt"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-800">2. Simulasi GLB GLBB</h3>
+                                <p class="text-xs text-gray-500">Simulasi gerak lurus beraturan dan berubah beraturan</p>
+                            </div>
+                        </div>
+                        <div class="text-gray-400">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Hukum Newton -->
+                <div class="material-category bg-white rounded-lg shadow-sm p-4 mb-4 border-l-orange-500" onclick="openSimulation('newton')">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center">
+                            <div class="bg-orange-100 text-orange-600 p-3 rounded-lg mr-3 material-icon">
+                                <i class="fas fa-balance-scale"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-800">3. Simulasi Hukum Newton</h3>
+                                <p class="text-xs text-gray-500">Visualisasi hukum gerak Newton</p>
+                            </div>
+                        </div>
+                        <div class="text-gray-400">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Hukum Termodinamika -->
+                <div class="material-category bg-white rounded-lg shadow-sm p-4 mb-4 border-l-red-600" onclick="openSimulation('termodinamika')">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center">
+                            <div class="bg-red-100 text-red-700 p-3 rounded-lg mr-3 material-icon">
+                                <i class="fas fa-fire"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-800">4. Simulasi Hukum Termodinamika</h3>
+                                <p class="text-xs text-gray-500">Simulasi panas, suhu, dan energi termal</p>
+                            </div>
+                        </div>
+                        <div class="text-gray-400">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Medan Magnet -->
+                <div class="material-category bg-white rounded-lg shadow-sm p-4 mb-4 border-l-purple-600" onclick="openSimulation('magnet')">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center">
+                            <div class="bg-purple-100 text-purple-700 p-3 rounded-lg mr-3 material-icon">
+                                <i class="fas fa-magnet"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-800">5. Simulasi Medan Magnet</h3>
+                                <p class="text-xs text-gray-500">Visualisasi garis gaya magnet</p>
+                            </div>
+                        </div>
+                        <div class="text-gray-400">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Getaran Gelombang (duplicate - keeping as per request) -->
+                <div class="material-category bg-white rounded-lg shadow-sm p-4 mb-4 border-l-teal-500" onclick="openSimulation('gelombang')">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center">
+                            <div class="bg-teal-100 text-teal-600 p-3 rounded-lg mr-3 material-icon">
+                                <i class="fas fa-wave-square"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-800">6. Simulasi Getaran Gelombang</h3>
+                                <p class="text-xs text-gray-500">Simulasi karakteristik gelombang</p>
+                            </div>
+                        </div>
+                        <div class="text-gray-400">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Parabola -->
+                <div class="material-category bg-white rounded-lg shadow-sm p-4 border-l-cyan-500" onclick="openSimulation('parabola')">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center">
+                            <div class="bg-cyan-100 text-cyan-600 p-3 rounded-lg mr-3 material-icon">
+                                <i class="fas fa-basketball-ball"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-gray-800">7. Simulasi Parabola</h3>
+                                <p class="text-xs text-gray-500">Simulasi gerak parabola dan peluru</p>
+                            </div>
+                        </div>
+                        <div class="text-gray-400">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            
         </main>
         
-       <!-- BOTTOM NAVIGATION YANG SUDAH DIPERBAIKI - SAMA DENGAN FILE UTAMA -->
+        <!-- BOTTOM NAVIGATION YANG SUDAH DIPERBAIKI - SAMA DENGAN FILE UTAMA -->
          <nav class="bottom-nav">
             <a href="../dashboard siswa.html" class="nav-item">
                 <i class="fas fa-home nav-icon"></i>
@@ -674,7 +647,7 @@
         </nav>
 
     <script>
-        // Simple interaction for bottom nav
+        // Simple interaction for bottom nav - DIPERBAIKI UNTUK NAVIGASI BARU
         document.addEventListener('DOMContentLoaded', function() {
             const navItems = document.querySelectorAll('.nav-item');
             
@@ -691,24 +664,49 @@
             });
             
             // Set current page as active
-            const currentNavItem = document.querySelector('.bottom-nav a[href*="kategori materi.html"]');
+            const currentNavItem = document.querySelector('.bottom-nav a[href="kategori materi.html"]');
             if (currentNavItem) {
                 currentNavItem.classList.add('active');
                 currentNavItem.querySelector('.nav-icon').classList.add('active');
             }
-            
-            // Jika file tidak ada, tampilkan pesan
-            document.querySelectorAll('.simulation-card').forEach(card => {
-                card.addEventListener('click', function(e) {
-                    // Jika file belum dibuat, tampilkan alert
-                    if (this.getAttribute('href') === '#') {
-                        e.preventDefault();
-                        const title = this.querySelector('h3').textContent;
-                        alert(`Simulasi "${title}" sedang dalam pengembangan.`);
-                    }
-                });
-            });
         });
+        
+        function openMaterial(material) {
+            const materialNames = {
+                'glb': 'GLB dan GLBB',
+                'torsi': 'Torsi'
+            };
+            
+            alert(`Membuka materi: ${materialNames[material]}`);
+            // In a real app, this would navigate to the material page
+        }
+        
+        function openTool(tool) {
+            const toolNames = {
+                'oscilogram': 'Oscilloscope',
+                'luxmeter': 'Luxmeter',
+                'gyroscope': 'Gyroscope',
+                'accelerometer': 'Accelerometer'
+            };
+            
+            alert(`Membuka alat: ${toolNames[tool]}`);
+            // In a real app, this would open the tool interface
+        }
+        
+        function openSimulation(simulation) {
+            const simulationNames = {
+                'getaran': 'Simulasi Getaran Gelombang',
+                'glb-glbb': 'Simulasi GLB GLBB',
+                'newton': 'Simulasi Hukum Newton',
+                'termodinamika': 'Simulasi Hukum Termodinamika',
+                'magnet': 'Simulasi Medan Magnet',
+                'gelombang': 'Simulasi Getaran Gelombang',
+                'parabola': 'Simulasi Parabola'
+            };
+            
+            alert(`Membuka simulasi: ${simulationNames[simulation]}`);
+            // In a real app, this would launch the simulation
+        }
     </script>
 </body>
 </html>

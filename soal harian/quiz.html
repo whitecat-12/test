@@ -1,669 +1,1461 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Science Explorer - Aplikasi Belajar Fisika & Sains</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --primary: #38b2ac;
-            --secondary: #0e7490;
-            --accent: #f59e0b;
-            --physics: #3b82f6;
-            --chemistry: #10b981;
-            --biology: #8b5cf6;
-            --astronomy: #ec4899;
-            --logo-color: #9999ff;
-        }
-        
-        body {
-            font-family: 'Baloo 2', cursive;
-            background-color: #f8fafc;
-        }
-        
-        .app-container {
-            max-width: 414px;
-            margin: 0 auto;
-            background: white;
-            min-height: 100vh;
-            position: relative;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
-        }
-        
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            max-width: 414px;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
-            background: white;
-            z-index: 10;
-            height: 70px;
-            display: flex;
-            align-items: center;
-        }
-        
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: #6b7280;
-            text-decoration: none;
-            flex: 1;
-            height: 100%;
-            padding: 0.5rem 0;
-            transition: all 0.3s ease;
-        }
-        
-        .nav-item span {
-            font-size: 0.75rem;
-            margin-top: 0.25rem;
-        }
-        
-        .nav-item.active {
-            color: var(--primary);
-        }
-        
-        .nav-icon {
-            transition: all 0.3s ease;
-            font-size: 1.25rem;
-        }
-        
-        .nav-icon.active {
-            transform: translateY(-5px);
-            color: var(--primary);
-        }
-        
-        .app-logo {
-            display: flex;
-            align-items: center;
-        }
-        
-        .app-logo-icon {
-            background: var(--logo-color);
-            color: white;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 8px;
-        }
-        
-        .app-name {
-            font-weight: 700;
-            font-size: 1.25rem;
-            color: var(--logo-color);
-        }
-
-        .lavender-bg {
-            background-color: #e6e6fa;
-        }
-        
-        .lavender-border {
-            border-color: #e6e6fa;
-        }
-        
-        .lavender-text {
-            color: #9370db;
-        }
-        
-        .option:hover {
-            background-color: #f3f4ff !important;
-            transform: translateY(-2px);
-            transition: all 0.2s ease;
-        }
-        
-        .quiz-container {
-            box-shadow: 0 10px 25px rgba(147, 112, 219, 0.15);
-            border-radius: 16px;
-        }
-        
-        .nav-button {
-            transition: all 0.3s ease;
-            border-radius: 12px;
-            font-weight: 500;
-        }
-        
-        .nav-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-        
-        .option {
-            transition: all 0.2s ease;
-            border-radius: 12px;
-            border: 2px solid #f1f1f1;
-        }
-        
-        .correct-answer {
-            background-color: #d4edda !important;
-            border-color: #c3e6cb;
-            color: #155724;
-        }
-        
-        .wrong-answer {
-            background-color: #f8d7da !important;
-            border-color: #f5c6cb;
-            color: #721c24;
-        }
-        
-        .score-display {
-            background: linear-gradient(135deg, #e6e6fa 0%, #ffffff 100%);
-            border-radius: 16px;
-        }
-        
-        .mapel-selector {
-            border-radius: 12px;
-            transition: all 0.3s ease;
-        }
-        
-        .mapel-selector:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-        
-        .physics-bg { background-color: #dbeafe; }
-        .physics-text { color: #1e40af; }
-        .physics-border { border-color: #3b82f6; }
-        
-        .chemistry-bg { background-color: #d1fae5; }
-        .chemistry-text { color: #065f46; }
-        .chemistry-border { border-color: #10b981; }
-        
-        .biology-bg { background-color: #f3e8ff; }
-        .biology-text { color: #6b21a8; }
-        .biology-border { border-color: #8b5cf6; }
-        
-        .astronomy-bg { background-color: #fce7f3; }
-        .astronomy-text { color: #9d174d; }
-        .astronomy-border { border-color: #ec4899; }
-        
-        .math-bg { background-color: #fef3c7; }
-        .math-text { color: #92400e; }
-        .math-border { border-color: #f59e0b; }
-    </style>
-
-    <!-- 🔹 MathJax -->
-    <script>
-        window.MathJax = {
-            tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
-            svg: { fontCache: 'global' }
-        };
-    </script>
-    <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+  <meta charset="UTF-8">
+  <title>Dashboard Guru - Sistem Kategori Soal</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js" 
+    onload="renderMathInElement(document.body);"></script>
 </head>
-<body>
-    <!-- Mobile App Container -->
-    <div class="app-container">
-        <!-- App Header -->
-        <header class="bg-gradient-to-r from-primary to-secondary p-4 text-white">
-            <div class="flex justify-between items-center">
-                <div class="app-logo">
-                    <div class="app-logo-icon">
-                        <i class="fas fa-atom"></i>
-                    </div>
-                    <h1 class="app-name">QUANTARA</h1>
-                </div>
-                <div class="flex items-center space-x-3">
-                    <i class="fas fa-search"></i>
-                    <i class="fas fa-user-circle text-xl"></i>
-                </div>
-            </div>
-        </header>
-        
-        <!-- Main Content Area -->
-        <main class="pb-20">
-            <!-- Quiz Container -->
-            <div class="p-4">
-                <div class="bg-white quiz-container p-4">
-                    <!-- Header -->
-                    <div class="text-center mb-6">
-                        <h1 class="text-2xl font-bold lavender-text">Quiz Siswa</h1>
-                        <div class="w-20 h-1 lavender-bg mx-auto mt-2 rounded-full"></div>
-                        <p class="text-gray-600 mt-2 text-sm">Pilih mata pelajaran untuk mulai quiz!</p>
-                    </div>
+<body class="bg-gray-100 min-h-screen p-6">
+  <div class="max-w-7xl mx-auto">
+    <h1 class="text-3xl font-bold text-center mb-8 text-teal-700">Dashboard Guru - QUANTARA</h1>
+    <p class="text-center text-gray-600 mb-8">Kelola soal dengan sistem kategori untuk pembelajaran yang terstruktur</p>
 
-                    <!-- Pilih Mata Pelajaran (Tampilan Awal) -->
-                    <div id="mapelSelection" class="space-y-4 mb-6">
-                        <div class="grid grid-cols-2 gap-3">
-                            <div class="mapel-selector physics-bg p-4 rounded-xl border physics-border cursor-pointer text-center" data-mapel="Fisika">
-                                <i class="fas fa-atom text-2xl physics-text mb-2"></i>
-                                <h3 class="font-bold physics-text">Fisika</h3>
-                                <p class="text-xs text-gray-600 mt-1">Hukum gerak, energi, listrik</p>
-                            </div>
-                            
-                            <div class="mapel-selector chemistry-bg p-4 rounded-xl border chemistry-border cursor-pointer text-center" data-mapel="Kimia">
-                                <i class="fas fa-flask text-2xl chemistry-text mb-2"></i>
-                                <h3 class="font-bold chemistry-text">Kimia</h3>
-                                <p class="text-xs text-gray-600 mt-1">Unsur, senyawa, reaksi</p>
-                            </div>
-                            
-                            <div class="mapel-selector biology-bg p-4 rounded-xl border biology-border cursor-pointer text-center" data-mapel="Biologi">
-                                <i class="fas fa-dna text-2xl biology-text mb-2"></i>
-                                <h3 class="font-bold biology-text">Biologi</h3>
-                                <p class="text-xs text-gray-600 mt-1">Sel, organ, ekosistem</p>
-                            </div>
-                            
-                            <div class="mapel-selector astronomy-bg p-4 rounded-xl border astronomy-border cursor-pointer text-center" data-mapel="Astronomi">
-                                <i class="fas fa-moon text-2xl astronomy-text mb-2"></i>
-                                <h3 class="font-bold astronomy-text">Astronomi</h3>
-                                <p class="text-xs text-gray-600 mt-1">Planet, bintang, galaksi</p>
-                            </div>
-                            
-                            <div class="mapel-selector math-bg p-4 rounded-xl border math-border cursor-pointer text-center" data-mapel="Matematika">
-                                <i class="fas fa-calculator text-2xl math-text mb-2"></i>
-                                <h3 class="font-bold math-text">Matematika</h3>
-                                <p class="text-xs text-gray-600 mt-1">Aljabar, geometri, kalkulus</p>
-                            </div>
-                            
-                            <div class="mapel-selector lavender-bg p-4 rounded-xl border lavender-border cursor-pointer text-center" data-mapel="Lainnya">
-                                <i class="fas fa-book text-2xl lavender-text mb-2"></i>
-                                <h3 class="font-bold lavender-text">Lainnya</h3>
-                                <p class="text-xs text-gray-600 mt-1">Pelajaran lainnya</p>
-                            </div>
-                        </div>
-                        
-                        <div class="text-center mt-4">
-                            <button id="startQuizBtn" class="bg-teal-500 text-white px-6 py-3 rounded-full font-semibold hover:bg-teal-600 transition-all shadow-lg">
-                                <i class="fas fa-play mr-2"></i> Mulai Quiz
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Progress indicator (akan ditampilkan setelah pilih mapel) -->
-                    <div id="progressContainer" class="mb-6 hidden">
-                        <div class="flex justify-between items-center mb-2">
-                            <div class="flex items-center">
-                                <span id="selectedMapel" class="text-sm font-medium mr-3"></span>
-                                <span class="text-sm font-medium lavender-text">Progress</span>
-                            </div>
-                            <span class="text-sm font-medium text-gray-600" id="progress-text">1/10</span>
-                        </div>
-                        <div class="bg-gray-200 rounded-full h-2.5">
-                            <div class="lavender-bg h-2.5 rounded-full" id="progress-bar" style="width: 10%"></div>
-                        </div>
-                    </div>
-
-                    <!-- Tempat soal -->
-                    <div id="quiz" class="space-y-6 mb-6"></div>
-
-                    <!-- Navigasi soal -->
-                    <div id="navContainer" class="flex justify-between mt-6 hidden">
-                        <button id="prevBtn" class="nav-button bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm" disabled>
-                            ← Sebelumnya
-                        </button>
-                        <button id="nextBtn" class="nav-button lavender-bg text-white px-4 py-2 rounded-lg text-sm">
-                            Selanjutnya →
-                        </button>
-                    </div>
-
-                    <!-- Logout -->
-                    <button id="logoutBtn" class="mt-6 w-full bg-white lavender-text border lavender-border p-3 rounded-lg font-medium hover:bg-lavender hover:text-white transition-all text-sm">
-                        Logout
-                    </button>
-                </div>
-            </div>
-        </main>
-        
-        <!-- BOTTOM NAVIGATION -->
-        <nav class="bottom-nav">
-            <a href="index.html" class="nav-item">
-                <i class="fas fa-home nav-icon"></i>
-                <span>Beranda</span>
-            </a>
-            <a href="soal harian/dashboard soal.html" class="nav-item active">
-                <i class="fas fa-flask nav-icon"></i>
-                <span>Soal Harian</span>
-            </a>
-            <a href="ai/index.html" class="nav-item">
-                <i class="fas fa-robot nav-icon"></i>
-                <span>Nayra AI</span>
-            </a>
-            <a href="kategori/kategori materi.html" class="nav-item">
-                <i class="fas fa-chalkboard-teacher nav-icon"></i>
-                <span>Materi Harian</span>
-            </a>
-            <a href="profil.html" class="nav-item">
-                <i class="fas fa-user nav-icon"></i>
-                <span>Profil</span>
-            </a>
-        </nav>
+    <!-- Loading Indicator -->
+    <div id="loading" class="text-center py-8">
+      <div class="inline-flex items-center">
+        <i class="fas fa-spinner fa-spin text-teal-600 text-2xl mr-3"></i>
+        <span class="text-gray-600">Memuat dashboard...</span>
+      </div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, getDocs, addDoc, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    <!-- Content Area (initially hidden) -->
+    <div id="content" class="hidden">
+      <!-- Statistik Dashboard -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div class="bg-white p-4 rounded-xl shadow">
+          <div class="flex items-center">
+            <div class="bg-teal-100 p-3 rounded-lg mr-3">
+              <i class="fas fa-question-circle text-teal-600 text-xl"></i>
+            </div>
+            <div>
+              <p class="text-sm text-gray-500">Total Soal</p>
+              <h3 class="text-xl font-bold" id="totalSoal">0</h3>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-white p-4 rounded-xl shadow">
+          <div class="flex items-center">
+            <div class="bg-blue-100 p-3 rounded-lg mr-3">
+              <i class="fas fa-tags text-blue-600 text-xl"></i>
+            </div>
+            <div>
+              <p class="text-sm text-gray-500">Kategori</p>
+              <h3 class="text-xl font-bold" id="totalKategori">0</h3>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-white p-4 rounded-xl shadow">
+          <div class="flex items-center">
+            <div class="bg-purple-100 p-3 rounded-lg mr-3">
+              <i class="fas fa-layer-group text-purple-600 text-xl"></i>
+            </div>
+            <div>
+              <p class="text-sm text-gray-500">Mapel Aktif</p>
+              <h3 class="text-xl font-bold" id="totalMapel">0</h3>
+            </div>
+          </div>
+        </div>
+        
+        <div class="bg-white p-4 rounded-xl shadow">
+          <div class="flex items-center">
+            <div class="bg-green-100 p-3 rounded-lg mr-3">
+              <i class="fas fa-chart-line text-green-600 text-xl"></i>
+            </div>
+            <div>
+              <p class="text-sm text-gray-500">Soal Terkategorisasi</p>
+              <h3 class="text-xl font-bold" id="soalTerkategori">0%</h3>
+            </div>
+          </div>
+        </div>
+      </div>
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyAJ5I8k2MzAyDLt9fUcXHRNtRVjKB_ETLY",
-            authDomain: "projectid-81104.firebaseapp.com",
-            projectId: "projectid-81104",
-            storageBucket: "projectid-81104.firebasestorage.app",
-            messagingSenderId: "554913260457",
-            appId: "1:554913260457:web:bf988867ebfd902c651ab8",
-            measurementId: "G-8WFHQW5WGN"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-        const auth = getAuth();
-
-        const quizEl = document.getElementById("quiz");
-        const nextBtn = document.getElementById("nextBtn");
-        const prevBtn = document.getElementById("prevBtn");
-        const logoutBtn = document.getElementById("logoutBtn");
-        const progressBar = document.getElementById("progress-bar");
-        const progressText = document.getElementById("progress-text");
-        const mapelSelection = document.getElementById("mapelSelection");
-        const progressContainer = document.getElementById("progressContainer");
-        const navContainer = document.getElementById("navContainer");
-        const startQuizBtn = document.getElementById("startQuizBtn");
-        const selectedMapelEl = document.getElementById("selectedMapel");
-
-        let soalList = [];
-        let currentIndex = 0;
-        let score = 0;                 
-        let answered = {};             
-        let currentUser = null;
-        let selectedMapel = null;
-
-        // 🔹 Logout
-        logoutBtn.addEventListener("click", async () => {
-            await signOut(auth);
-            window.location.href = "login.html";
-        });
-
-        // 🔹 Cek login user
-        onAuthStateChanged(auth, (user) => {
-            if (!user) {
-                window.location.href = "login.html";
-            } else {
-                currentUser = user;
-            }
-        });
-
-        // 🔹 Pilih Mata Pelajaran
-        document.querySelectorAll('.mapel-selector').forEach(item => {
-            item.addEventListener('click', () => {
-                // Hapus semua seleksi
-                document.querySelectorAll('.mapel-selector').forEach(el => {
-                    el.style.boxShadow = 'none';
-                    el.style.transform = 'translateY(0)';
-                });
-                
-                // Tandai yang dipilih
-                selectedMapel = item.dataset.mapel;
-                item.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
-                item.style.transform = 'translateY(-2px)';
-                
-                // Update tombol start
-                startQuizBtn.disabled = false;
-                startQuizBtn.innerHTML = `<i class="fas fa-play mr-2"></i> Mulai Quiz ${selectedMapel}`;
-            });
-        });
-
-        // 🔹 Mulai Quiz
-        startQuizBtn.addEventListener('click', async () => {
-            if (!selectedMapel) {
-                alert("Silakan pilih mata pelajaran terlebih dahulu!");
-                return;
-            }
+      <!-- Sistem Kategori -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+        <!-- Panel Manajemen Kategori -->
+        <div class="bg-white p-6 rounded-2xl shadow-lg">
+          <h2 class="text-xl font-bold text-purple-700 mb-4">
+            <i class="fas fa-tags mr-2"></i>Manajemen Kategori
+          </h2>
+          
+          <form id="kategoriForm" class="space-y-4 mb-6">
+            <input type="hidden" id="kategoriId">
             
-            // Sembunyikan pemilih mapel
-            mapelSelection.classList.add('hidden');
+            <div>
+              <label class="block font-semibold mb-1">Nama Kategori:</label>
+              <input type="text" id="namaKategori" class="w-full border p-3 rounded-lg focus:ring-2 focus:ring-purple-400" placeholder="Contoh: Kinematika, Termodinamika" required>
+            </div>
             
-            // Tampilkan progress dan navigasi
-            progressContainer.classList.remove('hidden');
-            navContainer.classList.remove('hidden');
-            selectedMapelEl.textContent = `📚 ${selectedMapel}`;
+            <div>
+              <label class="block font-semibold mb-1">Mata Pelajaran:</label>
+              <select id="mapelKategori" class="w-full border p-3 rounded-lg focus:ring-2 focus:ring-purple-400" required>
+                <option value="">Pilih Mapel</option>
+              </select>
+            </div>
             
-            // Load soal berdasarkan mapel yang dipilih
-            await loadSoalByMapel(selectedMapel);
-        });
+            <div>
+              <label class="block font-semibold mb-1">Deskripsi:</label>
+              <textarea id="deskripsiKategori" class="w-full border p-3 rounded-lg focus:ring-1 focus:ring-purple-400" rows="2" placeholder="Deskripsi singkat kategori"></textarea>
+            </div>
+            
+            <div>
+              <label class="block font-semibold mb-1">Warna Kategori:</label>
+              <div class="grid grid-cols-5 gap-2" id="colorPicker">
+                <button type="button" data-color="bg-teal-100" data-text="text-teal-800" class="w-8 h-8 bg-teal-100 rounded-full border-2 border-transparent hover:border-teal-300"></button>
+                <button type="button" data-color="bg-blue-100" data-text="text-blue-800" class="w-8 h-8 bg-blue-100 rounded-full border-2 border-transparent hover:border-blue-300"></button>
+                <button type="button" data-color="bg-purple-100" data-text="text-purple-800" class="w-8 h-8 bg-purple-100 rounded-full border-2 border-transparent hover:border-purple-300"></button>
+                <button type="button" data-color="bg-pink-100" data-text="text-pink-800" class="w-8 h-8 bg-pink-100 rounded-full border-2 border-transparent hover:border-pink-300"></button>
+                <button type="button" data-color="bg-yellow-100" data-text="text-yellow-800" class="w-8 h-8 bg-yellow-100 rounded-full border-2 border-transparent hover:border-yellow-300"></button>
+                <button type="button" data-color="bg-red-100" data-text="text-red-800" class="w-8 h-8 bg-red-100 rounded-full border-2 border-transparent hover:border-red-300"></button>
+                <button type="button" data-color="bg-green-100" data-text="text-green-800" class="w-8 h-8 bg-green-100 rounded-full border-2 border-transparent hover:border-green-300"></button>
+                <button type="button" data-color="bg-indigo-100" data-text="text-indigo-800" class="w-8 h-8 bg-indigo-100 rounded-full border-2 border-transparent hover:border-indigo-300"></button>
+                <button type="button" data-color="bg-orange-100" data-text="text-orange-800" class="w-8 h-8 bg-orange-100 rounded-full border-2 border-transparent hover:border-orange-300"></button>
+                <button type="button" data-color="bg-gray-100" data-text="text-gray-800" class="w-8 h-8 bg-gray-100 rounded-full border-2 border-transparent hover:border-gray-300"></button>
+              </div>
+              <input type="hidden" id="warnaKategori" value="bg-teal-100">
+              <input type="hidden" id="textKategori" value="text-teal-800">
+            </div>
+            
+            <div class="flex gap-2">
+              <button type="submit" class="flex-1 bg-purple-600 text-white p-3 rounded-lg hover:bg-purple-700 transition font-semibold">
+                <i class="fas fa-save mr-2"></i>Simpan Kategori
+              </button>
+              <button type="button" id="resetKategori" class="bg-gray-200 text-gray-700 p-3 rounded-lg hover:bg-gray-300 transition font-semibold">
+                Reset
+              </button>
+            </div>
+          </form>
+          
+          <div class="mt-4">
+            <h3 class="font-semibold text-gray-700 mb-2">Daftar Kategori</h3>
+            <div id="daftarKategori" class="space-y-2 max-h-60 overflow-y-auto"></div>
+          </div>
+        </div>
 
-        // 🔹 Ambil soal dari Firestore BERDASARKAN MAPEL
-        async function loadSoalByMapel(mapel) {
-            try {
-                // Query untuk mengambil soal dengan mapel tertentu
-                const q = query(collection(db, "soal"), where("mapel", "==", mapel));
-                const snapshot = await getDocs(q);
-                
-                soalList = snapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data()
-                }));
+        <!-- Form Input Soal dengan Kategori -->
+        <div class="bg-white p-6 rounded-2xl shadow-lg">
+          <h2 class="text-xl font-bold text-teal-700 mb-4">
+            <i class="fas fa-plus-circle mr-2"></i>Tambah Soal dengan Kategori
+          </h2>
+          
+          <form id="soalForm" class="space-y-4">
+            <input type="hidden" id="soalId">
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label class="block font-semibold mb-1">Mata Pelajaran:</label>
+                <select id="mapelInput" class="w-full border p-3 rounded-lg focus:ring-2 focus:ring-teal-400" required>
+                  <option value="">Pilih Mapel</option>
+                </select>
+              </div>
+              
+              <div>
+                <label class="block font-semibold mb-1">Kategori:</label>
+                <select id="kategoriInput" class="w-full border p-3 rounded-lg focus:ring-2 focus:ring-teal-400" required>
+                  <option value="">Pilih Kategori</option>
+                </select>
+              </div>
+            </div>
 
-                if (soalList.length === 0) {
-                    quizEl.innerHTML = `
-                        <div class="text-center py-8">
-                            <div class="text-5xl mb-4">📝</div>
-                            <h3 class="text-lg font-bold text-gray-700 mb-2">Belum Ada Soal</h3>
-                            <p class="text-gray-500 mb-4">Belum ada soal untuk mata pelajaran <span class="font-semibold">${mapel}</span>.</p>
-                            <button onclick="window.location.reload()" class="bg-teal-500 text-white px-4 py-2 rounded-lg">
-                                <i class="fas fa-arrow-left mr-2"></i> Kembali Pilih Mapel
-                            </button>
-                        </div>`;
-                    progressContainer.classList.add('hidden');
-                    navContainer.classList.add('hidden');
-                } else {
-                    // Acak urutan soal
-                    soalList = shuffleArray(soalList);
-                    
-                    // Batasi maksimal 10 soal
-                    if (soalList.length > 10) {
-                        soalList = soalList.slice(0, 10);
-                    }
-                    
-                    updateProgress();
-                    renderSoal();
-                }
-            } catch (err) {
-                console.error("Error load soal:", err);
-                quizEl.innerHTML = `
-                    <div class="text-center py-8">
-                        <div class="text-5xl mb-4 text-red-500">❌</div>
-                        <h3 class="text-lg font-bold text-red-700 mb-2">Terjadi Kesalahan</h3>
-                        <p class="text-red-500 mb-4">Gagal mengambil soal. Silakan coba lagi.</p>
-                        <button onclick="window.location.reload()" class="bg-teal-500 text-white px-4 py-2 rounded-lg">
-                            <i class="fas fa-redo mr-2"></i> Coba Lagi
-                        </button>
-                    </div>`;
-                progressContainer.classList.add('hidden');
-                navContainer.classList.add('hidden');
-            }
-        }
+            <div>
+              <label class="block font-semibold mb-1">Pertanyaan:</label>
+              <textarea id="pertanyaan" class="w-full border border-gray-300 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-400" rows="3" placeholder="Gunakan $...$ untuk inline atau $$...$$ untuk display math" required></textarea>
+            </div>
 
-        // Fungsi untuk mengacak array
-        function shuffleArray(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
-            }
-            return array;
-        }
-
-        // Update progress bar
-        function updateProgress() {
-            const progress = ((currentIndex + 1) / soalList.length) * 100;
-            progressBar.style.width = `${progress}%`;
-            progressText.textContent = `${currentIndex + 1}/${soalList.length}`;
-        }
-
-        // 🔹 Tampilkan soal
-        function renderSoal() {
-            const data = soalList[currentIndex];
-            updateProgress();
-
-            quizEl.innerHTML = `
-                <div class="p-4 bg-white border border-gray-100 rounded-xl shadow-sm">
-                    <div class="flex justify-between items-start mb-3">
-                        <h2 class="font-semibold text-base lavender-text">Soal ${currentIndex + 1}:</h2>
-                        <span class="text-xs bg-lavender text-white px-2 py-1 rounded-full">${data.mapel || 'Umum'}</span>
-                    </div>
-                    <p class="mb-4 text-gray-700 text-base">${data.pertanyaan}</p>
-                    <div class="space-y-3">
-                        ${["A","B","C","D"].map(opt => `
-                            <div class="option bg-white p-3 rounded-lg cursor-pointer shadow-sm hover:shadow-md text-sm"
-                                data-opt="${opt}" data-correct="${opt === data.jawaban}">
-                                <span class="font-medium mr-2">${opt}.</span> ${data.opsi[opt]}
-                            </div>
-                        `).join("")}
-                    </div>
-                    <p id="feedback" class="mt-4 p-3 rounded-lg hidden text-sm"></p>
+            <div>
+              <label class="block font-semibold mb-1">Opsi Jawaban:</label>
+              <div class="grid grid-cols-1 gap-3">
+                <div class="flex items-center gap-2">
+                  <span class="bg-gray-200 w-8 h-8 rounded-full flex items-center justify-center font-bold">A</span>
+                  <input type="text" id="opsiA" placeholder="Opsi A" class="flex-1 border p-2 rounded-lg focus:ring-1 focus:ring-teal-400" required>
                 </div>
-            `;
-
-            if (window.MathJax) MathJax.typesetPromise();
-
-            document.querySelectorAll(".option").forEach(optEl => {
-                optEl.addEventListener("click", () => {
-                    const opt = optEl.dataset.opt;
-                    const benar = optEl.dataset.correct === "true";
-                    const feedback = document.getElementById("feedback");
-                    feedback.classList.remove("hidden");
-
-                    if (!answered[currentIndex]) {   
-                        answered[currentIndex] = opt;
-                        if (benar) {
-                            score += (100 / soalList.length);
-                        }
-                    }
-
-                    if (benar) {
-                        optEl.classList.add("correct-answer");
-                        feedback.innerHTML = "✅ <span class='font-medium'>Jawaban Benar!</span> " + (data.penjelasan || "");
-                        feedback.className = "mt-4 p-3 rounded-lg bg-green-50 text-green-700 border border-green-200 text-sm";
-                    } else {
-                        optEl.classList.add("wrong-answer");
-                        // Tandai juga jawaban yang benar
-                        document.querySelectorAll(".option").forEach(o => {
-                            if (o.dataset.correct === "true") {
-                                o.classList.add("correct-answer");
-                            }
-                        });
-                        feedback.innerHTML = "❌ <span class='font-medium'>Jawaban Salah.</span> " + (data.penjelasan || "");
-                        feedback.className = "mt-4 p-3 rounded-lg bg-red-50 text-red-700 border border-red-200 text-sm";
-                    }
-
-                    if (window.MathJax) MathJax.typesetPromise([feedback]);
-
-                    document.querySelectorAll(".option").forEach(o => {
-                        o.style.pointerEvents = "none";
-                    });
-                });
-            });
-
-            prevBtn.disabled = currentIndex === 0;
-            nextBtn.textContent = currentIndex === soalList.length - 1 ? "Selesai 🎯" : "Selanjutnya →";
-            nextBtn.className = currentIndex === soalList.length - 1 
-                ? "nav-button bg-green-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-600" 
-                : "nav-button lavender-bg text-white px-4 py-2 rounded-lg text-sm";
-        }
-
-        // 🔹 Navigasi soal
-        nextBtn.addEventListener("click", () => {
-            if (currentIndex < soalList.length - 1) {
-                currentIndex++;
-                renderSoal();
-            } else {
-                showResult();
-            }
-        });
-
-        prevBtn.addEventListener("click", () => {
-            if (currentIndex > 0) {
-                currentIndex--;
-                renderSoal();
-            }
-        });
-
-        // 🔹 Tampilkan hasil & simpan ke Firestore
-        async function showResult() {
-            const finalScore = Math.round(score);
-            
-            // Sembunyikan progress bar dan navigasi
-            progressContainer.classList.add('hidden');
-            navContainer.classList.add('hidden');
-            
-            quizEl.innerHTML = `
-                <div class="score-display p-6 text-center border border-lavender rounded-xl">
-                    <div class="text-4xl mb-3">🎉</div>
-                    <h2 class="text-xl font-bold mb-2 lavender-text">Quiz Selesai!</h2>
-                    <p class="text-base text-gray-600 mb-3">Hasil quiz untuk <span class="font-semibold">${selectedMapel}</span></p>
-                    
-                    <div class="inline-block bg-white rounded-full px-5 py-3 shadow-md mb-4">
-                        <span class="text-gray-600 text-sm">Nilai akhir:</span>
-                        <span class="text-2xl font-bold lavender-text"> ${finalScore}</span>
-                        <span class="text-gray-400 text-sm">/100</span>
-                    </div>
-                    
-                    <div class="mt-4 space-y-2">
-                        <div class="flex justify-between text-sm">
-                            <span>Total Soal:</span>
-                            <span class="font-semibold">${soalList.length}</span>
-                        </div>
-                        <div class="flex justify-between text-sm">
-                            <span>Jawaban Benar:</span>
-                            <span class="font-semibold text-green-600">${Object.values(answered).filter((ans, idx) => ans === soalList[idx].jawaban).length}</span>
-                        </div>
-                        <div class="flex justify-between text-sm">
-                            <span>Jawaban Salah:</span>
-                            <span class="font-semibold text-red-600">${Object.values(answered).filter((ans, idx) => ans !== soalList[idx].jawaban).length}</span>
-                        </div>
-                    </div>
-                    
-                    <div class="mt-6">
-                        <button onclick="window.location.reload()" class="bg-teal-500 text-white px-6 py-2 rounded-lg font-semibold hover:bg-teal-600 transition-all mr-2">
-                            <i class="fas fa-redo mr-2"></i> Ulang Quiz
-                        </button>
-                        <button onclick="mapelSelection.classList.remove('hidden'); quizEl.innerHTML=''; progressContainer.classList.add('hidden'); navContainer.classList.add('hidden'); currentIndex=0; score=0; answered={};" 
-                            class="bg-gray-200 text-gray-700 px-6 py-2 rounded-lg font-semibold hover:bg-gray-300 transition-all">
-                            <i class="fas fa-book mr-2"></i> Mapel Lain
-                        </button>
-                    </div>
+                <div class="flex items-center gap-2">
+                  <span class="bg-gray-200 w-8 h-8 rounded-full flex items-center justify-center font-bold">B</span>
+                  <input type="text" id="opsiB" placeholder="Opsi B" class="flex-1 border p-2 rounded-lg focus:ring-1 focus:ring-teal-400" required>
                 </div>
-            `;
+                <div class="flex items-center gap-2">
+                  <span class="bg-gray-200 w-8 h-8 rounded-full flex items-center justify-center font-bold">C</span>
+                  <input type="text" id="opsiC" placeholder="Opsi C" class="flex-1 border p-2 rounded-lg focus:ring-1 focus:ring-teal-400" required>
+                </div>
+                <div class="flex items-center gap-2">
+                  <span class="bg-gray-200 w-8 h-8 rounded-full flex items-center justify-center font-bold">D</span>
+                  <input type="text" id="opsiD" placeholder="Opsi D" class="flex-1 border p-2 rounded-lg focus:ring-1 focus:ring-teal-400" required>
+                </div>
+              </div>
+            </div>
 
-            try {
-                await addDoc(collection(db, "nilai"), {
-                    uid: currentUser.uid,
-                    email: currentUser.email,
-                    mapel: selectedMapel,
-                    score: finalScore,
-                    totalSoal: soalList.length,
-                    benar: Object.values(answered).filter((ans, idx) => ans === soalList[idx].jawaban).length,
-                    salah: Object.values(answered).filter((ans, idx) => ans !== soalList[idx].jawaban).length,
-                    createdAt: new Date()
-                });
-                console.log("Nilai tersimpan");
-            } catch (err) {
-                console.error("Gagal simpan nilai:", err);
-            }
+            <div>
+              <label class="block font-semibold mb-1">Jawaban Benar:</label>
+              <div class="grid grid-cols-4 gap-2">
+                <button type="button" data-jawaban="A" class="jawaban-btn bg-gray-200 text-gray-700 p-3 rounded-lg hover:bg-gray-300 font-bold">A</button>
+                <button type="button" data-jawaban="B" class="jawaban-btn bg-gray-200 text-gray-700 p-3 rounded-lg hover:bg-gray-300 font-bold">B</button>
+                <button type="button" data-jawaban="C" class="jawaban-btn bg-gray-200 text-gray-700 p-3 rounded-lg hover:bg-gray-300 font-bold">C</button>
+                <button type="button" data-jawaban="D" class="jawaban-btn bg-gray-200 text-gray-700 p-3 rounded-lg hover:bg-gray-300 font-bold">D</button>
+              </div>
+              <input type="hidden" id="jawaban" value="A">
+            </div>
+
+            <div>
+              <label class="block font-semibold mb-1">Tingkat Kesulitan:</label>
+              <div class="grid grid-cols-3 gap-2">
+                <button type="button" data-tingkat="mudah" class="tingkat-btn bg-gray-200 text-gray-700 p-2 rounded-lg hover:bg-gray-300">Mudah</button>
+                <button type="button" data-tingkat="menengah" class="tingkat-btn bg-gray-200 text-gray-700 p-2 rounded-lg hover:bg-gray-300">Menengah</button>
+                <button type="button" data-tingkat="sulit" class="tingkat-btn bg-gray-200 text-gray-700 p-2 rounded-lg hover:bg-gray-300">Sulit</button>
+              </div>
+              <input type="hidden" id="tingkat" value="menengah">
+            </div>
+
+            <div>
+              <label class="block font-semibold mb-1">Penjelasan (Opsional):</label>
+              <textarea id="penjelasan" class="w-full border p-3 rounded-lg focus:ring-1 focus:ring-teal-400" rows="2" placeholder="Penjelasan untuk jawaban yang benar"></textarea>
+            </div>
+
+            <div class="flex gap-2">
+              <button type="submit" class="flex-1 bg-teal-600 text-white p-3 rounded-lg hover:bg-teal-700 transition font-semibold flex justify-center items-center gap-2">
+                <i class="fa-solid fa-floppy-disk"></i> Simpan Soal
+              </button>
+              <button type="button" id="resetSoal" class="bg-gray-200 text-gray-700 p-3 rounded-lg hover:bg-gray-300 transition font-semibold">
+                Reset
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Panel Preview & Filter -->
+        <div class="bg-white p-6 rounded-2xl shadow-lg">
+          <h2 class="text-xl font-bold text-blue-700 mb-4">
+            <i class="fas fa-filter mr-2"></i>Filter & Preview Soal
+          </h2>
+          
+          <div class="space-y-4">
+            <div>
+              <label class="block font-semibold mb-1">Filter berdasarkan:</label>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <select id="filterMapel" class="w-full border p-2 rounded-lg">
+                  <option value="">Semua Mapel</option>
+                </select>
+                
+                <select id="filterKategori" class="w-full border p-2 rounded-lg">
+                  <option value="">Semua Kategori</option>
+                </select>
+              </div>
+              
+              <div class="grid grid-cols-3 gap-2 mt-3">
+                <select id="filterTingkat" class="w-full border p-2 rounded-lg">
+                  <option value="">Semua Tingkat</option>
+                  <option value="mudah">Mudah</option>
+                  <option value="menengah">Menengah</option>
+                  <option value="sulit">Sulit</option>
+                </select>
+                
+                <button id="btnFilter" class="bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700">
+                  <i class="fas fa-filter"></i> Filter
+                </button>
+                
+                <button id="btnResetFilter" class="bg-gray-200 text-gray-700 p-2 rounded-lg hover:bg-gray-300">
+                  <i class="fas fa-redo"></i>
+                </button>
+              </div>
+            </div>
+            
+            <div>
+              <h3 class="font-semibold text-gray-700 mb-2">Statistik Kategori:</h3>
+              <div id="statistikKategori" class="space-y-2"></div>
+            </div>
+            
+            <div>
+              <h3 class="font-semibold text-gray-700 mb-2">Preview Soal:</h3>
+              <div id="previewSoal" class="p-4 bg-gray-50 rounded-lg max-h-80 overflow-y-auto">
+                <p class="text-gray-500 text-center">Pilih filter untuk melihat preview soal</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabel Daftar Soal -->
+      <div class="bg-white p-6 rounded-2xl shadow-lg mb-6">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-xl font-bold text-teal-700">
+            <i class="fas fa-list-check mr-2"></i>Daftar Soal dengan Kategori
+          </h2>
+          <button id="refreshSoal" class="bg-teal-600 text-white px-4 py-2 rounded-lg hover:bg-teal-700">
+            <i class="fas fa-redo mr-2"></i>Refresh
+          </button>
+        </div>
+        
+        <div class="mb-4 flex gap-2">
+          <input type="text" id="searchSoal" class="flex-1 border p-2 rounded-lg" placeholder="Cari soal, kategori, atau mapel...">
+          <button id="btnExport" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+            <i class="fas fa-download mr-2"></i>Export
+          </button>
+        </div>
+        
+        <div class="overflow-x-auto">
+          <table class="min-w-full bg-white border border-gray-200">
+            <thead>
+              <tr class="bg-gray-50">
+                <th class="py-3 px-4 border-b text-left">No</th>
+                <th class="py-3 px-4 border-b text-left">Pertanyaan</th>
+                <th class="py-3 px-4 border-b text-left">Mapel</th>
+                <th class="py-3 px-4 border-b text-left">Kategori</th>
+                <th class="py-3 px-4 border-b text-left">Tingkat</th>
+                <th class="py-3 px-4 border-b text-left">Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="tabelSoal">
+              <!-- Data soal akan dimuat di sini -->
+            </tbody>
+          </table>
+        </div>
+        
+        <div class="mt-4 text-center text-gray-500" id="paginationInfo">
+          Menampilkan 0 dari 0 soal
+        </div>
+      </div>
+
+      <!-- Panel Dashboard Murid -->
+      <div class="bg-white p-6 rounded-2xl shadow-lg mb-6">
+        <h2 class="text-xl font-bold text-indigo-700 mb-4">
+          <i class="fas fa-user-graduate mr-2"></i>Dashboard Murid - Akses Soal
+        </h2>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div class="p-4 bg-indigo-50 rounded-lg">
+            <h3 class="font-semibold text-indigo-700 mb-2">URL Akses Murid:</h3>
+            <div class="flex items-center gap-2">
+              <input type="text" id="urlMurid" readonly class="flex-1 border p-2 rounded-lg bg-gray-50" value="https://quantara.com/murid">
+              <button onclick="copyToClipboard('urlMurid')" class="bg-indigo-600 text-white p-2 rounded-lg hover:bg-indigo-700">
+                <i class="fas fa-copy"></i>
+              </button>
+            </div>
+            <p class="text-sm text-gray-600 mt-2">Bagikan link ini ke siswa untuk mengakses soal berdasarkan kategori</p>
+          </div>
+          
+          <div class="p-4 bg-teal-50 rounded-lg">
+            <h3 class="font-semibold text-teal-700 mb-2">Cara Akses Murid:</h3>
+            <ol class="list-decimal pl-5 text-sm text-gray-700 space-y-1">
+              <li>Murid membuka link akses</li>
+              <li>Memilih mata pelajaran</li>
+              <li>Memilih kategori yang diinginkan</li>
+              <li>Mengerjakan soal secara terstruktur</li>
+              <li>Melihat hasil dan pembahasan</li>
+            </ol>
+          </div>
+          
+          <div class="p-4 bg-purple-50 rounded-lg">
+            <h3 class="font-semibold text-purple-700 mb-2">QR Code Akses:</h3>
+            <div class="text-center">
+              <div class="inline-block p-4 bg-white rounded-lg border">
+                <div id="qrcode" class="w-32 h-32 mx-auto bg-gray-200 flex items-center justify-center text-gray-500">
+                  QR Code
+                </div>
+              </div>
+              <p class="text-sm text-gray-600 mt-2">Scan untuk akses cepat</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-8">
+        <button id="logoutBtn" class="w-full bg-red-500 text-white p-3 rounded-lg hover:bg-red-600 transition font-semibold flex justify-center items-center gap-2">
+          <i class="fa-solid fa-right-from-bracket"></i> Logout
+        </button>
+      </div>
+    </div>
+
+    <!-- Error Message -->
+    <div id="errorMessage" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+      <p id="errorText"></p>
+    </div>
+  </div>
+
+  <!-- Modal Preview Soal -->
+  <div id="previewModal" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
+      <div class="p-6 border-b">
+        <div class="flex justify-between items-center">
+          <h3 class="text-xl font-bold text-teal-700">Preview Soal</h3>
+          <button onclick="closeModal()" class="text-gray-500 hover:text-gray-700">
+            <i class="fas fa-times text-2xl"></i>
+          </button>
+        </div>
+      </div>
+      <div class="p-6 overflow-y-auto max-h-[70vh]" id="modalContent">
+        <!-- Konten modal akan dimuat di sini -->
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { 
+      getFirestore, 
+      collection, 
+      addDoc, 
+      getDocs, 
+      doc, 
+      updateDoc, 
+      deleteDoc, 
+      getDoc, 
+      setDoc,
+      query,
+      orderBy,
+      where 
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAJ5I8k2MzAyDLt9fUcXHRNtRVjKB_ETLY",
+      authDomain: "projectid-81104.firebaseapp.com",
+      projectId: "projectid-81104",
+      storageBucket: "projectid-81104.firebasestorage.app",
+      messagingSenderId: "554913260457",
+      appId: "1:554913260457:web:bf988867ebfd902c651ab8",
+      measurementId: "G-8WFHQW5WGN"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth(app);
+
+    // DOM Elements
+    const loading = document.getElementById('loading');
+    const content = document.getElementById('content');
+    const errorMessage = document.getElementById('errorMessage');
+    const errorText = document.getElementById('errorText');
+    
+    const kategoriForm = document.getElementById('kategoriForm');
+    const soalForm = document.getElementById('soalForm');
+    const tabelSoal = document.getElementById('tabelSoal');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const refreshSoal = document.getElementById('refreshSoal');
+    const searchSoal = document.getElementById('searchSoal');
+    const resetSoal = document.getElementById('resetSoal');
+    const resetKategori = document.getElementById('resetKategori');
+    
+    // Filter elements
+    const filterMapel = document.getElementById('filterMapel');
+    const filterKategori = document.getElementById('filterKategori');
+    const filterTingkat = document.getElementById('filterTingkat');
+    const btnFilter = document.getElementById('btnFilter');
+    const btnResetFilter = document.getElementById('btnResetFilter');
+    
+    // Select elements
+    const mapelInput = document.getElementById('mapelInput');
+    const kategoriInput = document.getElementById('kategoriInput');
+    const mapelKategori = document.getElementById('mapelKategori');
+    
+    // Statistik
+    const totalSoalEl = document.getElementById('totalSoal');
+    const totalKategoriEl = document.getElementById('totalKategori');
+    const totalMapelEl = document.getElementById('totalMapel');
+    const soalTerkategoriEl = document.getElementById('soalTerkategori');
+    const statistikKategori = document.getElementById('statistikKategori');
+
+    let currentUser = null;
+    let userRole = null;
+    let soalData = [];
+    let kategoriData = [];
+    let mapelData = new Set();
+
+    // Show error message
+    function showError(message) {
+      errorText.textContent = message;
+      errorMessage.classList.remove('hidden');
+      loading.classList.add('hidden');
+    }
+
+    // Hide error message
+    function hideError() {
+      errorMessage.classList.add('hidden');
+    }
+
+    // Check if user is teacher
+    async function checkUserRole(user) {
+      try {
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (userDoc.exists()) {
+          return userDoc.data().role;
+        }
+        return null;
+      } catch (error) {
+        console.error("Error checking user role:", error);
+        return null;
+      }
+    }
+
+    // Initialize dashboard
+    onAuthStateChanged(auth, async (user) => {
+      if (!user) {
+        window.location.href = "login.html";
+        return;
+      }
+
+      currentUser = user;
+      
+      // Check user role
+      userRole = await checkUserRole(user);
+      
+      if (userRole !== "guru") {
+        showError("Akses ditolak. Hanya guru yang dapat mengakses dashboard ini.");
+        return;
+      }
+
+      // User is teacher, show content
+      hideError();
+      loading.classList.add('hidden');
+      content.classList.remove('hidden');
+      
+      // Load initial data
+      loadKategori();
+      loadSoal();
+      loadStatistik();
+      
+      // Setup event listeners
+      setupEventListeners();
+    });
+
+    // Setup all event listeners
+    function setupEventListeners() {
+      // Logout
+      logoutBtn.addEventListener("click", async () => {
+        await signOut(auth);
+        window.location.href = "login.html";
+      });
+
+      // Refresh soal
+      refreshSoal.addEventListener("click", () => {
+        loadSoal();
+        loadStatistik();
+      });
+
+      // Search soal
+      searchSoal.addEventListener("input", (e) => {
+        filterTabelSoal(e.target.value);
+      });
+
+      // Reset buttons
+      resetSoal.addEventListener("click", resetSoalForm);
+      resetKategori.addEventListener("click", resetKategoriForm);
+
+      // Filter buttons
+      btnFilter.addEventListener("click", applyFilter);
+      btnResetFilter.addEventListener("click", resetFilter);
+
+      // Jawaban button selection
+      document.querySelectorAll('.jawaban-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const jawaban = btn.dataset.jawaban;
+          document.getElementById('jawaban').value = jawaban;
+          
+          // Reset all buttons
+          document.querySelectorAll('.jawaban-btn').forEach(b => {
+            b.classList.remove('bg-teal-600', 'text-white');
+            b.classList.add('bg-gray-200', 'text-gray-700');
+          });
+          
+          // Highlight selected button
+          btn.classList.remove('bg-gray-200', 'text-gray-700');
+          btn.classList.add('bg-teal-600', 'text-white');
+        });
+      });
+
+      // Tingkat button selection
+      document.querySelectorAll('.tingkat-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const tingkat = btn.dataset.tingkat;
+          document.getElementById('tingkat').value = tingkat;
+          
+          // Reset all buttons
+          document.querySelectorAll('.tingkat-btn').forEach(b => {
+            b.classList.remove('bg-teal-600', 'text-white');
+            b.classList.add('bg-gray-200', 'text-gray-700');
+          });
+          
+          // Highlight selected button
+          btn.classList.remove('bg-gray-200', 'text-gray-700');
+          btn.classList.add('bg-teal-600', 'text-white');
+        });
+      });
+
+      // Color picker
+      document.querySelectorAll('#colorPicker button').forEach(btn => {
+        btn.addEventListener('click', () => {
+          document.getElementById('warnaKategori').value = btn.dataset.color;
+          document.getElementById('textKategori').value = btn.dataset.text;
+          
+          // Update border
+          document.querySelectorAll('#colorPicker button').forEach(b => {
+            b.classList.remove('border-teal-500', 'border-2');
+          });
+          btn.classList.add('border-teal-500', 'border-2');
+        });
+      });
+
+      // Mapel change event
+      mapelKategori.addEventListener('change', updateKategoriByMapel);
+      mapelInput.addEventListener('change', updateKategoriByMapel);
+      filterMapel.addEventListener('change', updateFilterKategori);
+    }
+
+    // 🔹 Load statistik
+    async function loadStatistik() {
+      try {
+        // Total soal
+        const soalSnapshot = await getDocs(collection(db, "soal"));
+        const totalSoal = soalSnapshot.size;
+        totalSoalEl.textContent = totalSoal;
+        
+        // Total kategori
+        const kategoriSnapshot = await getDocs(collection(db, "kategori"));
+        const totalKategori = kategoriSnapshot.size;
+        totalKategoriEl.textContent = totalKategori;
+        
+        // Total mapel unik
+        mapelData = new Set();
+        soalSnapshot.forEach(doc => {
+          const data = doc.data();
+          if (data.mapel) mapelData.add(data.mapel);
+        });
+        totalMapelEl.textContent = mapelData.size;
+        
+        // Persentase soal terkategorisasi
+        let soalDenganKategori = 0;
+        soalSnapshot.forEach(doc => {
+          const data = doc.data();
+          if (data.kategori && data.kategori !== "") soalDenganKategori++;
+        });
+        
+        const persentase = totalSoal > 0 ? Math.round((soalDenganKategori / totalSoal) * 100) : 0;
+        soalTerkategoriEl.textContent = `${persentase}%`;
+        
+        // Update select options
+        updateMapelSelects();
+        
+        // Load statistik kategori
+        loadStatistikKategori();
+        
+      } catch (error) {
+        console.error("Error loading statistics:", error);
+      }
+    }
+
+    // 🔹 Update mapel selects
+    function updateMapelSelects() {
+      const selects = [mapelInput, mapelKategori, filterMapel];
+      
+      selects.forEach(select => {
+        const currentValue = select.value;
+        select.innerHTML = '<option value="">Pilih Mapel</option>';
+        
+        Array.from(mapelData).sort().forEach(mapel => {
+          const option = document.createElement('option');
+          option.value = mapel;
+          option.textContent = mapel;
+          select.appendChild(option);
+        });
+        
+        // Restore previous value if still valid
+        if (currentValue && mapelData.has(currentValue)) {
+          select.value = currentValue;
+        }
+        
+        // Trigger change event to update dependent selects
+        select.dispatchEvent(new Event('change'));
+      });
+    }
+
+    // 🔹 Update kategori berdasarkan mapel
+    function updateKategoriByMapel() {
+      const mapel = this.value;
+      const targetSelect = this.id === 'mapelInput' ? kategoriInput : 
+                         this.id === 'mapelKategori' ? null : null;
+      
+      if (!targetSelect) return;
+      
+      const filteredKategori = kategoriData.filter(k => k.mapel === mapel);
+      
+      targetSelect.innerHTML = '<option value="">Pilih Kategori</option>';
+      filteredKategori.forEach(kategori => {
+        const option = document.createElement('option');
+        option.value = kategori.id;
+        option.textContent = kategori.nama;
+        targetSelect.appendChild(option);
+      });
+    }
+
+    // 🔹 Update filter kategori
+    function updateFilterKategori() {
+      const mapel = filterMapel.value;
+      const filteredKategori = mapel ? 
+        kategoriData.filter(k => k.mapel === mapel) : 
+        kategoriData;
+      
+      filterKategori.innerHTML = '<option value="">Semua Kategori</option>';
+      filteredKategori.forEach(kategori => {
+        const option = document.createElement('option');
+        option.value = kategori.id;
+        option.textContent = kategori.nama;
+        filterKategori.appendChild(option);
+      });
+    }
+
+    // 🔹 Load kategori
+    async function loadKategori() {
+      try {
+        const q = query(collection(db, "kategori"), orderBy("nama"));
+        const snapshot = await getDocs(q);
+        
+        kategoriData = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        
+        renderKategoriList();
+        
+      } catch (error) {
+        console.error("Error loading kategori:", error);
+        showNotification("Gagal memuat kategori", "error");
+      }
+    }
+
+    function renderKategoriList() {
+      const container = document.getElementById('daftarKategori');
+      container.innerHTML = '';
+      
+      if (kategoriData.length === 0) {
+        container.innerHTML = '<p class="text-gray-500 text-center py-4">Belum ada kategori</p>';
+        return;
+      }
+      
+      kategoriData.forEach(kategori => {
+        const item = document.createElement('div');
+        item.className = 'flex items-center justify-between p-2 bg-gray-50 rounded-lg';
+        item.innerHTML = `
+          <div class="flex items-center gap-2">
+            <span class="w-3 h-3 rounded-full ${kategori.warna || 'bg-gray-300'}"></span>
+            <span class="font-medium">${kategori.nama}</span>
+            <span class="text-xs text-gray-500">(${kategori.mapel})</span>
+          </div>
+          <div class="flex gap-1">
+            <button data-id="${kategori.id}" class="editKategoriBtn text-blue-600 hover:text-blue-800">
+              <i class="fas fa-edit"></i>
+            </button>
+            <button data-id="${kategori.id}" class="deleteKategoriBtn text-red-600 hover:text-red-800">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        `;
+        container.appendChild(item);
+      });
+      
+      setupKategoriEventListeners();
+    }
+
+    // 🔹 Form kategori
+    kategoriForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      
+      if (userRole !== "guru") {
+        showNotification("Anda tidak memiliki izin untuk menambah kategori", "error");
+        return;
+      }
+
+      const kategoriId = document.getElementById('kategoriId').value;
+      const nama = document.getElementById('namaKategori').value.trim();
+      const mapel = document.getElementById('mapelKategori').value;
+      const deskripsi = document.getElementById('deskripsiKategori').value.trim();
+      const warna = document.getElementById('warnaKategori').value;
+      const textColor = document.getElementById('textKategori').value;
+
+      if (!nama || !mapel) {
+        showNotification("Nama kategori dan mata pelajaran harus diisi!", "error");
+        return;
+      }
+
+      const kategoriData = {
+        nama,
+        mapel,
+        deskripsi,
+        warna,
+        textColor,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        createdBy: currentUser.uid,
+        createdByName: currentUser.displayName || currentUser.email
+      };
+
+      try {
+        if (kategoriId) {
+          // Update existing kategori
+          await updateDoc(doc(db, "kategori", kategoriId), kategoriData);
+          showNotification("Kategori berhasil diperbarui ✅", "success");
+        } else {
+          // Add new kategori
+          const docRef = await addDoc(collection(db, "kategori"), kategoriData);
+          kategoriData.id = docRef.id;
+          showNotification("Kategori berhasil ditambahkan ✅", "success");
         }
 
-        // INTERAKSI NAVBAR
-        document.addEventListener('DOMContentLoaded', function() {
-            const navItems = document.querySelectorAll('.nav-item');
+        resetKategoriForm();
+        loadKategori();
+        loadStatistik();
+        
+      } catch (error) {
+        console.error("Error menyimpan kategori:", error);
+        showNotification("Terjadi kesalahan saat menyimpan kategori", "error");
+      }
+    });
+
+    function setupKategoriEventListeners() {
+      document.querySelectorAll('.editKategoriBtn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const docId = btn.dataset.id;
+          const kategori = kategoriData.find(k => k.id === docId);
+          
+          if (kategori) {
+            document.getElementById('kategoriId').value = docId;
+            document.getElementById('namaKategori').value = kategori.nama;
+            document.getElementById('mapelKategori').value = kategori.mapel;
+            document.getElementById('deskripsiKategori').value = kategori.deskripsi || '';
+            document.getElementById('warnaKategori').value = kategori.warna || 'bg-teal-100';
+            document.getElementById('textKategori').value = kategori.textColor || 'text-teal-800';
             
-            navItems.forEach(item => {
-                item.addEventListener('click', function() {
-                    navItems.forEach(nav => {
-                        nav.classList.remove('active');
-                        nav.querySelector('.nav-icon').classList.remove('active');
-                    });
-                    
-                    this.classList.add('active');
-                    this.querySelector('.nav-icon').classList.add('active');
-                });
+            // Update color picker
+            document.querySelectorAll('#colorPicker button').forEach(b => {
+              b.classList.remove('border-teal-500', 'border-2');
+              if (b.dataset.color === kategori.warna) {
+                b.classList.add('border-teal-500', 'border-2');
+              }
             });
+            
+            // Scroll to form
+            kategoriForm.scrollIntoView({ behavior: 'smooth' });
+          }
         });
-    </script>
+      });
+
+      document.querySelectorAll('.deleteKategoriBtn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const docId = btn.dataset.id;
+          
+          if (confirm("Yakin ingin menghapus kategori ini? Soal yang menggunakan kategori ini akan kehilangan kategorinya.")) {
+            try {
+              await deleteDoc(doc(db, "kategori", docId));
+              showNotification("Kategori berhasil dihapus ✅", "success");
+              loadKategori();
+              loadStatistik();
+            } catch (error) {
+              console.error("Error deleting kategori:", error);
+              showNotification("Gagal menghapus kategori", "error");
+            }
+          }
+        });
+      });
+    }
+
+    function resetKategoriForm() {
+      kategoriForm.reset();
+      document.getElementById('kategoriId').value = '';
+      document.getElementById('warnaKategori').value = 'bg-teal-100';
+      document.getElementById('textKategori').value = 'text-teal-800';
+      
+      // Reset color picker
+      document.querySelectorAll('#colorPicker button').forEach(b => {
+        b.classList.remove('border-teal-500', 'border-2');
+      });
+      document.querySelector('#colorPicker button[data-color="bg-teal-100"]').classList.add('border-teal-500', 'border-2');
+    }
+
+    // 🔹 Form soal
+    soalForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      
+      if (userRole !== "guru") {
+        showNotification("Anda tidak memiliki izin untuk menambah soal", "error");
+        return;
+      }
+
+      const soalId = document.getElementById('soalId').value;
+      const mapel = mapelInput.value;
+      const kategori = kategoriInput.value;
+      const tingkat = document.getElementById('tingkat').value;
+
+      if (!mapel || !kategori) {
+        showNotification("Mata pelajaran dan kategori harus diisi!", "error");
+        return;
+      }
+
+      const soalData = {
+        mapel,
+        kategori,
+        pertanyaan: document.getElementById('pertanyaan').value,
+        opsi: {
+          A: document.getElementById('opsiA').value,
+          B: document.getElementById('opsiB').value,
+          C: document.getElementById('opsiC').value,
+          D: document.getElementById('opsiD').value
+        },
+        jawaban: document.getElementById('jawaban').value,
+        tingkat,
+        penjelasan: document.getElementById('penjelasan').value,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        createdBy: currentUser.uid,
+        createdByName: currentUser.displayName || currentUser.email
+      };
+
+      try {
+        if (soalId) {
+          // Update existing soal
+          await updateDoc(doc(db, "soal", soalId), soalData);
+          showNotification("Soal berhasil diperbarui ✅", "success");
+        } else {
+          // Add new soal with custom ID
+          const timestamp = Date.now();
+          const randomId = Math.random().toString(36).substring(2, 9);
+          const soalDocId = `soal_${timestamp}_${randomId}`;
+          
+          await setDoc(doc(db, "soal", soalDocId), soalData);
+          showNotification("Soal berhasil ditambahkan ✅", "success");
+        }
+
+        resetSoalForm();
+        loadSoal();
+        loadStatistik();
+        
+      } catch (error) {
+        console.error("Error menyimpan soal:", error);
+        showNotification("Terjadi kesalahan saat menyimpan soal", "error");
+      }
+    });
+
+    function resetSoalForm() {
+      soalForm.reset();
+      document.getElementById('soalId').value = '';
+      document.getElementById('jawaban').value = 'A';
+      document.getElementById('tingkat').value = 'menengah';
+      
+      // Reset buttons
+      document.querySelectorAll('.jawaban-btn').forEach(b => {
+        b.classList.remove('bg-teal-600', 'text-white');
+        b.classList.add('bg-gray-200', 'text-gray-700');
+      });
+      document.querySelector('.jawaban-btn[data-jawaban="A"]').classList.add('bg-teal-600', 'text-white');
+      
+      document.querySelectorAll('.tingkat-btn').forEach(b => {
+        b.classList.remove('bg-teal-600', 'text-white');
+        b.classList.add('bg-gray-200', 'text-gray-700');
+      });
+      document.querySelector('.tingkat-btn[data-tingkat="menengah"]').classList.add('bg-teal-600', 'text-white');
+    }
+
+    // 🔹 Load soal
+    async function loadSoal() {
+      try {
+        tabelSoal.innerHTML = '<tr><td colspan="6" class="py-8 text-center"><i class="fas fa-spinner fa-spin text-teal-600 mr-2"></i>Memuat soal...</td></tr>';
+        
+        const q = query(collection(db, "soal"), orderBy("createdAt", "desc"));
+        const snapshot = await getDocs(q);
+        
+        soalData = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        
+        renderTabelSoal(soalData);
+        
+      } catch (error) {
+        console.error("Error loading soal:", error);
+        tabelSoal.innerHTML = '<tr><td colspan="6" class="py-8 text-center text-red-500">Gagal memuat soal</td></tr>';
+      }
+    }
+
+    function renderTabelSoal(soalArray) {
+      tabelSoal.innerHTML = '';
+      
+      if (soalArray.length === 0) {
+        tabelSoal.innerHTML = `
+          <tr>
+            <td colspan="6" class="py-8 text-center text-gray-500">
+              <i class="fas fa-clipboard-question text-3xl mb-3 block"></i>
+              <p>Belum ada soal. Tambahkan soal pertama Anda!</p>
+            </td>
+          </tr>`;
+        return;
+      }
+      
+      soalArray.forEach((item, index) => {
+        const kategori = kategoriData.find(k => k.id === item.kategori);
+        const tingkatColor = getTingkatColor(item.tingkat);
+        
+        const row = document.createElement('tr');
+        row.className = 'hover:bg-gray-50';
+        row.innerHTML = `
+          <td class="py-3 px-4 border-b">${index + 1}</td>
+          <td class="py-3 px-4 border-b">
+            <div class="line-clamp-2 max-w-xs">${item.pertanyaan.substring(0, 80)}${item.pertanyaan.length > 80 ? '...' : ''}</div>
+          </td>
+          <td class="py-3 px-4 border-b">${item.mapel}</td>
+          <td class="py-3 px-4 border-b">
+            ${kategori ? `
+              <span class="${kategori.warna || 'bg-gray-100'} ${kategori.textColor || 'text-gray-800'} text-xs font-medium px-2 py-1 rounded-full">
+                ${kategori.nama}
+              </span>
+            ` : '<span class="text-gray-500 text-sm">Tanpa kategori</span>'}
+          </td>
+          <td class="py-3 px-4 border-b">
+            <span class="${tingkatColor} text-xs font-medium px-2 py-1 rounded-full">
+              ${item.tingkat || 'menengah'}
+            </span>
+          </td>
+          <td class="py-3 px-4 border-b">
+            <div class="flex gap-2">
+              <button data-id="${item.id}" class="viewSoalBtn bg-blue-100 text-blue-700 hover:bg-blue-200 w-8 h-8 rounded-full flex items-center justify-center">
+                <i class="fas fa-eye text-xs"></i>
+              </button>
+              <button data-id="${item.id}" class="editSoalBtn bg-teal-100 text-teal-700 hover:bg-teal-200 w-8 h-8 rounded-full flex items-center justify-center">
+                <i class="fas fa-edit text-xs"></i>
+              </button>
+              <button data-id="${item.id}" class="deleteSoalBtn bg-red-100 text-red-700 hover:bg-red-200 w-8 h-8 rounded-full flex items-center justify-center">
+                <i class="fas fa-trash text-xs"></i>
+              </button>
+            </div>
+          </td>
+        `;
+        tabelSoal.appendChild(row);
+      });
+      
+      setupSoalEventListeners();
+      updatePaginationInfo(soalArray.length);
+    }
+
+    function filterTabelSoal(keyword) {
+      if (!keyword.trim()) {
+        renderTabelSoal(soalData);
+        return;
+      }
+      
+      const filtered = soalData.filter(item => 
+        item.pertanyaan.toLowerCase().includes(keyword.toLowerCase()) ||
+        item.mapel.toLowerCase().includes(keyword.toLowerCase()) ||
+        (item.kategori && kategoriData.find(k => k.id === item.kategori)?.nama.toLowerCase().includes(keyword.toLowerCase()))
+      );
+      
+      renderTabelSoal(filtered);
+    }
+
+    function applyFilter() {
+      const mapel = filterMapel.value;
+      const kategori = filterKategori.value;
+      const tingkat = filterTingkat.value;
+      
+      let filtered = soalData;
+      
+      if (mapel) {
+        filtered = filtered.filter(item => item.mapel === mapel);
+      }
+      
+      if (kategori) {
+        filtered = filtered.filter(item => item.kategori === kategori);
+      }
+      
+      if (tingkat) {
+        filtered = filtered.filter(item => item.tingkat === tingkat);
+      }
+      
+      renderTabelSoal(filtered);
+      updatePreviewSoal(filtered.slice(0, 3)); // Show first 3 as preview
+    }
+
+    function resetFilter() {
+      filterMapel.value = '';
+      filterKategori.value = '';
+      filterTingkat.value = '';
+      renderTabelSoal(soalData);
+      document.getElementById('previewSoal').innerHTML = '<p class="text-gray-500 text-center">Pilih filter untuk melihat preview soal</p>';
+    }
+
+    function setupSoalEventListeners() {
+      document.querySelectorAll('.viewSoalBtn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const docId = btn.dataset.id;
+          const soal = soalData.find(s => s.id === docId);
+          
+          if (soal) {
+            showPreviewModal(soal);
+          }
+        });
+      });
+
+      document.querySelectorAll('.editSoalBtn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const docId = btn.dataset.id;
+          const soal = soalData.find(s => s.id === docId);
+          
+          if (soal) {
+            // Isi form edit
+            document.getElementById('soalId').value = docId;
+            document.getElementById('mapelInput').value = soal.mapel;
+            document.getElementById('pertanyaan').value = soal.pertanyaan;
+            document.getElementById('opsiA').value = soal.opsi.A;
+            document.getElementById('opsiB').value = soal.opsi.B;
+            document.getElementById('opsiC').value = soal.opsi.C;
+            document.getElementById('opsiD').value = soal.opsi.D;
+            document.getElementById('jawaban').value = soal.jawaban;
+            document.getElementById('tingkat').value = soal.tingkat || 'menengah';
+            document.getElementById('penjelasan').value = soal.penjelasan || '';
+            
+            // Update kategori select
+            if (soal.kategori) {
+              const kategori = kategoriData.find(k => k.id === soal.kategori);
+              if (kategori && kategori.mapel === soal.mapel) {
+                document.getElementById('kategoriInput').value = soal.kategori;
+              }
+            }
+            
+            // Update buttons
+            document.querySelectorAll('.jawaban-btn').forEach(b => {
+              b.classList.remove('bg-teal-600', 'text-white');
+              b.classList.add('bg-gray-200', 'text-gray-700');
+            });
+            document.querySelector(`.jawaban-btn[data-jawaban="${soal.jawaban}"]`).classList.add('bg-teal-600', 'text-white');
+            
+            document.querySelectorAll('.tingkat-btn').forEach(b => {
+              b.classList.remove('bg-teal-600', 'text-white');
+              b.classList.add('bg-gray-200', 'text-gray-700');
+            });
+            document.querySelector(`.tingkat-btn[data-tingkat="${soal.tingkat || 'menengah'}"]`).classList.add('bg-teal-600', 'text-white');
+            
+            // Scroll to form
+            soalForm.scrollIntoView({ behavior: 'smooth' });
+          }
+        });
+      });
+
+      document.querySelectorAll('.deleteSoalBtn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const docId = btn.dataset.id;
+          
+          if (confirm("Yakin ingin menghapus soal ini?")) {
+            try {
+              await deleteDoc(doc(db, "soal", docId));
+              showNotification("Soal berhasil dihapus ✅", "success");
+              loadSoal();
+              loadStatistik();
+            } catch (error) {
+              console.error("Error deleting soal:", error);
+              showNotification("Gagal menghapus soal", "error");
+            }
+          }
+        });
+      });
+    }
+
+    function showPreviewModal(soal) {
+      const kategori = kategoriData.find(k => k.id === soal.kategori);
+      const modal = document.getElementById('previewModal');
+      const content = document.getElementById('modalContent');
+      
+      content.innerHTML = `
+        <div class="space-y-4">
+          <div class="flex justify-between items-start">
+            <div>
+              <span class="bg-teal-100 text-teal-800 text-sm font-medium px-3 py-1 rounded-full">${soal.mapel}</span>
+              ${kategori ? `<span class="${kategori.warna} ${kategori.textColor} text-sm font-medium px-3 py-1 rounded-full ml-2">${kategori.nama}</span>` : ''}
+              <span class="${getTingkatColor(soal.tingkat)} text-sm font-medium px-3 py-1 rounded-full ml-2">${soal.tingkat}</span>
+            </div>
+            <div class="text-sm text-gray-500">
+              ${new Date(soal.createdAt?.toDate() || soal.createdAt).toLocaleDateString('id-ID')}
+            </div>
+          </div>
+          
+          <div class="prose max-w-none">
+            <h4 class="font-bold text-lg mb-3">Soal:</h4>
+            <div class="bg-gray-50 p-4 rounded-lg">${soal.pertanyaan}</div>
+          </div>
+          
+          <div>
+            <h4 class="font-bold text-lg mb-3">Opsi Jawaban:</h4>
+            <div class="grid grid-cols-1 gap-2">
+              ${['A', 'B', 'C', 'D'].map(opsi => `
+                <div class="flex items-center gap-3 p-3 rounded-lg ${soal.jawaban === opsi ? 'bg-green-50 border border-green-200' : 'bg-gray-50'}">
+                  <span class="font-bold ${soal.jawaban === opsi ? 'text-green-600' : 'text-gray-600'}">${opsi}.</span>
+                  <span class="${soal.jawaban === opsi ? 'font-medium text-green-700' : 'text-gray-700'}">${soal.opsi[opsi]}</span>
+                  ${soal.jawaban === opsi ? '<span class="ml-auto bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded">Jawaban Benar</span>' : ''}
+                </div>
+              `).join('')}
+            </div>
+          </div>
+          
+          ${soal.penjelasan ? `
+            <div>
+              <h4 class="font-bold text-lg mb-3">Penjelasan:</h4>
+              <div class="bg-blue-50 p-4 rounded-lg">${soal.penjelasan}</div>
+            </div>
+          ` : ''}
+        </div>
+      `;
+      
+      modal.classList.remove('hidden');
+      
+      // Render MathJax
+      renderMathInElement(content, {
+        delimiters: [
+          {left: "$$", right: "$$", display: true},
+          {left: "$", right: "$", display: false}
+        ],
+        throwOnError: false
+      });
+    }
+
+    function closeModal() {
+      document.getElementById('previewModal').classList.add('hidden');
+    }
+
+    function updatePreviewSoal(soalArray) {
+      const container = document.getElementById('previewSoal');
+      
+      if (soalArray.length === 0) {
+        container.innerHTML = '<p class="text-gray-500 text-center py-4">Tidak ada soal dengan filter yang dipilih</p>';
+        return;
+      }
+      
+      let html = '<div class="space-y-3">';
+      
+      soalArray.forEach((soal, index) => {
+        const kategori = kategoriData.find(k => k.id === soal.kategori);
+        
+        html += `
+          <div class="p-3 bg-gray-50 rounded-lg">
+            <div class="flex justify-between items-start mb-2">
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-medium text-gray-500">#${index + 1}</span>
+                ${kategori ? `<span class="${kategori.warna} ${kategori.textColor} text-xs font-medium px-2 py-1 rounded-full">${kategori.nama}</span>` : ''}
+              </div>
+              <button onclick="viewSoalById('${soal.id}')" class="text-blue-600 hover:text-blue-800 text-sm">
+                <i class="fas fa-eye"></i>
+              </button>
+            </div>
+            <p class="text-sm line-clamp-2">${soal.pertanyaan.substring(0, 100)}${soal.pertanyaan.length > 100 ? '...' : ''}</p>
+          </div>
+        `;
+      });
+      
+      html += '</div>';
+      container.innerHTML = html;
+    }
+
+    // Make function available globally for inline onclick
+    window.viewSoalById = function(id) {
+      const soal = soalData.find(s => s.id === id);
+      if (soal) showPreviewModal(soal);
+    };
+
+    window.copyToClipboard = function(elementId) {
+      const element = document.getElementById(elementId);
+      element.select();
+      element.setSelectionRange(0, 99999);
+      document.execCommand('copy');
+      showNotification('URL berhasil disalin ke clipboard!', 'success');
+    };
+
+    function updatePaginationInfo(total) {
+      document.getElementById('paginationInfo').textContent = `Menampilkan ${total} soal`;
+    }
+
+    async function loadStatistikKategori() {
+      const container = document.getElementById('statistikKategori');
+      container.innerHTML = '';
+      
+      if (kategoriData.length === 0) return;
+      
+      // Hitung jumlah soal per kategori
+      const statistik = {};
+      soalData.forEach(soal => {
+        if (soal.kategori) {
+          statistik[soal.kategori] = (statistik[soal.kategori] || 0) + 1;
+        }
+      });
+      
+      // Tampilkan top 5 kategori
+      const topKategori = kategoriData
+        .map(k => ({
+          ...k,
+          jumlah: statistik[k.id] || 0
+        }))
+        .sort((a, b) => b.jumlah - a.jumlah)
+        .slice(0, 5);
+      
+      topKategori.forEach(kategori => {
+        const item = document.createElement('div');
+        item.className = 'flex items-center justify-between';
+        item.innerHTML = `
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full ${kategori.warna}"></span>
+            <span class="text-sm">${kategori.nama}</span>
+          </div>
+          <span class="text-sm font-medium">${kategori.jumlah} soal</span>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function getTingkatColor(tingkat) {
+      switch(tingkat) {
+        case 'mudah': return 'bg-green-100 text-green-800';
+        case 'sulit': return 'bg-red-100 text-red-800';
+        default: return 'bg-yellow-100 text-yellow-800';
+      }
+    }
+
+    function showNotification(message, type = 'info') {
+      const notification = document.createElement('div');
+      notification.className = `fixed top-4 right-4 z-50 px-6 py-3 rounded-lg shadow-lg text-white font-medium transform transition-all duration-300 ${
+        type === 'success' ? 'bg-green-500' :
+        type === 'error' ? 'bg-red-500' :
+        'bg-blue-500'
+      }`;
+      notification.innerHTML = `
+        <div class="flex items-center gap-3">
+          <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+          <span>${message}</span>
+        </div>
+      `;
+      
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.style.opacity = '0';
+        notification.style.transform = 'translateY(-20px)';
+        setTimeout(() => {
+          if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+          }
+        }, 300);
+      }, 3000);
+    }
+
+    // Export to CSV
+    document.getElementById('btnExport').addEventListener('click', () => {
+      if (soalData.length === 0) {
+        showNotification('Tidak ada data untuk diexport', 'error');
+        return;
+      }
+      
+      let csv = 'No,Mapel,Kategori,Pertanyaan,Tingkat,Jawaban\n';
+      
+      soalData.forEach((soal, index) => {
+        const kategori = kategoriData.find(k => k.id === soal.kategori);
+        const row = [
+          index + 1,
+          `"${soal.mapel}"`,
+          `"${kategori ? kategori.nama : 'Tidak ada kategori'}"`,
+          `"${soal.pertanyaan.replace(/"/g, '""')}"`,
+          soal.tingkat,
+          soal.jawaban
+        ];
+        csv += row.join(',') + '\n';
+      });
+      
+      const blob = new Blob([csv], { type: 'text/csv' });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `soal_quantara_${new Date().toISOString().slice(0,10)}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      window.URL.revokeObjectURL(url);
+      
+      showNotification('Data berhasil diexport ke CSV', 'success');
+    });
+
+    // Initialize
+    resetJawabanButtons();
+    resetTingkatButtons();
+    
+    function resetJawabanButtons() {
+      document.querySelectorAll('.jawaban-btn').forEach(b => {
+        b.classList.remove('bg-teal-600', 'text-white');
+        b.classList.add('bg-gray-200', 'text-gray-700');
+      });
+      document.querySelector('.jawaban-btn[data-jawaban="A"]').classList.add('bg-teal-600', 'text-white');
+    }
+    
+    function resetTingkatButtons() {
+      document.querySelectorAll('.tingkat-btn').forEach(b => {
+        b.classList.remove('bg-teal-600', 'text-white');
+        b.classList.add('bg-gray-200', 'text-gray-700');
+      });
+      document.querySelector('.tingkat-btn[data-tingkat="menengah"]').classList.add('bg-teal-600', 'text-white');
+    }
+  </script>
+  
+  <style>
+    .rotate-180 {
+      transform: rotate(180deg);
+      transition: transform 0.3s ease;
+    }
+    
+    .line-clamp-2 {
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    
+    /* Scrollbar styling */
+    .overflow-y-auto::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    .overflow-y-auto::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 10px;
+    }
+    
+    .overflow-y-auto::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 10px;
+    }
+    
+    .overflow-y-auto::-webkit-scrollbar-thumb:hover {
+      background: #a1a1a1;
+    }
+    
+    /* Table styling */
+    table {
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+    
+    th {
+      position: sticky;
+      top: 0;
+      background-color: #f9fafb;
+    }
+    
+    /* Modal animation */
+    #previewModal {
+      transition: opacity 0.3s ease;
+    }
+    
+    #previewModal > div {
+      transform: scale(0.95);
+      transition: transform 0.3s ease;
+    }
+    
+    #previewModal:not(.hidden) > div {
+      transform: scale(1);
+    }
+  </style>
 </body>
 </html>

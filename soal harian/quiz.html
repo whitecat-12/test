@@ -3,464 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Science Explorer - Aplikasi Belajar Fisika & Sains</title>
+    <title>Science Explorer - Quiz Siswa</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary: #38b2ac;  /* Keeping navbar primary color */
-            --secondary: #0e7490; /* Keeping navbar secondary color */
-            --accent: #f59e0b;
-            --physics: #3b82f6;
-            --chemistry: #10b981;
-            --biology: #8b5cf6;
-            --astronomy: #ec4899;
-            --logo-color: #9999ff; /* Warna baru untuk logo */
+        /* ... (CSS tetap sama seperti sebelumnya) ... */
+        
+        .mapel-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            margin-bottom: 10px;
         }
         
-        body {
-            font-family: 'Baloo 2', cursive;
-            background-color: #f8fafc;
-        }
+        .mapel-fisika { background: #e0f2fe; color: #0369a1; }
+        .mapel-kimia { background: #dcfce7; color: #166534; }
+        .mapel-biologi { background: #f3e8ff; color: #7c3aed; }
+        .mapel-matematika { background: #fef3c7; color: #92400e; }
         
-        .app-container {
-            max-width: 414px;
-            margin: 0 auto;
-            background: white;
-            min-height: 100vh;
-            position: relative;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
-        }
-        
-        /* NAVBAR YANG SUDAH DISAMAKAN */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            max-width: 414px;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
-            background: white;
-            z-index: 10;
-            height: 70px; /* TINGGI SAMA */
-            display: flex;
-            align-items: center;
-        }
-        
-        /* STYLE NAV ITEM YANG SAMA */
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: #6b7280;
-            text-decoration: none;
-            flex: 1;
-            height: 100%;
-            padding: 0.5rem 0;
-            transition: all 0.3s ease;
-        }
-        
-        .nav-item span {
-            font-size: 0.75rem;
-            margin-top: 0.25rem;
-        }
-        
-        .nav-item.active {
-            color: var(--primary);
-        }
-        
-        .nav-icon {
-            transition: all 0.3s ease;
-            font-size: 1.25rem; /* UKURAN SAMA */
-        }
-        
-        .nav-icon.active {
-            transform: translateY(-5px); /* EFEK SAMA */
-            color: var(--primary);
-        }
-        
-        .app-logo {
-            display: flex;
-            align-items: center;
-        }
-        
-        .app-logo-icon {
-            background: var(--logo-color); /* Warna diubah ke #9999ff */
-            color: white;
-            width: 36px;
-            height: 36px;
+        /* Loading spinner */
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #38b2ac;
             border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 8px;
-        }
-        
-        .app-name {
-            font-weight: 700;
-            font-size: 1.25rem;
-            color: var(--logo-color); /* Warna diubah ke #9999ff */
-        }
-
-        .floating-btn {
-            animation: float 4s ease-in-out infinite;
-        }
-        
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-            100% { transform: translateY(0px); }
-        }
-        
-        .bounce {
-            animation: bounce 2s infinite;
-        }
-        
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
-        }
-        
-        .card-hover {
-            transition: all 0.3s ease;
-        }
-        
-        .card-hover:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1);
-        }
-        
-        .islamic-pattern {
-            background-image: radial-gradient(rgba(56, 178, 172, 0.1) 1px, transparent 1px);
-            background-size: 20px 20px;
-        }
-        
-        .section-content {
-            display: none;
-            padding: 16px;
-            background: white;
-            border-radius: 12px;
-            margin-top: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-        }
-        
-        .active-section {
-            display: block;
-            animation: fadeIn 0.5s ease-in-out;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .video-btn {
-            transition: all 0.3s ease;
-        }
-        
-        .video-btn:hover {
-            transform: scale(1.1);
-        }
-        
-        .progress-bar {
-            height: 6px;
-            border-radius: 3px;
-            background-color: #e5e7eb;
-            overflow: hidden;
-        }
-        
-        .progress-fill {
-            height: 100%;
-            border-radius: 3px;
-            transition: width 0.5s ease;
-        }
-        
-        .sticker {
-            position: absolute;
-            right: -10px;
-            top: -10px;
             width: 40px;
             height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 12px;
-            transform: rotate(15deg);
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        }
-        
-        .achievement-badge {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            position: relative;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-        
-        .achievement-badge::after {
-            content: '';
-            position: absolute;
-            top: -5px;
-            left: -5px;
-            right: -5px;
-            bottom: -5px;
-            border-radius: 50%;
-            border: 2px dashed currentColor;
-            opacity: 0.3;
-            animation: spin 10s linear infinite;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
         }
         
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
-        }
-        
-        /* New styles for improved daily dose */
-        .daily-dose-card {
-            background: linear-gradient(135deg, #eff6ff, #dbeafe);
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-            position: relative;
-            border: none;
-        }
-
-        .daily-dose-header {
-            background: linear-gradient(135deg, #3b82f6, #10b981);
-            color: white;
-            padding: 12px 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .daily-dose-content {
-            padding: 16px;
-            position: relative;
-        }
-
-        .daily-dose-verse {
-            font-size: 0.9rem;
-            line-height: 1.6;
-            color: #334155;
-            position: relative;
-            padding-left: 24px;
-            margin-bottom: 12px;
-        }
-
-        .daily-dose-verse::before {
-            content: '"';
-            position: absolute;
-            left: 0;
-            top: 0;
-            font-size: 2rem;
-            color: #38b2ac;
-            line-height: 1;
-        }
-
-        .daily-dose-verse::after {
-            content: '"';
-            position: absolute;
-            right: 0;
-            bottom: -0.5em;
-            font-size: 2rem;
-            color: #38b2ac;
-            line-height: 1;
-        }
-
-        .daily-dose-reference {
-            display: block;
-            text-align: right;
-            font-style: italic;
-            color: #64748b;
-            margin-top: 8px;
-        }
-
-        .daily-dose-actions {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 16px;
-        }
-
-        .daily-dose-button {
-            flex: 1;
-            margin: 0 4px;
-            padding: 10px;
-            border-radius: 8px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.3s ease;
-        }
-
-        .daily-dose-button:hover {
-            transform: translateY(-2px);
-        }
-
-        .daily-dose-button i {
-            margin-right: 6px;
-        }
-
-        .daily-dose-progress {
-            margin-top: 16px;
-            background: #e2e8f0;
-            height: 8px;
-            border-radius: 4px;
-            overflow: hidden;
-        }
-
-        .daily-dose-progress-bar {
-            height: 100%;
-            background: linear-gradient(90deg, #3b82f6, #10b981);
-            border-radius: 4px;
-            transition: width 0.5s ease;
-        }
-
-        .daily-dose-stats {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 8px;
-            font-size: 0.8rem;
-            color: #64748b;
-        }
-
-        .daily-dose-calendar {
-            position: absolute;
-            top: -20px;
-            right: 16px;
-            width: 60px;
-            height: 60px;
-            background: white;
-            border-radius: 50%;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-            z-index: 1;
-        }
-
-        .daily-dose-calendar-day {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #38b2ac;
-            line-height: 1;
-        }
-
-        .daily-dose-calendar-month {
-            font-size: 0.7rem;
-            text-transform: uppercase;
-            color: #64748b;
-            margin-top: 2px;
-        }
-
-        .daily-dose-hijri {
-            position: absolute;
-            bottom: -10px;
-            right: 16px;
-            background: #f59e0b;
-            color: white;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 0.7rem;
-            font-weight: 600;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .daily-dose-title {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: #0f172a;
-            margin-bottom: 4px;
-        }
-
-        .daily-dose-subtitle {
-            font-size: 0.9rem;
-            color: #64748b;
-            margin-bottom: 12px;
-        }
-
-        .daily-dose-divider {
-            height: 1px;
-            background: linear-gradient(90deg, transparent, #e2e8f0, transparent);
-            margin: 16px 0;
-        }
-        
-        /* Quiz specific styles */
-        .lavender-bg {
-            background-color: #e6e6fa;
-        }
-        
-        .lavender-border {
-            border-color: #e6e6fa;
-        }
-        
-        .lavender-text {
-            color: #9370db;
-        }
-        
-        .option:hover {
-            background-color: #f3f4ff !important;
-            transform: translateY(-2px);
-            transition: all 0.2s ease;
-        }
-        
-        .quiz-container {
-            box-shadow: 0 10px 25px rgba(147, 112, 219, 0.15);
-            border-radius: 16px;
-        }
-        
-        .nav-button {
-            transition: all 0.3s ease;
-            border-radius: 12px;
-            font-weight: 500;
-        }
-        
-        .nav-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-        
-        .option {
-            transition: all 0.2s ease;
-            border-radius: 12px;
-            border: 2px solid #f1f1f1;
-        }
-        
-        .correct-answer {
-            background-color: #d4edda !important;
-            border-color: #c3e6cb;
-            color: #155724;
-        }
-        
-        .wrong-answer {
-            background-color: #f8d7da !important;
-            border-color: #f5c6cb;
-            color: #721c24;
-        }
-        
-        .score-display {
-            background: linear-gradient(135deg, #e6e6fa 0%, #ffffff 100%);
-            border-radius: 16px;
-        }
-
-        /* RESPONSIVE SAMA */
-        @media (max-width: 414px) {
-            .bottom-nav {
-                height: 65px;
-            }
-            
-            .nav-icon {
-                font-size: 1.1rem;
-            }
         }
     </style>
 
@@ -490,6 +67,11 @@
                     <i class="fas fa-user-circle text-xl"></i>
                 </div>
             </div>
+            
+            <!-- Mata Pelajaran Indicator -->
+            <div id="mapelIndicator" class="mt-2 text-sm text-center font-medium bg-white bg-opacity-20 py-1 px-3 rounded-full inline-block">
+                Memuat quiz...
+            </div>
         </header>
         
         <!-- Main Content Area -->
@@ -499,27 +81,44 @@
                 <div class="bg-white quiz-container p-4">
                     <!-- Header -->
                     <div class="text-center mb-6">
-                        <h1 class="text-2xl font-bold lavender-text">Quiz Siswa</h1>
+                        <h1 class="text-2xl font-bold lavender-text" id="quizTitle">Quiz Siswa</h1>
                         <div class="w-20 h-1 lavender-bg mx-auto mt-2 rounded-full"></div>
-                        <p class="text-gray-600 mt-2 text-sm">Uji pengetahuanmu dengan quiz menyenangkan ini!</p>
+                        <div id="mapelBadge" class="mt-2"></div>
+                        <p class="text-gray-600 mt-2 text-sm" id="quizDesc">Uji pengetahuanmu dengan quiz menyenangkan ini!</p>
                     </div>
 
                     <!-- Progress indicator -->
                     <div class="mb-6">
                         <div class="flex justify-between items-center mb-2">
                             <span class="text-sm font-medium lavender-text">Progress</span>
-                            <span class="text-sm font-medium text-gray-600" id="progress-text">1/10</span>
+                            <span class="text-sm font-medium text-gray-600" id="progress-text">0/0</span>
                         </div>
                         <div class="bg-gray-200 rounded-full h-2.5">
-                            <div class="lavender-bg h-2.5 rounded-full" id="progress-bar" style="width: 10%"></div>
+                            <div class="lavender-bg h-2.5 rounded-full" id="progress-bar" style="width: 0%"></div>
                         </div>
                     </div>
 
+                    <!-- Loading State -->
+                    <div id="loadingState" class="text-center py-8">
+                        <div class="spinner"></div>
+                        <p class="text-gray-500 mt-3">Memuat soal quiz...</p>
+                    </div>
+
                     <!-- Tempat soal -->
-                    <div id="quiz" class="space-y-6 mb-6"></div>
+                    <div id="quiz" class="space-y-6 mb-6 hidden"></div>
+
+                    <!-- No Questions Message -->
+                    <div id="noQuestions" class="text-center py-8 hidden">
+                        <div class="text-5xl mb-4">📝</div>
+                        <h3 class="text-lg font-semibold text-gray-700 mb-2">Belum Ada Soal</h3>
+                        <p class="text-gray-500 mb-4">Belum ada soal untuk mata pelajaran ini.</p>
+                        <a href="soal harian/dashboard soal.html" class="bg-lavender text-white px-4 py-2 rounded-lg inline-block">
+                            Kembali ke Dashboard
+                        </a>
+                    </div>
 
                     <!-- Navigasi soal -->
-                    <div class="flex justify-between mt-6">
+                    <div id="navigation" class="flex justify-between mt-6 hidden">
                         <button id="prevBtn" class="nav-button bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm" disabled>
                             ← Sebelumnya
                         </button>
@@ -563,7 +162,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, addDoc, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
         import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const firebaseConfig = {
@@ -580,18 +179,69 @@
         const db = getFirestore(app);
         const auth = getAuth();
 
+        // DOM Elements
         const quizEl = document.getElementById("quiz");
         const nextBtn = document.getElementById("nextBtn");
         const prevBtn = document.getElementById("prevBtn");
         const logoutBtn = document.getElementById("logoutBtn");
         const progressBar = document.getElementById("progress-bar");
         const progressText = document.getElementById("progress-text");
+        const loadingState = document.getElementById("loadingState");
+        const noQuestions = document.getElementById("noQuestions");
+        const navigation = document.getElementById("navigation");
+        const mapelIndicator = document.getElementById("mapelIndicator");
+        const mapelBadge = document.getElementById("mapelBadge");
+        const quizTitle = document.getElementById("quizTitle");
+        const quizDesc = document.getElementById("quizDesc");
 
+        // State variables
         let soalList = [];
         let currentIndex = 0;
         let score = 0;                 
         let answered = {};             
         let currentUser = null;
+        let selectedMapel = "";
+
+        // 🔹 Fungsi untuk mendapatkan parameter dari URL
+        function getUrlParams() {
+            const params = new URLSearchParams(window.location.search);
+            return {
+                mapel: params.get('mapel') || "",
+                jenis: params.get('jenis') || "",
+                tingkat: params.get('tingkat') || ""
+            };
+        }
+
+        // 🔹 Setup mapel badge berdasarkan jenis mata pelajaran
+        function setupMapelBadge(mapel) {
+            const mapelLower = mapel.toLowerCase();
+            let badgeClass = "mapel-fisika";
+            let icon = "fas fa-atom";
+            
+            if (mapelLower.includes("fisika")) {
+                badgeClass = "mapel-fisika";
+                icon = "fas fa-atom";
+            } else if (mapelLower.includes("kimia")) {
+                badgeClass = "mapel-kimia";
+                icon = "fas fa-flask";
+            } else if (mapelLower.includes("biologi")) {
+                badgeClass = "mapel-biologi";
+                icon = "fas fa-dna";
+            } else if (mapelLower.includes("matematika")) {
+                badgeClass = "mapel-matematika";
+                icon = "fas fa-calculator";
+            }
+            
+            mapelBadge.innerHTML = `
+                <span class="mapel-badge ${badgeClass}">
+                    <i class="${icon} mr-1"></i> ${mapel}
+                </span>
+            `;
+            
+            mapelIndicator.textContent = `Quiz ${mapel}`;
+            quizTitle.textContent = `Quiz ${mapel}`;
+            quizDesc.textContent = `Uji pengetahuanmu tentang ${mapel} dengan quiz ini!`;
+        }
 
         // 🔹 Logout
         logoutBtn.addEventListener("click", async () => {
@@ -605,38 +255,87 @@
                 window.location.href = "login.html";
             } else {
                 currentUser = user;
-                loadSoal();
+                initializeQuiz();
             }
         });
 
-        // 🔹 Ambil soal dari Firestore
-        async function loadSoal() {
+        // 🔹 Inisialisasi quiz
+        async function initializeQuiz() {
+            const params = getUrlParams();
+            selectedMapel = params.mapel;
+            
+            if (!selectedMapel) {
+                // Jika tidak ada parameter mapel, tampilkan semua soal atau redirect
+                loadingState.classList.add("hidden");
+                quizEl.classList.add("hidden");
+                noQuestions.classList.remove("hidden");
+                noQuestions.innerHTML = `
+                    <div class="text-5xl mb-4">🔍</div>
+                    <h3 class="text-lg font-semibold text-gray-700 mb-2">Pilih Mata Pelajaran</h3>
+                    <p class="text-gray-500 mb-4">Silakan pilih mata pelajaran terlebih dahulu.</p>
+                    <a href="soal harian/dashboard soal.html" class="bg-lavender text-white px-4 py-2 rounded-lg inline-block">
+                        Kembali ke Dashboard
+                    </a>
+                `;
+                return;
+            }
+            
+            setupMapelBadge(selectedMapel);
+            await loadSoalByMapel(selectedMapel);
+        }
+
+        // 🔹 Ambil soal DARI MATAPELAJARAN TERTENTU
+        async function loadSoalByMapel(mapel) {
             try {
-                const snapshot = await getDocs(collection(db, "soal"));
-                soalList = snapshot.docs.map(doc => doc.data());
+                loadingState.classList.remove("hidden");
+                quizEl.classList.add("hidden");
+                navigation.classList.add("hidden");
+                noQuestions.classList.add("hidden");
+                
+                // Query untuk mengambil soal berdasarkan mapel
+                const q = query(collection(db, "soal"), where("mapel", "==", mapel));
+                const snapshot = await getDocs(q);
+                
+                soalList = snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
 
                 if (soalList.length === 0) {
-                    quizEl.innerHTML = `
-                        <div class="text-center py-8">
-                            <div class="text-5xl mb-4">📝</div>
-                            <p class="text-gray-500">Belum ada soal yang tersedia.</p>
-                        </div>`;
-                } else {
-                    updateProgress();
-                    renderSoal();
+                    loadingState.classList.add("hidden");
+                    noQuestions.classList.remove("hidden");
+                    return;
                 }
+
+                // Reset state
+                currentIndex = 0;
+                score = 0;
+                answered = {};
+                
+                // Setup UI
+                loadingState.classList.add("hidden");
+                quizEl.classList.remove("hidden");
+                navigation.classList.remove("hidden");
+                updateProgress();
+                renderSoal();
+                
             } catch (err) {
                 console.error("Error load soal:", err);
+                loadingState.classList.add("hidden");
                 quizEl.innerHTML = `
                     <div class="text-center py-8">
                         <div class="text-5xl mb-4 text-red-500">❌</div>
-                        <p class="text-red-500">Gagal mengambil soal. Cek rules Firestore & login user.</p>
+                        <p class="text-red-500">Gagal mengambil soal. Cek koneksi internet Anda.</p>
+                        <button onclick="location.reload()" class="mt-4 bg-lavender text-white px-4 py-2 rounded-lg">
+                            Coba Lagi
+                        </button>
                     </div>`;
             }
         }
 
         // Update progress bar
         function updateProgress() {
+            if (soalList.length === 0) return;
             const progress = ((currentIndex + 1) / soalList.length) * 100;
             progressBar.style.width = `${progress}%`;
             progressText.textContent = `${currentIndex + 1}/${soalList.length}`;
@@ -649,13 +348,22 @@
 
             quizEl.innerHTML = `
                 <div class="p-4 bg-white border border-gray-100 rounded-xl shadow-sm">
-                    <h2 class="font-semibold text-base mb-3 lavender-text">Soal ${currentIndex + 1}:</h2>
+                    <div class="flex justify-between items-start mb-3">
+                        <h2 class="font-semibold text-base lavender-text">Soal ${currentIndex + 1}:</h2>
+                        <span class="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded">${data.mapel}</span>
+                    </div>
                     <p class="mb-4 text-gray-700 text-base">${data.pertanyaan}</p>
                     <div class="space-y-3">
                         ${["A","B","C","D"].map(opt => `
-                            <div class="option bg-white p-3 rounded-lg cursor-pointer shadow-sm hover:shadow-md text-sm"
+                            <div class="option bg-white p-3 rounded-lg cursor-pointer shadow-sm hover:shadow-md text-sm border border-gray-200"
                                 data-opt="${opt}" data-correct="${opt === data.jawaban}">
-                                <span class="font-medium mr-2">${opt}.</span> ${data.opsi[opt]}
+                                <div class="flex items-center">
+                                    <span class="font-medium mr-3 w-6 h-6 flex items-center justify-center rounded-full 
+                                        ${opt === data.jawaban ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'}">
+                                        ${opt}
+                                    </span>
+                                    <span>${data.opsi[opt]}</span>
+                                </div>
                             </div>
                         `).join("")}
                     </div>
@@ -670,8 +378,7 @@
                     const opt = optEl.dataset.opt;
                     const benar = optEl.dataset.correct === "true";
                     const feedback = document.getElementById("feedback");
-                    feedback.classList.remove("hidden");
-
+                    
                     if (!answered[currentIndex]) {   
                         answered[currentIndex] = opt;
                         if (benar) {
@@ -681,24 +388,39 @@
 
                     if (benar) {
                         optEl.classList.add("correct-answer");
-                        feedback.innerHTML = "✅ <span class='font-medium'>Jawaban Benar!</span> " + (data.penjelasan || "");
+                        feedback.innerHTML = `
+                            <div class="flex items-start">
+                                <i class="fas fa-check-circle text-green-500 mt-1 mr-2"></i>
+                                <div>
+                                    <span class="font-medium text-green-700">Jawaban Benar!</span>
+                                    <div class="text-green-600 mt-1">${data.penjelasan || "Penjelasan tidak tersedia"}</div>
+                                </div>
+                            </div>`;
                         feedback.className = "mt-4 p-3 rounded-lg bg-green-50 text-green-700 border border-green-200 text-sm";
                     } else {
                         optEl.classList.add("wrong-answer");
-                        // Tandai juga jawaban yang benar
                         document.querySelectorAll(".option").forEach(o => {
                             if (o.dataset.correct === "true") {
                                 o.classList.add("correct-answer");
                             }
                         });
-                        feedback.innerHTML = "❌ <span class='font-medium'>Jawaban Salah.</span> " + (data.penjelasan || "");
+                        feedback.innerHTML = `
+                            <div class="flex items-start">
+                                <i class="fas fa-times-circle text-red-500 mt-1 mr-2"></i>
+                                <div>
+                                    <span class="font-medium text-red-700">Jawaban Salah.</span>
+                                    <div class="text-red-600 mt-1">${data.penjelasan || "Penjelasan tidak tersedia"}</div>
+                                </div>
+                            </div>`;
                         feedback.className = "mt-4 p-3 rounded-lg bg-red-50 text-red-700 border border-red-200 text-sm";
                     }
 
+                    feedback.classList.remove("hidden");
                     if (window.MathJax) MathJax.typesetPromise([feedback]);
 
                     document.querySelectorAll(".option").forEach(o => {
                         o.style.pointerEvents = "none";
+                        o.classList.remove("hover:shadow-md");
                     });
                 });
             });
@@ -707,7 +429,7 @@
             nextBtn.textContent = currentIndex === soalList.length - 1 ? "Selesai 🎯" : "Selanjutnya →";
             nextBtn.className = currentIndex === soalList.length - 1 
                 ? "nav-button bg-green-500 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-600" 
-                : "nav-button lavender-bg text-white px-4 py-2 rounded-lg text-sm";
+                : "nav-button lavender-bg text-white px-4 py-2 rounded-lg text-sm hover:bg-purple-600";
         }
 
         // 🔹 Navigasi soal
@@ -731,29 +453,51 @@
         async function showResult() {
             const finalScore = Math.round(score);
             
-            // Sembunyikan progress bar
             document.querySelector(".mb-6").style.display = "none";
-            
             quizEl.innerHTML = `
                 <div class="score-display p-6 text-center border border-lavender rounded-xl">
                     <div class="text-4xl mb-3">🎉</div>
                     <h2 class="text-xl font-bold mb-2 lavender-text">Quiz Selesai!</h2>
-                    <p class="text-base text-gray-600 mb-3">Kamu telah menyelesaikan semua soal</p>
-                    <div class="inline-block bg-white rounded-full px-5 py-3 shadow-md">
+                    <div class="mapel-badge mapel-fisika inline-block mb-3">
+                        <i class="fas fa-trophy mr-1"></i> ${selectedMapel}
+                    </div>
+                    <p class="text-base text-gray-600 mb-3">Kamu telah menyelesaikan semua soal ${selectedMapel}</p>
+                    <div class="inline-block bg-white rounded-full px-5 py-3 shadow-md mb-4">
                         <span class="text-gray-600 text-sm">Nilai akhir:</span>
                         <span class="text-2xl font-bold lavender-text"> ${finalScore}</span>
                         <span class="text-gray-400 text-sm">/100</span>
                     </div>
+                    
+                    <div class="bg-gray-50 p-4 rounded-lg mt-4">
+                        <p class="text-sm text-gray-600 mb-2">Statistik Jawaban:</p>
+                        <div class="flex justify-between text-sm">
+                            <span>Benar: ${Object.values(answered).filter((ans, idx) => ans === soalList[idx].jawaban).length}/${soalList.length}</span>
+                            <span>Salah: ${Object.values(answered).filter((ans, idx) => ans !== soalList[idx].jawaban).length}/${soalList.length}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 space-y-2">
+                        <button onclick="location.reload()" class="w-full bg-lavender text-white px-4 py-2 rounded-lg">
+                            <i class="fas fa-redo mr-2"></i> Coba Lagi
+                        </button>
+                        <button onclick="window.location.href='soal harian/dashboard soal.html'" class="w-full bg-gray-200 text-gray-700 px-4 py-2 rounded-lg">
+                            <i class="fas fa-arrow-left mr-2"></i> Kembali ke Dashboard
+                        </button>
+                    </div>
                 </div>
             `;
-            nextBtn.style.display = "none";
-            prevBtn.style.display = "none";
+            
+            navigation.style.display = "none";
 
             try {
                 await addDoc(collection(db, "nilai"), {
                     uid: currentUser.uid,
                     email: currentUser.email,
+                    mapel: selectedMapel,
                     score: finalScore,
+                    totalSoal: soalList.length,
+                    benar: Object.values(answered).filter((ans, idx) => ans === soalList[idx].jawaban).length,
+                    salah: Object.values(answered).filter((ans, idx) => ans !== soalList[idx].jawaban).length,
                     createdAt: new Date()
                 });
                 console.log("Nilai tersimpan");

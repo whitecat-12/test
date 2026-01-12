@@ -187,6 +187,16 @@
         .math-bg { background-color: #fef3c7; }
         .math-text { color: #92400e; }
         .math-border { border-color: #f59e0b; }
+        
+        @media (max-width: 414px) {
+            .bottom-nav {
+                height: 65px;
+            }
+            
+            .nav-icon {
+                font-size: 1.1rem;
+            }
+        }
     </style>
 
     <!-- 🔹 MathJax -->
@@ -283,7 +293,7 @@
         
         <!-- BOTTOM NAVIGATION -->
         <nav class="bottom-nav">
-            <a href="index.html" class="nav-item">
+            <a href="dashboad siswa.html" class="nav-item">
                 <i class="fas fa-home nav-icon"></i>
                 <span>Beranda</span>
             </a>
@@ -291,15 +301,15 @@
                 <i class="fas fa-flask nav-icon"></i>
                 <span>Soal Harian</span>
             </a>
-            <a href="ai/index.html" class="nav-item">
+            <a href="ai/nayra.html" class="nav-item">
                 <i class="fas fa-robot nav-icon"></i>
                 <span>Nayra AI</span>
             </a>
-            <a href="kategori/kategori materi.html" class="nav-item">
+            <a href="materi harian/kategori materi.html" class="nav-item">
                 <i class="fas fa-chalkboard-teacher nav-icon"></i>
                 <span>Materi Harian</span>
             </a>
-            <a href="profil.html" class="nav-item">
+            <a href="profil/profil.html" class="nav-item">
                 <i class="fas fa-user nav-icon"></i>
                 <span>Profil</span>
             </a>
@@ -823,7 +833,7 @@
             }, 3000);
         }
 
-        // INTERAKSI NAVBAR
+        // INTERAKSI NAVBAR - Sama dengan contoh
         document.addEventListener('DOMContentLoaded', function() {
             const navItems = document.querySelectorAll('.nav-item');
             
@@ -838,6 +848,13 @@
                     this.querySelector('.nav-icon').classList.add('active');
                 });
             });
+            
+            // Set "Soal Harian" sebagai aktif secara default
+            const soalHarianNav = document.querySelector('a[href*="soal harian"]');
+            if (soalHarianNav) {
+                soalHarianNav.classList.add('active');
+                soalHarianNav.querySelector('.nav-icon').classList.add('active');
+            }
         });
     </script>
 </body>

@@ -1,0 +1,1803 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator Ilmiah - TETA SAINS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #38b2ac;
+            --secondary: #0e7490;
+            --accent: #f59e0b;
+            --physics: #3b82f6;
+            --chemistry: #10b981;
+            --biology: #8b5cf6;
+            --astronomy: #ec4899;
+        }
+        
+        body {
+            font-family: 'Baloo 2', cursive;
+            background-color: #f8fafc;
+        }
+        
+        .app-container {
+            max-width: 414px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            max-width: 414px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            background: white;
+            z-index: 10;
+            height: 70px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+            text-decoration: none;
+            flex: 1;
+            height: 100%;
+            padding: 0.5rem 0;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item span {
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
+        
+        .nav-item.active {
+            color: var(--primary);
+        }
+        
+        .nav-icon {
+            transition: all 0.3s ease;
+            font-size: 1.25rem;
+        }
+        
+        .nav-icon.active {
+            transform: translateY(-5px);
+            color: var(--primary);
+        }
+        
+        .app-logo {
+            display: flex;
+            align-items: center;
+        }
+        
+        .app-logo-icon {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 8px;
+        }
+        
+        .app-name {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: #60a5fa;
+        }
+
+        /* Main Navbar Styles */
+        .main-navbar {
+            display: flex;
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+            margin: 0 -1rem;
+            padding: 0 1rem;
+        }
+        
+        .main-nav-item {
+            flex: 1;
+            text-align: center;
+            padding: 12px 0;
+            font-weight: 600;
+            font-size: 14px;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .main-nav-item.active {
+            color: #3b82f6;
+        }
+        
+        .main-nav-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #3b82f6;
+            border-radius: 3px 3px 0 0;
+        }
+        
+        .main-nav-item.physics.active {
+            color: #3b82f6;
+        }
+        
+        .main-nav-item.physics.active::after {
+            background: #3b82f6;
+        }
+        
+        .main-nav-item.chemistry.active {
+            color: #10b981;
+        }
+        
+        .main-nav-item.chemistry.active::after {
+            background: #10b981;
+        }
+
+        /* Container Styles */
+        .calc-container {
+            padding: 1rem;
+            background: white;
+        }
+        
+        /* Mode Selector - Physics */
+        .mode-selector {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+            margin-top: 15px;
+            margin-bottom: 15px;
+            background: #f1f5f9;
+            padding: 4px;
+            border-radius: 8px;
+        }
+        
+        .mode-selector.chemistry {
+            grid-template-columns: repeat(4, 1fr);
+        }
+        
+        .mode-btn {
+            padding: 10px 4px;
+            border-radius: 6px;
+            border: none;
+            background: transparent;
+            color: #64748b;
+            cursor: pointer;
+            font-family: 'Baloo 2', cursive;
+            font-weight: 500;
+            font-size: 11px;
+            transition: all 0.3s;
+            white-space: nowrap;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .mode-btn i {
+            font-size: 14px;
+        }
+        
+        .mode-btn.active {
+            background: white;
+            color: #3b82f6;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .mode-btn.kinematic.active {
+            background: linear-gradient(135deg, #3b82f6, #60a5fa);
+            color: white;
+        }
+        
+        .mode-btn.force.active {
+            background: linear-gradient(135deg, #ef4444, #f87171);
+            color: white;
+        }
+        
+        .mode-btn.energy.active {
+            background: linear-gradient(135deg, #10b981, #34d399);
+            color: white;
+        }
+        
+        .mode-btn.wave.active {
+            background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+            color: white;
+        }
+        
+        .mode-btn.stoichiometry.active {
+            background: linear-gradient(135deg, #f59e0b, #fbbf24);
+            color: white;
+        }
+        
+        .mode-btn.concentration.active {
+            background: linear-gradient(135deg, #ec4899, #f472b6);
+            color: white;
+        }
+        
+        .mode-btn.gas.active {
+            background: linear-gradient(135deg, #06b6d4, #22d3ee);
+            color: white;
+        }
+        
+        .mode-btn.ph.active {
+            background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+            color: white;
+        }
+        
+        /* Panel Styles */
+        .calc-panel {
+            display: none;
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 15px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .calc-panel.active {
+            display: block;
+        }
+        
+        .panel-title {
+            text-align: center;
+            font-weight: 700;
+            font-size: 18px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .panel-title.kinematic {
+            color: #3b82f6;
+            border-bottom-color: #3b82f6;
+        }
+        
+        .panel-title.force {
+            color: #ef4444;
+            border-bottom-color: #ef4444;
+        }
+        
+        .panel-title.energy {
+            color: #10b981;
+            border-bottom-color: #10b981;
+        }
+        
+        .panel-title.wave {
+            color: #8b5cf6;
+            border-bottom-color: #8b5cf6;
+        }
+        
+        .panel-title.stoichiometry {
+            color: #f59e0b;
+            border-bottom-color: #f59e0b;
+        }
+        
+        .panel-title.concentration {
+            color: #ec4899;
+            border-bottom-color: #ec4899;
+        }
+        
+        .panel-title.gas {
+            color: #06b6d4;
+            border-bottom-color: #06b6d4;
+        }
+        
+        .panel-title.ph {
+            color: #8b5cf6;
+            border-bottom-color: #8b5cf6;
+        }
+        
+        /* Input Styles */
+        .input-group {
+            margin-bottom: 16px;
+        }
+        
+        .input-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+            font-size: 14px;
+            color: #475569;
+        }
+        
+        .input-label span {
+            font-weight: 600;
+        }
+        
+        .unit {
+            font-size: 12px;
+            color: #94a3b8;
+        }
+        
+        .input-field {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-family: 'Baloo 2', cursive;
+            font-size: 16px;
+            background: white;
+            transition: all 0.3s;
+        }
+        
+        .input-field:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        
+        select.input-field {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+        }
+        
+        /* Button Styles */
+        .calc-btn {
+            width: 100%;
+            padding: 14px;
+            border-radius: 8px;
+            border: none;
+            font-family: 'Baloo 2', cursive;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 10px;
+        }
+        
+        .calc-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .calc-btn:active {
+            transform: translateY(0);
+        }
+        
+        .calc-btn.kinematic {
+            background: linear-gradient(135deg, #3b82f6, #1d4ed8);
+            color: white;
+        }
+        
+        .calc-btn.force {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            color: white;
+        }
+        
+        .calc-btn.energy {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+        }
+        
+        .calc-btn.wave {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            color: white;
+        }
+        
+        .calc-btn.stoichiometry {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+        }
+        
+        .calc-btn.concentration {
+            background: linear-gradient(135deg, #ec4899, #db2777);
+            color: white;
+        }
+        
+        .calc-btn.gas {
+            background: linear-gradient(135deg, #06b6d4, #0891b2);
+            color: white;
+        }
+        
+        .calc-btn.ph {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            color: white;
+        }
+        
+        .calc-btn.reset {
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px solid #cbd5e1;
+            margin-top: 8px;
+        }
+        
+        /* Result Styles */
+        .result-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .result-title {
+            text-align: center;
+            font-weight: 600;
+            color: #10b981;
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+        
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        
+        .result-item:last-child {
+            border-bottom: none;
+        }
+        
+        .result-label {
+            color: #64748b;
+            font-size: 14px;
+        }
+        
+        .result-value {
+            font-weight: 600;
+            font-size: 16px;
+            color: #1e293b;
+        }
+        
+        /* Formula Display */
+        .formula-display {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            border: 1px solid #e2e8f0;
+            font-size: 14px;
+            color: #475569;
+        }
+        
+        .formula-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #3b82f6;
+        }
+        
+        .formula {
+            font-family: monospace;
+            background: #f8fafc;
+            padding: 8px;
+            border-radius: 4px;
+            margin-top: 5px;
+            border-left: 3px solid #3b82f6;
+        }
+        
+        /* Responsive */
+        @media (max-width: 380px) {
+            .mode-btn {
+                font-size: 10px;
+                padding: 8px 2px;
+            }
+            
+            .mode-btn i {
+                font-size: 12px;
+            }
+            
+            .mode-selector {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .mode-selector.chemistry {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 420px) {
+            .calc-container {
+                padding: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile App Container -->
+    <div class="app-container">
+        <!-- App Header -->
+        <header class="bg-gradient-to-r from-blue-100 to-blue-50 p-4 text-white">
+            <div class="flex justify-between items-center">
+                <div class="app-logo">
+                    <div class="app-logo-icon" style="background: #9999ff; color: white;">
+                        <i class="fas fa-atom"></i>
+                    </div>
+                    <h1 class="app-name" style="color: #9999ff;">FISIKA & KIMIA</h1>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Main Navbar -->
+        <div class="main-navbar">
+            <div class="main-nav-item physics active" data-category="physics">
+                <i class="fas fa-atom mr-1"></i> Fisika
+            </div>
+            <div class="main-nav-item chemistry" data-category="chemistry">
+                <i class="fas fa-flask mr-1"></i> Kimia
+            </div>
+        </div>
+        
+        <!-- Main Content Area -->
+        <main class="pb-20">
+            <div class="calc-container">
+                <!-- Physics Mode -->
+                <div id="physics-category" class="category-panel active">
+                    <!-- Mode Selector - Physics -->
+                    <div class="mode-selector">
+                        <button class="mode-btn kinematic active" data-mode="kinematic">
+                            <i class="fas fa-running"></i>
+                            <span>Kinematik</span>
+                        </button>
+                        <button class="mode-btn force" data-mode="force">
+                            <i class="fas fa-weight-hanging"></i>
+                            <span>Gaya</span>
+                        </button>
+                        <button class="mode-btn energy" data-mode="energy">
+                            <i class="fas fa-bolt"></i>
+                            <span>Energi</span>
+                        </button>
+                        <button class="mode-btn wave" data-mode="wave">
+                            <i class="fas fa-wave-square"></i>
+                            <span>Gelombang</span>
+                        </button>
+                    </div>
+                    
+                    <!-- Kalkulator Kinematik -->
+                    <div id="kinematic-mode" class="calc-panel active">
+                        <h2 class="panel-title kinematic">Kalkulator Kinematik</h2>
+                        
+                        <div class="input-group">
+                            <div class="input-label">
+                                <span>Kecepatan Awal (v₀)</span>
+                                <span class="unit">m/s</span>
+                            </div>
+                            <input type="number" id="kinematic-v0" class="input-field" placeholder="0" step="any">
+                        </div>
+                        
+                        <div class="input-group">
+                            <div class="input-label">
+                                <span>Kecepatan Akhir (v)</span>
+                                <span class="unit">m/s</span>
+                            </div>
+                            <input type="number" id="kinematic-v" class="input-field" placeholder="0" step="any">
+                        </div>
+                        
+                        <div class="input-group">
+                            <div class="input-label">
+                                <span>Percepatan (a)</span>
+                                <span class="unit">m/s²</span>
+                            </div>
+                            <input type="number" id="kinematic-a" class="input-field" placeholder="0" step="any">
+                        </div>
+                        
+                        <div class="input-group">
+                            <div class="input-label">
+                                <span>Waktu (t)</span>
+                                <span class="unit">s</span>
+                            </div>
+                            <input type="number" id="kinematic-t" class="input-field" placeholder="0" step="any">
+                        </div>
+                        
+                        <div class="input-group">
+                            <div class="input-label">
+                                <span>Jarak (s)</span>
+                                <span class="unit">m</span>
+                            </div>
+                            <input type="number" id="kinematic-s" class="input-field" placeholder="0" step="any">
+                        </div>
+                        
+                        <button id="calculate-kinematic" class="calc-btn kinematic">
+                            <i class="fas fa-calculator mr-2"></i>Hitung Kinematik
+                        </button>
+                        <button id="reset-kinematic" class="calc-btn reset">
+                            <i class="fas fa-redo mr-2"></i>Reset
+                        </button>
+                        
+                        <div class="result-container" id="kinematic-result" style="display: none;">
+                            <div class="result-title">Hasil Perhitungan</div>
+                            <div class="result-item">
+                                <span class="result-label">Kecepatan Akhir:</span>
+                                <span class="result-value" id="kinematic-result-v">0 m/s</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">Jarak Tempuh:</span>
+                                <span class="result-value" id="kinematic-result-s">0 m</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">Waktu:</span>
+                                <span class="result-value" id="kinematic-result-t">0 s</span>
+                            </div>
+                        </div>
+                        
+                        <div class="formula-display">
+                            <div class="formula-title">Rumus Kinematik:</div>
+                            <div class="formula">v = v₀ + a·t</div>
+                            <div class="formula">s = v₀·t + ½·a·t²</div>
+                            <div class="formula">v² = v₀² + 2·a·s</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Kalkulator Gaya -->
+                    <div id="force-mode" class="calc-panel">
+                        <h2 class="panel-title force">Kalkulator Gaya</h2>
+                        
+                        <div class="input-group">
+                            <div class="input-label">
+                                <span>Massa (m)</span>
+                                <span class="unit">kg</span>
+                            </div>
+                            <input type="number" id="force-m" class="input-field" placeholder="0" step="any">
+                        </div>
+                        
+                        <div class="input-group">
+                            <div class="input-label">
+                                <span>Percepatan (a)</span>
+                                <span class="unit">m/s²</span>
+                            </div>
+                            <input type="number" id="force-a" class="input-field" placeholder="0" step="any">
+                        </div>
+                        
+                        <div class="input-group">
+                            <div class="input-label">
+                                <span>Gaya (F)</span>
+                                <span class="unit">N</span>
+                            </div>
+                            <input type="number" id="force-f" class="input-field" placeholder="0" step="any">
+                        </div>
+                        
+                        <div class="input-group">
+                            <div class="input-label">
+                                <span>Koefisien Gesek (μ)</span>
+                                <span class="unit">-</span>
+                            </div>
+                            <input type="number" id="force-mu" class="input-field" placeholder="0" step="any">
+                        </div>
+                        
+                        <button id="calculate-force" class="calc-btn force">
+                            <i class="fas fa-calculator mr-2"></i>Hitung Gaya
+                        </button>
+                        <button id="reset-force" class="calc-btn reset">
+                            <i class="fas fa-redo mr-2"></i>Reset
+                        </button>
+                        
+                        <div class="result-container" id="force-result" style="display: none;">
+                            <div class="result-title">Hasil Perhitungan</div>
+                            <div class="result-item">
+                                <span class="result-label">Gaya Total (F):</span>
+                                <span class="result-value" id="force-result-f">0 N</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">Gaya Normal (N):</span>
+                                <span class="result-value" id="force-result-n">0 N</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">Gaya Gesek (f):</span>
+                                <span class="result-value" id="force-result-friction">0 N</span>
+                            </div>
+                        </div>
+                        
+                        <div class="formula-display">
+                            <div class="formula-title">Rumus Gaya:</div>
+                            <div class="formula">F = m·a (Hukum Newton II)</div>
+                            <div class="formula">f = μ·N (Gaya Gesek)</div>
+                            <div class="formula">N = m·g (Gaya Normal, g = 9.8 m/s²)</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Kalkulator Energi -->
+                    <div id="energy-mode" class="calc-panel">
+                        <h2 class="panel-title energy">Kalkulator Energi</h2>
+                        
+                        <div class="input-group">
+                            <div class="input-label">
+                                <span>Massa (m)</span>
+                                <span class="unit">kg</span>
+                            </div>
+                            <input type="number" id="energy-m" class="input-field" placeholder="0" step="any">
+                        </div>
+                        
+                        <div class="input-group">
+                            <div class="input-label">
+                                <span>Kecepatan (v)</span>
+                                <span class="unit">m/s</span>
+                            </div>
+                            <input type="number" id="energy-v" class="input-field" placeholder="0" step="any">
+                        </div>
+                        
+                        <div class="input-group">
+                            <div class="input-label">
+                                <span>Ketinggian (h)</span>
+                                <span class="unit">m</span>
+                            </div>
+                            <input type="number" id="energy-h" class="input-field" placeholder="0" step="any">
+                        </div>
+                        
+                        <button id="calculate-energy" class="calc-btn energy">
+                            <i class="fas fa-calculator mr-2"></i>Hitung Energi
+                        </button>
+                        <button id="reset-energy" class="calc-btn reset">
+                            <i class="fas fa-redo mr-2"></i>Reset
+                        </button>
+                        
+                        <div class="result-container" id="energy-result" style="display: none;">
+                            <div class="result-title">Hasil Perhitungan</div>
+                            <div class="result-item">
+                                <span class="result-label">Energi Kinetik (EK):</span>
+                                <span class="result-value" id="energy-result-ek">0 J</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">Energi Potensial (EP):</span>
+                                <span class="result-value" id="energy-result-ep">0 J</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">Energi Mekanik (EM):</span>
+                                <span class="result-value" id="energy-result-em">0 J</span>
+                            </div>
+                        </div>
+                        
+                        <div class="formula-display">
+                            <div class="formula-title">Rumus Energi:</div>
+                            <div class="formula">EK = ½·m·v² (Energi Kinetik)</div>
+                            <div class="formula">EP = m·g·h (Energi Potensial, g = 9.8 m/s²)</div>
+                            <div class="formula">EM = EK + EP (Energi Mekanik)</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Kalkulator Gelombang -->
+                    <div id="wave-mode" class="calc-panel">
+                        <h2 class="panel-title wave">Kalkulator Gelombang</h2>
+                        
+                        <div class="input-group">
+                            <div class="input-label">
+                                <span>Frekuensi (f)</span>
+                                <span class="unit">Hz</span>
+                            </div>
+                            <input type="number" id="wave-f" class="input-field" placeholder="0" step="any">
+                        </div>
+                        
+                        <div class="input-group">
+                            <div class="input-label">
+                                <span>Panjang Gelombang (λ)</span>
+                                <span class="unit">m</span>
+                            </div>
+                            <input type="number" id="wave-lambda" class="input-field" placeholder="0" step="any">
+                        </div>
+                        
+                        <div class="input-group">
+                            <div class="input-label">
+                                <span>Periode (T)</span>
+                                <span class="unit">s</span>
+                            </div>
+                            <input type="number" id="wave-t" class="input-field" placeholder="0" step="any">
+                        </div>
+                        
+                        <div class="input-group">
+                            <div class="input-label">
+                                <span>Cepat Rambat (v)</span>
+                                <span class="unit">m/s</span>
+                            </div>
+                            <input type="number" id="wave-v" class="input-field" placeholder="0" step="any">
+                        </div>
+                        
+                        <button id="calculate-wave" class="calc-btn wave">
+                            <i class="fas fa-calculator mr-2"></i>Hitung Gelombang
+                        </button>
+                        <button id="reset-wave" class="calc-btn reset">
+                            <i class="fas fa-redo mr-2"></i>Reset
+                        </button>
+                        
+                        <div class="result-container" id="wave-result" style="display: none;">
+                            <div class="result-title">Hasil Perhitungan</div>
+                            <div class="result-item">
+                                <span class="result-label">Cepat Rambat:</span>
+                                <span class="result-value" id="wave-result-v">0 m/s</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">Frekuensi:</span>
+                                <span class="result-value" id="wave-result-f">0 Hz</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">Periode:</span>
+                                <span class="result-value" id="wave-result-t">0 s</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">Panjang Gelombang:</span>
+                                <span class="result-value" id="wave-result-lambda">0 m</span>
+                            </div>
+                        </div>
+                        
+                        <div class="formula-display">
+                            <div class="formula-title">Rumus Gelombang:</div>
+                            <div class="formula">v = λ·f (Cepat rambat)</div>
+                            <div class="formula">T = 1/f (Periode)</div>
+                            <div class="formula">f = 1/T (Frekuensi)</div>
+                            <div class="formula">λ = v/f (Panjang gelombang)</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Chemistry Mode -->
+                <div id="chemistry-category" class="category-panel">
+                    <!-- Mode Selector - Chemistry -->
+                    <div class="mode-selector chemistry">
+                        <button class="mode-btn stoichiometry active" data-mode="stoichiometry">
+                            <i class="fas fa-balance-scale"></i>
+                            <span>Stoikiometri</span>
+                        </button>
+                        <button class="mode-btn concentration" data-mode="concentration">
+                            <i class="fas fa-vial"></i>
+                            <span>Konsentrasi</span>
+                        </button>
+                        <button class="mode-btn gas" data-mode="gas">
+                            <i class="fas fa-wind"></i>
+                            <span>Gas Ideal</span>
+                        </button>
+                        <button class="mode-btn ph" data-mode="ph">
+                            <i class="fas fa-vial"></i>
+                            <span>pH & pOH</span>
+                        </button>
+                    </div>
+                    
+                    <!-- Kalkulator Stoikiometri -->
+                    <div id="stoichiometry-mode" class="calc-panel active">
+                        <h2 class="panel-title stoichiometry">Kalkulator Stoikiometri</h2>
+                        
+                        <div class="input-group">
+                            <div class="input-label">
+                                <span>Massa Zat (m)</span>
+                                <span class="unit">gram</span>
+                            </div>
+                            <input type="number" id="stoich-mass" class="input-field" placeholder="0" step="any">
+                        </div>
+                        
+                        <div class="input-group">
+                            <div class="input-label">
+                                <span>Massa Molekul Relatif (Mr)</span>
+                                <span class="unit">g/mol</span>
+                            </div>
+                            <input type="number" id="stoich-mr" class="input-field" placeholder="0" step="any">
+                        </div>
+                        
+                        <div class="input-group">
+                            <div class="input-label">
+                                <span>Volume Gas (STP)</span>
+                                <span class="unit">L</span>
+                            </div>
+                            <input type="number" id="stoich-volume" class="input-field" placeholder="0" step="any">
+                        </div>
+                        
+                        <div class="input-group">
+                            <div class="input-label">
+                                <span>Jumlah Partikel</span>
+                                <span class="unit">partikel</span>
+                            </div>
+                            <input type="number" id="stoich-particles" class="input-field" placeholder="0" step="any">
+                        </div>
+                        
+                        <button id="calculate-stoichiometry" class="calc-btn stoichiometry">
+                            <i class="fas fa-calculator mr-2"></i>Hitung Stoikiometri
+                        </button>
+                        <button id="reset-stoichiometry" class="calc-btn reset">
+                            <i class="fas fa-redo mr-2"></i>Reset
+                        </button>
+                        
+                        <div class="result-container" id="stoichiometry-result" style="display: none;">
+                            <div class="result-title">Hasil Perhitungan</div>
+                            <div class="result-item">
+                                <span class="result-label">Jumlah Mol (n):</span>
+                                <span class="result-value" id="stoich-result-n">0 mol</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">Massa:</span>
+                                <span class="result-value" id="stoich-result-mass">0 gram</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">Volume Gas (STP):</span>
+                                <span class="result-value" id="stoich-result-volume">0 L</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">Jumlah Partikel:</span>
+                                <span class="result-value" id="stoich-result-particles">0 partikel</span>
+                            </div>
+                        </div>
+                        
+                        <div class="formula-display">
+                            <div class="formula-title">Rumus Stoikiometri:</div>
+                            <div class="formula">n = massa / Mr (Jumlah mol)</div>
+                            <div class="formula">V = n × 22.4 L (Volume gas STP)</div>
+                            <div class="formula">N = n × 6.02×10²³ (Jumlah partikel)</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Kalkulator Konsentrasi -->
+                    <div id="concentration-mode" class="calc-panel">
+                        <h2 class="panel-title concentration">Kalkulator Konsentrasi</h2>
+                        
+                        <div class="input-group">
+                            <div class="input-label">
+                                <span>Jenis Konsentrasi</span>
+                            </div>
+                            <select id="concentration-type" class="input-field">
+                                <option value="molaritas">Molaritas (M)</option>
+                                <option value="molalitas">Molalitas (m)</option>
+                                <option value="normalitas">Normalitas (N)</option>
+                                <option value="fraksi-mol">Fraksi Mol (X)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="input-group">
+                            <div class="input-label">
+                                <span>Massa Zat Terlarut</span>
+                                <span class="unit">gram</span>
+                            </div>
+                            <input type="number" id="conc-mass-solute" class="input-field" placeholder="0" step="any">
+                        </div>
+                        
+                        <div class="input-group">
+                            <div class="input-label">
+                                <span>Mr Zat Terlarut</span>
+                                <span class="unit">g/mol</span>
+                            </div>
+                            <input type="number" id="conc-mr-solute" class="input-field" placeholder="0" step="any">
+                        </div>
+                        
+                        <div class="input-group">
+                            <div class="input-label">
+                                <span>Volume Larutan</span>
+                                <span class="unit">L</span>
+                            </div>
+                            <input type="number" id="conc-volume" class="input-field" placeholder="0" step="any">
+                        </div>
+                        
+                        <div class="input-group">
+                            <div class="input-label">
+                                <span>Massa Pelarut</span>
+                                <span class="unit">kg</span>
+                            </div>
+                            <input type="number" id="conc-mass-solvent" class="input-field" placeholder="0" step="any">
+                        </div>
+                        
+                        <button id="calculate-concentration" class="calc-btn concentration">
+                            <i class="fas fa-calculator mr-2"></i>Hitung Konsentrasi
+                        </button>
+                        <button id="reset-concentration" class="calc-btn reset">
+                            <i class="fas fa-redo mr-2"></i>Reset
+                        </button>
+                        
+                        <div class="result-container" id="concentration-result" style="display: none;">
+                            <div class="result-title">Hasil Perhitungan</div>
+                            <div class="result-item">
+                                <span class="result-label" id="conc-result-label">Molaritas:</span>
+                                <span class="result-value" id="conc-result-value">0 M</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">Jumlah Mol:</span>
+                                <span class="result-value" id="conc-result-moles">0 mol</span>
+                            </div>
+                        </div>
+                        
+                        <div class="formula-display">
+                            <div class="formula-title">Rumus Konsentrasi:</div>
+                            <div class="formula">M = n / V (Molaritas)</div>
+                            <div class="formula">m = n / massa pelarut (Molalitas)</div>
+                            <div class="formula">N = n × valensi / V (Normalitas)</div>
+                            <div class="formula">X = n₁ / (n₁ + n₂) (Fraksi Mol)</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Kalkulator Gas Ideal -->
+                    <div id="gas-mode" class="calc-panel">
+                        <h2 class="panel-title gas">Kalkulator Gas Ideal</h2>
+                        
+                        <div class="input-group">
+                            <div class="input-label">
+                                <span>Tekanan (P)</span>
+                                <span class="unit">atm</span>
+                            </div>
+                            <input type="number" id="gas-p" class="input-field" placeholder="0" step="any">
+                        </div>
+                        
+                        <div class="input-group">
+                            <div class="input-label">
+                                <span>Volume (V)</span>
+                                <span class="unit">L</span>
+                            </div>
+                            <input type="number" id="gas-v" class="input-field" placeholder="0" step="any">
+                        </div>
+                        
+                        <div class="input-group">
+                            <div class="input-label">
+                                <span>Jumlah Mol (n)</span>
+                                <span class="unit">mol</span>
+                            </div>
+                            <input type="number" id="gas-n" class="input-field" placeholder="0" step="any">
+                        </div>
+                        
+                        <div class="input-group">
+                            <div class="input-label">
+                                <span>Suhu (T)</span>
+                                <span class="unit">K</span>
+                            </div>
+                            <input type="number" id="gas-t" class="input-field" placeholder="0" step="any">
+                        </div>
+                        
+                        <button id="calculate-gas" class="calc-btn gas">
+                            <i class="fas fa-calculator mr-2"></i>Hitung Gas Ideal
+                        </button>
+                        <button id="reset-gas" class="calc-btn reset">
+                            <i class="fas fa-redo mr-2"></i>Reset
+                        </button>
+                        
+                        <div class="result-container" id="gas-result" style="display: none;">
+                            <div class="result-title">Hasil Perhitungan</div>
+                            <div class="result-item">
+                                <span class="result-label">Tekanan (P):</span>
+                                <span class="result-value" id="gas-result-p">0 atm</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">Volume (V):</span>
+                                <span class="result-value" id="gas-result-v">0 L</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">Jumlah Mol (n):</span>
+                                <span class="result-value" id="gas-result-n">0 mol</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">Suhu (T):</span>
+                                <span class="result-value" id="gas-result-t">0 K</span>
+                            </div>
+                        </div>
+                        
+                        <div class="formula-display">
+                            <div class="formula-title">Hukum Gas Ideal:</div>
+                            <div class="formula">PV = nRT</div>
+                            <div class="formula">R = 0.0821 L·atm/mol·K</div>
+                            <div class="formula">T(K) = T(°C) + 273</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Kalkulator pH & pOH -->
+                    <div id="ph-mode" class="calc-panel">
+                        <h2 class="panel-title ph">Kalkulator pH & pOH</h2>
+                        
+                        <div class="input-group">
+                            <div class="input-label">
+                                <span>Jenis Larutan</span>
+                            </div>
+                            <select id="solution-type" class="input-field">
+                                <option value="acid-strong">Asam Kuat</option>
+                                <option value="base-strong">Basa Kuat</option>
+                                <option value="acid-weak">Asam Lemah</option>
+                                <option value="base-weak">Basa Lemah</option>
+                            </select>
+                        </div>
+                        
+                        <div class="input-group">
+                            <div class="input-label">
+                                <span>Konsentrasi [H⁺] atau [OH⁻]</span>
+                                <span class="unit">M</span>
+                            </div>
+                            <input type="number" id="ph-concentration" class="input-field" placeholder="0" step="any">
+                        </div>
+                        
+                        <div class="input-group">
+                            <div class="input-label">
+                                <span>Konstanta Ionisasi (Ka/Kb)</span>
+                                <span class="unit">-</span>
+                            </div>
+                            <input type="number" id="ph-ka" class="input-field" placeholder="0" step="any">
+                        </div>
+                        
+                        <button id="calculate-ph" class="calc-btn ph">
+                            <i class="fas fa-calculator mr-2"></i>Hitung pH & pOH
+                        </button>
+                        <button id="reset-ph" class="calc-btn reset">
+                            <i class="fas fa-redo mr-2"></i>Reset
+                        </button>
+                        
+                        <div class="result-container" id="ph-result" style="display: none;">
+                            <div class="result-title">Hasil Perhitungan</div>
+                            <div class="result-item">
+                                <span class="result-label">pH:</span>
+                                <span class="result-value" id="ph-result-ph">0</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">pOH:</span>
+                                <span class="result-value" id="ph-result-poh">0</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">[H⁺]:</span>
+                                <span class="result-value" id="ph-result-h">0 M</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">[OH⁻]:</span>
+                                <span class="result-value" id="ph-result-oh">0 M</span>
+                            </div>
+                        </div>
+                        
+                        <div class="formula-display">
+                            <div class="formula-title">Rumus pH & pOH:</div>
+                            <div class="formula">pH = -log[H⁺]</div>
+                            <div class="formula">pOH = -log[OH⁻]</div>
+                            <div class="formula">pH + pOH = 14</div>
+                            <div class="formula">[H⁺] = 10⁻ᴾᴴ</div>
+                            <div class="formula">[OH⁻] = 10⁻ᴾᴼᴴ</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <!-- BOTTOM NAVIGATION -->
+        <nav class="bottom-nav">
+            <a href="dashboad siswa.html" class="nav-item">
+                <i class="fas fa-home nav-icon"></i>
+                <span>Beranda</span>
+            </a>
+            <a href="soal harian/dashboard soal.html" class="nav-item">
+                <i class="fas fa-flask nav-icon"></i>
+                <span>Soal Harian</span>
+            </a>
+            <a href="ai/nayra.html" class="nav-item">
+                <i class="fas fa-robot nav-icon"></i>
+                <span>Nayra AI</span>
+            </a>
+            <a href="materi harian/kategori materi.html" class="nav-item">
+                <i class="fas fa-chalkboard-teacher nav-icon"></i>
+                <span>Materi Harian</span>
+            </a>
+            <a href="profil/profil.html" class="nav-item">
+                <i class="fas fa-user nav-icon"></i>
+                <span>Profil</span>
+            </a>
+        </nav>
+    </div>
+
+    <script>
+        // Constants
+        const g = 9.8; // Gravitational acceleration (m/s²)
+        const R = 0.0821; // Gas constant (L·atm/mol·K)
+        const NA = 6.02e23; // Avogadro's number
+        const V_STP = 22.4; // Volume of 1 mole gas at STP (L)
+
+        // Main Navigation
+        document.addEventListener('DOMContentLoaded', function() {
+            // Main navbar switching
+            const mainNavItems = document.querySelectorAll('.main-nav-item');
+            const categories = {
+                'physics': document.getElementById('physics-category'),
+                'chemistry': document.getElementById('chemistry-category')
+            };
+            
+            mainNavItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const category = this.dataset.category;
+                    
+                    // Update active navbar item
+                    mainNavItems.forEach(nav => nav.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Hide all categories
+                    Object.values(categories).forEach(cat => {
+                        if(cat) {
+                            cat.style.display = 'none';
+                            cat.classList.remove('active');
+                        }
+                    });
+                    
+                    // Show selected category
+                    if(categories[category]) {
+                        categories[category].style.display = 'block';
+                        categories[category].classList.add('active');
+                    }
+                });
+            });
+            
+            // Bottom nav interaction
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    navItems.forEach(nav => {
+                        nav.classList.remove('active');
+                        nav.querySelector('.nav-icon').classList.remove('active');
+                    });
+                    
+                    this.classList.add('active');
+                    this.querySelector('.nav-icon').classList.add('active');
+                });
+            });
+            
+            // Initialize calculators
+            initPhysicsCalculators();
+            initChemistryCalculators();
+        });
+
+        // Physics Calculators
+        function initPhysicsCalculators() {
+            // Mode switching for physics
+            const physicsModeBtns = document.querySelectorAll('#physics-category .mode-btn');
+            const physicsModes = {
+                'kinematic': document.getElementById('kinematic-mode'),
+                'force': document.getElementById('force-mode'),
+                'energy': document.getElementById('energy-mode'),
+                'wave': document.getElementById('wave-mode')
+            };
+            
+            physicsModeBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const mode = this.dataset.mode;
+                    
+                    // Update active button
+                    physicsModeBtns.forEach(b => {
+                        b.classList.remove('active');
+                        b.classList.remove('kinematic', 'force', 'energy', 'wave');
+                    });
+                    
+                    this.classList.add('active');
+                    this.classList.add(mode);
+                    
+                    // Hide all modes
+                    Object.values(physicsModes).forEach(m => {
+                        if(m) {
+                            m.style.display = 'none';
+                            m.classList.remove('active');
+                        }
+                    });
+                    
+                    // Show selected mode
+                    if(physicsModes[mode]) {
+                        physicsModes[mode].style.display = 'block';
+                        physicsModes[mode].classList.add('active');
+                    }
+                });
+            });
+            
+            // Initialize individual calculators
+            initKinematicCalculator();
+            initForceCalculator();
+            initEnergyCalculator();
+            initWaveCalculator();
+        }
+
+        // Chemistry Calculators
+        function initChemistryCalculators() {
+            // Mode switching for chemistry
+            const chemistryModeBtns = document.querySelectorAll('#chemistry-category .mode-btn');
+            const chemistryModes = {
+                'stoichiometry': document.getElementById('stoichiometry-mode'),
+                'concentration': document.getElementById('concentration-mode'),
+                'gas': document.getElementById('gas-mode'),
+                'ph': document.getElementById('ph-mode')
+            };
+            
+            chemistryModeBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const mode = this.dataset.mode;
+                    
+                    // Update active button
+                    chemistryModeBtns.forEach(b => {
+                        b.classList.remove('active');
+                        b.classList.remove('stoichiometry', 'concentration', 'gas', 'ph');
+                    });
+                    
+                    this.classList.add('active');
+                    this.classList.add(mode);
+                    
+                    // Hide all modes
+                    Object.values(chemistryModes).forEach(m => {
+                        if(m) {
+                            m.style.display = 'none';
+                            m.classList.remove('active');
+                        }
+                    });
+                    
+                    // Show selected mode
+                    if(chemistryModes[mode]) {
+                        chemistryModes[mode].style.display = 'block';
+                        chemistryModes[mode].classList.add('active');
+                    }
+                });
+            });
+            
+            // Initialize individual calculators
+            initStoichiometryCalculator();
+            initConcentrationCalculator();
+            initGasCalculator();
+            initPHCalculator();
+        }
+
+        // Kinematic Calculator
+        function initKinematicCalculator() {
+            const calculateBtn = document.getElementById('calculate-kinematic');
+            const resetBtn = document.getElementById('reset-kinematic');
+            const resultDiv = document.getElementById('kinematic-result');
+            
+            calculateBtn.addEventListener('click', function() {
+                // Get input values
+                const v0 = parseFloat(document.getElementById('kinematic-v0').value) || 0;
+                const v = parseFloat(document.getElementById('kinematic-v').value);
+                const a = parseFloat(document.getElementById('kinematic-a').value) || 0;
+                const t = parseFloat(document.getElementById('kinematic-t').value);
+                const s = parseFloat(document.getElementById('kinematic-s').value);
+                
+                let calculatedV = v;
+                let calculatedS = s;
+                let calculatedT = t;
+                
+                // Calculate missing values using kinematic equations
+                if (t !== null && !isNaN(t) && a !== null && !isNaN(a)) {
+                    if (calculatedV === null || isNaN(calculatedV)) {
+                        calculatedV = v0 + a * t;
+                    }
+                    if (calculatedS === null || isNaN(calculatedS)) {
+                        calculatedS = v0 * t + 0.5 * a * t * t;
+                    }
+                }
+                
+                if (calculatedV !== null && !isNaN(calculatedV) && v0 !== null && !isNaN(v0) && a !== null && !isNaN(a) && (calculatedS === null || isNaN(calculatedS))) {
+                    calculatedS = (calculatedV * calculatedV - v0 * v0) / (2 * a);
+                }
+                
+                if (calculatedS !== null && !isNaN(calculatedS) && v0 !== null && !isNaN(v0) && a !== null && !isNaN(a) && (calculatedT === null || isNaN(calculatedT))) {
+                    // Solve quadratic equation: s = v0*t + 0.5*a*t^2
+                    // 0.5*a*t^2 + v0*t - s = 0
+                    const discriminant = v0 * v0 + 2 * a * calculatedS;
+                    if (discriminant >= 0) {
+                        calculatedT = (-v0 + Math.sqrt(discriminant)) / a;
+                        if (calculatedT < 0) {
+                            calculatedT = (-v0 - Math.sqrt(discriminant)) / a;
+                        }
+                    }
+                }
+                
+                // Display results
+                document.getElementById('kinematic-result-v').textContent = calculatedV !== null && !isNaN(calculatedV) ? calculatedV.toFixed(2) + ' m/s' : '-';
+                document.getElementById('kinematic-result-s').textContent = calculatedS !== null && !isNaN(calculatedS) ? calculatedS.toFixed(2) + ' m' : '-';
+                document.getElementById('kinematic-result-t').textContent = calculatedT !== null && !isNaN(calculatedT) ? calculatedT.toFixed(2) + ' s' : '-';
+                
+                // Show result container
+                resultDiv.style.display = 'block';
+            });
+            
+            resetBtn.addEventListener('click', function() {
+                // Clear all inputs
+                document.getElementById('kinematic-v0').value = '';
+                document.getElementById('kinematic-v').value = '';
+                document.getElementById('kinematic-a').value = '';
+                document.getElementById('kinematic-t').value = '';
+                document.getElementById('kinematic-s').value = '';
+                
+                // Hide result container
+                resultDiv.style.display = 'none';
+            });
+        }
+
+        // Force Calculator
+        function initForceCalculator() {
+            const calculateBtn = document.getElementById('calculate-force');
+            const resetBtn = document.getElementById('reset-force');
+            const resultDiv = document.getElementById('force-result');
+            
+            calculateBtn.addEventListener('click', function() {
+                // Get input values
+                const m = parseFloat(document.getElementById('force-m').value) || 0;
+                const a = parseFloat(document.getElementById('force-a').value) || 0;
+                const f = parseFloat(document.getElementById('force-f').value);
+                const mu = parseFloat(document.getElementById('force-mu').value) || 0;
+                
+                let calculatedF = f;
+                const calculatedN = m * g;
+                const calculatedFriction = mu * calculatedN;
+                
+                // Calculate force
+                if ((calculatedF === null || isNaN(calculatedF)) && m !== 0 && a !== 0) {
+                    calculatedF = m * a;
+                }
+                
+                // Display results
+                document.getElementById('force-result-f').textContent = calculatedF !== null && !isNaN(calculatedF) ? calculatedF.toFixed(2) + ' N' : '-';
+                document.getElementById('force-result-n').textContent = calculatedN.toFixed(2) + ' N';
+                document.getElementById('force-result-friction').textContent = calculatedFriction.toFixed(2) + ' N';
+                
+                // Show result container
+                resultDiv.style.display = 'block';
+            });
+            
+            resetBtn.addEventListener('click', function() {
+                // Clear all inputs
+                document.getElementById('force-m').value = '';
+                document.getElementById('force-a').value = '';
+                document.getElementById('force-f').value = '';
+                document.getElementById('force-mu').value = '';
+                
+                // Hide result container
+                resultDiv.style.display = 'none';
+            });
+        }
+
+        // Energy Calculator
+        function initEnergyCalculator() {
+            const calculateBtn = document.getElementById('calculate-energy');
+            const resetBtn = document.getElementById('reset-energy');
+            const resultDiv = document.getElementById('energy-result');
+            
+            calculateBtn.addEventListener('click', function() {
+                // Get input values
+                const m = parseFloat(document.getElementById('energy-m').value) || 0;
+                const v = parseFloat(document.getElementById('energy-v').value) || 0;
+                const h = parseFloat(document.getElementById('energy-h').value) || 0;
+                
+                // Calculate energy
+                const calculatedEK = 0.5 * m * v * v;
+                const calculatedEP = m * g * h;
+                const calculatedEM = calculatedEK + calculatedEP;
+                
+                // Display results
+                document.getElementById('energy-result-ek').textContent = calculatedEK.toFixed(2) + ' J';
+                document.getElementById('energy-result-ep').textContent = calculatedEP.toFixed(2) + ' J';
+                document.getElementById('energy-result-em').textContent = calculatedEM.toFixed(2) + ' J';
+                
+                // Show result container
+                resultDiv.style.display = 'block';
+            });
+            
+            resetBtn.addEventListener('click', function() {
+                // Clear all inputs
+                document.getElementById('energy-m').value = '';
+                document.getElementById('energy-v').value = '';
+                document.getElementById('energy-h').value = '';
+                
+                // Hide result container
+                resultDiv.style.display = 'none';
+            });
+        }
+
+        // Wave Calculator
+        function initWaveCalculator() {
+            const calculateBtn = document.getElementById('calculate-wave');
+            const resetBtn = document.getElementById('reset-wave');
+            const resultDiv = document.getElementById('wave-result');
+            
+            calculateBtn.addEventListener('click', function() {
+                // Get input values
+                const f = parseFloat(document.getElementById('wave-f').value);
+                const lambda = parseFloat(document.getElementById('wave-lambda').value);
+                const t = parseFloat(document.getElementById('wave-t').value);
+                const v = parseFloat(document.getElementById('wave-v').value);
+                
+                let calculatedF = f;
+                let calculatedLambda = lambda;
+                let calculatedT = t;
+                let calculatedV = v;
+                
+                // Calculate wave properties
+                // First, try to calculate from known values
+                if (calculatedF !== null && !isNaN(calculatedF) && calculatedT === null) {
+                    calculatedT = 1 / calculatedF;
+                } else if (calculatedT !== null && !isNaN(calculatedT) && calculatedF === null) {
+                    calculatedF = 1 / calculatedT;
+                }
+                
+                if (calculatedV !== null && !isNaN(calculatedV)) {
+                    if (calculatedF !== null && !isNaN(calculatedF) && calculatedLambda === null) {
+                        calculatedLambda = calculatedV / calculatedF;
+                    } else if (calculatedLambda !== null && !isNaN(calculatedLambda) && calculatedF === null) {
+                        calculatedF = calculatedV / calculatedLambda;
+                        if (calculatedT === null) calculatedT = 1 / calculatedF;
+                    }
+                } else {
+                    if (calculatedF !== null && !isNaN(calculatedF) && calculatedLambda !== null && !isNaN(calculatedLambda)) {
+                        calculatedV = calculatedF * calculatedLambda;
+                    }
+                }
+                
+                // Display results
+                document.getElementById('wave-result-v').textContent = calculatedV !== null && !isNaN(calculatedV) ? calculatedV.toFixed(2) + ' m/s' : '-';
+                document.getElementById('wave-result-f').textContent = calculatedF !== null && !isNaN(calculatedF) ? calculatedF.toFixed(2) + ' Hz' : '-';
+                document.getElementById('wave-result-t').textContent = calculatedT !== null && !isNaN(calculatedT) ? calculatedT.toFixed(2) + ' s' : '-';
+                document.getElementById('wave-result-lambda').textContent = calculatedLambda !== null && !isNaN(calculatedLambda) ? calculatedLambda.toFixed(2) + ' m' : '-';
+                
+                // Show result container
+                resultDiv.style.display = 'block';
+            });
+            
+            resetBtn.addEventListener('click', function() {
+                // Clear all inputs
+                document.getElementById('wave-f').value = '';
+                document.getElementById('wave-lambda').value = '';
+                document.getElementById('wave-t').value = '';
+                document.getElementById('wave-v').value = '';
+                
+                // Hide result container
+                resultDiv.style.display = 'none';
+            });
+        }
+
+        // Stoichiometry Calculator
+        function initStoichiometryCalculator() {
+            const calculateBtn = document.getElementById('calculate-stoichiometry');
+            const resetBtn = document.getElementById('reset-stoichiometry');
+            const resultDiv = document.getElementById('stoichiometry-result');
+            
+            calculateBtn.addEventListener('click', function() {
+                // Get input values
+                const mass = parseFloat(document.getElementById('stoich-mass').value);
+                const mr = parseFloat(document.getElementById('stoich-mr').value);
+                const volume = parseFloat(document.getElementById('stoich-volume').value);
+                const particles = parseFloat(document.getElementById('stoich-particles').value);
+                
+                let n = null; // moles
+                
+                // Calculate moles from different inputs
+                if (mass !== null && !isNaN(mass) && mr !== null && !isNaN(mr) && mr > 0) {
+                    n = mass / mr;
+                } else if (volume !== null && !isNaN(volume)) {
+                    n = volume / V_STP;
+                } else if (particles !== null && !isNaN(particles)) {
+                    n = particles / NA;
+                }
+                
+                // Calculate other properties from moles
+                let calculatedMass = null;
+                let calculatedVolume = null;
+                let calculatedParticles = null;
+                
+                if (n !== null && !isNaN(n)) {
+                    if (mr !== null && !isNaN(mr) && mr > 0) {
+                        calculatedMass = n * mr;
+                    }
+                    calculatedVolume = n * V_STP;
+                    calculatedParticles = n * NA;
+                }
+                
+                // Display results
+                document.getElementById('stoich-result-n').textContent = n !== null && !isNaN(n) ? n.toFixed(4) + ' mol' : '-';
+                document.getElementById('stoich-result-mass').textContent = calculatedMass !== null && !isNaN(calculatedMass) ? calculatedMass.toFixed(2) + ' gram' : '-';
+                document.getElementById('stoich-result-volume').textContent = calculatedVolume !== null && !isNaN(calculatedVolume) ? calculatedVolume.toFixed(2) + ' L' : '-';
+                document.getElementById('stoich-result-particles').textContent = calculatedParticles !== null && !isNaN(calculatedParticles) ? calculatedParticles.toExponential(2) + ' partikel' : '-';
+                
+                // Show result container
+                resultDiv.style.display = 'block';
+            });
+            
+            resetBtn.addEventListener('click', function() {
+                // Clear all inputs
+                document.getElementById('stoich-mass').value = '';
+                document.getElementById('stoich-mr').value = '';
+                document.getElementById('stoich-volume').value = '';
+                document.getElementById('stoich-particles').value = '';
+                
+                // Hide result container
+                resultDiv.style.display = 'none';
+            });
+        }
+
+        // Concentration Calculator
+        function initConcentrationCalculator() {
+            const calculateBtn = document.getElementById('calculate-concentration');
+            const resetBtn = document.getElementById('reset-concentration');
+            const resultDiv = document.getElementById('concentration-result');
+            const typeSelect = document.getElementById('concentration-type');
+            
+            calculateBtn.addEventListener('click', function() {
+                // Get input values
+                const type = typeSelect.value;
+                const massSolute = parseFloat(document.getElementById('conc-mass-solute').value) || 0;
+                const mrSolute = parseFloat(document.getElementById('conc-mr-solute').value) || 1;
+                const volume = parseFloat(document.getElementById('conc-volume').value) || 0;
+                const massSolvent = parseFloat(document.getElementById('conc-mass-solvent').value) || 0;
+                
+                // Calculate moles
+                const n = massSolute / mrSolute;
+                
+                let resultValue = 0;
+                let resultLabel = '';
+                
+                // Calculate based on concentration type
+                switch(type) {
+                    case 'molaritas':
+                        if (volume > 0) {
+                            resultValue = n / volume;
+                            resultLabel = 'Molaritas:';
+                        }
+                        break;
+                    case 'molalitas':
+                        if (massSolvent > 0) {
+                            resultValue = n / massSolvent;
+                            resultLabel = 'Molalitas:';
+                        }
+                        break;
+                    case 'normalitas':
+                        // Assuming valency = 1 for simplicity
+                        if (volume > 0) {
+                            resultValue = n / volume;
+                            resultLabel = 'Normalitas:';
+                        }
+                        break;
+                    case 'fraksi-mol':
+                        // Assuming only solute moles for simplicity
+                        if (n > 0) {
+                            resultValue = n; // Just show solute moles for now
+                            resultLabel = 'Fraksi Mol zat terlarut:';
+                        }
+                        break;
+                }
+                
+                // Display results
+                document.getElementById('conc-result-label').textContent = resultLabel;
+                document.getElementById('conc-result-value').textContent = resultValue.toFixed(4) + (type === 'fraksi-mol' ? '' : (type === 'molalitas' ? ' m' : (type === 'normalitas' ? ' N' : ' M')));
+                document.getElementById('conc-result-moles').textContent = n.toFixed(4) + ' mol';
+                
+                // Show result container
+                resultDiv.style.display = 'block';
+            });
+            
+            resetBtn.addEventListener('click', function() {
+                // Clear all inputs
+                document.getElementById('conc-mass-solute').value = '';
+                document.getElementById('conc-mr-solute').value = '';
+                document.getElementById('conc-volume').value = '';
+                document.getElementById('conc-mass-solvent').value = '';
+                
+                // Hide result container
+                resultDiv.style.display = 'none';
+            });
+        }
+
+        // Gas Ideal Calculator
+        function initGasCalculator() {
+            const calculateBtn = document.getElementById('calculate-gas');
+            const resetBtn = document.getElementById('reset-gas');
+            const resultDiv = document.getElementById('gas-result');
+            
+            calculateBtn.addEventListener('click', function() {
+                // Get input values
+                const P = parseFloat(document.getElementById('gas-p').value);
+                const V = parseFloat(document.getElementById('gas-v').value);
+                const n = parseFloat(document.getElementById('gas-n').value);
+                const T = parseFloat(document.getElementById('gas-t').value);
+                
+                let calculatedP = P;
+                let calculatedV = V;
+                let calculatedN = n;
+                let calculatedT = T;
+                
+                // Count how many values are provided
+                const providedValues = [P, V, n, T].filter(val => val !== null && !isNaN(val)).length;
+                
+                // If 3 values are provided, calculate the 4th
+                if (providedValues >= 3) {
+                    if (calculatedP === null || isNaN(calculatedP)) {
+                        calculatedP = (n * R * T) / V;
+                    } else if (calculatedV === null || isNaN(calculatedV)) {
+                        calculatedV = (n * R * T) / P;
+                    } else if (calculatedN === null || isNaN(calculatedN)) {
+                        calculatedN = (P * V) / (R * T);
+                    } else if (calculatedT === null || isNaN(calculatedT)) {
+                        calculatedT = (P * V) / (n * R);
+                    }
+                }
+                
+                // Display results
+                document.getElementById('gas-result-p').textContent = calculatedP !== null && !isNaN(calculatedP) ? calculatedP.toFixed(3) + ' atm' : '-';
+                document.getElementById('gas-result-v').textContent = calculatedV !== null && !isNaN(calculatedV) ? calculatedV.toFixed(3) + ' L' : '-';
+                document.getElementById('gas-result-n').textContent = calculatedN !== null && !isNaN(calculatedN) ? calculatedN.toFixed(4) + ' mol' : '-';
+                document.getElementById('gas-result-t').textContent = calculatedT !== null && !isNaN(calculatedT) ? calculatedT.toFixed(1) + ' K' : '-';
+                
+                // Show result container
+                resultDiv.style.display = 'block';
+            });
+            
+            resetBtn.addEventListener('click', function() {
+                // Clear all inputs
+                document.getElementById('gas-p').value = '';
+                document.getElementById('gas-v').value = '';
+                document.getElementById('gas-n').value = '';
+                document.getElementById('gas-t').value = '';
+                
+                // Hide result container
+                resultDiv.style.display = 'none';
+            });
+        }
+
+        // pH Calculator
+        function initPHCalculator() {
+            const calculateBtn = document.getElementById('calculate-ph');
+            const resetBtn = document.getElementById('reset-ph');
+            const resultDiv = document.getElementById('ph-result');
+            const typeSelect = document.getElementById('solution-type');
+            
+            calculateBtn.addEventListener('click', function() {
+                // Get input values
+                const type = typeSelect.value;
+                const concentration = parseFloat(document.getElementById('ph-concentration').value) || 0;
+                const ka = parseFloat(document.getElementById('ph-ka').value);
+                
+                let H = 0;
+                let OH = 0;
+                
+                // Calculate H+ and OH- based on solution type
+                switch(type) {
+                    case 'acid-strong':
+                        // Strong acid: [H+] = concentration
+                        H = concentration;
+                        break;
+                    case 'base-strong':
+                        // Strong base: [OH-] = concentration
+                        OH = concentration;
+                        break;
+                    case 'acid-weak':
+                        // Weak acid: [H+] = sqrt(Ka * concentration)
+                        if (ka && ka > 0) {
+                            H = Math.sqrt(ka * concentration);
+                        }
+                        break;
+                    case 'base-weak':
+                        // Weak base: [OH-] = sqrt(Kb * concentration)
+                        if (ka && ka > 0) {
+                            OH = Math.sqrt(ka * concentration);
+                        }
+                        break;
+                }
+                
+                // Calculate pH and pOH
+                let pH = 0;
+                let pOH = 0;
+                
+                if (H > 0) {
+                    pH = -Math.log10(H);
+                    pOH = 14 - pH;
+                    OH = Math.pow(10, -pOH);
+                } else if (OH > 0) {
+                    pOH = -Math.log10(OH);
+                    pH = 14 - pOH;
+                    H = Math.pow(10, -pH);
+                }
+                
+                // Display results
+                document.getElementById('ph-result-ph').textContent = pH.toFixed(2);
+                document.getElementById('ph-result-poh').textContent = pOH.toFixed(2);
+                document.getElementById('ph-result-h').textContent = H.toExponential(2) + ' M';
+                document.getElementById('ph-result-oh').textContent = OH.toExponential(2) + ' M';
+                
+                // Show result container
+                resultDiv.style.display = 'block';
+            });
+            
+            resetBtn.addEventListener('click', function() {
+                // Clear all inputs
+                document.getElementById('ph-concentration').value = '';
+                document.getElementById('ph-ka').value = '';
+                
+                // Hide result container
+                resultDiv.style.display = 'none';
+            });
+        }
+    </script>
+</body>
+</html>

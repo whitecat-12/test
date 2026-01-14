@@ -1,1 +1,959 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TETA SAINS - Tabel Periodik Unsur</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #38b2ac;
+            --secondary: #0e7490;
+            --accent: #f59e0b;
+        }
+        
+        body {
+            font-family: 'Baloo 2', cursive;
+            background-color: #f8fafc;
+        }
+        
+        .app-container {
+            max-width: 414px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        /* NAVBAR - TIDAK DIRUBAH */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            max-width: 414px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            background: white;
+            z-index: 10;
+            height: 70px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+            text-decoration: none;
+            flex: 1;
+            height: 100%;
+            padding: 0.5rem 0;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item span {
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
+        
+        .nav-item.active {
+            color: var(--primary);
+        }
+        
+        .nav-icon {
+            transition: all 0.3s ease;
+            font-size: 1.25rem;
+        }
+        
+        .nav-icon.active {
+            transform: translateY(-5px);
+            color: var(--primary);
+        }
+        
+        /* TABLE STYLES */
+        .periodic-table {
+            display: grid;
+            grid-template-columns: repeat(18, 1fr);
+            gap: 2px;
+            padding: 5px;
+            overflow-x: auto;
+        }
+        
+        .element-cell {
+            min-width: 35px;
+            height: 35px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        .element-cell:hover {
+            transform: scale(1.05);
+            z-index: 2;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+        }
+        
+        .element-number {
+            position: absolute;
+            top: 2px;
+            left: 3px;
+            font-size: 7px;
+            font-weight: bold;
+        }
+        
+        .element-symbol {
+            font-size: 12px;
+            font-weight: 800;
+            line-height: 1;
+        }
+        
+        .element-name {
+            font-size: 5px;
+            margin-top: 1px;
+            text-align: center;
+            display: none;
+        }
+        
+        .element-cell:hover .element-name {
+            display: block;
+        }
+        
+        /* Legend styles */
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+            margin-right: 8px;
+            flex-shrink: 0;
+        }
+        
+        /* ELEMENT CATEGORY COLORS */
+        .alkali-metal { background-color: #ff6b6b; color: white; }
+        .alkaline-earth { background-color: #ffa726; color: white; }
+        .transition-metal { background-color: #42a5f5; color: white; }
+        .basic-metal { background-color: #66bb6a; color: white; }
+        .semimetal { background-color: #ab47bc; color: white; }
+        .nonmetal { background-color: #26c6da; color: white; }
+        .halogen { background-color: #ffca28; color: #000; }
+        .noble-gas { background-color: #ec407a; color: white; }
+        .lanthanide { background-color: #7e57c2; color: white; }
+        .actinide { background-color: #5c6bc0; color: white; }
+        
+        /* Modal styles */
+        .element-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            padding: 20px;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            max-width: 350px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+        
+        .app-logo {
+            display: flex;
+            align-items: center;
+        }
+        
+        .app-logo-icon {
+            background: #9999ff;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 8px;
+        }
+        
+        .app-name {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: #9999ff;
+        }
+        
+        /* Element detail styles */
+        .element-detail-card {
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 10px;
+        }
+        
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .detail-label {
+            font-weight: 600;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .detail-value {
+            font-weight: 700;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        /* Scrollbar styling */
+        .periodic-table::-webkit-scrollbar {
+            height: 6px;
+        }
+        
+        .periodic-table::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+        
+        .periodic-table::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+        
+        /* Group labels */
+        .group-label {
+            font-size: 10px;
+            text-align: center;
+            color: #666;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        
+        /* Period labels */
+        .period-label {
+            font-size: 10px;
+            text-align: right;
+            color: #666;
+            font-weight: 600;
+            padding-right: 5px;
+            width: 20px;
+        }
+        
+        /* Layout grid untuk tabel dengan label */
+        .table-container {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .table-header {
+            display: grid;
+            grid-template-columns: 20px repeat(18, 1fr);
+            gap: 2px;
+            margin-bottom: 5px;
+        }
+        
+        .table-body {
+            display: flex;
+        }
+        
+        .period-labels {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            margin-right: 5px;
+        }
+        
+        .period-row {
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile App Container -->
+    <div class="app-container">
+        <!-- App Header -->
+        <header class="bg-gradient-to-r from-primary to-secondary p-4 text-white">
+            <div class="flex justify-between items-center">
+                <div class="app-logo">
+                    <div class="app-logo-icon">
+                        <i class="fas fa-atom"></i>
+                    </div>
+                    <h1 class="app-name">QUANTARA</h1>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-search"></i>
+                    <i class="fas fa-user-circle text-xl"></i>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Main Content -->
+        <main class="pb-24 p-4">
+            <!-- Page Title -->
+            <div class="mb-4">
+                <h1 class="text-xl font-bold text-gray-800 mb-1">
+                    <i class="fas fa-table text-teal-500 mr-2"></i> Tabel Periodik
+                </h1>
+                <p class="text-gray-600 text-sm">
+                    Tabel periodik unsur kimia lengkap
+                </p>
+            </div>
+            
+            <!-- Search Bar -->
+            <div class="mb-4">
+                <div class="relative">
+                    <input type="text" id="search-element" placeholder="Cari unsur..." 
+                           class="w-full p-3 pl-10 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm">
+                    <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                </div>
+            </div>
+            
+            <!-- Tabel Periodik -->
+            <div class="mb-6">
+                <div class="flex justify-between items-center mb-3">
+                    <h3 class="font-bold text-gray-700 text-sm flex items-center">
+                        <i class="fas fa-atom text-blue-500 mr-2 text-xs"></i> Unsur Kimia
+                    </h3>
+                    <div class="text-xs text-gray-500">
+                        <span id="total-elements">56</span> unsur
+                    </div>
+                </div>
+                
+                <div class="bg-white border border-gray-200 rounded-xl p-3">
+                    <div class="table-container">
+                        <!-- Header untuk golongan -->
+                        <div class="table-header">
+                            <div></div> <!-- Kolom kosong untuk label periode -->
+                            <div class="group-label">1</div>
+                            <div class="group-label">2</div>
+                            <div class="group-label">3</div>
+                            <div class="group-label">4</div>
+                            <div class="group-label">5</div>
+                            <div class="group-label">6</div>
+                            <div class="group-label">7</div>
+                            <div class="group-label">8</div>
+                            <div class="group-label">9</div>
+                            <div class="group-label">10</div>
+                            <div class="group-label">11</div>
+                            <div class="group-label">12</div>
+                            <div class="group-label">13</div>
+                            <div class="group-label">14</div>
+                            <div class="group-label">15</div>
+                            <div class="group-label">16</div>
+                            <div class="group-label">17</div>
+                            <div class="group-label">18</div>
+                        </div>
+                        
+                        <div class="table-body">
+                            <!-- Label periode -->
+                            <div class="period-labels">
+                                <div class="period-row"></div> <!-- Baris kosong untuk header -->
+                                <div class="period-row">1</div>
+                                <div class="period-row">2</div>
+                                <div class="period-row">3</div>
+                                <div class="period-row">4</div>
+                                <div class="period-row">5</div>
+                                <div class="period-row">6</div>
+                                <div class="period-row">7</div>
+                            </div>
+                            
+                            <!-- Tabel periodik utama -->
+                            <div id="periodic-table" class="periodic-table">
+                                <!-- Elements will be generated by JavaScript -->
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Note untuk lantanida dan aktinida -->
+                    <div class="mt-4 text-center">
+                        <div class="text-xs text-gray-500 mb-2">
+                            * Lantanida dan Aktinida ditampilkan terpisah
+                        </div>
+                        <div class="flex justify-center space-x-4">
+                            <button id="show-lanthanides" class="text-xs bg-purple-100 text-purple-700 px-3 py-1 rounded-full">
+                                Lihat Lantanida
+                            </button>
+                            <button id="show-actinides" class="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full">
+                                Lihat Aktinida
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Legend - Dipindah ke bawah tabel -->
+            <div class="mb-6 p-3 bg-gray-50 rounded-xl">
+                <h3 class="font-bold text-gray-700 mb-2 text-sm">Kategori Warna:</h3>
+                <div class="grid grid-cols-2 gap-1">
+                    <div class="legend-item">
+                        <div class="legend-color alkali-metal"></div>
+                        <span class="text-xs">Logam Alkali</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color alkaline-earth"></div>
+                        <span class="text-xs">Logam Alkali Tanah</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color transition-metal"></div>
+                        <span class="text-xs">Logam Transisi</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color basic-metal"></div>
+                        <span class="text-xs">Logam Dasar</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color semimetal"></div>
+                        <span class="text-xs">Metaloid</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color nonmetal"></div>
+                        <span class="text-xs">Nonlogam</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color halogen"></div>
+                        <span class="text-xs">Halogen</span>
+                    </div>
+                    <div class="legend-item">
+                        <div class="legend-color noble-gas"></div>
+                        <span class="text-xs">Gas Mulia</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quick Facts -->
+            <div class="mb-6 p-3 bg-teal-50 rounded-xl">
+                <h3 class="font-bold text-gray-700 mb-2 text-sm flex items-center">
+                    <i class="fas fa-lightbulb text-teal-500 mr-2 text-xs"></i> Fakta Singkat
+                </h3>
+                <div class="text-xs text-gray-700 space-y-1">
+                    <p>• Disusun berdasarkan kenaikan nomor atom</p>
+                    <p>• Ada 118 unsur yang dikonfirmasi</p>
+                    <p>• Dmitri Mendeleev adalah pencipta tabel periodik modern</p>
+                    <p>• Golongan menunjukkan kemiripan sifat kimia</p>
+                </div>
+            </div>
+        </main>
+        
+        <!-- Element Detail Modal -->
+        <div id="element-modal" class="element-modal hidden">
+            <div class="modal-content">
+                <button id="close-modal" class="close-modal">&times;</button>
+                <div id="modal-body"></div>
+            </div>
+        </div>
+        
+        <!-- Modal untuk Lantanida/Aktinida -->
+        <div id="special-modal" class="element-modal hidden">
+            <div class="modal-content">
+                <button id="close-special-modal" class="close-modal">&times;</button>
+                <div id="special-modal-body"></div>
+            </div>
+        </div>
+        
+        <!-- BOTTOM NAVIGATION - TIDAK DIRUBAH -->
+        <nav class="bottom-nav">
+            <a href="dashboad siswa.html" class="nav-item">
+                <i class="fas fa-home nav-icon"></i>
+                <span>Beranda</span>
+            </a>
+            <a href="soal harian/dashboard soal.html" class="nav-item">
+                <i class="fas fa-flask nav-icon"></i>
+                <span>Soal Harian</span>
+            </a>
+            <a href="ai/nayra.html" class="nav-item">
+                <i class="fas fa-robot nav-icon"></i>
+                <span>Nayra AI</span>
+            </a>
+            <a href="materi harian/kategori materi.html" class="nav-item">
+                <i class="fas fa-chalkboard-teacher nav-icon"></i>
+                <span>Materi Harian</span>
+            </a>
+            <a href="profil/profil.html" class="nav-item">
+                <i class="fas fa-user nav-icon"></i>
+                <span>Profil</span>
+            </a>
+        </nav>
+    </div>
 
+    <script>
+        // Data Tabel Periodik Lengkap
+        const periodicElements = [
+            // Periode 1
+            { symbol: "H", name: "Hidrogen", number: 1, mass: 1.008, category: "nonmetal", colorClass: "nonmetal", period: 1, group: 1, electronConfig: "1s¹" },
+            { symbol: "He", name: "Helium", number: 2, mass: 4.0026, category: "noble-gas", colorClass: "noble-gas", period: 1, group: 18, electronConfig: "1s²" },
+            
+            // Periode 2
+            { symbol: "Li", name: "Litium", number: 3, mass: 6.94, category: "alkali-metal", colorClass: "alkali-metal", period: 2, group: 1, electronConfig: "[He] 2s¹" },
+            { symbol: "Be", name: "Berilium", number: 4, mass: 9.0122, category: "alkaline-earth", colorClass: "alkaline-earth", period: 2, group: 2, electronConfig: "[He] 2s²" },
+            { symbol: "B", name: "Boron", number: 5, mass: 10.81, category: "semimetal", colorClass: "semimetal", period: 2, group: 13, electronConfig: "[He] 2s² 2p¹" },
+            { symbol: "C", name: "Karbon", number: 6, mass: 12.011, category: "nonmetal", colorClass: "nonmetal", period: 2, group: 14, electronConfig: "[He] 2s² 2p²" },
+            { symbol: "N", name: "Nitrogen", number: 7, mass: 14.007, category: "nonmetal", colorClass: "nonmetal", period: 2, group: 15, electronConfig: "[He] 2s² 2p³" },
+            { symbol: "O", name: "Oksigen", number: 8, mass: 15.999, category: "nonmetal", colorClass: "nonmetal", period: 2, group: 16, electronConfig: "[He] 2s² 2p⁴" },
+            { symbol: "F", name: "Fluor", number: 9, mass: 18.998, category: "halogen", colorClass: "halogen", period: 2, group: 17, electronConfig: "[He] 2s² 2p⁵" },
+            { symbol: "Ne", name: "Neon", number: 10, mass: 20.180, category: "noble-gas", colorClass: "noble-gas", period: 2, group: 18, electronConfig: "[He] 2s² 2p⁶" },
+            
+            // Periode 3
+            { symbol: "Na", name: "Natrium", number: 11, mass: 22.990, category: "alkali-metal", colorClass: "alkali-metal", period: 3, group: 1, electronConfig: "[Ne] 3s¹" },
+            { symbol: "Mg", name: "Magnesium", number: 12, mass: 24.305, category: "alkaline-earth", colorClass: "alkaline-earth", period: 3, group: 2, electronConfig: "[Ne] 3s²" },
+            { symbol: "Al", name: "Aluminium", number: 13, mass: 26.982, category: "basic-metal", colorClass: "basic-metal", period: 3, group: 13, electronConfig: "[Ne] 3s² 3p¹" },
+            { symbol: "Si", name: "Silikon", number: 14, mass: 28.085, category: "semimetal", colorClass: "semimetal", period: 3, group: 14, electronConfig: "[Ne] 3s² 3p²" },
+            { symbol: "P", name: "Fosfor", number: 15, mass: 30.974, category: "nonmetal", colorClass: "nonmetal", period: 3, group: 15, electronConfig: "[Ne] 3s² 3p³" },
+            { symbol: "S", name: "Belerang", number: 16, mass: 32.06, category: "nonmetal", colorClass: "nonmetal", period: 3, group: 16, electronConfig: "[Ne] 3s² 3p⁴" },
+            { symbol: "Cl", name: "Klorin", number: 17, mass: 35.45, category: "halogen", colorClass: "halogen", period: 3, group: 17, electronConfig: "[Ne] 3s² 3p⁵" },
+            { symbol: "Ar", name: "Argon", number: 18, mass: 39.948, category: "noble-gas", colorClass: "noble-gas", period: 3, group: 18, electronConfig: "[Ne] 3s² 3p⁶" },
+            
+            // Periode 4
+            { symbol: "K", name: "Kalium", number: 19, mass: 39.098, category: "alkali-metal", colorClass: "alkali-metal", period: 4, group: 1, electronConfig: "[Ar] 4s¹" },
+            { symbol: "Ca", name: "Kalsium", number: 20, mass: 40.078, category: "alkaline-earth", colorClass: "alkaline-earth", period: 4, group: 2, electronConfig: "[Ar] 4s²" },
+            { symbol: "Sc", name: "Skandium", number: 21, mass: 44.956, category: "transition-metal", colorClass: "transition-metal", period: 4, group: 3, electronConfig: "[Ar] 3d¹ 4s²" },
+            { symbol: "Ti", name: "Titanium", number: 22, mass: 47.867, category: "transition-metal", colorClass: "transition-metal", period: 4, group: 4, electronConfig: "[Ar] 3d² 4s²" },
+            { symbol: "V", name: "Vanadium", number: 23, mass: 50.942, category: "transition-metal", colorClass: "transition-metal", period: 4, group: 5, electronConfig: "[Ar] 3d³ 4s²" },
+            { symbol: "Cr", name: "Kromium", number: 24, mass: 51.996, category: "transition-metal", colorClass: "transition-metal", period: 4, group: 6, electronConfig: "[Ar] 3d⁵ 4s¹" },
+            { symbol: "Mn", name: "Mangan", number: 25, mass: 54.938, category: "transition-metal", colorClass: "transition-metal", period: 4, group: 7, electronConfig: "[Ar] 3d⁵ 4s²" },
+            { symbol: "Fe", name: "Besi", number: 26, mass: 55.845, category: "transition-metal", colorClass: "transition-metal", period: 4, group: 8, electronConfig: "[Ar] 3d⁶ 4s²" },
+            { symbol: "Co", name: "Kobalt", number: 27, mass: 58.933, category: "transition-metal", colorClass: "transition-metal", period: 4, group: 9, electronConfig: "[Ar] 3d⁷ 4s²" },
+            { symbol: "Ni", name: "Nikel", number: 28, mass: 58.693, category: "transition-metal", colorClass: "transition-metal", period: 4, group: 10, electronConfig: "[Ar] 3d⁸ 4s²" },
+            { symbol: "Cu", name: "Tembaga", number: 29, mass: 63.546, category: "transition-metal", colorClass: "transition-metal", period: 4, group: 11, electronConfig: "[Ar] 3d¹⁰ 4s¹" },
+            { symbol: "Zn", name: "Seng", number: 30, mass: 65.38, category: "transition-metal", colorClass: "transition-metal", period: 4, group: 12, electronConfig: "[Ar] 3d¹⁰ 4s²" },
+            { symbol: "Ga", name: "Galium", number: 31, mass: 69.723, category: "basic-metal", colorClass: "basic-metal", period: 4, group: 13, electronConfig: "[Ar] 3d¹⁰ 4s² 4p¹" },
+            { symbol: "Ge", name: "Germanium", number: 32, mass: 72.63, category: "semimetal", colorClass: "semimetal", period: 4, group: 14, electronConfig: "[Ar] 3d¹⁰ 4s² 4p²" },
+            { symbol: "As", name: "Arsen", number: 33, mass: 74.922, category: "semimetal", colorClass: "semimetal", period: 4, group: 15, electronConfig: "[Ar] 3d¹⁰ 4s² 4p³" },
+            { symbol: "Se", name: "Selenium", number: 34, mass: 78.971, category: "nonmetal", colorClass: "nonmetal", period: 4, group: 16, electronConfig: "[Ar] 3d¹⁰ 4s² 4p⁴" },
+            { symbol: "Br", name: "Brom", number: 35, mass: 79.904, category: "halogen", colorClass: "halogen", period: 4, group: 17, electronConfig: "[Ar] 3d¹⁰ 4s² 4p⁵" },
+            { symbol: "Kr", name: "Kripton", number: 36, mass: 83.798, category: "noble-gas", colorClass: "noble-gas", period: 4, group: 18, electronConfig: "[Ar] 3d¹⁰ 4s² 4p⁶" },
+            
+            // Periode 5
+            { symbol: "Rb", name: "Rubidium", number: 37, mass: 85.468, category: "alkali-metal", colorClass: "alkali-metal", period: 5, group: 1, electronConfig: "[Kr] 5s¹" },
+            { symbol: "Sr", name: "Strontium", number: 38, mass: 87.62, category: "alkaline-earth", colorClass: "alkaline-earth", period: 5, group: 2, electronConfig: "[Kr] 5s²" },
+            { symbol: "Y", name: "Yttrium", number: 39, mass: 88.906, category: "transition-metal", colorClass: "transition-metal", period: 5, group: 3, electronConfig: "[Kr] 4d¹ 5s²" },
+            { symbol: "Zr", name: "Zirkonium", number: 40, mass: 91.224, category: "transition-metal", colorClass: "transition-metal", period: 5, group: 4, electronConfig: "[Kr] 4d² 5s²" },
+            { symbol: "Nb", name: "Niobium", number: 41, mass: 92.906, category: "transition-metal", colorClass: "transition-metal", period: 5, group: 5, electronConfig: "[Kr] 4d⁴ 5s¹" },
+            { symbol: "Mo", name: "Molibdenum", number: 42, mass: 95.95, category: "transition-metal", colorClass: "transition-metal", period: 5, group: 6, electronConfig: "[Kr] 4d⁵ 5s¹" },
+            { symbol: "Tc", name: "Teknesium", number: 43, mass: 98, category: "transition-metal", colorClass: "transition-metal", period: 5, group: 7, electronConfig: "[Kr] 4d⁵ 5s²" },
+            { symbol: "Ru", name: "Rutenium", number: 44, mass: 101.07, category: "transition-metal", colorClass: "transition-metal", period: 5, group: 8, electronConfig: "[Kr] 4d⁷ 5s¹" },
+            { symbol: "Rh", name: "Rodium", number: 45, mass: 102.91, category: "transition-metal", colorClass: "transition-metal", period: 5, group: 9, electronConfig: "[Kr] 4d⁸ 5s¹" },
+            { symbol: "Pd", name: "Paladium", number: 46, mass: 106.42, category: "transition-metal", colorClass: "transition-metal", period: 5, group: 10, electronConfig: "[Kr] 4d¹⁰" },
+            { symbol: "Ag", name: "Perak", number: 47, mass: 107.87, category: "transition-metal", colorClass: "transition-metal", period: 5, group: 11, electronConfig: "[Kr] 4d¹⁰ 5s¹" },
+            { symbol: "Cd", name: "Kadmium", number: 48, mass: 112.41, category: "transition-metal", colorClass: "transition-metal", period: 5, group: 12, electronConfig: "[Kr] 4d¹⁰ 5s²" },
+            { symbol: "In", name: "Indium", number: 49, mass: 114.82, category: "basic-metal", colorClass: "basic-metal", period: 5, group: 13, electronConfig: "[Kr] 4d¹⁰ 5s² 5p¹" },
+            { symbol: "Sn", name: "Timah", number: 50, mass: 118.71, category: "basic-metal", colorClass: "basic-metal", period: 5, group: 14, electronConfig: "[Kr] 4d¹⁰ 5s² 5p²" },
+            { symbol: "Sb", name: "Antimon", number: 51, mass: 121.76, category: "semimetal", colorClass: "semimetal", period: 5, group: 15, electronConfig: "[Kr] 4d¹⁰ 5s² 5p³" },
+            { symbol: "Te", name: "Telurium", number: 52, mass: 127.60, category: "semimetal", colorClass: "semimetal", period: 5, group: 16, electronConfig: "[Kr] 4d¹⁰ 5s² 5p⁴" },
+            { symbol: "I", name: "Iodium", number: 53, mass: 126.90, category: "halogen", colorClass: "halogen", period: 5, group: 17, electronConfig: "[Kr] 4d¹⁰ 5s² 5p⁵" },
+            { symbol: "Xe", name: "Xenon", number: 54, mass: 131.29, category: "noble-gas", colorClass: "noble-gas", period: 5, group: 18, electronConfig: "[Kr] 4d¹⁰ 5s² 5p⁶" },
+            
+            // Lantanida (ditampilkan terpisah)
+            { symbol: "La", name: "Lantanum", number: 57, mass: 138.91, category: "lanthanide", colorClass: "lanthanide", period: 6, group: 3, electronConfig: "[Xe] 5d¹ 6s²" },
+            { symbol: "Ce", name: "Serium", number: 58, mass: 140.12, category: "lanthanide", colorClass: "lanthanide", period: 6, group: null, electronConfig: "[Xe] 4f¹ 5d¹ 6s²" },
+            { symbol: "Pr", name: "Praseodimium", number: 59, mass: 140.91, category: "lanthanide", colorClass: "lanthanide", period: 6, group: null, electronConfig: "[Xe] 4f³ 6s²" },
+            { symbol: "Nd", name: "Neodimium", number: 60, mass: 144.24, category: "lanthanide", colorClass: "lanthanide", period: 6, group: null, electronConfig: "[Xe] 4f⁴ 6s²" },
+            { symbol: "Pm", name: "Prometium", number: 61, mass: 145, category: "lanthanide", colorClass: "lanthanide", period: 6, group: null, electronConfig: "[Xe] 4f⁵ 6s²" },
+            { symbol: "Sm", name: "Samarium", number: 62, mass: 150.36, category: "lanthanide", colorClass: "lanthanide", period: 6, group: null, electronConfig: "[Xe] 4f⁶ 6s²" },
+            { symbol: "Eu", name: "Europium", number: 63, mass: 151.96, category: "lanthanide", colorClass: "lanthanide", period: 6, group: null, electronConfig: "[Xe] 4f⁷ 6s²" },
+            { symbol: "Gd", name: "Gadolinium", number: 64, mass: 157.25, category: "lanthanide", colorClass: "lanthanide", period: 6, group: null, electronConfig: "[Xe] 4f⁷ 5d¹ 6s²" },
+            { symbol: "Tb", name: "Terbium", number: 65, mass: 158.93, category: "lanthanide", colorClass: "lanthanide", period: 6, group: null, electronConfig: "[Xe] 4f⁹ 6s²" },
+            { symbol: "Dy", name: "Disprosium", number: 66, mass: 162.50, category: "lanthanide", colorClass: "lanthanide", period: 6, group: null, electronConfig: "[Xe] 4f¹⁰ 6s²" },
+            { symbol: "Ho", name: "Holmium", number: 67, mass: 164.93, category: "lanthanide", colorClass: "lanthanide", period: 6, group: null, electronConfig: "[Xe] 4f¹¹ 6s²" },
+            { symbol: "Er", name: "Erbium", number: 68, mass: 167.26, category: "lanthanide", colorClass: "lanthanide", period: 6, group: null, electronConfig: "[Xe] 4f¹² 6s²" },
+            { symbol: "Tm", name: "Tulium", number: 69, mass: 168.93, category: "lanthanide", colorClass: "lanthanide", period: 6, group: null, electronConfig: "[Xe] 4f¹³ 6s²" },
+            { symbol: "Yb", name: "Iterbium", number: 70, mass: 173.05, category: "lanthanide", colorClass: "lanthanide", period: 6, group: null, electronConfig: "[Xe] 4f¹⁴ 6s²" },
+            { symbol: "Lu", name: "Lutesium", number: 71, mass: 174.97, category: "lanthanide", colorClass: "lanthanide", period: 6, group: 3, electronConfig: "[Xe] 4f¹⁴ 5d¹ 6s²" },
+            
+            // Aktinida (ditampilkan terpisah)
+            { symbol: "Ac", name: "Aktinium", number: 89, mass: 227, category: "actinide", colorClass: "actinide", period: 7, group: 3, electronConfig: "[Rn] 6d¹ 7s²" },
+            { symbol: "Th", name: "Thorium", number: 90, mass: 232.04, category: "actinide", colorClass: "actinide", period: 7, group: null, electronConfig: "[Rn] 6d² 7s²" },
+            { symbol: "Pa", name: "Protaktinium", number: 91, mass: 231.04, category: "actinide", colorClass: "actinide", period: 7, group: null, electronConfig: "[Rn] 5f² 6d¹ 7s²" },
+            { symbol: "U", name: "Uranium", number: 92, mass: 238.03, category: "actinide", colorClass: "actinide", period: 7, group: null, electronConfig: "[Rn] 5f³ 6d¹ 7s²" },
+            { symbol: "Np", name: "Neptunium", number: 93, mass: 237, category: "actinide", colorClass: "actinide", period: 7, group: null, electronConfig: "[Rn] 5f⁴ 6d¹ 7s²" },
+            { symbol: "Pu", name: "Plutonium", number: 94, mass: 244, category: "actinide", colorClass: "actinide", period: 7, group: null, electronConfig: "[Rn] 5f⁶ 7s²" },
+            { symbol: "Am", name: "Amerisium", number: 95, mass: 243, category: "actinide", colorClass: "actinide", period: 7, group: null, electronConfig: "[Rn] 5f⁷ 7s²" },
+            { symbol: "Cm", name: "Kurium", number: 96, mass: 247, category: "actinide", colorClass: "actinide", period: 7, group: null, electronConfig: "[Rn] 5f⁷ 6d¹ 7s²" },
+            { symbol: "Bk", name: "Berkelium", number: 97, mass: 247, category: "actinide", colorClass: "actinide", period: 7, group: null, electronConfig: "[Rn] 5f⁹ 7s²" },
+            { symbol: "Cf", name: "Kalifornium", number: 98, mass: 251, category: "actinide", colorClass: "actinide", period: 7, group: null, electronConfig: "[Rn] 5f¹⁰ 7s²" },
+            { symbol: "Es", name: "Einsteinium", number: 99, mass: 252, category: "actinide", colorClass: "actinide", period: 7, group: null, electronConfig: "[Rn] 5f¹¹ 7s²" },
+            { symbol: "Fm", name: "Fermium", number: 100, mass: 257, category: "actinide", colorClass: "actinide", period: 7, group: null, electronConfig: "[Rn] 5f¹² 7s²" },
+            { symbol: "Md", name: "Mendelevium", number: 101, mass: 258, category: "actinide", colorClass: "actinide", period: 7, group: null, electronConfig: "[Rn] 5f¹³ 7s²" },
+            { symbol: "No", name: "Nobelium", number: 102, mass: 259, category: "actinide", colorClass: "actinide", period: 7, group: null, electronConfig: "[Rn] 5f¹⁴ 7s²" },
+            { symbol: "Lr", name: "Lawrensium", number: 103, mass: 262, category: "actinide", colorClass: "actinide", period: 7, group: 3, electronConfig: "[Rn] 5f¹⁴ 7s² 7p¹" }
+        ];
+
+        // DOM Elements
+        const periodicTableContainer = document.getElementById('periodic-table');
+        const elementModal = document.getElementById('element-modal');
+        const specialModal = document.getElementById('special-modal');
+        const closeModalBtn = document.getElementById('close-modal');
+        const closeSpecialModalBtn = document.getElementById('close-special-modal');
+        const modalBody = document.getElementById('modal-body');
+        const specialModalBody = document.getElementById('special-modal-body');
+        const searchInput = document.getElementById('search-element');
+        const totalElementsSpan = document.getElementById('total-elements');
+        const showLanthanidesBtn = document.getElementById('show-lanthanides');
+        const showActinidesBtn = document.getElementById('show-actinides');
+
+        // Inisialisasi Tabel Periodik
+        function initPeriodicTable() {
+            // Kosongkan kontainer
+            periodicTableContainer.innerHTML = '';
+            
+            // Buat 7 baris (periode) x 18 kolom (golongan)
+            for (let period = 1; period <= 7; period++) {
+                for (let group = 1; group <= 18; group++) {
+                    const element = findElementByPosition(period, group);
+                    
+                    const elementDiv = document.createElement('div');
+                    elementDiv.className = `element-cell ${element ? element.colorClass : 'bg-transparent'}`;
+                    
+                    if (element) {
+                        elementDiv.dataset.symbol = element.symbol;
+                        elementDiv.dataset.number = element.number;
+                        elementDiv.dataset.period = period;
+                        elementDiv.dataset.group = group;
+                        
+                        elementDiv.innerHTML = `
+                            <div class="element-number">${element.number}</div>
+                            <div class="element-symbol">${element.symbol}</div>
+                            <div class="element-name">${element.name}</div>
+                        `;
+                        
+                        elementDiv.addEventListener('click', () => showElementDetails(element));
+                    } else {
+                        // Kosong, tapi bisa berisi placeholder untuk posisi khusus
+                        if (period === 6 && group === 3) {
+                            elementDiv.innerHTML = `<div class="text-xs text-gray-400">57-71</div>`;
+                            elementDiv.classList.add('bg-gray-100');
+                            elementDiv.addEventListener('click', showLanthanides);
+                        } else if (period === 7 && group === 3) {
+                            elementDiv.innerHTML = `<div class="text-xs text-gray-400">89-103</div>`;
+                            elementDiv.classList.add('bg-gray-100');
+                            elementDiv.addEventListener('click', showActinides);
+                        } else {
+                            elementDiv.style.visibility = 'hidden';
+                        }
+                    }
+                    
+                    periodicTableContainer.appendChild(elementDiv);
+                }
+            }
+            
+            // Hitung total unsur yang ditampilkan
+            const visibleElements = periodicElements.filter(e => 
+                !['lanthanide', 'actinide'].includes(e.category) || 
+                (e.symbol === 'La' || e.symbol === 'Ac' || e.symbol === 'Lu' || e.symbol === 'Lr')
+            ).length;
+            
+            totalElementsSpan.textContent = visibleElements;
+            
+            // Setup event listeners
+            setupEventListeners();
+        }
+
+        // Cari elemen berdasarkan posisi (periode dan golongan)
+        function findElementByPosition(period, group) {
+            return periodicElements.find(element => 
+                element.period === period && 
+                element.group === group &&
+                !['lanthanide', 'actinide'].includes(element.category)
+            );
+        }
+
+        // Tampilkan detail elemen dalam modal
+        function showElementDetails(element) {
+            const categoryNames = {
+                "alkali-metal": "Logam Alkali",
+                "alkaline-earth": "Logam Alkali Tanah",
+                "transition-metal": "Logam Transisi",
+                "basic-metal": "Logam Dasar",
+                "semimetal": "Metaloid",
+                "nonmetal": "Nonlogam",
+                "halogen": "Halogen",
+                "noble-gas": "Gas Mulia",
+                "lanthanide": "Lantanida",
+                "actinide": "Aktinida"
+            };
+            
+            modalBody.innerHTML = `
+                <div class="element-detail-card" style="border-left-color: ${getCategoryColor(element.category)}; background-color: ${getCategoryColor(element.category, 0.1)}">
+                    <div class="flex items-center mb-4">
+                        <div class="element-cell ${element.colorClass} w-16 h-16 mr-4">
+                            <div class="element-number">${element.number}</div>
+                            <div class="element-symbol text-xl">${element.symbol}</div>
+                            <div class="element-name">${element.name}</div>
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-bold text-gray-800">${element.name}</h2>
+                            <p class="text-gray-600 text-sm">${element.symbol} • ${categoryNames[element.category] || element.category}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <div class="detail-row">
+                            <span class="detail-label">Nomor Atom:</span>
+                            <span class="detail-value">${element.number}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Massa Atom:</span>
+                            <span class="detail-value">${element.mass} u</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Periode:</span>
+                            <span class="detail-value">${element.period}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Golongan:</span>
+                            <span class="detail-value">${element.group || 'Lantanida/Aktinida'}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Konfigurasi Elektron:</span>
+                            <span class="detail-value text-xs">${element.electronConfig}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 p-3 bg-gray-50 rounded-lg">
+                        <h4 class="font-bold text-gray-700 mb-1 text-sm">Fakta Menarik:</h4>
+                        <p class="text-xs text-gray-600">${getElementFact(element)}</p>
+                    </div>
+                </div>
+            `;
+            
+            elementModal.classList.remove('hidden');
+        }
+
+        // Tampilkan lantanida
+        function showLanthanides() {
+            const lanthanides = periodicElements.filter(e => e.category === 'lanthanide');
+            showSpecialElements(lanthanides, "Lantanida (Unsur 57-71)");
+        }
+
+        // Tampilkan aktinida
+        function showActinides() {
+            const actinides = periodicElements.filter(e => e.category === 'actinide');
+            showSpecialElements(actinides, "Aktinida (Unsur 89-103)");
+        }
+
+        // Tampilkan elemen khusus (lantanida/aktinida)
+        function showSpecialElements(elements, title) {
+            specialModalBody.innerHTML = `
+                <div class="mb-4">
+                    <h2 class="text-xl font-bold text-gray-800 mb-2">${title}</h2>
+                    <p class="text-gray-600 text-sm mb-4">Deret unsur yang ditempatkan terpisah di tabel periodik</p>
+                </div>
+                <div class="grid grid-cols-5 gap-2 mb-4">
+                    ${elements.map(element => `
+                        <div class="element-cell ${element.colorClass} w-full" onclick="showElementDetailsFromModal(${element.number})">
+                            <div class="element-number">${element.number}</div>
+                            <div class="element-symbol">${element.symbol}</div>
+                            <div class="element-name">${element.name}</div>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="text-xs text-gray-500">
+                    <p>• Unsur-unsur ini memiliki sifat kimia yang mirip</p>
+                    <p>• Biasanya ditempatkan di baris terpisah di bawah tabel utama</p>
+                    <p>• Termasuk dalam periode 6 dan 7</p>
+                </div>
+            `;
+            
+            specialModal.classList.remove('hidden');
+        }
+
+        // Helper untuk showElementDetails dari modal khusus
+        window.showElementDetailsFromModal = function(number) {
+            const element = periodicElements.find(e => e.number === number);
+            if (element) {
+                specialModal.classList.add('hidden');
+                showElementDetails(element);
+            }
+        };
+
+        // Dapatkan warna berdasarkan kategori
+        function getCategoryColor(category, opacity = 1) {
+            const colors = {
+                "alkali-metal": "#ff6b6b",
+                "alkaline-earth": "#ffa726",
+                "transition-metal": "#42a5f5",
+                "basic-metal": "#66bb6a",
+                "semimetal": "#ab47bc",
+                "nonmetal": "#26c6da",
+                "halogen": "#ffca28",
+                "noble-gas": "#ec407a",
+                "lanthanide": "#7e57c2",
+                "actinide": "#5c6bc0"
+            };
+            
+            const color = colors[category] || "#cccccc";
+            if (opacity < 1) {
+                const r = parseInt(color.slice(1, 3), 16);
+                const g = parseInt(color.slice(3, 5), 16);
+                const b = parseInt(color.slice(5, 7), 16);
+                return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+            }
+            return color;
+        }
+
+        // Dapatkan fakta menarik tentang elemen
+        function getElementFact(element) {
+            const facts = {
+                "H": "Unsur paling melimpah di alam semesta (≈75% massa).",
+                "He": "Unsur kedua teringan dan tidak mudah bereaksi.",
+                "Li": "Logam paling ringan, digunakan dalam baterai lithium.",
+                "C": "Dasar kehidupan di Bumi, memiliki alotrop seperti berlian dan grafit.",
+                "O": "Menyusun 21% atmosfer Bumi dan penting untuk pernapasan.",
+                "Na": "Logam reaktif yang bereaksi keras dengan air.",
+                "Cl": "Gas beracun berwarna hijau kekuningan, digunakan sebagai disinfektan.",
+                "Fe": "Logam paling melimpah di inti Bumi, utama dalam pembuatan baja.",
+                "Au": "Logam mulia yang tahan korosi, digunakan dalam perhiasan.",
+                "U": "Unsur terberat yang ditemukan secara alami, digunakan dalam tenaga nuklir."
+            };
+            
+            return facts[element.symbol] || `Unsur ${element.category} yang ditemukan di alam.`;
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Tutup modal
+            closeModalBtn.addEventListener('click', () => {
+                elementModal.classList.add('hidden');
+            });
+            
+            closeSpecialModalBtn.addEventListener('click', () => {
+                specialModal.classList.add('hidden');
+            });
+            
+            // Tutup modal dengan klik di luar konten
+            elementModal.addEventListener('click', (e) => {
+                if (e.target === elementModal) {
+                    elementModal.classList.add('hidden');
+                }
+            });
+            
+            specialModal.addEventListener('click', (e) => {
+                if (e.target === specialModal) {
+                    specialModal.classList.add('hidden');
+                }
+            });
+            
+            // Tutup modal dengan tombol ESC
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    if (!elementModal.classList.contains('hidden')) {
+                        elementModal.classList.add('hidden');
+                    }
+                    if (!specialModal.classList.contains('hidden')) {
+                        specialModal.classList.add('hidden');
+                    }
+                }
+            });
+            
+            // Pencarian elemen
+            searchInput.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase().trim();
+                
+                // Sembunyikan semua elemen dulu
+                document.querySelectorAll('.element-cell').forEach(cell => {
+                    if (cell.dataset.symbol) {
+                        cell.style.opacity = '0.3';
+                        cell.style.transform = 'scale(0.95)';
+                    }
+                });
+                
+                // Jika kosong, tampilkan semua
+                if (!searchTerm) {
+                    document.querySelectorAll('.element-cell').forEach(cell => {
+                        if (cell.dataset.symbol) {
+                            cell.style.opacity = '1';
+                            cell.style.transform = 'scale(1)';
+                        }
+                    });
+                    return;
+                }
+                
+                // Tampilkan elemen yang cocok
+                let found = false;
+                periodicElements.forEach(element => {
+                    if (element.symbol.toLowerCase().includes(searchTerm) || 
+                        element.name.toLowerCase().includes(searchTerm) ||
+                        element.number.toString().includes(searchTerm)) {
+                        
+                        const cells = document.querySelectorAll(`[data-symbol="${element.symbol}"]`);
+                        cells.forEach(cell => {
+                            cell.style.opacity = '1';
+                            cell.style.transform = 'scale(1.05)';
+                            cell.style.zIndex = '10';
+                            cell.style.boxShadow = '0 0 8px rgba(0,0,0,0.2)';
+                        });
+                        found = true;
+                    }
+                });
+                
+                // Jika tidak ditemukan, reset semua
+                if (!found) {
+                    document.querySelectorAll('.element-cell').forEach(cell => {
+                        if (cell.dataset.symbol) {
+                            cell.style.opacity = '1';
+                            cell.style.transform = 'scale(1)';
+                            cell.style.zIndex = '1';
+                            cell.style.boxShadow = '';
+                        }
+                    });
+                }
+            });
+            
+            // Fokus pada input pencarian dengan shortcut Ctrl+F
+            document.addEventListener('keydown', (e) => {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+                    e.preventDefault();
+                    searchInput.focus();
+                }
+            });
+            
+            // Tombol untuk lantanida dan aktinida
+            showLanthanidesBtn.addEventListener('click', showLanthanides);
+            showActinidesBtn.addEventListener('click', showActinides);
+        }
+
+        // Inisialisasi ketika halaman dimuat
+        document.addEventListener('DOMContentLoaded', initPeriodicTable);
+    </script>
+</body>
+</html>

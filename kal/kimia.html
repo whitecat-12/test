@@ -1,1 +1,1131 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalkulator Kimia - TETA SAINS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #38b2ac;
+            --secondary: #0e7490;
+            --accent: #f59e0b;
+            --chemistry: #10b981;
+            --astronomy: #ec4899;
+        }
+        
+        body {
+            font-family: 'Baloo 2', cursive;
+            background-color: #f8fafc;
+        }
+        
+        .app-container {
+            max-width: 414px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            max-width: 414px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            background: white;
+            z-index: 10;
+            height: 70px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+            text-decoration: none;
+            flex: 1;
+            height: 100%;
+            padding: 0.5rem 0;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item span {
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
+        
+        .nav-item.active {
+            color: var(--primary);
+        }
+        
+        .nav-icon {
+            transition: all 0.3s ease;
+            font-size: 1.25rem;
+        }
+        
+        .nav-icon.active {
+            transform: translateY(-5px);
+            color: var(--primary);
+        }
+        
+        .app-logo {
+            display: flex;
+            align-items: center;
+        }
+        
+        .app-logo-icon {
+            background: linear-gradient(135deg, #10b981, #34d399);
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 8px;
+        }
+        
+        .app-name {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: #10b981;
+        }
 
+        /* Main Navbar Styles */
+        .main-navbar {
+            display: flex;
+            background: white;
+            border-bottom: 1px solid #e2e8f0;
+            margin: 0 -1rem;
+            padding: 0 1rem;
+        }
+        
+        .main-nav-item {
+            flex: 1;
+            text-align: center;
+            padding: 12px 0;
+            font-weight: 600;
+            font-size: 14px;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .main-nav-item.active {
+            color: #10b981;
+        }
+        
+        .main-nav-item.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #10b981;
+            border-radius: 3px 3px 0 0;
+        }
+
+        /* Container Styles */
+        .calc-container {
+            padding: 1rem;
+            background: white;
+        }
+        
+        /* Mode Selector - Chemistry */
+        .mode-selector {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+            margin-top: 15px;
+            margin-bottom: 15px;
+            background: #f1f5f9;
+            padding: 4px;
+            border-radius: 8px;
+        }
+        
+        .mode-btn {
+            padding: 10px 4px;
+            border-radius: 6px;
+            border: none;
+            background: transparent;
+            color: #64748b;
+            cursor: pointer;
+            font-family: 'Baloo 2', cursive;
+            font-weight: 500;
+            font-size: 11px;
+            transition: all 0.3s;
+            white-space: nowrap;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .mode-btn i {
+            font-size: 14px;
+        }
+        
+        .mode-btn.active {
+            background: white;
+            color: #10b981;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .mode-btn.stoichiometry.active {
+            background: linear-gradient(135deg, #f59e0b, #fbbf24);
+            color: white;
+        }
+        
+        .mode-btn.concentration.active {
+            background: linear-gradient(135deg, #ec4899, #f472b6);
+            color: white;
+        }
+        
+        .mode-btn.gas.active {
+            background: linear-gradient(135deg, #06b6d4, #22d3ee);
+            color: white;
+        }
+        
+        .mode-btn.ph.active {
+            background: linear-gradient(135deg, #8b5cf6, #a78bfa);
+            color: white;
+        }
+        
+        /* Panel Styles */
+        .calc-panel {
+            display: none;
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 15px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .calc-panel.active {
+            display: block;
+        }
+        
+        .panel-title {
+            text-align: center;
+            font-weight: 700;
+            font-size: 18px;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        .panel-title.stoichiometry {
+            color: #f59e0b;
+            border-bottom-color: #f59e0b;
+        }
+        
+        .panel-title.concentration {
+            color: #ec4899;
+            border-bottom-color: #ec4899;
+        }
+        
+        .panel-title.gas {
+            color: #06b6d4;
+            border-bottom-color: #06b6d4;
+        }
+        
+        .panel-title.ph {
+            color: #8b5cf6;
+            border-bottom-color: #8b5cf6;
+        }
+        
+        /* Input Styles */
+        .input-group {
+            margin-bottom: 16px;
+        }
+        
+        .input-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+            font-size: 14px;
+            color: #475569;
+        }
+        
+        .input-label span {
+            font-weight: 600;
+        }
+        
+        .unit {
+            font-size: 12px;
+            color: #94a3b8;
+        }
+        
+        .input-field {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-family: 'Baloo 2', cursive;
+            font-size: 16px;
+            background: white;
+            transition: all 0.3s;
+        }
+        
+        .input-field:focus {
+            outline: none;
+            border-color: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+        
+        select.input-field {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+        }
+        
+        /* Button Styles */
+        .calc-btn {
+            width: 100%;
+            padding: 14px;
+            border-radius: 8px;
+            border: none;
+            font-family: 'Baloo 2', cursive;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 10px;
+        }
+        
+        .calc-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .calc-btn:active {
+            transform: translateY(0);
+        }
+        
+        .calc-btn.stoichiometry {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            color: white;
+        }
+        
+        .calc-btn.concentration {
+            background: linear-gradient(135deg, #ec4899, #db2777);
+            color: white;
+        }
+        
+        .calc-btn.gas {
+            background: linear-gradient(135deg, #06b6d4, #0891b2);
+            color: white;
+        }
+        
+        .calc-btn.ph {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            color: white;
+        }
+        
+        .calc-btn.reset {
+            background: #f1f5f9;
+            color: #475569;
+            border: 1px solid #cbd5e1;
+            margin-top: 8px;
+        }
+        
+        /* Result Styles */
+        .result-container {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .result-title {
+            text-align: center;
+            font-weight: 600;
+            color: #10b981;
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+        
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        
+        .result-item:last-child {
+            border-bottom: none;
+        }
+        
+        .result-label {
+            color: #64748b;
+            font-size: 14px;
+        }
+        
+        .result-value {
+            font-weight: 600;
+            font-size: 16px;
+            color: #1e293b;
+        }
+        
+        /* Formula Display */
+        .formula-display {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+            border: 1px solid #e2e8f0;
+            font-size: 14px;
+            color: #475569;
+        }
+        
+        .formula-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #10b981;
+        }
+        
+        .formula {
+            font-family: monospace;
+            background: #f8fafc;
+            padding: 8px;
+            border-radius: 4px;
+            margin-top: 5px;
+            border-left: 3px solid #10b981;
+        }
+        
+        /* Responsive */
+        @media (max-width: 380px) {
+            .mode-btn {
+                font-size: 10px;
+                padding: 8px 2px;
+            }
+            
+            .mode-btn i {
+                font-size: 12px;
+            }
+            
+            .mode-selector {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 420px) {
+            .calc-container {
+                padding: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile App Container -->
+    <div class="app-container">
+        <!-- App Header -->
+        <header class="bg-gradient-to-r from-green-100 to-green-50 p-4 text-white">
+            <div class="flex justify-between items-center">
+                <div class="app-logo">
+                    <div class="app-logo-icon">
+                        <i class="fas fa-flask"></i>
+                    </div>
+                    <h1 class="app-name">KALKULATOR KIMIA</h1>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Main Navbar -->
+        <div class="main-navbar">
+            <div class="main-nav-item active">
+                <i class="fas fa-flask mr-1"></i> Kalkulator Kimia
+            </div>
+        </div>
+        
+        <!-- Main Content Area -->
+        <main class="pb-20">
+            <div class="calc-container">
+                <!-- Chemistry Mode -->
+                <div id="chemistry-category" class="category-panel active">
+                    <!-- Mode Selector - Chemistry -->
+                    <div class="mode-selector chemistry">
+                        <button class="mode-btn stoichiometry active" data-mode="stoichiometry">
+                            <i class="fas fa-balance-scale"></i>
+                            <span>Stoikiometri</span>
+                        </button>
+                        <button class="mode-btn concentration" data-mode="concentration">
+                            <i class="fas fa-vial"></i>
+                            <span>Konsentrasi</span>
+                        </button>
+                        <button class="mode-btn gas" data-mode="gas">
+                            <i class="fas fa-wind"></i>
+                            <span>Gas Ideal</span>
+                        </button>
+                        <button class="mode-btn ph" data-mode="ph">
+                            <i class="fas fa-vial"></i>
+                            <span>pH & pOH</span>
+                        </button>
+                    </div>
+                    
+                    <!-- Kalkulator Stoikiometri -->
+                    <div id="stoichiometry-mode" class="calc-panel active">
+                        <h2 class="panel-title stoichiometry">Kalkulator Stoikiometri</h2>
+                        
+                        <div class="input-group">
+                            <div class="input-label">
+                                <span>Massa Zat (m)</span>
+                                <span class="unit">gram</span>
+                            </div>
+                            <input type="number" id="stoich-mass" class="input-field" placeholder="0" step="any">
+                        </div>
+                        
+                        <div class="input-group">
+                            <div class="input-label">
+                                <span>Massa Molekul Relatif (Mr)</span>
+                                <span class="unit">g/mol</span>
+                            </div>
+                            <input type="number" id="stoich-mr" class="input-field" placeholder="0" step="any">
+                        </div>
+                        
+                        <div class="input-group">
+                            <div class="input-label">
+                                <span>Volume Gas (STP)</span>
+                                <span class="unit">L</span>
+                            </div>
+                            <input type="number" id="stoich-volume" class="input-field" placeholder="0" step="any">
+                        </div>
+                        
+                        <div class="input-group">
+                            <div class="input-label">
+                                <span>Jumlah Partikel</span>
+                                <span class="unit">partikel</span>
+                            </div>
+                            <input type="number" id="stoich-particles" class="input-field" placeholder="0" step="any">
+                        </div>
+                        
+                        <button id="calculate-stoichiometry" class="calc-btn stoichiometry">
+                            <i class="fas fa-calculator mr-2"></i>Hitung Stoikiometri
+                        </button>
+                        <button id="reset-stoichiometry" class="calc-btn reset">
+                            <i class="fas fa-redo mr-2"></i>Reset
+                        </button>
+                        
+                        <div class="result-container" id="stoichiometry-result" style="display: none;">
+                            <div class="result-title">Hasil Perhitungan</div>
+                            <div class="result-item">
+                                <span class="result-label">Jumlah Mol (n):</span>
+                                <span class="result-value" id="stoich-result-n">0 mol</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">Massa:</span>
+                                <span class="result-value" id="stoich-result-mass">0 gram</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">Volume Gas (STP):</span>
+                                <span class="result-value" id="stoich-result-volume">0 L</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">Jumlah Partikel:</span>
+                                <span class="result-value" id="stoich-result-particles">0 partikel</span>
+                            </div>
+                        </div>
+                        
+                        <div class="formula-display">
+                            <div class="formula-title">Rumus Stoikiometri:</div>
+                            <div class="formula">n = massa / Mr (Jumlah mol)</div>
+                            <div class="formula">V = n × 22.4 L (Volume gas STP)</div>
+                            <div class="formula">N = n × 6.02×10²³ (Jumlah partikel)</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Kalkulator Konsentrasi -->
+                    <div id="concentration-mode" class="calc-panel">
+                        <h2 class="panel-title concentration">Kalkulator Konsentrasi</h2>
+                        
+                        <div class="input-group">
+                            <div class="input-label">
+                                <span>Jenis Konsentrasi</span>
+                            </div>
+                            <select id="concentration-type" class="input-field">
+                                <option value="molaritas">Molaritas (M)</option>
+                                <option value="molalitas">Molalitas (m)</option>
+                                <option value="normalitas">Normalitas (N)</option>
+                                <option value="fraksi-mol">Fraksi Mol (X)</option>
+                            </select>
+                        </div>
+                        
+                        <div class="input-group">
+                            <div class="input-label">
+                                <span>Massa Zat Terlarut</span>
+                                <span class="unit">gram</span>
+                            </div>
+                            <input type="number" id="conc-mass-solute" class="input-field" placeholder="0" step="any">
+                        </div>
+                        
+                        <div class="input-group">
+                            <div class="input-label">
+                                <span>Mr Zat Terlarut</span>
+                                <span class="unit">g/mol</span>
+                            </div>
+                            <input type="number" id="conc-mr-solute" class="input-field" placeholder="0" step="any">
+                        </div>
+                        
+                        <div class="input-group">
+                            <div class="input-label">
+                                <span>Volume Larutan</span>
+                                <span class="unit">L</span>
+                            </div>
+                            <input type="number" id="conc-volume" class="input-field" placeholder="0" step="any">
+                        </div>
+                        
+                        <div class="input-group">
+                            <div class="input-label">
+                                <span>Massa Pelarut</span>
+                                <span class="unit">kg</span>
+                            </div>
+                            <input type="number" id="conc-mass-solvent" class="input-field" placeholder="0" step="any">
+                        </div>
+                        
+                        <button id="calculate-concentration" class="calc-btn concentration">
+                            <i class="fas fa-calculator mr-2"></i>Hitung Konsentrasi
+                        </button>
+                        <button id="reset-concentration" class="calc-btn reset">
+                            <i class="fas fa-redo mr-2"></i>Reset
+                        </button>
+                        
+                        <div class="result-container" id="concentration-result" style="display: none;">
+                            <div class="result-title">Hasil Perhitungan</div>
+                            <div class="result-item">
+                                <span class="result-label" id="conc-result-label">Molaritas:</span>
+                                <span class="result-value" id="conc-result-value">0 M</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">Jumlah Mol:</span>
+                                <span class="result-value" id="conc-result-moles">0 mol</span>
+                            </div>
+                        </div>
+                        
+                        <div class="formula-display">
+                            <div class="formula-title">Rumus Konsentrasi:</div>
+                            <div class="formula">M = n / V (Molaritas)</div>
+                            <div class="formula">m = n / massa pelarut (Molalitas)</div>
+                            <div class="formula">N = n × valensi / V (Normalitas)</div>
+                            <div class="formula">X = n₁ / (n₁ + n₂) (Fraksi Mol)</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Kalkulator Gas Ideal -->
+                    <div id="gas-mode" class="calc-panel">
+                        <h2 class="panel-title gas">Kalkulator Gas Ideal</h2>
+                        
+                        <div class="input-group">
+                            <div class="input-label">
+                                <span>Tekanan (P)</span>
+                                <span class="unit">atm</span>
+                            </div>
+                            <input type="number" id="gas-p" class="input-field" placeholder="0" step="any">
+                        </div>
+                        
+                        <div class="input-group">
+                            <div class="input-label">
+                                <span>Volume (V)</span>
+                                <span class="unit">L</span>
+                            </div>
+                            <input type="number" id="gas-v" class="input-field" placeholder="0" step="any">
+                        </div>
+                        
+                        <div class="input-group">
+                            <div class="input-label">
+                                <span>Jumlah Mol (n)</span>
+                                <span class="unit">mol</span>
+                            </div>
+                            <input type="number" id="gas-n" class="input-field" placeholder="0" step="any">
+                        </div>
+                        
+                        <div class="input-group">
+                            <div class="input-label">
+                                <span>Suhu (T)</span>
+                                <span class="unit">K</span>
+                            </div>
+                            <input type="number" id="gas-t" class="input-field" placeholder="0" step="any">
+                        </div>
+                        
+                        <button id="calculate-gas" class="calc-btn gas">
+                            <i class="fas fa-calculator mr-2"></i>Hitung Gas Ideal
+                        </button>
+                        <button id="reset-gas" class="calc-btn reset">
+                            <i class="fas fa-redo mr-2"></i>Reset
+                        </button>
+                        
+                        <div class="result-container" id="gas-result" style="display: none;">
+                            <div class="result-title">Hasil Perhitungan</div>
+                            <div class="result-item">
+                                <span class="result-label">Tekanan (P):</span>
+                                <span class="result-value" id="gas-result-p">0 atm</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">Volume (V):</span>
+                                <span class="result-value" id="gas-result-v">0 L</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">Jumlah Mol (n):</span>
+                                <span class="result-value" id="gas-result-n">0 mol</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">Suhu (T):</span>
+                                <span class="result-value" id="gas-result-t">0 K</span>
+                            </div>
+                        </div>
+                        
+                        <div class="formula-display">
+                            <div class="formula-title">Hukum Gas Ideal:</div>
+                            <div class="formula">PV = nRT</div>
+                            <div class="formula">R = 0.0821 L·atm/mol·K</div>
+                            <div class="formula">T(K) = T(°C) + 273</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Kalkulator pH & pOH -->
+                    <div id="ph-mode" class="calc-panel">
+                        <h2 class="panel-title ph">Kalkulator pH & pOH</h2>
+                        
+                        <div class="input-group">
+                            <div class="input-label">
+                                <span>Jenis Larutan</span>
+                            </div>
+                            <select id="solution-type" class="input-field">
+                                <option value="acid-strong">Asam Kuat</option>
+                                <option value="base-strong">Basa Kuat</option>
+                                <option value="acid-weak">Asam Lemah</option>
+                                <option value="base-weak">Basa Lemah</option>
+                            </select>
+                        </div>
+                        
+                        <div class="input-group">
+                            <div class="input-label">
+                                <span>Konsentrasi [H⁺] atau [OH⁻]</span>
+                                <span class="unit">M</span>
+                            </div>
+                            <input type="number" id="ph-concentration" class="input-field" placeholder="0" step="any">
+                        </div>
+                        
+                        <div class="input-group">
+                            <div class="input-label">
+                                <span>Konstanta Ionisasi (Ka/Kb)</span>
+                                <span class="unit">-</span>
+                            </div>
+                            <input type="number" id="ph-ka" class="input-field" placeholder="0" step="any">
+                        </div>
+                        
+                        <button id="calculate-ph" class="calc-btn ph">
+                            <i class="fas fa-calculator mr-2"></i>Hitung pH & pOH
+                        </button>
+                        <button id="reset-ph" class="calc-btn reset">
+                            <i class="fas fa-redo mr-2"></i>Reset
+                        </button>
+                        
+                        <div class="result-container" id="ph-result" style="display: none;">
+                            <div class="result-title">Hasil Perhitungan</div>
+                            <div class="result-item">
+                                <span class="result-label">pH:</span>
+                                <span class="result-value" id="ph-result-ph">0</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">pOH:</span>
+                                <span class="result-value" id="ph-result-poh">0</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">[H⁺]:</span>
+                                <span class="result-value" id="ph-result-h">0 M</span>
+                            </div>
+                            <div class="result-item">
+                                <span class="result-label">[OH⁻]:</span>
+                                <span class="result-value" id="ph-result-oh">0 M</span>
+                            </div>
+                        </div>
+                        
+                        <div class="formula-display">
+                            <div class="formula-title">Rumus pH & pOH:</div>
+                            <div class="formula">pH = -log[H⁺]</div>
+                            <div class="formula">pOH = -log[OH⁻]</div>
+                            <div class="formula">pH + pOH = 14</div>
+                            <div class="formula">[H⁺] = 10⁻ᴾᴴ</div>
+                            <div class="formula">[OH⁻] = 10⁻ᴾᴼᴴ</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <!-- BOTTOM NAVIGATION -->
+        <nav class="bottom-nav">
+            <a href="dashboad siswa.html" class="nav-item">
+                <i class="fas fa-home nav-icon"></i>
+                <span>Beranda</span>
+            </a>
+            <a href="soal harian/dashboard soal.html" class="nav-item">
+                <i class="fas fa-flask nav-icon"></i>
+                <span>Soal Harian</span>
+            </a>
+            <a href="ai/nayra.html" class="nav-item">
+                <i class="fas fa-robot nav-icon"></i>
+                <span>Nayra AI</span>
+            </a>
+            <a href="materi harian/kategori materi.html" class="nav-item">
+                <i class="fas fa-chalkboard-teacher nav-icon"></i>
+                <span>Materi Harian</span>
+            </a>
+            <a href="profil/profil.html" class="nav-item">
+                <i class="fas fa-user nav-icon"></i>
+                <span>Profil</span>
+            </a>
+        </nav>
+    </div>
+
+    <script>
+        // Constants
+        const R = 0.0821; // Gas constant (L·atm/mol·K)
+        const NA = 6.02e23; // Avogadro's number
+        const V_STP = 22.4; // Volume of 1 mole gas at STP (L)
+
+        // Main Navigation
+        document.addEventListener('DOMContentLoaded', function() {
+            // Bottom nav interaction
+            const navItems = document.querySelectorAll('.nav-item');
+            navItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    navItems.forEach(nav => {
+                        nav.classList.remove('active');
+                        nav.querySelector('.nav-icon').classList.remove('active');
+                    });
+                    
+                    this.classList.add('active');
+                    this.querySelector('.nav-icon').classList.add('active');
+                });
+            });
+            
+            // Initialize calculators
+            initChemistryCalculators();
+        });
+
+        // Chemistry Calculators
+        function initChemistryCalculators() {
+            // Mode switching for chemistry
+            const chemistryModeBtns = document.querySelectorAll('#chemistry-category .mode-btn');
+            const chemistryModes = {
+                'stoichiometry': document.getElementById('stoichiometry-mode'),
+                'concentration': document.getElementById('concentration-mode'),
+                'gas': document.getElementById('gas-mode'),
+                'ph': document.getElementById('ph-mode')
+            };
+            
+            chemistryModeBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const mode = this.dataset.mode;
+                    
+                    // Update active button
+                    chemistryModeBtns.forEach(b => {
+                        b.classList.remove('active');
+                        b.classList.remove('stoichiometry', 'concentration', 'gas', 'ph');
+                    });
+                    
+                    this.classList.add('active');
+                    this.classList.add(mode);
+                    
+                    // Hide all modes
+                    Object.values(chemistryModes).forEach(m => {
+                        if(m) {
+                            m.style.display = 'none';
+                            m.classList.remove('active');
+                        }
+                    });
+                    
+                    // Show selected mode
+                    if(chemistryModes[mode]) {
+                        chemistryModes[mode].style.display = 'block';
+                        chemistryModes[mode].classList.add('active');
+                    }
+                });
+            });
+            
+            // Initialize individual calculators
+            initStoichiometryCalculator();
+            initConcentrationCalculator();
+            initGasCalculator();
+            initPHCalculator();
+        }
+
+        // Stoichiometry Calculator
+        function initStoichiometryCalculator() {
+            const calculateBtn = document.getElementById('calculate-stoichiometry');
+            const resetBtn = document.getElementById('reset-stoichiometry');
+            const resultDiv = document.getElementById('stoichiometry-result');
+            
+            calculateBtn.addEventListener('click', function() {
+                // Get input values
+                const mass = parseFloat(document.getElementById('stoich-mass').value);
+                const mr = parseFloat(document.getElementById('stoich-mr').value);
+                const volume = parseFloat(document.getElementById('stoich-volume').value);
+                const particles = parseFloat(document.getElementById('stoich-particles').value);
+                
+                let n = null; // moles
+                
+                // Calculate moles from different inputs
+                if (mass !== null && !isNaN(mass) && mr !== null && !isNaN(mr) && mr > 0) {
+                    n = mass / mr;
+                } else if (volume !== null && !isNaN(volume)) {
+                    n = volume / V_STP;
+                } else if (particles !== null && !isNaN(particles)) {
+                    n = particles / NA;
+                }
+                
+                // Calculate other properties from moles
+                let calculatedMass = null;
+                let calculatedVolume = null;
+                let calculatedParticles = null;
+                
+                if (n !== null && !isNaN(n)) {
+                    if (mr !== null && !isNaN(mr) && mr > 0) {
+                        calculatedMass = n * mr;
+                    }
+                    calculatedVolume = n * V_STP;
+                    calculatedParticles = n * NA;
+                }
+                
+                // Display results
+                document.getElementById('stoich-result-n').textContent = n !== null && !isNaN(n) ? n.toFixed(4) + ' mol' : '-';
+                document.getElementById('stoich-result-mass').textContent = calculatedMass !== null && !isNaN(calculatedMass) ? calculatedMass.toFixed(2) + ' gram' : '-';
+                document.getElementById('stoich-result-volume').textContent = calculatedVolume !== null && !isNaN(calculatedVolume) ? calculatedVolume.toFixed(2) + ' L' : '-';
+                document.getElementById('stoich-result-particles').textContent = calculatedParticles !== null && !isNaN(calculatedParticles) ? calculatedParticles.toExponential(2) + ' partikel' : '-';
+                
+                // Show result container
+                resultDiv.style.display = 'block';
+            });
+            
+            resetBtn.addEventListener('click', function() {
+                // Clear all inputs
+                document.getElementById('stoich-mass').value = '';
+                document.getElementById('stoich-mr').value = '';
+                document.getElementById('stoich-volume').value = '';
+                document.getElementById('stoich-particles').value = '';
+                
+                // Hide result container
+                resultDiv.style.display = 'none';
+            });
+        }
+
+        // Concentration Calculator
+        function initConcentrationCalculator() {
+            const calculateBtn = document.getElementById('calculate-concentration');
+            const resetBtn = document.getElementById('reset-concentration');
+            const resultDiv = document.getElementById('concentration-result');
+            const typeSelect = document.getElementById('concentration-type');
+            
+            calculateBtn.addEventListener('click', function() {
+                // Get input values
+                const type = typeSelect.value;
+                const massSolute = parseFloat(document.getElementById('conc-mass-solute').value) || 0;
+                const mrSolute = parseFloat(document.getElementById('conc-mr-solute').value) || 1;
+                const volume = parseFloat(document.getElementById('conc-volume').value) || 0;
+                const massSolvent = parseFloat(document.getElementById('conc-mass-solvent').value) || 0;
+                
+                // Calculate moles
+                const n = massSolute / mrSolute;
+                
+                let resultValue = 0;
+                let resultLabel = '';
+                
+                // Calculate based on concentration type
+                switch(type) {
+                    case 'molaritas':
+                        if (volume > 0) {
+                            resultValue = n / volume;
+                            resultLabel = 'Molaritas:';
+                        }
+                        break;
+                    case 'molalitas':
+                        if (massSolvent > 0) {
+                            resultValue = n / massSolvent;
+                            resultLabel = 'Molalitas:';
+                        }
+                        break;
+                    case 'normalitas':
+                        // Assuming valency = 1 for simplicity
+                        if (volume > 0) {
+                            resultValue = n / volume;
+                            resultLabel = 'Normalitas:';
+                        }
+                        break;
+                    case 'fraksi-mol':
+                        // Assuming only solute moles for simplicity
+                        if (n > 0) {
+                            resultValue = n; // Just show solute moles for now
+                            resultLabel = 'Fraksi Mol zat terlarut:';
+                        }
+                        break;
+                }
+                
+                // Display results
+                document.getElementById('conc-result-label').textContent = resultLabel;
+                document.getElementById('conc-result-value').textContent = resultValue.toFixed(4) + (type === 'fraksi-mol' ? '' : (type === 'molalitas' ? ' m' : (type === 'normalitas' ? ' N' : ' M')));
+                document.getElementById('conc-result-moles').textContent = n.toFixed(4) + ' mol';
+                
+                // Show result container
+                resultDiv.style.display = 'block';
+            });
+            
+            resetBtn.addEventListener('click', function() {
+                // Clear all inputs
+                document.getElementById('conc-mass-solute').value = '';
+                document.getElementById('conc-mr-solute').value = '';
+                document.getElementById('conc-volume').value = '';
+                document.getElementById('conc-mass-solvent').value = '';
+                
+                // Hide result container
+                resultDiv.style.display = 'none';
+            });
+        }
+
+        // Gas Ideal Calculator
+        function initGasCalculator() {
+            const calculateBtn = document.getElementById('calculate-gas');
+            const resetBtn = document.getElementById('reset-gas');
+            const resultDiv = document.getElementById('gas-result');
+            
+            calculateBtn.addEventListener('click', function() {
+                // Get input values
+                const P = parseFloat(document.getElementById('gas-p').value);
+                const V = parseFloat(document.getElementById('gas-v').value);
+                const n = parseFloat(document.getElementById('gas-n').value);
+                const T = parseFloat(document.getElementById('gas-t').value);
+                
+                let calculatedP = P;
+                let calculatedV = V;
+                let calculatedN = n;
+                let calculatedT = T;
+                
+                // Count how many values are provided
+                const providedValues = [P, V, n, T].filter(val => val !== null && !isNaN(val)).length;
+                
+                // If 3 values are provided, calculate the 4th
+                if (providedValues >= 3) {
+                    if (calculatedP === null || isNaN(calculatedP)) {
+                        calculatedP = (n * R * T) / V;
+                    } else if (calculatedV === null || isNaN(calculatedV)) {
+                        calculatedV = (n * R * T) / P;
+                    } else if (calculatedN === null || isNaN(calculatedN)) {
+                        calculatedN = (P * V) / (R * T);
+                    } else if (calculatedT === null || isNaN(calculatedT)) {
+                        calculatedT = (P * V) / (n * R);
+                    }
+                }
+                
+                // Display results
+                document.getElementById('gas-result-p').textContent = calculatedP !== null && !isNaN(calculatedP) ? calculatedP.toFixed(3) + ' atm' : '-';
+                document.getElementById('gas-result-v').textContent = calculatedV !== null && !isNaN(calculatedV) ? calculatedV.toFixed(3) + ' L' : '-';
+                document.getElementById('gas-result-n').textContent = calculatedN !== null && !isNaN(calculatedN) ? calculatedN.toFixed(4) + ' mol' : '-';
+                document.getElementById('gas-result-t').textContent = calculatedT !== null && !isNaN(calculatedT) ? calculatedT.toFixed(1) + ' K' : '-';
+                
+                // Show result container
+                resultDiv.style.display = 'block';
+            });
+            
+            resetBtn.addEventListener('click', function() {
+                // Clear all inputs
+                document.getElementById('gas-p').value = '';
+                document.getElementById('gas-v').value = '';
+                document.getElementById('gas-n').value = '';
+                document.getElementById('gas-t').value = '';
+                
+                // Hide result container
+                resultDiv.style.display = 'none';
+            });
+        }
+
+        // pH Calculator
+        function initPHCalculator() {
+            const calculateBtn = document.getElementById('calculate-ph');
+            const resetBtn = document.getElementById('reset-ph');
+            const resultDiv = document.getElementById('ph-result');
+            const typeSelect = document.getElementById('solution-type');
+            
+            calculateBtn.addEventListener('click', function() {
+                // Get input values
+                const type = typeSelect.value;
+                const concentration = parseFloat(document.getElementById('ph-concentration').value) || 0;
+                const ka = parseFloat(document.getElementById('ph-ka').value);
+                
+                let H = 0;
+                let OH = 0;
+                
+                // Calculate H+ and OH- based on solution type
+                switch(type) {
+                    case 'acid-strong':
+                        // Strong acid: [H+] = concentration
+                        H = concentration;
+                        break;
+                    case 'base-strong':
+                        // Strong base: [OH-] = concentration
+                        OH = concentration;
+                        break;
+                    case 'acid-weak':
+                        // Weak acid: [H+] = sqrt(Ka * concentration)
+                        if (ka && ka > 0) {
+                            H = Math.sqrt(ka * concentration);
+                        }
+                        break;
+                    case 'base-weak':
+                        // Weak base: [OH-] = sqrt(Kb * concentration)
+                        if (ka && ka > 0) {
+                            OH = Math.sqrt(ka * concentration);
+                        }
+                        break;
+                }
+                
+                // Calculate pH and pOH
+                let pH = 0;
+                let pOH = 0;
+                
+                if (H > 0) {
+                    pH = -Math.log10(H);
+                    pOH = 14 - pH;
+                    OH = Math.pow(10, -pOH);
+                } else if (OH > 0) {
+                    pOH = -Math.log10(OH);
+                    pH = 14 - pOH;
+                    H = Math.pow(10, -pH);
+                }
+                
+                // Display results
+                document.getElementById('ph-result-ph').textContent = pH.toFixed(2);
+                document.getElementById('ph-result-poh').textContent = pOH.toFixed(2);
+                document.getElementById('ph-result-h').textContent = H.toExponential(2) + ' M';
+                document.getElementById('ph-result-oh').textContent = OH.toExponential(2) + ' M';
+                
+                // Show result container
+                resultDiv.style.display = 'block';
+            });
+            
+            resetBtn.addEventListener('click', function() {
+                // Clear all inputs
+                document.getElementById('ph-concentration').value = '';
+                document.getElementById('ph-ka').value = '';
+                
+                // Hide result container
+                resultDiv.style.display = 'none';
+            });
+        }
+    </script>
+</body>
+</html>

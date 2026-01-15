@@ -1,0 +1,1988 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QUANTARA - Luxmeter dengan Kamera</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #38b2ac;
+            --secondary: #0e7490;
+            --accent: #f59e0b;
+        }
+        
+        body {
+            font-family: 'Baloo 2', cursive;
+            background-color: #f8fafc;
+        }
+        
+        .app-container {
+            max-width: 414px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        /* NAVBAR */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            max-width: 414px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            background: white;
+            z-index: 10;
+            height: 70px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+            text-decoration: none;
+            flex: 1;
+            height: 100%;
+            padding: 0.5rem 0;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item span {
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
+        
+        .nav-item.active {
+            color: var(--primary);
+        }
+        
+        .nav-icon {
+            transition: all 0.3s ease;
+            font-size: 1.25rem;
+        }
+        
+        .nav-icon.active {
+            transform: translateY(-5px);
+            color: var(--primary);
+        }
+        
+        /* Video Container */
+        .video-container {
+            position: relative;
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            height: 300px;
+        }
+        
+        #video-preview {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        /* Canvas untuk analisis */
+        .analysis-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100% !important;
+            height: 100% !important;
+            pointer-events: none;
+        }
+        
+        /* Lux Meter */
+        .lux-meter {
+            height: 16px;
+            background: linear-gradient(to right, #1e3a8a, #3b82f6, #60a5fa, #93c5fd, #dbeafe);
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .lux-indicator {
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            width: 4px;
+            position: absolute;
+            top: 0;
+            transform: translateX(-50%);
+            transition: left 0.5s ease;
+            box-shadow: 0 0 5px rgba(0,0,0,0.3);
+        }
+        
+        /* Chart Container */
+        .chart-container {
+            height: 280px;
+            position: relative;
+            background: white;
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        /* Chart Controls */
+        .chart-controls {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .chart-btn {
+            padding: 4px 10px;
+            font-size: 11px;
+            border-radius: 6px;
+            background: #f3f4f6;
+            border: 1px solid #d1d5db;
+            color: #374151;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .chart-btn:hover {
+            background: #e5e7eb;
+        }
+        
+        .chart-btn.active {
+            background: #38b2ac;
+            color: white;
+            border-color: #38b2ac;
+        }
+        
+        /* Data panel */
+        .data-panel {
+            transition: all 0.3s ease;
+        }
+        
+        .data-panel.collapsed {
+            max-height: 60px;
+            overflow: hidden;
+        }
+        
+        /* Custom Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+        
+        /* Detection Status */
+        .detection-status {
+            font-size: 11px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            display: inline-block;
+        }
+        
+        .detection-good {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+        
+        .detection-fair {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+        
+        .detection-poor {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+        
+        /* Loading Spinner */
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #38b2ac;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Error Message */
+        .error-message {
+            background-color: #fee2e2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+            display: none;
+        }
+        
+        /* Table Styles */
+        .data-table {
+            width: 100%;
+            font-size: 12px;
+            border-collapse: collapse;
+            background: white;
+        }
+        
+        .data-table th {
+            background-color: #38b2ac;
+            color: white;
+            padding: 10px 12px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid #2c9c96;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .data-table td {
+            padding: 8px 12px;
+            border-bottom: 1px solid #f1f5f9;
+            color: #475569;
+        }
+        
+        .data-table tr:hover {
+            background-color: #f8fafc;
+        }
+        
+        .data-table tr:nth-child(even) {
+            background-color: #f9fafb;
+        }
+        
+        .data-table tr:nth-child(even):hover {
+            background-color: #f3f4f6;
+        }
+        
+        /* Export Buttons */
+        .export-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .export-btn {
+            flex: 1;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            transition: all 0.2s;
+        }
+        
+        .export-btn-chart {
+            background-color: #38b2ac;
+            color: white;
+        }
+        
+        .export-btn-chart:hover {
+            background-color: #319795;
+        }
+        
+        .export-btn-data {
+            background-color: #8b5cf6;
+            color: white;
+        }
+        
+        .export-btn-data:hover {
+            background-color: #7c3aed;
+        }
+        
+        /* Scrollable Table Container */
+        .table-container {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            margin-top: 10px;
+            background: white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+        }
+        
+        /* Calibration */
+        .calibration-section {
+            background-color: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 10px;
+        }
+        
+        .calibration-input {
+            width: 100%;
+            padding: 6px 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 12px;
+        }
+        
+        /* Section header */
+        .section-header {
+            font-size: 13px;
+            font-weight: 600;
+        }
+        
+        /* Result value */
+        .result-value {
+            font-size: 14px;
+        }
+        
+        /* Light Type Selection */
+        .light-type-toggle {
+            display: flex;
+            gap: 5px;
+            margin-top: 10px;
+        }
+        
+        .type-btn {
+            flex: 1;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+        }
+        
+        .type-btn-natural {
+            background-color: #e0f2fe;
+            color: #0369a1;
+            border: 1px solid #bae6fd;
+        }
+        
+        .type-btn-natural.active {
+            background-color: #0ea5e9;
+            color: white;
+            border-color: #0ea5e9;
+        }
+        
+        .type-btn-artificial {
+            background-color: #fce7f3;
+            color: #be185d;
+            border: 1px solid #fbcfe8;
+        }
+        
+        .type-btn-artificial.active {
+            background-color: #ec4899;
+            color: white;
+            border-color: #ec4899;
+        }
+        
+        /* Light Level Indicators */
+        .light-level-indicator {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        
+        .lux-value-display {
+            font-size: 28px;
+            font-weight: bold;
+            text-align: center;
+            margin: 10px 0;
+        }
+        
+        /* Lux Categories */
+        .lux-category {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        .lux-dark {
+            background-color: #1e293b;
+            color: white;
+        }
+        
+        .lux-dim {
+            background-color: #475569;
+            color: white;
+        }
+        
+        .lux-moderate {
+            background-color: #60a5fa;
+            color: white;
+        }
+        
+        .lux-bright {
+            background-color: #fbbf24;
+            color: #78350f;
+        }
+        
+        .lux-very-bright {
+            background-color: #fde68a;
+            color: #78350f;
+        }
+        
+        /* Camera Controls */
+        .camera-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .camera-btn {
+            flex: 1;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+        
+        /* Exposure Adjustment */
+        .exposure-control {
+            margin-top: 15px;
+        }
+        
+        .exposure-slider {
+            width: 100%;
+            height: 6px;
+            background: linear-gradient(to right, #1e293b, #cbd5e1);
+            border-radius: 3px;
+            outline: none;
+        }
+        
+        /* Sample Area Grid */
+        .sample-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            pointer-events: none;
+        }
+        
+        .grid-cell {
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            position: relative;
+        }
+        
+        .grid-cell-center {
+            border: 2px solid #f59e0b;
+        }
+        
+        .grid-value {
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            color: white;
+            font-size: 9px;
+            background: rgba(0,0,0,0.5);
+            padding: 1px 3px;
+            border-radius: 2px;
+        }
+        
+        /* White Balance Indicator */
+        .wb-indicator {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 0 5px rgba(0,0,0,0.3);
+        }
+        
+        @media (max-width: 380px) {
+            .chart-container {
+                height: 250px;
+            }
+            
+            .data-table {
+                font-size: 11px;
+            }
+            
+            .data-table th,
+            .data-table td {
+                padding: 8px 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile App Container -->
+    <div class="app-container">
+        
+        <!-- Loading Indicator -->
+        <div id="loading" class="fixed inset-0 bg-white bg-opacity-90 flex flex-col items-center justify-center z-50">
+            <div class="loading-spinner mb-4"></div>
+            <p class="text-gray-700 font-medium">Menyiapkan Luxmeter...</p>
+            <p class="text-gray-500 text-sm mt-2">Mengakses kamera dan sensor</p>
+        </div>
+        
+        <!-- Error Message -->
+        <div id="error-message" class="error-message m-4 hidden">
+            <div class="flex items-center">
+                <i class="fas fa-exclamation-triangle mr-3"></i>
+                <div>
+                    <p class="font-medium" id="error-title">Terjadi Kesalahan</p>
+                    <p class="text-sm" id="error-detail"></p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <main class="pb-24 p-4 custom-scrollbar" style="max-height: calc(100vh - 70px); overflow-y: auto;">
+            <!-- Page Title -->
+            <div class="mb-4">
+                <h1 class="text-lg font-bold text-gray-800 mb-1">
+                    <i class="fas fa-sun text-yellow-500 mr-2"></i> Luxmeter Digital
+                </h1>
+                <p class="text-gray-600 text-xs">
+                    Ukur intensitas cahaya dengan kamera smartphone secara real-time
+                </p>
+            </div>
+            
+            <!-- Camera Section -->
+            <div class="mb-6 p-4 bg-white border border-gray-200 rounded-xl shadow-sm">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="section-header text-gray-700 flex items-center">
+                        <i class="fas fa-camera text-blue-500 mr-2 text-xs"></i> Kamera Luxmeter
+                    </h3>
+                    <div class="text-xs text-gray-500" id="camera-status">
+                        <i class="fas fa-circle text-green-500 mr-1"></i> Siap
+                    </div>
+                </div>
+                
+                <!-- Camera Preview -->
+                <div id="camera-preview-container" class="mt-4">
+                    <div class="video-container">
+                        <video id="video-preview" class="w-full rounded-xl" playsinline autoplay></video>
+                        <canvas id="video-canvas" class="analysis-canvas w-full rounded-xl"></canvas>
+                        <canvas id="lux-canvas" class="hidden"></canvas>
+                        <!-- Sample Grid Overlay -->
+                        <div id="sample-grid" class="sample-grid">
+                            <!-- Grid cells will be generated here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Camera Controls -->
+                    <div class="camera-controls">
+                        <button id="btn-capture" class="camera-btn bg-blue-500 text-white hover:bg-blue-600">
+                            <i class="fas fa-camera mr-1"></i> Ambil Foto
+                        </button>
+                        <button id="btn-flash" class="camera-btn bg-gray-200 text-gray-700 hover:bg-gray-300">
+                            <i class="fas fa-bolt mr-1"></i> Flash
+                        </button>
+                        <button id="btn-switch-camera" class="camera-btn bg-gray-200 text-gray-700 hover:bg-gray-300">
+                            <i class="fas fa-sync-alt mr-1"></i> Ganti Kamera
+                        </button>
+                    </div>
+                    
+                    <!-- Camera Info -->
+                    <div class="mt-3 text-xs text-gray-500 flex justify-between">
+                        <div>
+                            <i class="fas fa-info-circle mr-1"></i>
+                            <span id="camera-resolution">-</span>
+                        </div>
+                        <div>
+                            <span id="frame-rate">0</span> FPS
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Real-time Lux Display -->
+            <div class="mb-6 p-4 bg-gradient-to-r from-yellow-50 to-amber-50 border border-yellow-200 rounded-xl shadow-sm">
+                <div class="text-center mb-4">
+                    <div class="lux-value-display">
+                        <span id="current-lux">0</span>
+                        <span class="text-lg">lux</span>
+                    </div>
+                    <div id="lux-category" class="lux-category lux-dim inline-block">Sangat Gelap</div>
+                </div>
+                
+                <!-- Lux Meter -->
+                <div class="mb-6">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-sm font-medium text-gray-700">Intensitas Cahaya</span>
+                        <span class="text-sm font-medium text-gray-700" id="lux-percentage">0%</span>
+                    </div>
+                    <div class="lux-meter relative">
+                        <div id="lux-indicator" class="lux-indicator" style="left: 0%;"></div>
+                    </div>
+                    <div class="flex justify-between text-xs text-gray-500 mt-1">
+                        <span>0 lux</span>
+                        <span>500 lux</span>
+                        <span>1K lux</span>
+                        <span>10K lux</span>
+                        <span>100K lux</span>
+                    </div>
+                </div>
+                
+                <!-- White Balance -->
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <span class="text-sm font-medium text-gray-700">White Balance</span>
+                        <div class="text-xs text-gray-500">Kualitas Cahaya</div>
+                    </div>
+                    <div class="flex items-center">
+                        <div id="wb-indicator" class="wb-indicator mr-2" style="background-color: #ffffff;"></div>
+                        <span id="wb-temperature" class="text-sm font-medium">5500K</span>
+                    </div>
+                </div>
+                
+                <!-- Light Type Selection -->
+                <div class="mb-4">
+                    <label class="block text-xs font-medium text-gray-700 mb-2">Jenis Cahaya</label>
+                    <div class="light-type-toggle">
+                        <div id="btn-natural" class="type-btn type-btn-natural active">
+                            <i class="fas fa-sun mr-1"></i> Alami
+                        </div>
+                        <div id="btn-artificial" class="type-btn type-btn-artificial">
+                            <i class="fas fa-lightbulb mr-1"></i> Buatan
+                        </div>
+                        <div id="btn-mixed" class="type-btn" style="background-color: #f0f9ff; color: #0e7490; border: 1px solid #bae6fd;">
+                            <i class="fas fa-blend mr-1"></i> Campuran
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Calibration Section -->
+            <div class="mb-6 p-4 bg-white border border-gray-200 rounded-xl shadow-sm">
+                <h3 class="section-header text-gray-700 flex items-center mb-4">
+                    <i class="fas fa-tachometer-alt text-purple-500 mr-2 text-xs"></i> Kalibrasi Luxmeter
+                </h3>
+                
+                <div class="space-y-4">
+                    <!-- Reference Lux Value -->
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-2">
+                            Nilai Referensi (lux)
+                        </label>
+                        <div class="flex gap-2">
+                            <select id="reference-preset" class="flex-1 p-2 border border-gray-300 rounded-lg text-xs">
+                                <option value="0">Pilih Preset</option>
+                                <option value="50">Cahaya Bulan (0.1-1 lux)</option>
+                                <option value="100">Lampu Jalan (10-50 lux)</option>
+                                <option value="300">Ruang Tamu (100-300 lux)</option>
+                                <option value="500">Kantor (300-500 lux)</option>
+                                <option value="1000">Supermarket (500-1000 lux)</option>
+                                <option value="10000">Cahaya Matahari (10K-100K lux)</option>
+                            </select>
+                            <button id="btn-apply-preset" class="px-3 bg-purple-100 text-purple-700 rounded-lg text-xs hover:bg-purple-200">
+                                Terapkan
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Manual Calibration -->
+                    <div class="calibration-section">
+                        <label class="block text-xs font-medium text-gray-700 mb-2">
+                            <i class="fas fa-ruler-combined mr-1"></i> Kalibrasi Manual
+                        </label>
+                        <div class="grid grid-cols-2 gap-2 mb-2">
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Nilai Referensi</label>
+                                <input type="number" id="reference-lux" value="500" min="0" step="1" class="calibration-input">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Nilai Terukur</label>
+                                <input type="number" id="measured-lux" value="0" min="0" step="1" class="calibration-input">
+                            </div>
+                        </div>
+                        <div class="text-xs text-gray-600 mb-2">
+                            <i class="fas fa-info-circle mr-1"></i> Gunakan luxmeter referensi untuk kalibrasi akurat
+                        </div>
+                        <button id="btn-calibrate" class="w-full py-2 bg-purple-100 text-purple-700 rounded-lg text-xs font-medium hover:bg-purple-200">
+                            <i class="fas fa-calculator mr-1"></i> Kalibrasi
+                        </button>
+                        <div id="calibration-result" class="mt-2 text-xs text-green-600 hidden">
+                            <i class="fas fa-check-circle mr-1"></i>
+                            Faktor Kalibrasi: <span id="calibration-factor">1.0</span>
+                        </div>
+                    </div>
+                    
+                    <!-- Exposure Settings -->
+                    <div class="exposure-control">
+                        <label class="block text-xs font-medium text-gray-700 mb-2">
+                            Kompensasi Eksposur: <span id="exposure-value" class="text-teal-600">0</span> EV
+                        </label>
+                        <input type="range" id="exposure-slider" min="-2" max="2" step="0.1" value="0" class="exposure-slider">
+                        <div class="flex justify-between text-xs text-gray-500 mt-1">
+                            <span>-2 EV</span>
+                            <span>Normal</span>
+                            <span>+2 EV</span>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-1">Atur untuk kondisi pencahayaan yang berbeda</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Light Quality Analysis -->
+            <div class="mb-6 p-4 bg-white border border-gray-200 rounded-xl shadow-sm">
+                <h3 class="section-header text-gray-700 flex items-center mb-4">
+                    <i class="fas fa-chart-bar text-orange-500 mr-2 text-xs"></i> Analisis Kualitas Cahaya
+                </h3>
+                
+                <div class="space-y-4">
+                    <!-- Light Distribution -->
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-2">Distribusi Cahaya</label>
+                        <div class="grid grid-cols-3 gap-2 text-center">
+                            <div class="bg-blue-50 p-3 rounded-lg">
+                                <p class="text-xs text-blue-700">Rata-rata</p>
+                                <p id="avg-lux" class="result-value font-bold text-blue-800">0</p>
+                                <p class="text-xs text-blue-600">lux</p>
+                            </div>
+                            <div class="bg-green-50 p-3 rounded-lg">
+                                <p class="text-xs text-green-700">Maksimum</p>
+                                <p id="max-lux" class="result-value font-bold text-green-800">0</p>
+                                <p class="text-xs text-green-600">lux</p>
+                            </div>
+                            <div class="bg-red-50 p-3 rounded-lg">
+                                <p class="text-xs text-red-700">Minimum</p>
+                                <p id="min-lux" class="result-value font-bold text-red-800">0</p>
+                                <p class="text-xs text-red-600">lux</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Uniformity -->
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-2">Uniformitas Cahaya</label>
+                        <div class="flex items-center mb-2">
+                            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                <div id="uniformity-bar" class="bg-green-600 h-2.5 rounded-full" style="width: 0%"></div>
+                            </div>
+                            <span id="uniformity-value" class="ml-2 text-xs font-medium text-gray-700">0%</span>
+                        </div>
+                        <p class="text-xs text-gray-500">Rasio antara minimum dan maksimum intensitas</p>
+                    </div>
+                    
+                    <!-- Color Temperature -->
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-2">Suhu Warna</label>
+                        <div class="flex items-center">
+                            <div class="flex-1">
+                                <div class="flex justify-between text-xs text-gray-500 mb-1">
+                                    <span>Hangat</span>
+                                    <span>Netral</span>
+                                    <span>Dingin</span>
+                                </div>
+                                <div class="w-full bg-gradient-to-r from-yellow-400 via-white to-blue-400 rounded-full h-2.5"></div>
+                            </div>
+                            <span id="color-temp" class="ml-2 text-xs font-medium text-gray-700">5500K</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Chart Section -->
+            <div id="chart-section" class="hidden mb-6">
+                <div class="p-4 bg-white border border-gray-200 rounded-xl shadow-sm">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="section-header text-gray-700 flex items-center">
+                            <i class="fas fa-chart-line text-teal-500 mr-2 text-xs"></i> Grafik Intensitas Cahaya
+                        </h3>
+                        <div class="chart-controls">
+                            <button class="chart-btn active" id="btn-chart-realtime">
+                                Real-time
+                            </button>
+                            <button class="chart-btn" id="btn-chart-history">
+                                Histori
+                            </button>
+                            <button class="chart-btn" id="btn-chart-distribution">
+                                Distribusi
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-container" id="chart-area">
+                        <canvas id="lux-chart"></canvas>
+                    </div>
+                    
+                    <!-- Export Chart Button -->
+                    <div class="export-buttons mt-3">
+                        <button id="btn-download-chart" class="export-btn export-btn-chart">
+                            <i class="fas fa-download"></i> Download Grafik
+                        </button>
+                        <button id="btn-download-snapshot" class="export-btn export-btn-data">
+                            <i class="fas fa-camera"></i> Download Foto + Data
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Data Log Section -->
+            <div id="data-section" class="hidden mb-6">
+                <div class="p-4 bg-white border border-gray-200 rounded-xl shadow-sm">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="section-header text-gray-700 flex items-center">
+                            <i class="fas fa-database text-purple-500 mr-2 text-xs"></i> Log Data Pengukuran
+                        </h3>
+                        <div class="flex space-x-2">
+                            <button class="text-xs px-3 py-1 bg-gray-100 rounded hover:bg-gray-200" id="table-toggle">
+                                Tampilkan Tabel
+                            </button>
+                            <button id="btn-clear-data" class="text-xs px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="hidden" id="table-area">
+                        <div class="table-container">
+                            <table class="data-table" id="lux-table">
+                                <thead>
+                                    <tr>
+                                        <th>Waktu</th>
+                                        <th>Lux</th>
+                                        <th>Kategori</th>
+                                        <th>Suhu Warna</th>
+                                        <th>Lokasi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="table-body">
+                                    <!-- Data rows will be inserted here -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Export Data Button -->
+                        <div class="export-buttons mt-4">
+                            <button id="btn-download-csv" class="export-btn export-btn-data">
+                                <i class="fas fa-file-csv"></i> Download CSV
+                            </button>
+                            <button id="btn-download-pdf" class="export-btn export-btn-data">
+                                <i class="fas fa-file-pdf"></i> Download Laporan
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Stats -->
+                    <div id="quick-stats" class="mt-4 grid grid-cols-2 gap-3">
+                        <div class="bg-gray-50 p-3 rounded-lg">
+                            <p class="text-xs text-gray-600">Rata-rata</p>
+                            <p id="stats-avg" class="text-lg font-bold text-gray-800">0 lux</p>
+                        </div>
+                        <div class="bg-gray-50 p-3 rounded-lg">
+                            <p class="text-xs text-gray-600">Pengukuran</p>
+                            <p id="stats-count" class="text-lg font-bold text-gray-800">0</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Light Recommendations -->
+            <div class="mb-6 p-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl">
+                <h3 class="section-header text-gray-700 mb-3 flex items-center">
+                    <i class="fas fa-lightbulb text-green-500 mr-2 text-xs"></i> Rekomendasi Pencahayaan
+                </h3>
+                
+                <div class="space-y-3">
+                    <div id="recommendation-content" class="text-xs text-gray-700">
+                        <p class="mb-2"><span class="font-bold">Kondisi saat ini:</span> <span id="current-condition">Mengukur...</span></p>
+                        <p class="mb-1"><span class="font-bold">Rekomendasi:</span></p>
+                        <ul class="list-disc pl-4 space-y-1">
+                            <li id="rec-1">Tunggu hasil pengukuran</li>
+                            <li id="rec-2">Pastikan kamera menghadap area yang diukur</li>
+                            <li id="rec-3">Hindari bayangan pada area pengukuran</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Standard References -->
+                    <div class="mt-4 pt-3 border-t border-green-100">
+                        <p class="text-xs font-medium text-gray-700 mb-2">Standar Pencahayaan (SNI):</p>
+                        <div class="text-xs text-gray-600 space-y-1">
+                            <div class="flex justify-between">
+                                <span>Ruang Belajar:</span>
+                                <span class="font-medium">300-500 lux</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Kantor:</span>
+                                <span class="font-medium">300-750 lux</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Ruang Baca:</span>
+                                <span class="font-medium">500-1000 lux</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Area Kerja Detail:</span>
+                                <span class="font-medium">750-1500 lux</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Control Buttons -->
+            <div class="mb-6 grid grid-cols-2 gap-3">
+                <button id="btn-start" class="py-3 bg-gradient-to-r from-teal-500 to-teal-600 text-white rounded-lg text-sm font-medium transition-all hover:from-teal-600 hover:to-teal-700 active:scale-95">
+                    <i class="fas fa-play mr-1"></i> Mulai Pengukuran
+                </button>
+                <button id="btn-stop" class="py-3 bg-gradient-to-r from-gray-400 to-gray-500 text-white rounded-lg text-sm font-medium transition-all hover:from-gray-500 hover:to-gray-600 active:scale-95">
+                    <i class="fas fa-stop mr-1"></i> Berhenti
+                </button>
+                <button id="btn-log" class="py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg text-sm font-medium transition-all hover:from-blue-600 hover:to-blue-700 active:scale-95 col-span-2">
+                    <i class="fas fa-save mr-1"></i> Simpan Data Pengukuran
+                </button>
+            </div>
+        </main>
+        
+        <!-- BOTTOM NAVIGATION -->
+        <nav class="bottom-nav">
+            <a href="dashboad siswa.html" class="nav-item">
+                <i class="fas fa-home nav-icon"></i>
+                <span>Beranda</span>
+            </a>
+            <a href="soal harian/dashboard soal.html" class="nav-item">
+                <i class="fas fa-flask nav-icon"></i>
+                <span>Soal Harian</span>
+            </a>
+            <a href="ai/nayra.html" class="nav-item">
+                <i class="fas fa-robot nav-icon"></i>
+                <span>Nayra AI</span>
+            </a>
+            <a href="materi harian/kategori materi.html" class="nav-item">
+                <i class="fas fa-chalkboard-teacher nav-icon"></i>
+                <span>Materi Harian</span>
+            </a>
+            <a href="profil/profil.html" class="nav-item">
+                <i class="fas fa-user nav-icon"></i>
+                <span>Profil</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Chart.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- jsPDF for PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- HTML2Canvas for screenshot -->
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    
+    <script>
+        // DOM Elements
+        const videoPreview = document.getElementById('video-preview');
+        const videoCanvas = document.getElementById('video-canvas');
+        const luxCanvas = document.getElementById('lux-canvas');
+        const canvasContext = videoCanvas.getContext('2d');
+        const luxContext = luxCanvas.getContext('2d');
+        const sampleGrid = document.getElementById('sample-grid');
+        const loading = document.getElementById('loading');
+        const errorMessage = document.getElementById('error-message');
+        const errorTitle = document.getElementById('error-title');
+        const errorDetail = document.getElementById('error-detail');
+        
+        // Control Elements
+        const btnStart = document.getElementById('btn-start');
+        const btnStop = document.getElementById('btn-stop');
+        const btnLog = document.getElementById('btn-log');
+        const btnCapture = document.getElementById('btn-capture');
+        const btnFlash = document.getElementById('btn-flash');
+        const btnSwitchCamera = document.getElementById('btn-switch-camera');
+        
+        // Display Elements
+        const currentLux = document.getElementById('current-lux');
+        const luxIndicator = document.getElementById('lux-indicator');
+        const luxPercentage = document.getElementById('lux-percentage');
+        const luxCategory = document.getElementById('lux-category');
+        const cameraStatus = document.getElementById('camera-status');
+        const cameraResolution = document.getElementById('camera-resolution');
+        const frameRate = document.getElementById('frame-rate');
+        
+        // Calibration Elements
+        const referencePreset = document.getElementById('reference-preset');
+        const btnApplyPreset = document.getElementById('btn-apply-preset');
+        const referenceLux = document.getElementById('reference-lux');
+        const measuredLux = document.getElementById('measured-lux');
+        const btnCalibrate = document.getElementById('btn-calibrate');
+        const calibrationResult = document.getElementById('calibration-result');
+        const calibrationFactor = document.getElementById('calibration-factor');
+        const exposureSlider = document.getElementById('exposure-slider');
+        const exposureValue = document.getElementById('exposure-value');
+        
+        // Light Type Elements
+        const btnNatural = document.getElementById('btn-natural');
+        const btnArtificial = document.getElementById('btn-artificial');
+        const btnMixed = document.getElementById('btn-mixed');
+        
+        // Analysis Elements
+        const avgLux = document.getElementById('avg-lux');
+        const maxLux = document.getElementById('max-lux');
+        const minLux = document.getElementById('min-lux');
+        const uniformityBar = document.getElementById('uniformity-bar');
+        const uniformityValue = document.getElementById('uniformity-value');
+        const wbIndicator = document.getElementById('wb-indicator');
+        const wbTemperature = document.getElementById('wb-temperature');
+        const colorTemp = document.getElementById('color-temp');
+        
+        // Chart Elements
+        const chartSection = document.getElementById('chart-section');
+        const btnChartRealtime = document.getElementById('btn-chart-realtime');
+        const btnChartHistory = document.getElementById('btn-chart-history');
+        const btnChartDistribution = document.getElementById('btn-chart-distribution');
+        const luxChartCanvas = document.getElementById('lux-chart');
+        
+        // Data Elements
+        const dataSection = document.getElementById('data-section');
+        const tableToggle = document.getElementById('table-toggle');
+        const tableArea = document.getElementById('table-area');
+        const tableBody = document.getElementById('table-body');
+        const btnClearData = document.getElementById('btn-clear-data');
+        const statsAvg = document.getElementById('stats-avg');
+        const statsCount = document.getElementById('stats-count');
+        
+        // Recommendation Elements
+        const currentCondition = document.getElementById('current-condition');
+        const rec1 = document.getElementById('rec-1');
+        const rec2 = document.getElementById('rec-2');
+        const rec3 = document.getElementById('rec-3');
+        
+        // Export Elements
+        const btnDownloadChart = document.getElementById('btn-download-chart');
+        const btnDownloadSnapshot = document.getElementById('btn-download-snapshot');
+        const btnDownloadCSV = document.getElementById('btn-download-csv');
+        const btnDownloadPDF = document.getElementById('btn-download-pdf');
+        
+        // Variables
+        let stream = null;
+        let isMeasuring = false;
+        let animationFrameId = null;
+        let luxChart = null;
+        let currentChartType = 'realtime';
+        let currentLightType = 'natural';
+        let calibration = 1.0;
+        let exposureCompensation = 0;
+        let flashEnabled = false;
+        let currentCamera = 'environment'; // 'environment' or 'user'
+        
+        // Data storage
+        let luxHistory = [];
+        let timeHistory = [];
+        let measurementLog = [];
+        let gridLuxValues = Array(9).fill(0);
+        let frameCount = 0;
+        let lastFrameTime = Date.now();
+        let fps = 0;
+        
+        // Constants
+        const LUX_CATEGORIES = [
+            { min: 0, max: 10, name: "Sangat Gelap", color: "lux-dark", desc: "Cahaya bulan, gelap total" },
+            { min: 10, max: 50, name: "Gelap", color: "lux-dim", desc: "Lampu jalan yang redup" },
+            { min: 50, max: 200, name: "Redup", color: "lux-dim", desc: "Ruang keluarga malam hari" },
+            { min: 200, max: 500, name: "Sedang", color: "lux-moderate", desc: "Kantor standar" },
+            { min: 500, max: 1000, name: "Terang", color: "lux-bright", desc: "Area kerja terang" },
+            { min: 1000, max: 5000, name: "Sangat Terang", color: "lux-very-bright", desc: "Cahaya siang hari dalam ruangan" },
+            { min: 5000, max: 10000, name: "Ekstrem", color: "lux-very-bright", desc: "Cahaya siang hari langsung" },
+            { min: 10000, max: Infinity, name: "Intens", color: "lux-very-bright", desc: "Cahaya matahari penuh" }
+        ];
+        
+        // Light recommendations
+        const RECOMMENDATIONS = {
+            veryDark: [
+                "Tambahkan sumber cahaya utama",
+                "Gunakan lampu dengan intensitas minimal 300 lux",
+                "Hindari membaca dalam kondisi ini"
+            ],
+            dark: [
+                "Cukup untuk navigasi, kurang untuk membaca",
+                "Tambahkan lampu baca",
+                "Targetkan 300-500 lux untuk aktivitas"
+            ],
+            moderate: [
+                "Baik untuk aktivitas sehari-hari",
+                "Ideal untuk ruang kerja",
+                "Pertahankan level ini"
+            ],
+            bright: [
+                "Sangat baik untuk membaca dan kerja detail",
+                "Ideal untuk ruang belajar",
+                "Tidak perlu penambahan cahaya"
+            ],
+            veryBright: [
+                "Mungkin terlalu terang untuk kenyamanan",
+                "Pertimbangkan untuk mengurangi intensitas",
+                "Gunakan tirai atau filter cahaya"
+            ]
+        };
+        
+        // Initialize
+        async function init() {
+            try {
+                // Request camera access
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        facingMode: 'environment',
+                        width: { ideal: 1920 },
+                        height: { ideal: 1080 }
+                    } 
+                });
+                
+                videoPreview.srcObject = stream;
+                
+                // Wait for video to be ready
+                videoPreview.onloadedmetadata = () => {
+                    loading.classList.add('hidden');
+                    setupCamera();
+                    createSampleGrid();
+                    initChart();
+                    updateRecommendations(0);
+                };
+                
+            } catch (err) {
+                console.error('Error accessing camera:', err);
+                loading.innerHTML = `
+                    <div class="text-center">
+                        <i class="fas fa-video-slash text-red-500 text-3xl mb-4"></i>
+                        <p class="text-gray-700 font-medium">Akses Kamera Ditolak</p>
+                        <p class="text-gray-500 text-sm mt-2">Izinkan akses kamera untuk menggunakan luxmeter</p>
+                        <button onclick="location.reload()" class="mt-4 px-4 py-2 bg-teal-500 text-white rounded-lg text-sm">
+                            Coba Lagi
+                        </button>
+                    </div>
+                `;
+            }
+        }
+        
+        function setupCamera() {
+            // Set canvas dimensions to match video
+            const width = videoPreview.videoWidth;
+            const height = videoPreview.videoHeight;
+            
+            videoCanvas.width = width;
+            videoCanvas.height = height;
+            luxCanvas.width = width;
+            luxCanvas.height = height;
+            
+            cameraResolution.textContent = `${width}×${height}`;
+            
+            // Start FPS counter
+            setInterval(() => {
+                frameRate.textContent = fps;
+                fps = 0;
+            }, 1000);
+            
+            // Start measurement
+            btnStart.click();
+        }
+        
+        function createSampleGrid() {
+            sampleGrid.innerHTML = '';
+            
+            for (let i = 0; i < 9; i++) {
+                const cell = document.createElement('div');
+                cell.className = `grid-cell ${i === 4 ? 'grid-cell-center' : ''}`;
+                
+                const value = document.createElement('div');
+                value.className = 'grid-value';
+                value.id = `grid-value-${i}`;
+                value.textContent = '0';
+                
+                cell.appendChild(value);
+                sampleGrid.appendChild(cell);
+            }
+        }
+        
+        // Initialize Chart
+        function initChart() {
+            const ctx = luxChartCanvas.getContext('2d');
+            
+            luxChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Intensitas Cahaya (lux)',
+                        data: [],
+                        borderColor: '#f59e0b',
+                        backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 2,
+                        pointBackgroundColor: '#f59e0b',
+                        pointBorderColor: '#ffffff',
+                        pointBorderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                font: {
+                                    size: 11,
+                                    family: "'Baloo 2', cursive"
+                                }
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Pengukuran Intensitas Cahaya Real-time',
+                            font: {
+                                size: 13,
+                                weight: 'bold',
+                                family: "'Baloo 2', cursive"
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Waktu (detik)',
+                                font: {
+                                    size: 11,
+                                    family: "'Baloo 2', cursive"
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Intensitas (lux)',
+                                font: {
+                                    size: 11,
+                                    family: "'Baloo 2', cursive"
+                                }
+                            },
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            },
+                            suggestedMax: 1000
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Start measurement
+        function startMeasurement() {
+            if (isMeasuring) return;
+            
+            isMeasuring = true;
+            cameraStatus.innerHTML = '<i class="fas fa-circle text-green-500 mr-1"></i> Mengukur...';
+            
+            btnStart.disabled = true;
+            btnStart.classList.add('opacity-50');
+            btnStop.disabled = false;
+            btnStop.classList.remove('opacity-50');
+            
+            chartSection.classList.remove('hidden');
+            dataSection.classList.remove('hidden');
+            
+            measurementLoop();
+        }
+        
+        // Stop measurement
+        function stopMeasurement() {
+            if (!isMeasuring) return;
+            
+            isMeasuring = false;
+            cameraStatus.innerHTML = '<i class="fas fa-circle text-yellow-500 mr-1"></i> Dijeda';
+            
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+                animationFrameId = null;
+            }
+            
+            btnStart.disabled = false;
+            btnStart.classList.remove('opacity-50');
+            btnStop.disabled = true;
+            btnStop.classList.add('opacity-50');
+        }
+        
+        // Main measurement loop
+        function measurementLoop() {
+            if (!isMeasuring) return;
+            
+            // Calculate FPS
+            fps++;
+            
+            // Draw current frame to canvas
+            canvasContext.drawImage(videoPreview, 0, 0, videoCanvas.width, videoCanvas.height);
+            
+            // Analyze light intensity
+            const luxData = analyzeLightIntensity();
+            const lux = luxData.average * calibration;
+            
+            // Update display
+            updateLuxDisplay(lux);
+            updateGridValues(luxData.grid);
+            updateAnalysis(luxData);
+            updateChart(lux);
+            
+            // Continue loop
+            animationFrameId = requestAnimationFrame(measurementLoop);
+        }
+        
+        // Analyze light intensity from canvas
+        function analyzeLightIntensity() {
+            const width = videoCanvas.width;
+            const height = videoCanvas.height;
+            
+            // Get image data from canvas
+            const imageData = canvasContext.getImageData(0, 0, width, height);
+            const data = imageData.data;
+            
+            // Sample 1000 points for efficiency
+            const sampleCount = 1000;
+            let totalLuminance = 0;
+            let maxLuminance = 0;
+            let minLuminance = 255;
+            let gridValues = Array(9).fill(0);
+            let gridCounts = Array(9).fill(0);
+            
+            // Calculate grid cell dimensions
+            const cellWidth = Math.floor(width / 3);
+            const cellHeight = Math.floor(height / 3);
+            
+            for (let i = 0; i < sampleCount; i++) {
+                // Random sampling
+                const x = Math.floor(Math.random() * width);
+                const y = Math.floor(Math.random() * height);
+                
+                // Calculate pixel index
+                const idx = (y * width + x) * 4;
+                
+                // Convert RGB to luminance (standard formula)
+                const r = data[idx];
+                const g = data[idx + 1];
+                const b = data[idx + 2];
+                
+                // Calculate luminance (0-255)
+                const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
+                
+                totalLuminance += luminance;
+                maxLuminance = Math.max(maxLuminance, luminance);
+                minLuminance = Math.min(minLuminance, luminance);
+                
+                // Determine grid cell
+                const gridX = Math.floor(x / cellWidth);
+                const gridY = Math.floor(y / cellHeight);
+                const gridIndex = gridY * 3 + gridX;
+                
+                if (gridIndex >= 0 && gridIndex < 9) {
+                    gridValues[gridIndex] += luminance;
+                    gridCounts[gridIndex]++;
+                }
+            }
+            
+            // Calculate average grid values
+            for (let i = 0; i < 9; i++) {
+                if (gridCounts[i] > 0) {
+                    gridValues[i] = gridValues[i] / gridCounts[i];
+                }
+            }
+            
+            const avgLuminance = totalLuminance / sampleCount;
+            
+            // Convert luminance (0-255) to lux approximation
+            // This is a simplified conversion - real calibration would be more complex
+            const baseLux = Math.pow(avgLuminance / 255, 2.2) * 10000;
+            
+            // Apply exposure compensation
+            const compensatedLux = baseLux * Math.pow(2, exposureCompensation);
+            
+            return {
+                average: compensatedLux,
+                max: maxLuminance,
+                min: minLuminance,
+                grid: gridValues
+            };
+        }
+        
+        // Update lux display
+        function updateLuxDisplay(lux) {
+            // Update numeric display
+            const roundedLux = Math.round(lux);
+            currentLux.textContent = roundedLux.toLocaleString();
+            
+            // Update meter indicator
+            const logLux = Math.log10(lux + 1); // Add 1 to avoid log(0)
+            const maxLogLux = 5; // 100,000 lux
+            const percentage = Math.min((logLux / maxLogLux) * 100, 100);
+            luxIndicator.style.left = `${percentage}%`;
+            luxPercentage.textContent = `${Math.round(percentage)}%`;
+            
+            // Update category
+            const category = getLuxCategory(lux);
+            luxCategory.textContent = category.name;
+            luxCategory.className = `lux-category ${category.color} inline-block`;
+            
+            // Update white balance indicator (simulated)
+            updateWhiteBalance(lux);
+        }
+        
+        // Get lux category
+        function getLuxCategory(lux) {
+            for (const category of LUX_CATEGORIES) {
+                if (lux >= category.min && lux < category.max) {
+                    return category;
+                }
+            }
+            return LUX_CATEGORIES[LUX_CATEGORIES.length - 1];
+        }
+        
+        // Update white balance display
+        function updateWhiteBalance(lux) {
+            // Simulate color temperature based on light intensity
+            let temp;
+            let color;
+            
+            if (lux < 100) {
+                temp = 2700; // Warm
+                color = '#ffd166';
+            } else if (lux < 500) {
+                temp = 4000; // Neutral warm
+                color = '#ffef9f';
+            } else if (lux < 2000) {
+                temp = 5000; // Neutral
+                color = '#ffffff';
+            } else if (lux < 10000) {
+                temp = 6000; // Cool
+                color = '#e0f2fe';
+            } else {
+                temp = 8000; // Very cool
+                color = '#bae6fd';
+            }
+            
+            wbIndicator.style.backgroundColor = color;
+            wbTemperature.textContent = `${temp}K`;
+            colorTemp.textContent = `${temp}K`;
+        }
+        
+        // Update grid values
+        function updateGridValues(gridValues) {
+            gridLuxValues = gridValues;
+            
+            for (let i = 0; i < 9; i++) {
+                const element = document.getElementById(`grid-value-${i}`);
+                if (element) {
+                    const luxValue = Math.pow(gridValues[i] / 255, 2.2) * 10000 * calibration;
+                    element.textContent = Math.round(luxValue).toLocaleString();
+                }
+            }
+            
+            // Update analysis values
+            const luxValues = gridValues.map(v => Math.pow(v / 255, 2.2) * 10000 * calibration);
+            avgLux.textContent = Math.round(luxValues.reduce((a, b) => a + b, 0) / luxValues.length);
+            maxLux.textContent = Math.round(Math.max(...luxValues));
+            minLux.textContent = Math.round(Math.min(...luxValues));
+            
+            // Update uniformity
+            const uniformity = (Math.min(...luxValues) / Math.max(...luxValues)) * 100;
+            uniformityBar.style.width = `${Math.min(uniformity, 100)}%`;
+            uniformityValue.textContent = `${Math.round(uniformity)}%`;
+        }
+        
+        // Update analysis
+        function updateAnalysis(luxData) {
+            // This function can be expanded for more detailed analysis
+        }
+        
+        // Update chart
+        function updateChart(lux) {
+            const now = new Date();
+            const timeLabel = `${now.getHours()}:${now.getMinutes()}:${now.getSeconds()}`;
+            
+            // Add to history
+            luxHistory.push(lux);
+            timeHistory.push(timeLabel);
+            
+            // Keep only last 100 points
+            if (luxHistory.length > 100) {
+                luxHistory.shift();
+                timeHistory.shift();
+            }
+            
+            // Update chart
+            if (luxChart) {
+                luxChart.data.labels = timeHistory;
+                luxChart.data.datasets[0].data = luxHistory;
+                luxChart.update('none');
+            }
+        }
+        
+        // Update recommendations
+        function updateRecommendations(lux) {
+            let condition = '';
+            let recommendations = [];
+            
+            if (lux < 50) {
+                condition = 'Sangat Gelap';
+                recommendations = RECOMMENDATIONS.veryDark;
+            } else if (lux < 200) {
+                condition = 'Gelap';
+                recommendations = RECOMMENDATIONS.dark;
+            } else if (lux < 500) {
+                condition = 'Cukup Terang';
+                recommendations = RECOMMENDATIONS.moderate;
+            } else if (lux < 1000) {
+                condition = 'Terang';
+                recommendations = RECOMMENDATIONS.bright;
+            } else {
+                condition = 'Sangat Terang';
+                recommendations = RECOMMENDATIONS.veryBright;
+            }
+            
+            currentCondition.textContent = condition;
+            rec1.textContent = recommendations[0] || '';
+            rec2.textContent = recommendations[1] || '';
+            rec3.textContent = recommendations[2] || '';
+        }
+        
+        // Log measurement
+        function logMeasurement() {
+            const now = new Date();
+            const lux = parseFloat(currentLux.textContent.replace(/,/g, ''));
+            const category = luxCategory.textContent;
+            
+            const measurement = {
+                timestamp: now.toISOString(),
+                time: now.toLocaleTimeString(),
+                date: now.toLocaleDateString(),
+                lux: lux,
+                category: category,
+                colorTemp: wbTemperature.textContent,
+                lightType: currentLightType,
+                calibration: calibration,
+                exposure: exposureCompensation,
+                location: 'Manual Entry' // In real app, get from GPS
+            };
+            
+            measurementLog.push(measurement);
+            updateDataTable();
+            updateStats();
+            
+            // Show notification
+            showError('Data Tersimpan', `Pengukuran ${lux} lux telah disimpan`);
+        }
+        
+        // Update data table
+        function updateDataTable() {
+            tableBody.innerHTML = '';
+            
+            if (measurementLog.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td colspan="5" class="text-center py-6 text-gray-500">
+                        <i class="fas fa-database text-2xl mb-2 block text-gray-300"></i>
+                        <p class="text-sm">Belum ada data pengukuran</p>
+                        <p class="text-xs mt-1">Klik "Simpan Data" untuk menyimpan pengukuran</p>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+                return;
+            }
+            
+            // Show last 10 measurements
+            const startIndex = Math.max(0, measurementLog.length - 10);
+            
+            for (let i = startIndex; i < measurementLog.length; i++) {
+                const m = measurementLog[i];
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td>${m.time}</td>
+                    <td class="font-semibold">${m.lux.toLocaleString()}</td>
+                    <td><span class="px-2 py-1 rounded text-xs ${getCategoryClass(m.category)}">${m.category}</span></td>
+                    <td>${m.colorTemp}</td>
+                    <td>${m.location}</td>
+                `;
+                
+                tableBody.appendChild(row);
+            }
+        }
+        
+        // Get category CSS class
+        function getCategoryClass(category) {
+            const cat = LUX_CATEGORIES.find(c => c.name === category);
+            return cat ? cat.color : 'lux-dim';
+        }
+        
+        // Update statistics
+        function updateStats() {
+            if (measurementLog.length === 0) {
+                statsAvg.textContent = '0 lux';
+                statsCount.textContent = '0';
+                return;
+            }
+            
+            const totalLux = measurementLog.reduce((sum, m) => sum + m.lux, 0);
+            const avgLux = totalLux / measurementLog.length;
+            
+            statsAvg.textContent = `${Math.round(avgLux).toLocaleString()} lux`;
+            statsCount.textContent = measurementLog.length.toString();
+        }
+        
+        // Capture photo
+        function capturePhoto() {
+            const canvas = document.createElement('canvas');
+            canvas.width = videoCanvas.width;
+            canvas.height = videoCanvas.height;
+            const ctx = canvas.getContext('2d');
+            
+            // Draw current frame
+            ctx.drawImage(videoPreview, 0, 0);
+            
+            // Add overlay with data
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+            ctx.fillRect(10, 10, 400, 120);
+            
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 16px Arial';
+            ctx.fillText('LUXMETER - QUANTARA', 20, 35);
+            
+            ctx.font = '14px Arial';
+            ctx.fillText(`Intensitas: ${currentLux.textContent} lux`, 20, 60);
+            ctx.fillText(`Kategori: ${luxCategory.textContent}`, 20, 85);
+            ctx.fillText(`Waktu: ${new Date().toLocaleString()}`, 20, 110);
+            
+            // Convert to data URL
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+            
+            // Create download link
+            const link = document.createElement('a');
+            link.download = `luxmeter-${new Date().toISOString().slice(0, 19).replace(/[:]/g, '-')}.jpg`;
+            link.href = dataUrl;
+            link.click();
+            
+            showError('Foto Tersimpan', 'Foto dengan data lux telah diunduh');
+        }
+        
+        // Switch camera
+        async function switchCamera() {
+            stopMeasurement();
+            
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+            
+            try {
+                currentCamera = currentCamera === 'environment' ? 'user' : 'environment';
+                
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        facingMode: currentCamera,
+                        width: { ideal: 1920 },
+                        height: { ideal: 1080 }
+                    } 
+                });
+                
+                videoPreview.srcObject = stream;
+                setupCamera();
+                
+            } catch (err) {
+                console.error('Error switching camera:', err);
+                showError('Gagal Ganti Kamera', 'Tidak dapat mengakses kamera lain');
+            }
+        }
+        
+        // Apply preset
+        function applyPreset() {
+            const presetValue = referencePreset.value;
+            if (presetValue === '0') return;
+            
+            referenceLux.value = presetValue;
+            measuredLux.value = currentLux.textContent.replace(/,/g, '');
+            
+            showError('Preset Diterapkan', 'Nilai referensi telah diatur');
+        }
+        
+        // Calibrate
+        function calibrate() {
+            const reference = parseFloat(referenceLux.value);
+            const measured = parseFloat(measuredLux.value);
+            
+            if (isNaN(reference) || isNaN(measured) || measured === 0) {
+                showError('Kalibrasi Gagal', 'Masukkan nilai yang valid');
+                return;
+            }
+            
+            calibration = reference / measured;
+            calibrationFactor.textContent = calibration.toFixed(3);
+            calibrationResult.classList.remove('hidden');
+            
+            showError('Kalibrasi Berhasil', `Faktor kalibrasi: ${calibration.toFixed(3)}`);
+        }
+        
+        // Error handling
+        function showError(title, message) {
+            errorTitle.textContent = title;
+            errorDetail.textContent = message;
+            errorMessage.classList.remove('hidden');
+            
+            setTimeout(() => {
+                errorMessage.classList.add('hidden');
+            }, 3000);
+        }
+        
+        // Event Listeners
+        btnStart.addEventListener('click', startMeasurement);
+        btnStop.addEventListener('click', stopMeasurement);
+        btnLog.addEventListener('click', logMeasurement);
+        btnCapture.addEventListener('click', capturePhoto);
+        btnFlash.addEventListener('click', () => {
+            flashEnabled = !flashEnabled;
+            btnFlash.innerHTML = flashEnabled ? 
+                '<i class="fas fa-bolt mr-1"></i> Flash ON' : 
+                '<i class="fas fa-bolt mr-1"></i> Flash';
+            btnFlash.classList.toggle('bg-yellow-500', flashEnabled);
+            btnFlash.classList.toggle('text-white', flashEnabled);
+        });
+        btnSwitchCamera.addEventListener('click', switchCamera);
+        
+        btnApplyPreset.addEventListener('click', applyPreset);
+        btnCalibrate.addEventListener('click', calibrate);
+        
+        exposureSlider.addEventListener('input', (e) => {
+            exposureCompensation = parseFloat(e.target.value);
+            exposureValue.textContent = exposureCompensation;
+        });
+        
+        btnNatural.addEventListener('click', () => {
+            currentLightType = 'natural';
+            btnNatural.classList.add('active');
+            btnArtificial.classList.remove('active');
+            btnMixed.classList.remove('active');
+        });
+        
+        btnArtificial.addEventListener('click', () => {
+            currentLightType = 'artificial';
+            btnNatural.classList.remove('active');
+            btnArtificial.classList.add('active');
+            btnMixed.classList.remove('active');
+        });
+        
+        btnMixed.addEventListener('click', () => {
+            currentLightType = 'mixed';
+            btnNatural.classList.remove('active');
+            btnArtificial.classList.remove('active');
+            btnMixed.classList.add('active');
+        });
+        
+        btnChartRealtime.addEventListener('click', () => {
+            currentChartType = 'realtime';
+            btnChartRealtime.classList.add('active');
+            btnChartHistory.classList.remove('active');
+            btnChartDistribution.classList.remove('active');
+            // Update chart type if needed
+        });
+        
+        btnChartHistory.addEventListener('click', () => {
+            currentChartType = 'history';
+            btnChartRealtime.classList.remove('active');
+            btnChartHistory.classList.add('active');
+            btnChartDistribution.classList.remove('active');
+            // Update chart type if needed
+        });
+        
+        btnChartDistribution.addEventListener('click', () => {
+            currentChartType = 'distribution';
+            btnChartRealtime.classList.remove('active');
+            btnChartHistory.classList.remove('active');
+            btnChartDistribution.classList.add('active');
+            // Update chart type if needed
+        });
+        
+        tableToggle.addEventListener('click', () => {
+            if (tableArea.classList.contains('hidden')) {
+                tableArea.classList.remove('hidden');
+                tableToggle.textContent = 'Sembunyikan Tabel';
+                updateDataTable();
+            } else {
+                tableArea.classList.add('hidden');
+                tableToggle.textContent = 'Tampilkan Tabel';
+            }
+        });
+        
+        btnClearData.addEventListener('click', () => {
+            if (measurementLog.length > 0 && confirm('Hapus semua data pengukuran?')) {
+                measurementLog = [];
+                updateDataTable();
+                updateStats();
+                showError('Data Dihapus', 'Semua data pengukuran telah dihapus');
+            }
+        });
+        
+        // Export functions
+        btnDownloadChart.addEventListener('click', () => {
+            if (!luxChart) {
+                showError('Grafik Tidak Tersedia', 'Tidak ada grafik untuk diunduh');
+                return;
+            }
+            
+            const link = document.createElement('a');
+            link.download = `grafik-luxmeter-${new Date().toISOString().slice(0, 10)}.png`;
+            link.href = luxChartCanvas.toDataURL('image/png');
+            link.click();
+            
+            showError('Grafik Tersimpan', 'Grafik analisis lux telah diunduh');
+        });
+        
+        btnDownloadSnapshot.addEventListener('click', () => {
+            // Capture screenshot of entire app
+            html2canvas(document.querySelector('.app-container')).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `luxmeter-snapshot-${new Date().toISOString().slice(0, 19).replace(/[:]/g, '-')}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                
+                showError('Snapshot Tersimpan', 'Foto tampilan aplikasi telah diunduh');
+            });
+        });
+        
+        btnDownloadCSV.addEventListener('click', () => {
+            if (measurementLog.length === 0) {
+                showError('Data Tidak Tersedia', 'Tidak ada data untuk diunduh');
+                return;
+            }
+            
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Waktu,Tanggal,Lux,Kategori,Suhu Warna,Jenis Cahaya,Kalibrasi,Eksposur,Lokasi\n";
+            
+            measurementLog.forEach(m => {
+                const row = [
+                    m.time,
+                    m.date,
+                    m.lux,
+                    m.category,
+                    m.colorTemp,
+                    m.lightType,
+                    m.calibration,
+                    m.exposure,
+                    m.location
+                ].join(',');
+                csvContent += row + "\n";
+            });
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement('a');
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `data-luxmeter-${new Date().toISOString().slice(0, 10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showError('CSV Tersimpan', 'Data pengukuran telah diunduh sebagai CSV');
+        });
+        
+        btnDownloadPDF.addEventListener('click', () => {
+            if (measurementLog.length === 0) {
+                showError('Data Tidak Tersedia', 'Tidak ada data untuk laporan');
+                return;
+            }
+            
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                doc.setFontSize(16);
+                doc.text('LAPORAN PENGUKURAN LUXMETER', 105, 15, null, null, 'center');
+                
+                doc.setFontSize(10);
+                doc.text(`Tanggal: ${new Date().toLocaleDateString('id-ID')}`, 105, 23, null, null, 'center');
+                
+                let yPos = 35;
+                doc.setFontSize(12);
+                doc.text('Ringkasan Pengukuran:', 20, yPos);
+                yPos += 10;
+                
+                doc.setFontSize(10);
+                const totalLux = measurementLog.reduce((sum, m) => sum + m.lux, 0);
+                const avgLux = totalLux / measurementLog.length;
+                const maxLux = Math.max(...measurementLog.map(m => m.lux));
+                const minLux = Math.min(...measurementLog.map(m => m.lux));
+                
+                doc.text(`Jumlah Pengukuran: ${measurementLog.length}`, 20, yPos);
+                yPos += 7;
+                doc.text(`Rata-rata Lux: ${avgLux.toFixed(0)} lux`, 20, yPos);
+                yPos += 7;
+                doc.text(`Lux Maksimum: ${maxLux.toFixed(0)} lux`, 20, yPos);
+                yPos += 7;
+                doc.text(`Lux Minimum: ${minLux.toFixed(0)} lux`, 20, yPos);
+                yPos += 15;
+                
+                doc.setFontSize(12);
+                doc.text('Data Pengukuran:', 20, yPos);
+                yPos += 10;
+                
+                const headers = ['Waktu', 'Lux', 'Kategori', 'Suhu Warna'];
+                const columnWidths = [40, 30, 50, 40];
+                let xPos = 20;
+                
+                doc.setFontSize(9);
+                headers.forEach((header, i) => {
+                    doc.text(header, xPos, yPos);
+                    xPos += columnWidths[i];
+                });
+                
+                yPos += 2;
+                doc.line(20, yPos, 150, yPos);
+                yPos += 3;
+                
+                doc.setFontSize(8);
+                measurementLog.slice(-20).forEach((m, i) => {
+                    xPos = 20;
+                    doc.text(m.time, xPos, yPos);
+                    xPos += columnWidths[0];
+                    doc.text(m.lux.toString(), xPos, yPos);
+                    xPos += columnWidths[1];
+                    doc.text(m.category, xPos, yPos);
+                    xPos += columnWidths[2];
+                    doc.text(m.colorTemp, xPos, yPos);
+                    yPos += 5;
+                    
+                    if (yPos > 270 && i < measurementLog.length - 1) {
+                        doc.addPage();
+                        yPos = 20;
+                    }
+                });
+                
+                doc.save(`laporan-luxmeter-${new Date().toISOString().slice(0, 10)}.pdf`);
+                
+                showError('Laporan Tersimpan', 'Laporan pengukuran telah diunduh sebagai PDF');
+                
+            } catch (error) {
+                console.error('Error generating PDF:', error);
+                showError('Error PDF', 'Gagal membuat laporan PDF');
+            }
+        });
+        
+        // Initialize app
+        init();
+    </script>
+</body>
+</html>

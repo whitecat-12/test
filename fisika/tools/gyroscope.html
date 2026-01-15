@@ -1,0 +1,1009 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QUANTARA - Gyroscope 2D</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #38b2ac;
+            --secondary: #0e7490;
+            --accent: #f59e0b;
+        }
+        
+        body {
+            font-family: 'Baloo 2', cursive;
+            background-color: #f8fafc;
+        }
+        
+        .app-container {
+            max-width: 414px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        /* NAVBAR */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            max-width: 414px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            background: white;
+            z-index: 10;
+            height: 70px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+            text-decoration: none;
+            flex: 1;
+            height: 100%;
+            padding: 0.5rem 0;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item span {
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
+        
+        .nav-item.active {
+            color: var(--primary);
+        }
+        
+        .nav-icon {
+            transition: all 0.3s ease;
+            font-size: 1.25rem;
+        }
+        
+        .nav-icon.active {
+            transform: translateY(-5px);
+            color: var(--primary);
+        }
+        
+        /* Gyroscope Container */
+        .gyro-container {
+            position: relative;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            overflow: hidden;
+            height: 280px;
+            width: 280px;
+            margin: 20px auto;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+        
+        /* Gyroscope Inner Circle */
+        .gyro-inner {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Gyroscope Needle */
+        .gyro-needle {
+            position: absolute;
+            width: 3px;
+            height: 120px;
+            background: linear-gradient(to top, #fff, #f59e0b);
+            transform-origin: bottom center;
+            border-radius: 3px;
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+            z-index: 10;
+        }
+        
+        .gyro-needle::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: -7px;
+            width: 17px;
+            height: 17px;
+            background: #f59e0b;
+            border-radius: 50%;
+            box-shadow: 0 0 15px rgba(245, 158, 11, 0.8);
+        }
+        
+        /* Gyroscope Markings */
+        .gyro-markings {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+        }
+        
+        .marking {
+            position: absolute;
+            width: 2px;
+            height: 15px;
+            background: rgba(255, 255, 255, 0.5);
+            transform-origin: bottom center;
+            left: calc(50% - 1px);
+            bottom: 10px;
+        }
+        
+        .marking.major {
+            height: 25px;
+            background: rgba(255, 255, 255, 0.8);
+            width: 3px;
+        }
+        
+        /* Gyroscope Labels */
+        .gyro-labels {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            color: white;
+            font-weight: bold;
+        }
+        
+        .label {
+            position: absolute;
+            font-size: 14px;
+            transform-origin: center;
+        }
+        
+        /* Data Panels */
+        .data-panel {
+            transition: all 0.3s ease;
+        }
+        
+        .data-panel.collapsed {
+            max-height: 60px;
+            overflow: hidden;
+        }
+        
+        /* Value Indicators */
+        .value-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px;
+            background: #f8fafc;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .value-label {
+            font-size: 12px;
+            color: #64748b;
+            font-weight: 600;
+        }
+        
+        .value-number {
+            font-size: 18px;
+            font-weight: 700;
+            color: #0f766e;
+        }
+        
+        /* Chart Container */
+        .chart-container {
+            height: 200px;
+            position: relative;
+            background: white;
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        /* Animation classes */
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes shake {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(1deg); }
+            75% { transform: rotate(-1deg); }
+        }
+        
+        .shake {
+            animation: shake 0.5s infinite;
+        }
+        
+        /* Custom Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+        
+        /* Device Orientation Status */
+        .orientation-status {
+            font-size: 11px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            display: inline-block;
+        }
+        
+        .orientation-active {
+            background-color: #d1fae5;
+            color: #065f46;
+        }
+        
+        .orientation-inactive {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile App Container -->
+    <div class="app-container">
+        <!-- Main Content -->
+        <main class="pb-24 p-4 custom-scrollbar" style="max-height: calc(100vh - 70px); overflow-y: auto;">
+            <!-- Page Title -->
+            <div class="mb-4">
+                <h1 class="text-lg font-bold text-gray-800 mb-1">
+                    <i class="fas fa-compass text-teal-500 mr-2"></i> Gyroscope 2D
+                </h1>
+                <p class="text-gray-600 text-xs">
+                    Simulator gyroscope untuk mengukur orientasi perangkat
+                </p>
+            </div>
+            
+            <!-- Gyroscope Visualization -->
+            <div class="mb-6 p-4 bg-white border border-gray-200 rounded-xl shadow-sm">
+                <h3 class="section-header text-gray-700 flex items-center mb-4">
+                    <i class="fas fa-sync-alt text-purple-500 mr-2 text-xs"></i> Visualisasi Gyroscope
+                </h3>
+                
+                <div class="flex flex-col items-center">
+                    <div class="gyro-container">
+                        <!-- Gyroscope Markings -->
+                        <div class="gyro-markings" id="gyro-markings">
+                            <!-- Markings will be generated by JavaScript -->
+                        </div>
+                        
+                        <!-- Gyroscope Labels -->
+                        <div class="gyro-labels" id="gyro-labels">
+                            <!-- Labels will be generated by JavaScript -->
+                        </div>
+                        
+                        <!-- Gyroscope Inner Circle -->
+                        <div class="gyro-inner">
+                            <div class="text-center">
+                                <div class="text-white text-4xl font-bold mb-2" id="rotation-value">0°</div>
+                                <div class="text-white text-sm opacity-80" id="rotation-direction">NORTH</div>
+                            </div>
+                        </div>
+                        
+                        <!-- Gyroscope Needle -->
+                        <div class="gyro-needle" id="gyro-needle"></div>
+                    </div>
+                    
+                    <!-- Orientation Status -->
+                    <div id="orientation-status" class="mt-4 orientation-status orientation-inactive">
+                        <i class="fas fa-exclamation-triangle mr-1"></i>
+                        <span>Gyroscope tidak aktif</span>
+                    </div>
+                    
+                    <p class="text-xs text-gray-500 mt-3 text-center">
+                        Putar perangkat Anda untuk melihat perubahan orientasi
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Real-time Data -->
+            <div class="mb-6 p-4 bg-white border border-gray-200 rounded-xl shadow-sm">
+                <h3 class="section-header text-gray-700 flex items-center mb-4">
+                    <i class="fas fa-chart-line text-orange-500 mr-2 text-xs"></i> Data Real-time
+                </h3>
+                
+                <div class="space-y-3">
+                    <!-- Alpha (Z-axis rotation) -->
+                    <div class="value-indicator">
+                        <div class="value-label">
+                            <i class="fas fa-rotate text-blue-500 mr-2"></i>
+                            <span>Alpha (Z-rotation)</span>
+                        </div>
+                        <div class="value-number" id="alpha-value">0.00°</div>
+                    </div>
+                    
+                    <!-- Beta (X-axis rotation) -->
+                    <div class="value-indicator">
+                        <div class="value-label">
+                            <i class="fas fa-arrows-up-down text-green-500 mr-2"></i>
+                            <span>Beta (X-tilt)</span>
+                        </div>
+                        <div class="value-number" id="beta-value">0.00°</div>
+                    </div>
+                    
+                    <!-- Gamma (Y-axis rotation) -->
+                    <div class="value-indicator">
+                        <div class="value-label">
+                            <i class="fas fa-arrows-left-right text-red-500 mr-2"></i>
+                            <span>Gamma (Y-tilt)</span>
+                        </div>
+                        <div class="value-number" id="gamma-value">0.00°</div>
+                    </div>
+                    
+                    <!-- Rotation Rate -->
+                    <div class="value-indicator">
+                        <div class="value-label">
+                            <i class="fas fa-tachometer-alt text-purple-500 mr-2"></i>
+                            <span>Kecepatan Rotasi</span>
+                        </div>
+                        <div class="value-number" id="rotation-rate">0.00°/s</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Control Panel -->
+            <div class="mb-6 p-4 bg-white border border-gray-200 rounded-xl shadow-sm">
+                <h3 class="section-header text-gray-700 flex items-center mb-4">
+                    <i class="fas fa-sliders-h text-teal-500 mr-2 text-xs"></i> Kontrol Gyroscope
+                </h3>
+                
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <button id="btn-start" class="py-3 bg-gradient-to-r from-teal-500 to-teal-600 text-white rounded-lg text-sm font-medium transition-all hover:from-teal-600 hover:to-teal-700 active:scale-95">
+                        <i class="fas fa-play mr-1"></i> Mulai
+                    </button>
+                    <button id="btn-stop" class="py-3 bg-red-100 text-red-700 rounded-lg text-sm font-medium transition-colors hover:bg-red-200 active:scale-95">
+                        <i class="fas fa-stop mr-1"></i> Berhenti
+                    </button>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <button id="btn-reset" class="py-3 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition-colors hover:bg-gray-300 active:scale-95">
+                        <i class="fas fa-redo mr-1"></i> Reset
+                    </button>
+                    <button id="btn-calibrate" class="py-3 bg-blue-100 text-blue-700 rounded-lg text-sm font-medium transition-colors hover:bg-blue-200 active:scale-95">
+                        <i class="fas fa-compass mr-1"></i> Kalibrasi
+                    </button>
+                </div>
+                
+                <!-- Sensitivity Control -->
+                <div class="mt-4">
+                    <label class="block text-xs font-medium text-gray-700 mb-2">
+                        Sensitivitas: <span id="sensitivity-value" class="text-teal-600">50</span>%
+                    </label>
+                    <input type="range" id="sensitivity-slider" min="10" max="100" value="50" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer">
+                    <div class="flex justify-between text-xs text-gray-500 mt-1">
+                        <span>Rendah</span>
+                        <span>Sedang</span>
+                        <span>Tinggi</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Chart Section -->
+            <div class="mb-6 p-4 bg-white border border-gray-200 rounded-xl shadow-sm">
+                <h3 class="section-header text-gray-700 flex items-center mb-4">
+                    <i class="fas fa-chart-area text-purple-500 mr-2 text-xs"></i> Grafik Rotasi
+                </h3>
+                
+                <div class="chart-container">
+                    <canvas id="rotation-chart"></canvas>
+                </div>
+                
+                <div class="flex space-x-2 mt-3">
+                    <button id="btn-chart-alpha" class="flex-1 py-2 bg-blue-100 text-blue-700 rounded-lg text-xs font-medium transition-colors hover:bg-blue-200">
+                        Alpha
+                    </button>
+                    <button id="btn-chart-beta" class="flex-1 py-2 bg-green-100 text-green-700 rounded-lg text-xs font-medium transition-colors hover:bg-green-200">
+                        Beta
+                    </button>
+                    <button id="btn-chart-gamma" class="flex-1 py-2 bg-red-100 text-red-700 rounded-lg text-xs font-medium transition-colors hover:bg-red-200">
+                        Gamma
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Information Panel -->
+            <div class="mb-6 p-4 bg-gradient-to-r from-blue-50 to-teal-50 border border-blue-100 rounded-xl">
+                <h3 class="section-header text-gray-700 mb-2 flex items-center">
+                    <i class="fas fa-info-circle text-blue-500 mr-2 text-xs"></i> Informasi Gyroscope
+                </h3>
+                <div class="text-xs text-gray-700 space-y-2">
+                    <p><span class="font-bold">Alpha:</span> Rotasi sekitar sumbu Z (0° hingga 360°)</p>
+                    <p><span class="font-bold">Beta:</span> Kemiringan depan/belakang (-180° hingga 180°)</p>
+                    <p><span class="font-bold">Gamma:</span> Kemiringan kiri/kanan (-90° hingga 90°)</p>
+                    <p><span class="font-bold">Gyroscope:</span> Mengukur kecepatan rotasi perangkat dalam tiga sumbu</p>
+                </div>
+            </div>
+        </main>
+        
+        <!-- BOTTOM NAVIGATION -->
+        <nav class="bottom-nav">
+            <a href="dashboad siswa.html" class="nav-item">
+                <i class="fas fa-home nav-icon"></i>
+                <span>Beranda</span>
+            </a>
+            <a href="soal harian/dashboard soal.html" class="nav-item">
+                <i class="fas fa-flask nav-icon"></i>
+                <span>Soal Harian</span>
+            </a>
+            <a href="ai/nayra.html" class="nav-item">
+                <i class="fas fa-robot nav-icon"></i>
+                <span>Nayra AI</span>
+            </a>
+            <a href="materi harian/kategori materi.html" class="nav-item">
+                <i class="fas fa-chalkboard-teacher nav-icon"></i>
+                <span>Materi Harian</span>
+            </a>
+            <a href="profil/profil.html" class="nav-item">
+                <i class="fas fa-user nav-icon"></i>
+                <span>Profil</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Chart.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script>
+        // DOM Elements
+        const gyroNeedle = document.getElementById('gyro-needle');
+        const gyroMarkings = document.getElementById('gyro-markings');
+        const gyroLabels = document.getElementById('gyro-labels');
+        const rotationValue = document.getElementById('rotation-value');
+        const rotationDirection = document.getElementById('rotation-direction');
+        const alphaValue = document.getElementById('alpha-value');
+        const betaValue = document.getElementById('beta-value');
+        const gammaValue = document.getElementById('gamma-value');
+        const rotationRate = document.getElementById('rotation-rate');
+        const orientationStatus = document.getElementById('orientation-status');
+        const btnStart = document.getElementById('btn-start');
+        const btnStop = document.getElementById('btn-stop');
+        const btnReset = document.getElementById('btn-reset');
+        const btnCalibrate = document.getElementById('btn-calibrate');
+        const sensitivitySlider = document.getElementById('sensitivity-slider');
+        const sensitivityValue = document.getElementById('sensitivity-value');
+        const btnChartAlpha = document.getElementById('btn-chart-alpha');
+        const btnChartBeta = document.getElementById('btn-chart-beta');
+        const btnChartGamma = document.getElementById('btn-chart-gamma');
+        
+        // Variables
+        let isGyroActive = false;
+        let lastAlpha = 0;
+        let lastBeta = 0;
+        let lastGamma = 0;
+        let lastTime = 0;
+        let rotationHistory = [];
+        let alphaHistory = [];
+        let betaHistory = [];
+        let gammaHistory = [];
+        let timeHistory = [];
+        let currentChartType = 'alpha';
+        let rotationChart = null;
+        let sensitivity = 50;
+        let calibrationOffset = 0;
+        
+        // Initialize Gyroscope Markings
+        function initGyroscopeMarkings() {
+            // Clear existing markings
+            gyroMarkings.innerHTML = '';
+            gyroLabels.innerHTML = '';
+            
+            // Create markings for every 10 degrees
+            for (let i = 0; i < 360; i += 10) {
+                const marking = document.createElement('div');
+                marking.className = 'marking';
+                
+                // Major markings every 30 degrees
+                if (i % 30 === 0) {
+                    marking.classList.add('major');
+                }
+                
+                marking.style.transform = `rotate(${i}deg)`;
+                gyroMarkings.appendChild(marking);
+                
+                // Add labels every 30 degrees
+                if (i % 30 === 0) {
+                    const label = document.createElement('div');
+                    label.className = 'label';
+                    label.textContent = i + '°';
+                    
+                    // Position labels
+                    const radius = 135; // Adjusted for inner circle
+                    const angle = (i - 90) * (Math.PI / 180); // Offset by 90 degrees for proper alignment
+                    const x = radius * Math.cos(angle);
+                    const y = radius * Math.sin(angle);
+                    
+                    label.style.left = `calc(50% + ${x}px)`;
+                    label.style.top = `calc(50% + ${y}px)`;
+                    label.style.transform = `translate(-50%, -50%)`;
+                    
+                    gyroLabels.appendChild(label);
+                }
+            }
+            
+            // Add cardinal directions
+            const directions = [
+                { text: 'N', angle: 0, color: '#ef4444' },
+                { text: 'E', angle: 90, color: '#10b981' },
+                { text: 'S', angle: 180, color: '#ef4444' },
+                { text: 'W', angle: 270, color: '#10b981' }
+            ];
+            
+            directions.forEach(dir => {
+                const directionLabel = document.createElement('div');
+                directionLabel.className = 'label';
+                directionLabel.textContent = dir.text;
+                directionLabel.style.color = dir.color;
+                directionLabel.style.fontSize = '16px';
+                directionLabel.style.fontWeight = 'bold';
+                
+                const radius = 105; // Closer to center
+                const angle = (dir.angle - 90) * (Math.PI / 180);
+                const x = radius * Math.cos(angle);
+                const y = radius * Math.sin(angle);
+                
+                directionLabel.style.left = `calc(50% + ${x}px)`;
+                directionLabel.style.top = `calc(50% + ${y}px)`;
+                directionLabel.style.transform = `translate(-50%, -50%)`;
+                
+                gyroLabels.appendChild(directionLabel);
+            });
+        }
+        
+        // Initialize Chart
+        function initChart() {
+            const ctx = document.getElementById('rotation-chart').getContext('2d');
+            
+            if (rotationChart) {
+                rotationChart.destroy();
+            }
+            
+            rotationChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: timeHistory,
+                    datasets: [
+                        {
+                            label: 'Alpha (Z)',
+                            data: alphaHistory,
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 0,
+                            hidden: currentChartType !== 'alpha'
+                        },
+                        {
+                            label: 'Beta (X)',
+                            data: betaHistory,
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 0,
+                            hidden: currentChartType !== 'beta'
+                        },
+                        {
+                            label: 'Gamma (Y)',
+                            data: gammaHistory,
+                            borderColor: '#ef4444',
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 0,
+                            hidden: currentChartType !== 'gamma'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                font: {
+                                    size: 11,
+                                    family: "'Baloo 2', cursive"
+                                },
+                                padding: 10,
+                                usePointStyle: true
+                            }
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            callbacks: {
+                                label: function(context) {
+                                    return `${context.dataset.label}: ${context.parsed.y.toFixed(2)}°`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Waktu (s)',
+                                font: {
+                                    size: 11,
+                                    family: "'Baloo 2', cursive"
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            },
+                            ticks: {
+                                font: {
+                                    size: 10,
+                                    family: "'Baloo 2', cursive"
+                                },
+                                maxTicksLimit: 8
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Sudut (°)',
+                                font: {
+                                    size: 11,
+                                    family: "'Baloo 2', cursive"
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            },
+                            ticks: {
+                                font: {
+                                    size: 10,
+                                    family: "'Baloo 2', cursive"
+                                }
+                            }
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'nearest'
+                    },
+                    animation: {
+                        duration: 0
+                    }
+                }
+            });
+        }
+        
+        // Update Gyroscope Display
+        function updateGyroscope(alpha, beta, gamma, rate) {
+            // Apply calibration offset
+            const calibratedAlpha = (alpha - calibrationOffset + 360) % 360;
+            
+            // Update needle rotation
+            gyroNeedle.style.transform = `rotate(${calibratedAlpha}deg)`;
+            
+            // Update rotation value and direction
+            rotationValue.textContent = `${calibratedAlpha.toFixed(1)}°`;
+            
+            // Determine direction
+            let direction = '';
+            if (calibratedAlpha >= 337.5 || calibratedAlpha < 22.5) direction = 'NORTH';
+            else if (calibratedAlpha >= 22.5 && calibratedAlpha < 67.5) direction = 'NORTH-EAST';
+            else if (calibratedAlpha >= 67.5 && calibratedAlpha < 112.5) direction = 'EAST';
+            else if (calibratedAlpha >= 112.5 && calibratedAlpha < 157.5) direction = 'SOUTH-EAST';
+            else if (calibratedAlpha >= 157.5 && calibratedAlpha < 202.5) direction = 'SOUTH';
+            else if (calibratedAlpha >= 202.5 && calibratedAlpha < 247.5) direction = 'SOUTH-WEST';
+            else if (calibratedAlpha >= 247.5 && calibratedAlpha < 292.5) direction = 'WEST';
+            else direction = 'NORTH-WEST';
+            
+            rotationDirection.textContent = direction;
+            
+            // Update data values
+            alphaValue.textContent = `${alpha.toFixed(2)}°`;
+            betaValue.textContent = `${beta.toFixed(2)}°`;
+            gammaValue.textContent = `${gamma.toFixed(2)}°`;
+            rotationRate.textContent = `${Math.abs(rate).toFixed(2)}°/s`;
+            
+            // Add visual effect based on rotation rate
+            if (Math.abs(rate) > 50) {
+                gyroNeedle.classList.add('shake');
+            } else {
+                gyroNeedle.classList.remove('shake');
+            }
+            
+            // Update history for chart
+            const currentTime = Date.now();
+            const elapsedTime = (currentTime - lastTime) / 1000;
+            
+            if (timeHistory.length === 0 || elapsedTime >= 0.1) { // Update every 100ms
+                timeHistory.push((currentTime - lastTime) / 1000);
+                alphaHistory.push(alpha);
+                betaHistory.push(beta);
+                gammaHistory.push(gamma);
+                
+                // Keep last 100 data points
+                if (timeHistory.length > 100) {
+                    timeHistory.shift();
+                    alphaHistory.shift();
+                    betaHistory.shift();
+                    gammaHistory.shift();
+                }
+                
+                // Update chart
+                if (rotationChart) {
+                    rotationChart.data.labels = timeHistory.map((_, i) => i * 0.1);
+                    rotationChart.data.datasets[0].data = alphaHistory;
+                    rotationChart.data.datasets[1].data = betaHistory;
+                    rotationChart.data.datasets[2].data = gammaHistory;
+                    rotationChart.update('none');
+                }
+                
+                lastTime = currentTime;
+            }
+        }
+        
+        // Handle Device Orientation
+        function handleOrientation(event) {
+            if (!isGyroActive) return;
+            
+            const alpha = event.alpha; // Z-axis rotation (0-360)
+            const beta = event.beta;   // X-axis tilt (-180 to 180)
+            const gamma = event.gamma; // Y-axis tilt (-90 to 90)
+            
+            // Calculate rotation rate
+            const currentTime = Date.now();
+            let rate = 0;
+            
+            if (lastAlpha !== null) {
+                const deltaAlpha = Math.abs(alpha - lastAlpha);
+                const deltaTime = (currentTime - lastTime) / 1000;
+                rate = deltaAlpha / deltaTime;
+            }
+            
+            // Apply sensitivity
+            const scaledAlpha = lastAlpha + (alpha - lastAlpha) * (sensitivity / 50);
+            const scaledBeta = lastBeta + (beta - lastBeta) * (sensitivity / 50);
+            const scaledGamma = lastGamma + (gamma - lastGamma) * (sensitivity / 50);
+            
+            updateGyroscope(scaledAlpha, scaledBeta, scaledGamma, rate);
+            
+            lastAlpha = scaledAlpha;
+            lastBeta = scaledBeta;
+            lastGamma = scaledGamma;
+        }
+        
+        // Start Gyroscope
+        function startGyroscope() {
+            if (typeof DeviceOrientationEvent !== 'undefined' && 
+                typeof DeviceOrientationEvent.requestPermission === 'function') {
+                // iOS 13+ devices
+                DeviceOrientationEvent.requestPermission()
+                    .then(permissionState => {
+                        if (permissionState === 'granted') {
+                            initializeGyroscope();
+                        } else {
+                            alert('Izin akses gyroscope diperlukan untuk aplikasi ini.');
+                            orientationStatus.innerHTML = `
+                                <i class="fas fa-exclamation-triangle mr-1"></i>
+                                <span>Izin ditolak - Aktifkan di pengaturan</span>
+                            `;
+                            orientationStatus.className = 'orientation-status orientation-inactive';
+                        }
+                    })
+                    .catch(console.error);
+            } else {
+                // Non-iOS devices or older iOS
+                initializeGyroscope();
+            }
+        }
+        
+        function initializeGyroscope() {
+            if (window.DeviceOrientationEvent) {
+                window.addEventListener('deviceorientation', handleOrientation);
+                isGyroActive = true;
+                
+                orientationStatus.innerHTML = `
+                    <i class="fas fa-check-circle mr-1"></i>
+                    <span>Gyroscope aktif</span>
+                `;
+                orientationStatus.className = 'orientation-status orientation-active';
+                
+                btnStart.disabled = true;
+                btnStop.disabled = false;
+                
+                // Start with initial values
+                lastTime = Date.now();
+                updateGyroscope(0, 0, 0, 0);
+                
+                // Add pulse animation to needle
+                gyroNeedle.classList.add('pulse');
+            } else {
+                alert('Perangkat Anda tidak mendukung gyroscope atau Device Orientation API.');
+                orientationStatus.innerHTML = `
+                    <i class="fas fa-times-circle mr-1"></i>
+                    <span>Gyroscope tidak didukung</span>
+                `;
+                orientationStatus.className = 'orientation-status orientation-inactive';
+            }
+        }
+        
+        // Stop Gyroscope
+        function stopGyroscope() {
+            if (window.DeviceOrientationEvent) {
+                window.removeEventListener('deviceorientation', handleOrientation);
+                isGyroActive = false;
+                
+                orientationStatus.innerHTML = `
+                    <i class="fas fa-pause-circle mr-1"></i>
+                    <span>Gyroscope dihentikan</span>
+                `;
+                orientationStatus.className = 'orientation-status orientation-inactive';
+                
+                btnStart.disabled = false;
+                btnStop.disabled = true;
+                
+                // Remove pulse animation
+                gyroNeedle.classList.remove('pulse');
+                gyroNeedle.classList.remove('shake');
+            }
+        }
+        
+        // Reset Gyroscope
+        function resetGyroscope() {
+            lastAlpha = 0;
+            lastBeta = 0;
+            lastGamma = 0;
+            rotationHistory = [];
+            alphaHistory = [];
+            betaHistory = [];
+            gammaHistory = [];
+            timeHistory = [];
+            calibrationOffset = 0;
+            
+            updateGyroscope(0, 0, 0, 0);
+            
+            // Reset chart
+            if (rotationChart) {
+                rotationChart.data.labels = [];
+                rotationChart.data.datasets[0].data = [];
+                rotationChart.data.datasets[1].data = [];
+                rotationChart.data.datasets[2].data = [];
+                rotationChart.update('none');
+            }
+            
+            // Reset to initial state
+            gyroNeedle.style.transform = 'rotate(0deg)';
+            rotationValue.textContent = '0°';
+            rotationDirection.textContent = 'NORTH';
+            
+            alphaValue.textContent = '0.00°';
+            betaValue.textContent = '0.00°';
+            gammaValue.textContent = '0.00°';
+            rotationRate.textContent = '0.00°/s';
+        }
+        
+        // Calibrate Gyroscope
+        function calibrateGyroscope() {
+            if (lastAlpha !== null) {
+                calibrationOffset = lastAlpha;
+                alert(`Gyroscope dikalibrasi pada ${lastAlpha.toFixed(2)}°`);
+            } else {
+                alert('Mulai gyroscope terlebih dahulu untuk kalibrasi');
+            }
+        }
+        
+        // Event Listeners
+        btnStart.addEventListener('click', startGyroscope);
+        btnStop.addEventListener('click', stopGyroscope);
+        btnReset.addEventListener('click', resetGyroscope);
+        btnCalibrate.addEventListener('click', calibrateGyroscope);
+        
+        sensitivitySlider.addEventListener('input', (e) => {
+            sensitivity = parseInt(e.target.value);
+            sensitivityValue.textContent = sensitivity;
+        });
+        
+        btnChartAlpha.addEventListener('click', () => {
+            currentChartType = 'alpha';
+            btnChartAlpha.classList.add('bg-blue-500', 'text-white');
+            btnChartBeta.classList.remove('bg-green-500', 'text-white');
+            btnChartGamma.classList.remove('bg-red-500', 'text-white');
+            
+            btnChartAlpha.className = 'flex-1 py-2 bg-blue-500 text-white rounded-lg text-xs font-medium';
+            btnChartBeta.className = 'flex-1 py-2 bg-green-100 text-green-700 rounded-lg text-xs font-medium hover:bg-green-200';
+            btnChartGamma.className = 'flex-1 py-2 bg-red-100 text-red-700 rounded-lg text-xs font-medium hover:bg-red-200';
+            
+            if (rotationChart) {
+                rotationChart.data.datasets[0].hidden = false;
+                rotationChart.data.datasets[1].hidden = true;
+                rotationChart.data.datasets[2].hidden = true;
+                rotationChart.update();
+            }
+        });
+        
+        btnChartBeta.addEventListener('click', () => {
+            currentChartType = 'beta';
+            btnChartAlpha.classList.remove('bg-blue-500', 'text-white');
+            btnChartBeta.classList.add('bg-green-500', 'text-white');
+            btnChartGamma.classList.remove('bg-red-500', 'text-white');
+            
+            btnChartAlpha.className = 'flex-1 py-2 bg-blue-100 text-blue-700 rounded-lg text-xs font-medium hover:bg-blue-200';
+            btnChartBeta.className = 'flex-1 py-2 bg-green-500 text-white rounded-lg text-xs font-medium';
+            btnChartGamma.className = 'flex-1 py-2 bg-red-100 text-red-700 rounded-lg text-xs font-medium hover:bg-red-200';
+            
+            if (rotationChart) {
+                rotationChart.data.datasets[0].hidden = true;
+                rotationChart.data.datasets[1].hidden = false;
+                rotationChart.data.datasets[2].hidden = true;
+                rotationChart.update();
+            }
+        });
+        
+        btnChartGamma.addEventListener('click', () => {
+            currentChartType = 'gamma';
+            btnChartAlpha.classList.remove('bg-blue-500', 'text-white');
+            btnChartBeta.classList.remove('bg-green-500', 'text-white');
+            btnChartGamma.classList.add('bg-red-500', 'text-white');
+            
+            btnChartAlpha.className = 'flex-1 py-2 bg-blue-100 text-blue-700 rounded-lg text-xs font-medium hover:bg-blue-200';
+            btnChartBeta.className = 'flex-1 py-2 bg-green-100 text-green-700 rounded-lg text-xs font-medium hover:bg-green-200';
+            btnChartGamma.className = 'flex-1 py-2 bg-red-500 text-white rounded-lg text-xs font-medium';
+            
+            if (rotationChart) {
+                rotationChart.data.datasets[0].hidden = true;
+                rotationChart.data.datasets[1].hidden = true;
+                rotationChart.data.datasets[2].hidden = false;
+                rotationChart.update();
+            }
+        });
+        
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', () => {
+            initGyroscopeMarkings();
+            initChart();
+            
+            // Set initial button states
+            btnStop.disabled = true;
+            
+            // Set initial chart button state
+            btnChartAlpha.classList.add('bg-blue-500', 'text-white');
+            btnChartAlpha.className = 'flex-1 py-2 bg-blue-500 text-white rounded-lg text-xs font-medium';
+            
+            // Show help message
+            setTimeout(() => {
+                if (!isGyroActive) {
+                    alert('Klik "Mulai" untuk mengaktifkan gyroscope. Pastikan perangkat Anda mendukung sensor orientasi.');
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

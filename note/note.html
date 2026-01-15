@@ -1,0 +1,1213 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Note Canvas A4 - QUANTARA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- MathJax untuk LaTeX -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <!-- Fabric.js untuk canvas editing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
+    <!-- jsPDF untuk ekspor PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #38b2ac;
+            --secondary: #0e7490;
+            --accent: #f59e0b;
+            --physics: #3b82f6;
+            --chemistry: #10b981;
+            --biology: #8b5cf6;
+            --astronomy: #ec4899;
+        }
+        
+        body {
+            font-family: 'Baloo 2', cursive;
+            background-color: #f8fafc;
+        }
+        
+        .app-container {
+            max-width: 414px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        /* NAVBAR */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            max-width: 414px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            background: white;
+            z-index: 10;
+            height: 70px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+            text-decoration: none;
+            flex: 1;
+            height: 100%;
+            padding: 0.5rem 0;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item span {
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
+        
+        .nav-item.active {
+            color: var(--primary);
+        }
+        
+        .nav-icon {
+            transition: all 0.3s ease;
+            font-size: 1.25rem;
+        }
+        
+        .nav-icon.active {
+            transform: translateY(-5px);
+            color: var(--primary);
+        }
+        
+        .app-logo {
+            display: flex;
+            align-items: center;
+        }
+        
+        .app-logo-icon {
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 8px;
+        }
+        
+        .app-name {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: #9999ff;
+        }
+        
+        /* CANVAS STYLES */
+        .canvas-container {
+            width: 100%;
+            height: 500px;
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        
+        #note-canvas {
+            background-color: white;
+        }
+        
+        .toolbar {
+            display: flex;
+            overflow-x: auto;
+            padding: 0.75rem;
+            background-color: white;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .toolbar-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem 0.75rem;
+            margin-right: 0.5rem;
+            border-radius: 0.5rem;
+            background-color: #f9fafb;
+            border: 1px solid #e5e7eb;
+            color: #4b5563;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-width: 70px;
+        }
+        
+        .toolbar-btn:hover {
+            background-color: #f3f4f6;
+        }
+        
+        .toolbar-btn.active {
+            background-color: #dbeafe;
+            border-color: #60a5fa;
+            color: #3b82f6;
+        }
+        
+        .tool-icon {
+            font-size: 1.25rem;
+            margin-bottom: 0.25rem;
+        }
+        
+        .tool-label {
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        /* MODAL STYLES */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background-color: white;
+            border-radius: 0.75rem;
+            width: 90%;
+            max-width: 380px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .latex-preview {
+            background-color: #f8fafc;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.375rem;
+            padding: 1rem;
+            min-height: 80px;
+            overflow-x: auto;
+        }
+        
+        /* A4 Paper Size */
+        .a4-container {
+            width: 350px;
+            height: 495px;
+            background: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            margin: 0 auto;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #d1d5db;
+        }
+        
+        .a4-canvas {
+            width: 100%;
+            height: 100%;
+        }
+        
+        .object-controls {
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 5px;
+            background: white;
+            padding: 5px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 20;
+        }
+        
+        .control-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #f3f4f6;
+            border: none;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: #4b5563;
+        }
+        
+        .control-btn:hover {
+            background: #e5e7eb;
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile App Container -->
+    <div class="app-container">
+        <!-- App Header -->
+        <header class="bg-gradient-to-r from-primary to-secondary p-4 text-white">
+            <div class="flex justify-between items-center">
+                <div class="app-logo">
+                    <div class="app-logo-icon" style="background: #9999ff; color: white;">
+                        <i class="fas fa-atom"></i>
+                    </div>
+                    <h1 class="app-name">QUANTARA</h1>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <button id="download-pdf" class="bg-white text-primary px-3 py-1 rounded-lg font-semibold text-sm">
+                        <i class="fas fa-download mr-1"></i> PDF
+                    </button>
+                    <i class="fas fa-user-circle text-xl"></i>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Main Content Area -->
+        <main class="pb-20 px-4">
+            <div class="pt-4 pb-4">
+                <h2 class="text-xl font-bold text-gray-800 mb-1">Note Canvas A4</h2>
+                <p class="text-gray-600 text-sm">Buat catatan dengan teks, gambar, dan rumus LaTeX. Unduh sebagai PDF.</p>
+            </div>
+            
+            <!-- Toolbar -->
+            <div class="toolbar">
+                <div class="toolbar-btn active" id="tool-select">
+                    <i class="fas fa-mouse-pointer tool-icon"></i>
+                    <span class="tool-label">Pilih</span>
+                </div>
+                <div class="toolbar-btn" id="tool-text">
+                    <i class="fas fa-font tool-icon"></i>
+                    <span class="tool-label">Teks</span>
+                </div>
+                <div class="toolbar-btn" id="tool-latex">
+                    <i class="fas fa-square-root-alt tool-icon"></i>
+                    <span class="tool-label">LaTeX</span>
+                </div>
+                <div class="toolbar-btn" id="tool-image">
+                    <i class="fas fa-image tool-icon"></i>
+                    <span class="tool-label">Gambar</span>
+                </div>
+                <div class="toolbar-btn" id="tool-shape">
+                    <i class="fas fa-square tool-icon"></i>
+                    <span class="tool-label">Bentuk</span>
+                </div>
+                <div class="toolbar-btn" id="tool-line">
+                    <i class="fas fa-slash tool-icon"></i>
+                    <span class="tool-label">Garis</span>
+                </div>
+                <div class="toolbar-btn" id="tool-delete">
+                    <i class="fas fa-trash tool-icon"></i>
+                    <span class="tool-label">Hapus</span>
+                </div>
+            </div>
+            
+            <!-- Canvas Container -->
+            <div class="mt-4">
+                <div class="a4-container">
+                    <canvas id="note-canvas" class="a4-canvas" width="350" height="495"></canvas>
+                </div>
+                
+                <!-- Object Controls (akan muncul saat objek dipilih) -->
+                <div id="object-controls" class="object-controls" style="display: none;">
+                    <button id="btn-bring-forward" class="control-btn" title="Bawa ke Depan">
+                        <i class="fas fa-arrow-up"></i>
+                    </button>
+                    <button id="btn-send-backward" class="control-btn" title="Kirim ke Belakang">
+                        <i class="fas fa-arrow-down"></i>
+                    </button>
+                    <button id="btn-change-color" class="control-btn" title="Ubah Warna">
+                        <i class="fas fa-palette"></i>
+                    </button>
+                    <button id="btn-duplicate" class="control-btn" title="Duplikat">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Color Palette -->
+            <div class="mt-4 p-3 bg-gray-50 rounded-lg">
+                <h3 class="text-sm font-semibold text-gray-700 mb-2">Palet Warna</h3>
+                <div class="flex flex-wrap gap-2">
+                    <div class="color-option w-8 h-8 rounded-full cursor-pointer bg-red-500" data-color="#ef4444"></div>
+                    <div class="color-option w-8 h-8 rounded-full cursor-pointer bg-blue-500" data-color="#3b82f6"></div>
+                    <div class="color-option w-8 h-8 rounded-full cursor-pointer bg-green-500" data-color="#10b981"></div>
+                    <div class="color-option w-8 h-8 rounded-full cursor-pointer bg-yellow-500" data-color="#f59e0b"></div>
+                    <div class="color-option w-8 h-8 rounded-full cursor-pointer bg-purple-500" data-color="#8b5cf6"></div>
+                    <div class="color-option w-8 h-8 rounded-full cursor-pointer bg-pink-500" data-color="#ec4899"></div>
+                    <div class="color-option w-8 h-8 rounded-full cursor-pointer bg-gray-800" data-color="#1f2937"></div>
+                    <div class="color-option w-8 h-8 rounded-full cursor-pointer bg-white border border-gray-300" data-color="#ffffff"></div>
+                </div>
+            </div>
+            
+            <!-- Quick Actions -->
+            <div class="mt-4 grid grid-cols-2 gap-3">
+                <button id="btn-clear" class="bg-red-50 text-red-600 p-3 rounded-lg font-semibold flex items-center justify-center">
+                    <i class="fas fa-broom mr-2"></i> Hapus Semua
+                </button>
+                <button id="btn-add-sample" class="bg-blue-50 text-blue-600 p-3 rounded-lg font-semibold flex items-center justify-center">
+                    <i class="fas fa-plus mr-2"></i> Contoh Catatan
+                </button>
+            </div>
+            
+            <!-- Instructions -->
+            <div class="mt-6 p-4 bg-gradient-to-r from-blue-50 to-teal-50 rounded-lg">
+                <h3 class="font-bold text-gray-800 mb-2">Cara Menggunakan:</h3>
+                <ul class="text-sm text-gray-700 space-y-1">
+                    <li><i class="fas fa-mouse-pointer text-primary mr-1"></i> Klik tool untuk memilih fungsi</li>
+                    <li><i class="fas fa-font text-primary mr-1"></i> Klik di canvas untuk menambahkan teks</li>
+                    <li><i class="fas fa-square-root-alt text-primary mr-1"></i> Gunakan LaTeX untuk rumus matematika</li>
+                    <li><i class="fas fa-image text-primary mr-1"></i> Unggah gambar dari perangkat Anda</li>
+                    <li><i class="fas fa-download text-primary mr-1"></i> Klik tombol PDF untuk mengunduh</li>
+                </ul>
+            </div>
+        </main>
+        
+        <!-- BOTTOM NAVIGATION -->
+        <nav class="bottom-nav">
+            <a href="dashboad siswa.html" class="nav-item">
+                <i class="fas fa-home nav-icon"></i>
+                <span>Beranda</span>
+            </a>
+            <a href="soal harian/dashboard soal.html" class="nav-item">
+                <i class="fas fa-flask nav-icon"></i>
+                <span>Soal Harian</span>
+            </a>
+            <a href="ai/nayra.html" class="nav-item">
+                <i class="fas fa-robot nav-icon"></i>
+                <span>Nayra AI</span>
+            </a>
+            <a href="#" class="nav-item active">
+                <i class="fas fa-sticky-note nav-icon active"></i>
+                <span>Note Canvas</span>
+            </a>
+            <a href="profil/profil.html" class="nav-item">
+                <i class="fas fa-user nav-icon"></i>
+                <span>Profil</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- MODAL UNTUK INPUT LaTeX -->
+    <div id="latex-modal" class="modal">
+        <div class="modal-content">
+            <div class="p-4 border-b">
+                <h3 class="font-bold text-gray-800">Tambahkan Rumus LaTeX</h3>
+            </div>
+            <div class="p-4">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-medium mb-2">Masukkan kode LaTeX:</label>
+                    <textarea id="latex-input" class="w-full border border-gray-300 rounded-lg p-3 text-sm" rows="3" placeholder="Contoh: E = mc^2 atau \frac{a}{b}">E = mc^2</textarea>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-medium mb-2">Pratinjau:</label>
+                    <div id="latex-preview" class="latex-preview">
+                        <!-- MathJax akan merender di sini -->
+                        \(E = mc^2\)
+                    </div>
+                </div>
+                
+                <div class="flex justify-end space-x-2">
+                    <button id="latex-cancel" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium">Batal</button>
+                    <button id="latex-insert" class="px-4 py-2 bg-primary text-white rounded-lg font-medium">Tambahkan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL UNTUK UPLOAD GAMBAR -->
+    <div id="image-modal" class="modal">
+        <div class="modal-content">
+            <div class="p-4 border-b">
+                <h3 class="font-bold text-gray-800">Tambahkan Gambar</h3>
+            </div>
+            <div class="p-4">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-medium mb-2">Unggah gambar dari perangkat:</label>
+                    <input type="file" id="image-upload" accept="image/*" class="w-full border border-gray-300 rounded-lg p-2">
+                </div>
+                
+                <div class="mb-4">
+                    <p class="text-gray-600 text-sm mb-2">Atau gunakan gambar contoh:</p>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div class="sample-image cursor-pointer border border-gray-200 rounded overflow-hidden">
+                            <img src="https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80" class="w-full h-20 object-cover" data-url="https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80">
+                        </div>
+                        <div class="sample-image cursor-pointer border border-gray-200 rounded overflow-hidden">
+                            <img src="https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80" class="w-full h-20 object-cover" data-url="https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80">
+                        </div>
+                        <div class="sample-image cursor-pointer border border-gray-200 rounded overflow-hidden">
+                            <img src="https://images.unsplash.com/photo-1532094349884-543bc11b234d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=200&q=80" class="w-full h-20 object-cover" data-url="https://images.unsplash.com/photo-1532094349884-543bc11b234d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=400&q=80">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex justify-end space-x-2">
+                    <button id="image-cancel" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium">Batal</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Inisialisasi variabel global
+        let canvas;
+        let currentTool = 'select';
+        let selectedColor = '#3b82f6';
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            // Inisialisasi canvas Fabric.js
+            canvas = new fabric.Canvas('note-canvas', {
+                backgroundColor: 'white',
+                selectionColor: 'rgba(59, 130, 246, 0.3)',
+                selectionBorderColor: '#3b82f6',
+                selectionLineWidth: 1
+            });
+            
+            // Atur ukuran canvas sesuai container A4
+            canvas.setDimensions({
+                width: 350,
+                height: 495
+            });
+            
+            // Tambahkan background grid (opsional)
+            addGridBackground();
+            
+            // Setup event listeners untuk toolbar
+            setupToolbar();
+            
+            // Setup event listeners untuk palette warna
+            setupColorPalette();
+            
+            // Setup event listeners untuk kontrol objek
+            setupObjectControls();
+            
+            // Setup event listeners untuk tombol aksi
+            setupActionButtons();
+            
+            // Setup modal LaTeX
+            setupLatexModal();
+            
+            // Setup modal gambar
+            setupImageModal();
+            
+            // Event listener untuk pemilihan objek
+            canvas.on('selection:created', updateObjectControls);
+            canvas.on('selection:updated', updateObjectControls);
+            canvas.on('selection:cleared', hideObjectControls);
+            
+            // Event listener untuk tool PDF download
+            document.getElementById('download-pdf').addEventListener('click', downloadAsPDF);
+            
+            // Render ulang MathJax saat modal LaTeX terbuka
+            document.getElementById('latex-input').addEventListener('input', function() {
+                document.getElementById('latex-preview').innerHTML = `\\(${this.value}\\)`;
+                if (window.MathJax) {
+                    MathJax.typesetPromise(['#latex-preview']);
+                }
+            });
+        });
+        
+        function addGridBackground() {
+            // Membuat background dengan grid tipis
+            const gridSize = 20;
+            const gridColor = 'rgba(0, 0, 0, 0.05)';
+            
+            // Membuat pattern untuk grid
+            const gridPattern = document.createElement('canvas');
+            gridPattern.width = gridSize;
+            gridPattern.height = gridSize;
+            const ctx = gridPattern.getContext('2d');
+            
+            // Gambar garis vertikal
+            ctx.strokeStyle = gridColor;
+            ctx.lineWidth = 0.5;
+            ctx.beginPath();
+            ctx.moveTo(gridSize - 0.5, 0);
+            ctx.lineTo(gridSize - 0.5, gridSize);
+            ctx.stroke();
+            
+            // Gambar garis horizontal
+            ctx.beginPath();
+            ctx.moveTo(0, gridSize - 0.5);
+            ctx.lineTo(gridSize, gridSize - 0.5);
+            ctx.stroke();
+            
+            // Tambahkan pattern ke canvas sebagai background
+            const pattern = new fabric.Pattern({
+                source: gridPattern,
+                repeat: 'repeat'
+            });
+            
+            // Tambahkan rect sebagai background dengan pattern grid
+            const background = new fabric.Rect({
+                width: canvas.width,
+                height: canvas.height,
+                fill: pattern,
+                selectable: false,
+                evented: false,
+                id: 'background-grid'
+            });
+            
+            canvas.add(background);
+            canvas.sendToBack(background);
+        }
+        
+        function setupToolbar() {
+            const tools = ['select', 'text', 'latex', 'image', 'shape', 'line', 'delete'];
+            
+            tools.forEach(toolId => {
+                const toolBtn = document.getElementById(`tool-${toolId}`);
+                toolBtn.addEventListener('click', function() {
+                    // Hapus active state dari semua tool
+                    document.querySelectorAll('.toolbar-btn').forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+                    
+                    // Tambahkan active state ke tool yang diklik
+                    this.classList.add('active');
+                    
+                    // Ubah tool yang aktif
+                    currentTool = toolId;
+                    
+                    // Atur cursor berdasarkan tool
+                    setCursorForTool();
+                    
+                    // Jika tool adalah delete, hapus objek yang dipilih
+                    if (toolId === 'delete') {
+                        const activeObject = canvas.getActiveObject();
+                        if (activeObject) {
+                            canvas.remove(activeObject);
+                            canvas.discardActiveObject();
+                            canvas.requestRenderAll();
+                        }
+                        // Kembalikan ke tool select setelah menghapus
+                        setTimeout(() => {
+                            document.getElementById('tool-select').click();
+                        }, 100);
+                    }
+                });
+            });
+            
+            // Atur cursor default untuk tool select
+            setCursorForTool();
+        }
+        
+        function setCursorForTool() {
+            switch(currentTool) {
+                case 'select':
+                    canvas.defaultCursor = 'default';
+                    canvas.hoverCursor = 'move';
+                    canvas.selection = true;
+                    break;
+                case 'text':
+                    canvas.defaultCursor = 'text';
+                    canvas.hoverCursor = 'text';
+                    canvas.selection = false;
+                    setupTextTool();
+                    break;
+                case 'latex':
+                    canvas.defaultCursor = 'crosshair';
+                    canvas.hoverCursor = 'crosshair';
+                    canvas.selection = false;
+                    setupLatexTool();
+                    break;
+                case 'image':
+                    canvas.defaultCursor = 'crosshair';
+                    canvas.hoverCursor = 'crosshair';
+                    canvas.selection = false;
+                    setupImageTool();
+                    break;
+                case 'shape':
+                    canvas.defaultCursor = 'crosshair';
+                    canvas.hoverCursor = 'crosshair';
+                    canvas.selection = false;
+                    setupShapeTool();
+                    break;
+                case 'line':
+                    canvas.defaultCursor = 'crosshair';
+                    canvas.hoverCursor = 'crosshair';
+                    canvas.selection = false;
+                    setupLineTool();
+                    break;
+                default:
+                    canvas.defaultCursor = 'default';
+                    canvas.hoverCursor = 'move';
+            }
+        }
+        
+        function setupTextTool() {
+            canvas.off('mouse:down'); // Hapus event listener sebelumnya
+            
+            canvas.on('mouse:down', function(options) {
+                if (currentTool === 'text' && options.target === null) {
+                    const point = canvas.getPointer(options.e);
+                    
+                    // Buat textbox di posisi klik
+                    const textbox = new fabric.Textbox('Ketik di sini...', {
+                        left: point.x,
+                        top: point.y,
+                        width: 150,
+                        fontSize: 16,
+                        fill: selectedColor,
+                        fontFamily: 'Arial',
+                        editable: true
+                    });
+                    
+                    canvas.add(textbox);
+                    canvas.setActiveObject(textbox);
+                    canvas.requestRenderAll();
+                    
+                    // Fokus ke textbox untuk langsung mengetik
+                    setTimeout(() => {
+                        textbox.enterEditing();
+                        textbox.hiddenTextarea.focus();
+                    }, 100);
+                    
+                    // Kembalikan ke tool select setelah menambahkan teks
+                    setTimeout(() => {
+                        document.getElementById('tool-select').click();
+                    }, 300);
+                }
+            });
+        }
+        
+        function setupLatexTool() {
+            canvas.off('mouse:down'); // Hapus event listener sebelumnya
+            
+            canvas.on('mouse:down', function(options) {
+                if (currentTool === 'latex' && options.target === null) {
+                    // Tampilkan modal LaTeX
+                    showLatexModal();
+                }
+            });
+        }
+        
+        function setupImageTool() {
+            canvas.off('mouse:down'); // Hapus event listener sebelumnya
+            
+            canvas.on('mouse:down', function(options) {
+                if (currentTool === 'image' && options.target === null) {
+                    // Tampilkan modal gambar
+                    showImageModal();
+                }
+            });
+        }
+        
+        function setupShapeTool() {
+            canvas.off('mouse:down'); // Hapus event listener sebelumnya
+            
+            canvas.on('mouse:down', function(options) {
+                if (currentTool === 'shape' && options.target === null) {
+                    const point = canvas.getPointer(options.e);
+                    
+                    // Buat persegi di posisi klik
+                    const rect = new fabric.Rect({
+                        left: point.x,
+                        top: point.y,
+                        width: 100,
+                        height: 70,
+                        fill: 'transparent',
+                        stroke: selectedColor,
+                        strokeWidth: 2
+                    });
+                    
+                    canvas.add(rect);
+                    canvas.setActiveObject(rect);
+                    canvas.requestRenderAll();
+                    
+                    // Kembalikan ke tool select setelah menambahkan shape
+                    setTimeout(() => {
+                        document.getElementById('tool-select').click();
+                    }, 100);
+                }
+            });
+        }
+        
+        function setupLineTool() {
+            canvas.off('mouse:down'); // Hapus event listener sebelumnya
+            
+            canvas.on('mouse:down', function(options) {
+                if (currentTool === 'line' && options.target === null) {
+                    const point = canvas.getPointer(options.e);
+                    
+                    // Buat garis di posisi klik
+                    const line = new fabric.Line([point.x, point.y, point.x + 80, point.y], {
+                        stroke: selectedColor,
+                        strokeWidth: 2
+                    });
+                    
+                    canvas.add(line);
+                    canvas.setActiveObject(line);
+                    canvas.requestRenderAll();
+                    
+                    // Kembalikan ke tool select setelah menambahkan garis
+                    setTimeout(() => {
+                        document.getElementById('tool-select').click();
+                    }, 100);
+                }
+            });
+        }
+        
+        function setupColorPalette() {
+            document.querySelectorAll('.color-option').forEach(colorOption => {
+                colorOption.addEventListener('click', function() {
+                    // Hapus border dari semua color option
+                    document.querySelectorAll('.color-option').forEach(opt => {
+                        opt.classList.remove('ring-2', 'ring-offset-2', 'ring-blue-500');
+                    });
+                    
+                    // Tambahkan border ke color option yang dipilih
+                    this.classList.add('ring-2', 'ring-offset-2', 'ring-blue-500');
+                    
+                    // Simpan warna yang dipilih
+                    selectedColor = this.getAttribute('data-color');
+                    
+                    // Terapkan warna ke objek yang dipilih
+                    const activeObject = canvas.getActiveObject();
+                    if (activeObject) {
+                        if (activeObject.type === 'textbox' || activeObject.type === 'i-text' || activeObject.type === 'text') {
+                            activeObject.set('fill', selectedColor);
+                        } else if (activeObject.type === 'rect' || activeObject.type === 'circle' || activeObject.type === 'triangle') {
+                            if (activeObject.fill && activeObject.fill !== 'transparent') {
+                                activeObject.set('fill', selectedColor);
+                            } else {
+                                activeObject.set('stroke', selectedColor);
+                            }
+                        } else if (activeObject.type === 'line') {
+                            activeObject.set('stroke', selectedColor);
+                        }
+                        canvas.requestRenderAll();
+                    }
+                });
+            });
+        }
+        
+        function setupObjectControls() {
+            document.getElementById('btn-bring-forward').addEventListener('click', function() {
+                const activeObject = canvas.getActiveObject();
+                if (activeObject) {
+                    canvas.bringForward(activeObject);
+                    canvas.requestRenderAll();
+                }
+            });
+            
+            document.getElementById('btn-send-backward').addEventListener('click', function() {
+                const activeObject = canvas.getActiveObject();
+                if (activeObject) {
+                    canvas.sendBackwards(activeObject);
+                    canvas.requestRenderAll();
+                }
+            });
+            
+            document.getElementById('btn-change-color').addEventListener('click', function() {
+                // Toggle antara fill dan stroke untuk shape
+                const activeObject = canvas.getActiveObject();
+                if (activeObject) {
+                    if (activeObject.type === 'rect' || activeObject.type === 'circle' || activeObject.type === 'triangle') {
+                        if (activeObject.fill === 'transparent') {
+                            activeObject.set('fill', selectedColor);
+                            activeObject.set('stroke', selectedColor);
+                        } else {
+                            activeObject.set('fill', 'transparent');
+                            activeObject.set('stroke', selectedColor);
+                        }
+                        canvas.requestRenderAll();
+                    }
+                }
+            });
+            
+            document.getElementById('btn-duplicate').addEventListener('click', function() {
+                const activeObject = canvas.getActiveObject();
+                if (activeObject) {
+                    activeObject.clone(function(cloned) {
+                        cloned.set({
+                            left: cloned.left + 20,
+                            top: cloned.top + 20
+                        });
+                        canvas.add(cloned);
+                        canvas.setActiveObject(cloned);
+                        canvas.requestRenderAll();
+                    });
+                }
+            });
+        }
+        
+        function updateObjectControls() {
+            const activeObject = canvas.getActiveObject();
+            if (activeObject && activeObject.id !== 'background-grid') {
+                const controls = document.getElementById('object-controls');
+                const rect = canvas.getSelectionElement().getBoundingClientRect();
+                const canvasRect = document.getElementById('note-canvas').getBoundingClientRect();
+                
+                controls.style.display = 'flex';
+                controls.style.top = `${rect.top - canvasRect.top - 40}px`;
+                controls.style.left = `${rect.left - canvasRect.left + rect.width/2}px`;
+                controls.style.transform = 'translateX(-50%)';
+            } else {
+                hideObjectControls();
+            }
+        }
+        
+        function hideObjectControls() {
+            document.getElementById('object-controls').style.display = 'none';
+        }
+        
+        function setupActionButtons() {
+            // Tombol hapus semua
+            document.getElementById('btn-clear').addEventListener('click', function() {
+                if (confirm('Apakah Anda yakin ingin menghapus semua konten di canvas?')) {
+                    // Hapus semua objek kecuali background grid
+                    canvas.getObjects().forEach(obj => {
+                        if (obj.id !== 'background-grid') {
+                            canvas.remove(obj);
+                        }
+                    });
+                    canvas.discardActiveObject();
+                    canvas.requestRenderAll();
+                }
+            });
+            
+            // Tombol tambahkan contoh catatan
+            document.getElementById('btn-add-sample').addEventListener('click', function() {
+                addSampleNote();
+            });
+        }
+        
+        function setupLatexModal() {
+            const modal = document.getElementById('latex-modal');
+            const cancelBtn = document.getElementById('latex-cancel');
+            const insertBtn = document.getElementById('latex-insert');
+            
+            // Fungsi untuk menampilkan modal
+            window.showLatexModal = function() {
+                modal.style.display = 'flex';
+                document.getElementById('latex-input').focus();
+            };
+            
+            // Fungsi untuk menyembunyikan modal
+            function hideLatexModal() {
+                modal.style.display = 'none';
+            }
+            
+            // Event listener untuk tombol batal
+            cancelBtn.addEventListener('click', hideLatexModal);
+            
+            // Event listener untuk tombol tambahkan
+            insertBtn.addEventListener('click', function() {
+                const latexCode = document.getElementById('latex-input').value;
+                if (latexCode.trim()) {
+                    addLatexToCanvas(latexCode);
+                    hideLatexModal();
+                    
+                    // Reset input
+                    document.getElementById('latex-input').value = 'E = mc^2';
+                    document.getElementById('latex-preview').innerHTML = `\\(E = mc^2\\)`;
+                    MathJax.typesetPromise(['#latex-preview']);
+                }
+            });
+            
+            // Tutup modal saat klik di luar konten modal
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    hideLatexModal();
+                }
+            });
+        }
+        
+        function addLatexToCanvas(latexCode) {
+            // Buat elemen untuk menampilkan LaTeX
+            const latexContainer = document.createElement('div');
+            latexContainer.innerHTML = `\\(${latexCode}\\)`;
+            latexContainer.style.position = 'absolute';
+            latexContainer.style.left = '-9999px';
+            latexContainer.style.top = '-9999px';
+            latexContainer.style.fontSize = '20px';
+            document.body.appendChild(latexContainer);
+            
+            // Render MathJax
+            MathJax.typesetPromise([latexContainer]).then(() => {
+                // Dapatkan SVG dari MathJax
+                const mjContainer = latexContainer.querySelector('.MJX-TEX');
+                if (mjContainer) {
+                    // Konversi ke gambar
+                    const svgElement = mjContainer.querySelector('svg');
+                    if (svgElement) {
+                        const svgData = new XMLSerializer().serializeToString(svgElement);
+                        const svgBlob = new Blob([svgData], {type: 'image/svg+xml;charset=utf-8'});
+                        const svgUrl = URL.createObjectURL(svgBlob);
+                        
+                        // Tambahkan ke canvas sebagai gambar
+                        fabric.Image.fromURL(svgUrl, function(img) {
+                            // Posisikan di tengah canvas
+                            img.set({
+                                left: canvas.width / 2 - img.width / 2,
+                                top: canvas.height / 2 - img.height / 2,
+                                scaleX: 0.5,
+                                scaleY: 0.5
+                            });
+                            
+                            canvas.add(img);
+                            canvas.setActiveObject(img);
+                            canvas.requestRenderAll();
+                            
+                            // Bersihkan URL
+                            URL.revokeObjectURL(svgUrl);
+                            
+                            // Kembalikan ke tool select
+                            setTimeout(() => {
+                                document.getElementById('tool-select').click();
+                            }, 100);
+                        });
+                    }
+                }
+                
+                // Hapus container temporary
+                document.body.removeChild(latexContainer);
+            }).catch(err => {
+                console.error('Error rendering LaTeX:', err);
+                document.body.removeChild(latexContainer);
+                
+                // Fallback: buat teks biasa jika LaTeX gagal di-render
+                const text = new fabric.Textbox(`LaTeX: ${latexCode}`, {
+                    left: canvas.width / 2 - 100,
+                    top: canvas.height / 2 - 20,
+                    width: 200,
+                    fontSize: 16,
+                    fill: selectedColor,
+                    fontFamily: 'Arial'
+                });
+                
+                canvas.add(text);
+                canvas.setActiveObject(text);
+                canvas.requestRenderAll();
+                
+                // Kembalikan ke tool select
+                setTimeout(() => {
+                    document.getElementById('tool-select').click();
+                }, 100);
+            });
+        }
+        
+        function setupImageModal() {
+            const modal = document.getElementById('image-modal');
+            const cancelBtn = document.getElementById('image-cancel');
+            const uploadInput = document.getElementById('image-upload');
+            
+            // Fungsi untuk menampilkan modal
+            window.showImageModal = function() {
+                modal.style.display = 'flex';
+            };
+            
+            // Fungsi untuk menyembunyikan modal
+            function hideImageModal() {
+                modal.style.display = 'none';
+                uploadInput.value = '';
+            }
+            
+            // Event listener untuk tombol batal
+            cancelBtn.addEventListener('click', hideImageModal);
+            
+            // Event listener untuk upload gambar
+            uploadInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(event) {
+                        addImageToCanvas(event.target.result);
+                        hideImageModal();
+                    };
+                    reader.readAsDataURL(file);
+                }
+            });
+            
+            // Event listener untuk gambar contoh
+            document.querySelectorAll('.sample-image').forEach(img => {
+                img.addEventListener('click', function() {
+                    const imageUrl = this.querySelector('img').getAttribute('data-url');
+                    addImageToCanvas(imageUrl);
+                    hideImageModal();
+                });
+            });
+            
+            // Tutup modal saat klik di luar konten modal
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    hideImageModal();
+                }
+            });
+        }
+        
+        function addImageToCanvas(imageSrc) {
+            fabric.Image.fromURL(imageSrc, function(img) {
+                // Skala gambar agar sesuai dengan canvas
+                const maxWidth = canvas.width * 0.8;
+                const maxHeight = canvas.height * 0.6;
+                
+                let scale = 1;
+                if (img.width > maxWidth || img.height > maxHeight) {
+                    scale = Math.min(maxWidth / img.width, maxHeight / img.height);
+                }
+                
+                img.set({
+                    left: canvas.width / 2 - (img.width * scale) / 2,
+                    top: canvas.height / 2 - (img.height * scale) / 2,
+                    scaleX: scale,
+                    scaleY: scale
+                });
+                
+                canvas.add(img);
+                canvas.setActiveObject(img);
+                canvas.requestRenderAll();
+                
+                // Kembalikan ke tool select
+                setTimeout(() => {
+                    document.getElementById('tool-select').click();
+                }, 100);
+            });
+        }
+        
+        function addSampleNote() {
+            // Tambahkan contoh catatan fisika
+            const title = new fabric.Textbox('Hukum Newton II', {
+                left: 50,
+                top: 30,
+                width: 250,
+                fontSize: 24,
+                fill: '#3b82f6',
+                fontFamily: 'Arial',
+                fontWeight: 'bold',
+                textAlign: 'center'
+            });
+            
+            const formula = new fabric.Textbox('ΣF = ma', {
+                left: 100,
+                top: 80,
+                width: 150,
+                fontSize: 32,
+                fill: '#ef4444',
+                fontFamily: 'Arial',
+                textAlign: 'center'
+            });
+            
+            const description = new fabric.Textbox('Percepatan yang dihasilkan oleh resultan gaya yang bekerja pada suatu benda berbanding lurus dengan resultan gaya, dan berbanding terbalik dengan massa benda.', {
+                left: 30,
+                top: 140,
+                width: 290,
+                fontSize: 14,
+                fill: '#1f2937',
+                fontFamily: 'Arial',
+                lineHeight: 1.4
+            });
+            
+            // Tambahkan kotak di belakang judul
+            const titleBg = new fabric.Rect({
+                left: 45,
+                top: 25,
+                width: 260,
+                height: 35,
+                fill: '#dbeafe',
+                stroke: '#3b82f6',
+                strokeWidth: 1
+            });
+            
+            // Tambahkan garis pembatas
+            const line = new fabric.Line([30, 130, 320, 130], {
+                stroke: '#d1d5db',
+                strokeWidth: 1
+            });
+            
+            // Tambahkan semua ke canvas
+            canvas.add(titleBg);
+            canvas.add(title);
+            canvas.add(formula);
+            canvas.add(line);
+            canvas.add(description);
+            
+            canvas.requestRenderAll();
+        }
+        
+        async function downloadAsPDF() {
+            // Tampilkan loading
+            const downloadBtn = document.getElementById('download-pdf');
+            const originalText = downloadBtn.innerHTML;
+            downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Membuat PDF...';
+            downloadBtn.disabled = true;
+            
+            try {
+                // Ekspor canvas ke gambar
+                const dataUrl = canvas.toDataURL({
+                    format: 'png',
+                    quality: 1.0,
+                    multiplier: 2 // Resolusi lebih tinggi untuk PDF
+                });
+                
+                // Buat PDF dengan jsPDF
+                const { jsPDF } = window.jspdf;
+                const pdf = new jsPDF({
+                    orientation: 'portrait',
+                    unit: 'mm',
+                    format: 'a4'
+                });
+                
+                // Tambahkan gambar ke PDF
+                const imgWidth = 190; // mm (sesuai A4)
+                const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                
+                // Hitung posisi untuk center di A4
+                const xPos = (210 - imgWidth) / 2; // A4 width = 210mm
+                const yPos = (297 - imgHeight) / 2; // A4 height = 297mm
+                
+                pdf.addImage(dataUrl, 'PNG', xPos, yPos, imgWidth, imgHeight);
+                
+                // Tambahkan header
+                pdf.setFontSize(10);
+                pdf.setTextColor(100, 100, 100);
+                pdf.text('Dibuat dengan Note Canvas - QUANTARA', 105, 15, { align: 'center' });
+                
+                // Tambahkan tanggal
+                const now = new Date();
+                const dateStr = now.toLocaleDateString('id-ID', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
+                });
+                pdf.text(dateStr, 105, 285, { align: 'center' });
+                
+                // Simpan PDF
+                pdf.save(`catatan-quantara-${Date.now()}.pdf`);
+                
+            } catch (error) {
+                console.error('Error generating PDF:', error);
+                alert('Terjadi kesalahan saat membuat PDF. Silakan coba lagi.');
+            } finally {
+                // Kembalikan tombol ke keadaan semula
+                downloadBtn.innerHTML = originalText;
+                downloadBtn.disabled = false;
+            }
+        }
+        
+        // Script untuk navbar active state
+        const navItems = document.querySelectorAll('.nav-item');
+        
+        navItems.forEach(item => {
+            item.addEventListener('click', function() {
+                navItems.forEach(nav => {
+                    nav.classList.remove('active');
+                    nav.querySelector('.nav-icon').classList.remove('active');
+                });
+                
+                this.classList.add('active');
+                this.querySelector('.nav-icon').classList.add('active');
+            });
+        });
+    </script>
+</body>
+</html>

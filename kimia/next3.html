@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Game Tabel Periodik - TETA SAINS</title>
+    <title>QUANTARA - Tabel Molekul Kimia</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -12,10 +12,6 @@
             --primary: #38b2ac;
             --secondary: #0e7490;
             --accent: #f59e0b;
-            --physics: #3b82f6;
-            --chemistry: #10b981;
-            --biology: #8b5cf6;
-            --astronomy: #ec4899;
         }
         
         body {
@@ -32,7 +28,7 @@
             box-shadow: 0 0 20px rgba(0,0,0,0.1);
         }
         
-        /* NAVBAR - TIDAK DIUBAH */
+        /* NAVBAR - TIDAK DIRUBAH */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -78,148 +74,410 @@
             color: var(--primary);
         }
         
-        /* GAME STYLES */
-        .element-card {
-            width: 50px;
-            height: 50px;
+        /* TABLE STYLES */
+        .molecules-table {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 4px;
+            padding: 5px;
+            overflow-x: auto;
+        }
+        
+        .molecule-cell {
+            min-width: 45px;
+            height: 45px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             border-radius: 8px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            padding: 2px;
+        }
+        
+        .molecule-cell:hover {
+            transform: scale(1.08);
+            z-index: 2;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .molecule-cell.selected {
+            border: 2px solid #f59e0b;
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
+            70% { box-shadow: 0 0 0 5px rgba(245, 158, 11, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+        }
+        
+        .molecule-formula {
+            font-size: 12px;
+            font-weight: 800;
+            line-height: 1;
+            text-align: center;
+        }
+        
+        .molecule-name {
+            font-size: 6px;
+            margin-top: 1px;
+            text-align: center;
+            display: none;
+        }
+        
+        .molecule-cell:hover .molecule-name {
+            display: block;
+        }
+        
+        .molecule-mass {
+            position: absolute;
+            bottom: 1px;
+            right: 2px;
+            font-size: 6px;
             font-weight: bold;
-            cursor: grab;
-            transition: all 0.2s;
+            opacity: 0.8;
+        }
+        
+        /* Legend styles */
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+            margin-right: 8px;
+            flex-shrink: 0;
+        }
+        
+        /* MOLECULE CATEGORY COLORS */
+        .organic { background-color: #4caf50; color: white; }
+        .inorganic { background-color: #2196f3; color: white; }
+        .acid { background-color: #f44336; color: white; }
+        .base { background-color: #ff9800; color: white; }
+        .biomolecule { background-color: #9c27b0; color: white; }
+        .gas { background-color: #00bcd4; color: white; }
+        .polymer { background-color: #795548; color: white; }
+        .salt { background-color: #607d8b; color: white; }
+        
+        /* Modal styles */
+        .molecule-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            padding: 20px;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            max-width: 350px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+        
+        .app-logo {
+            display: flex;
+            align-items: center;
+        }
+        
+        .app-logo-icon {
+            background: #9999ff;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 8px;
+        }
+        
+        .app-name {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: #9999ff;
+        }
+        
+        /* Molecule detail styles */
+        .molecule-detail-card {
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 10px;
+        }
+        
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .detail-label {
+            font-weight: 600;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .detail-value {
+            font-weight: 700;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        /* Scrollbar styling */
+        .molecules-table::-webkit-scrollbar {
+            height: 6px;
+        }
+        
+        .molecules-table::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+        
+        .molecules-table::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+        
+        /* Reaction System Styles */
+        .reaction-panel {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+        }
+        
+        .selected-molecules {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+            min-height: 40px;
+        }
+        
+        .selected-molecule-badge {
+            background: white;
+            color: #333;
+            padding: 5px 10px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            font-weight: 600;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .selected-molecule-badge .remove-btn {
+            background: none;
+            border: none;
+            color: #ff6b6b;
+            margin-left: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        .reaction-result {
+            background: white;
+            color: #333;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .reaction-equation {
+            font-size: 20px;
+            font-weight: 800;
+            color: #4f46e5;
+            margin-bottom: 10px;
+            text-align: center;
+            padding: 10px;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+        
+        .reaction-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .reaction-description {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .reaction-properties {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            font-size: 12px;
+        }
+        
+        .reaction-prop {
+            background: #f8fafc;
+            padding: 8px;
+            border-radius: 6px;
+        }
+        
+        .reaction-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .reaction-btn {
+            flex: 1;
+            background: #f59e0b;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .reaction-btn:hover {
+            background: #d97706;
+        }
+        
+        .reaction-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .clear-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .clear-btn:hover {
+            background: #dc2626;
+        }
+        
+        .status-message {
+            text-align: center;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 5px;
+            min-height: 16px;
+        }
+        
+        /* Tab Styles */
+        .tab-container {
+            display: flex;
+            background: #f1f5f9;
+            border-radius: 10px;
+            padding: 5px;
+            margin-bottom: 15px;
+        }
+        
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 8px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+        
+        .tab.active {
+            background: white;
+            color: #4f46e5;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        /* Molecule structure visualization */
+        .structure-viz {
+            width: 100%;
+            height: 120px;
+            background: linear-gradient(45deg, #f8f9fa, #e9ecef);
+            border-radius: 10px;
+            margin: 10px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             position: relative;
             overflow: hidden;
         }
         
-        .element-card.dragging {
-            opacity: 0.7;
-            transform: scale(1.05);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        }
-        
-        .element-symbol {
-            font-size: 1.2rem;
-            font-weight: 800;
-        }
-        
-        .element-number {
-            font-size: 0.7rem;
+        .atom {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
             position: absolute;
-            top: 2px;
-            left: 4px;
-        }
-        
-        .element-name {
-            font-size: 0.6rem;
-            margin-top: 2px;
-        }
-        
-        .slot {
-            width: 54px;
-            height: 54px;
-            border: 2px dashed #cbd5e1;
-            border-radius: 8px;
             display: flex;
             align-items: center;
             justify-content: center;
-            background-color: #f8fafc;
-            transition: all 0.3s;
-        }
-        
-        .slot.correct {
-            border-color: #10b981;
-            background-color: rgba(16, 185, 129, 0.1);
-        }
-        
-        .slot.incorrect {
-            border-color: #ef4444;
-            background-color: rgba(239, 68, 68, 0.1);
-        }
-        
-        .slot.hover {
-            border-color: #3b82f6;
-            background-color: rgba(59, 130, 246, 0.1);
-        }
-        
-        .slot.filled {
-            border-style: solid;
-        }
-        
-        .color-alkali { background-color: #FF6961; }
-        .color-alkaline-earth { background-color: #FFB347; }
-        .color-transition { background-color: #77DD77; }
-        .color-basic-metal { background-color: #AEC6CF; }
-        .color-metalloid { background-color: #FDFD96; }
-        .color-nonmetal { background-color: #84B6F4; }
-        .color-halogen { background-color: #FFB7C5; }
-        .color-noble-gas { background-color: #E6E6FA; }
-        .color-lanthanide { background-color: #C9A0DC; }
-        .color-actinide { background-color: #F49AC2; }
-        
-        .timer {
-            font-size: 2rem;
             font-weight: bold;
-            text-align: center;
-            color: #3b82f6;
+            font-size: 10px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
         
-        .score-display {
-            font-size: 1.5rem;
-            font-weight: bold;
-            text-align: center;
-            color: #10b981;
-        }
-        
-        .pulse {
-            animation: pulse 0.5s infinite alternate;
-        }
-        
-        @keyframes pulse {
-            from { transform: scale(1); }
-            to { transform: scale(1.05); }
-        }
-        
-        .bounce {
-            animation: bounce 0.5s;
-        }
-        
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-        
-        .confetti {
+        .bond {
+            height: 2px;
+            background: #333;
             position: absolute;
-            width: 10px;
-            height: 10px;
-            background-color: #f59e0b;
-            border-radius: 50%;
-            opacity: 0.7;
-            animation: confetti-fall 2s linear forwards;
-        }
-        
-        @keyframes confetti-fall {
-            0% {
-                transform: translateY(-100px) rotate(0deg);
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(500px) rotate(360deg);
-                opacity: 0;
-            }
-        }
-        
-        .game-complete {
-            animation: complete-glow 2s infinite alternate;
-        }
-        
-        @keyframes complete-glow {
-            from { box-shadow: 0 0 10px rgba(16, 185, 129, 0.5); }
-            to { box-shadow: 0 0 20px rgba(16, 185, 129, 0.8); }
+            transform-origin: 0 0;
         }
     </style>
 </head>
@@ -230,155 +488,178 @@
         <header class="bg-gradient-to-r from-primary to-secondary p-4 text-white">
             <div class="flex justify-between items-center">
                 <div class="app-logo">
-                    <div class="app-logo-icon" style="background: #9999ff; color: white;">
+                    <div class="app-logo-icon">
                         <i class="fas fa-atom"></i>
                     </div>
-                    <h1 class="app-name" style="color: #9999ff;">TETA SAINS</h1>
+                    <h1 class="app-name">QUANTARA</h1>
                 </div>
                 <div class="flex items-center space-x-3">
-                    <a href="dashboad siswa.html" class="text-white">
-                        <i class="fas fa-home"></i>
-                    </a>
+                    <i class="fas fa-search"></i>
+                    <i class="fas fa-user-circle text-xl"></i>
                 </div>
             </div>
         </header>
         
-        <!-- Main Content Area -->
-        <main class="pb-20">
-            <!-- Game Header -->
-            <section class="p-4">
-                <div class="bg-white rounded-xl shadow-md p-4 mb-4 border-l-4" style="border-color: #10b981;">
-                    <div class="flex justify-between items-center mb-2">
-                        <h1 class="text-xl font-bold text-gray-800">
-                            <i class="fas fa-gamepad text-green-500 mr-2"></i>
-                            Game Tabel Periodik
-                        </h1>
-                        <span class="text-xs bg-green-500 text-white px-2 py-1 rounded-full">
-                            Level: <span id="currentLevel">1</span>/5
-                        </span>
+        <!-- Main Content -->
+        <main class="pb-24 p-4">
+            <!-- Page Title -->
+            <div class="mb-4">
+                <h1 class="text-xl font-bold text-gray-800 mb-1">
+                    <i class="fas fa-molecule text-teal-500 mr-2"></i> Tabel Molekul Kimia
+                </h1>
+                <p class="text-gray-600 text-sm">
+                    Koleksi molekul kimia penting lengkap dengan sifat dan reaksinya
+                </p>
+            </div>
+            
+            <!-- Tabs -->
+            <div class="tab-container">
+                <div class="tab active" data-tab="table">Tabel Molekul</div>
+                <div class="tab" data-tab="reaction">Reaksi Kimia</div>
+            </div>
+            
+            <!-- Tab Content: Table -->
+            <div id="table-tab" class="tab-content active">
+                <!-- Search Bar -->
+                <div class="mb-4">
+                    <div class="relative">
+                        <input type="text" id="search-molecule" placeholder="Cari molekul..." 
+                               class="w-full p-3 pl-10 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm">
+                        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
                     </div>
-                    <p class="text-sm text-gray-600">
-                        Susun unsur-unsur kimia pada posisi yang benar di tabel periodik!
+                </div>
+                
+                <!-- Tabel Molekul -->
+                <div class="mb-6">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="font-bold text-gray-700 text-sm flex items-center">
+                            <i class="fas fa-molecule text-blue-500 mr-2 text-xs"></i> Molekul Kimia
+                        </h3>
+                        <div class="text-xs text-gray-500">
+                            <span id="total-molecules">60</span> molekul
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white border border-gray-200 rounded-xl p-3">
+                        <div id="molecules-table" class="molecules-table">
+                            <!-- Molecules will be generated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Legend - Dipindah ke bawah tabel -->
+                <div class="mb-6 p-3 bg-gray-50 rounded-xl">
+                    <h3 class="font-bold text-gray-700 mb-2 text-sm">Kategori Warna:</h3>
+                    <div class="grid grid-cols-2 gap-1">
+                        <div class="legend-item">
+                            <div class="legend-color organic"></div>
+                            <span class="text-xs">Organik</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color inorganic"></div>
+                            <span class="text-xs">Anorganik</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color acid"></div>
+                            <span class="text-xs">Asam</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color base"></div>
+                            <span class="text-xs">Basa</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color biomolecule"></div>
+                            <span class="text-xs">Biomolekul</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color gas"></div>
+                            <span class="text-xs">Gas</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color polymer"></div>
+                            <span class="text-xs">Polimer</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color salt"></div>
+                            <span class="text-xs">Garam</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tab Content: Chemical Reactions -->
+            <div id="reaction-tab" class="tab-content">
+                <div class="reaction-panel">
+                    <h3 class="font-bold text-lg mb-3">
+                        <i class="fas fa-flask mr-2"></i>Reaksi Kimia
+                    </h3>
+                    <p class="text-sm mb-4">
+                        Pilih 2-3 molekul untuk melihat reaksi kimia yang mungkin terjadi.
+                        Klik pada molekul di tabel untuk memilih.
+                    </p>
+                    
+                    <div class="selected-molecules" id="selected-molecules">
+                        <div class="text-sm text-center w-full py-2" id="empty-selection">
+                            Belum ada molekul dipilih
+                        </div>
+                    </div>
+                    
+                    <div class="reaction-actions">
+                        <button id="reaction-btn" class="reaction-btn" disabled>
+                            <i class="fas fa-bolt mr-2"></i>Lihat Reaksi
+                        </button>
+                        <button id="clear-btn" class="clear-btn">
+                            <i class="fas fa-trash mr-2"></i>Hapus
+                        </button>
+                    </div>
+                    
+                    <div class="status-message" id="status-message">
+                        Pilih 2 atau 3 molekul untuk melihat reaksi
+                    </div>
+                </div>
+                
+                <div id="reaction-result" class="reaction-result">
+                    <!-- Results will be displayed here -->
+                </div>
+                
+                <div class="bg-white border border-gray-200 rounded-xl p-3 mt-4">
+                    <h3 class="font-bold text-gray-700 mb-3 text-sm flex items-center">
+                        <i class="fas fa-molecule text-blue-500 mr-2 text-xs"></i> Molekul yang Tersedia
+                    </h3>
+                    <div class="table-container">
+                        <div id="reaction-molecules-table" class="molecules-table">
+                            <!-- Molecules for reaction mode will be generated -->
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-3 text-center">
+                        Klik pada molekul untuk memilih/dipilih ulang
                     </p>
                 </div>
-            </section>
+            </div>
             
-            <!-- Game Stats -->
-            <section class="px-4">
-                <div class="grid grid-cols-3 gap-3 mb-4">
-                    <div class="bg-blue-50 rounded-lg p-3 text-center border border-blue-200">
-                        <div class="timer" id="timer">02:00</div>
-                        <div class="text-xs text-blue-600">Waktu</div>
-                    </div>
-                    <div class="bg-green-50 rounded-lg p-3 text-center border border-green-200">
-                        <div class="score-display" id="score">0</div>
-                        <div class="text-xs text-green-600">Skor</div>
-                    </div>
-                    <div class="bg-purple-50 rounded-lg p-3 text-center border border-purple-200">
-                        <div id="correctCount" class="text-2xl font-bold text-purple-600">0</div>
-                        <div class="text-xs text-purple-600">Tepat</div>
-                    </div>
+            <!-- Quick Facts -->
+            <div class="mb-6 p-3 bg-teal-50 rounded-xl">
+                <h3 class="font-bold text-gray-700 mb-2 text-sm flex items-center">
+                    <i class="fas fa-lightbulb text-teal-500 mr-2 text-xs"></i> Fakta Molekul
+                </h3>
+                <div class="text-xs text-gray-700 space-y-1">
+                    <p>• Air (H₂O) adalah pelarut universal yang penting untuk kehidupan</p>
+                    <p>• DNA mengandung instruksi genetik untuk perkembangan organisme</p>
+                    <p>• Glukosa (C₆H₁₂O₆) adalah sumber energi utama sel</p>
+                    <p>• Ozon (O₃) melindungi Bumi dari radiasi UV matahari</p>
                 </div>
-            </section>
-            
-            <!-- Game Area -->
-            <section class="p-4">
-                <!-- Unsur yang harus disusun -->
-                <div class="bg-yellow-50 rounded-xl p-4 mb-4 border border-yellow-200">
-                    <h3 class="font-bold text-gray-800 mb-2 flex items-center">
-                        <i class="fas fa-hand-point-right text-yellow-500 mr-2"></i>
-                        Unsur yang Harus Disusun:
-                    </h3>
-                    <div class="flex flex-wrap gap-2" id="elementsContainer">
-                        <!-- Elements will be generated here -->
-                    </div>
-                </div>
-                
-                <!-- Tabel Periodik -->
-                <div class="bg-white rounded-xl shadow-lg p-4 border border-gray-200">
-                    <h3 class="font-bold text-gray-800 mb-3 text-center">
-                        <i class="fas fa-table text-blue-500 mr-2"></i>
-                        Tabel Periodik
-                    </h3>
-                    
-                    <div class="overflow-x-auto">
-                        <div id="periodicTable" class="inline-block mx-auto">
-                            <!-- Periodic table slots will be generated here -->
-                        </div>
-                    </div>
-                    
-                    <!-- Legend -->
-                    <div class="mt-4 pt-3 border-t border-gray-200">
-                        <h4 class="text-sm font-bold text-gray-700 mb-2">Keterangan Golongan:</h4>
-                        <div class="grid grid-cols-3 gap-2 text-xs">
-                            <div class="flex items-center">
-                                <div class="w-3 h-3 rounded-sm color-alkali mr-1"></div>
-                                <span>Alkali</span>
-                            </div>
-                            <div class="flex items-center">
-                                <div class="w-3 h-3 rounded-sm color-alkaline-earth mr-1"></div>
-                                <span>Alkali Tanah</span>
-                            </div>
-                            <div class="flex items-center">
-                                <div class="w-3 h-3 rounded-sm color-transition mr-1"></div>
-                                <span>Transisi</span>
-                            </div>
-                            <div class="flex items-center">
-                                <div class="w-3 h-3 rounded-sm color-nonmetal mr-1"></div>
-                                <span>Non-Logam</span>
-                            </div>
-                            <div class="flex items-center">
-                                <div class="w-3 h-3 rounded-sm color-halogen mr-1"></div>
-                                <span>Halogen</span>
-                            </div>
-                            <div class="flex items-center">
-                                <div class="w-3 h-3 rounded-sm color-noble-gas mr-1"></div>
-                                <span>Gas Mulia</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Game Controls -->
-                <div class="mt-4 grid grid-cols-2 gap-3">
-                    <button id="checkButton" 
-                            class="py-3 bg-green-500 text-white rounded-lg font-bold flex items-center justify-center hover:bg-green-600 transition">
-                        <i class="fas fa-check-circle mr-2"></i> Periksa Jawaban
-                    </button>
-                    <button id="hintButton" 
-                            class="py-3 bg-blue-500 text-white rounded-lg font-bold flex items-center justify-center hover:bg-blue-600 transition">
-                        <i class="fas fa-lightbulb mr-2"></i> Petunjuk (3)
-                    </button>
-                    <button id="nextLevelButton" 
-                            class="py-3 bg-purple-500 text-white rounded-lg font-bold flex items-center justify-center hover:bg-purple-600 transition">
-                        <i class="fas fa-forward mr-2"></i> Level Berikutnya
-                    </button>
-                    <button id="resetButton" 
-                            class="py-3 bg-red-500 text-white rounded-lg font-bold flex items-center justify-center hover:bg-red-600 transition">
-                        <i class="fas fa-redo mr-2"></i> Ulangi Level
-                    </button>
-                </div>
-            </section>
-            
-            <!-- Instructions -->
-            <section class="p-4 pt-0">
-                <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                    <h3 class="font-bold text-gray-800 mb-2 flex items-center">
-                        <i class="fas fa-info-circle text-blue-500 mr-2"></i>
-                        Cara Bermain:
-                    </h3>
-                    <ul class="text-sm text-gray-600 space-y-1">
-                        <li>1. Drag & drop unsur ke kotak tabel periodik</li>
-                        <li>2. Susun berdasarkan nomor atom dan golongan</li>
-                        <li>3. Warna unsur sesuai dengan golongannya</li>
-                        <li>4. Tekan "Periksa Jawaban" untuk mengecek</li>
-                        <li>5. Selesaikan dalam waktu yang ditentukan!</li>
-                    </ul>
-                </div>
-            </section>
+            </div>
         </main>
         
-        <!-- BOTTOM NAVIGATION - TIDAK DIUBAH -->
+        <!-- Molecule Detail Modal -->
+        <div id="molecule-modal" class="molecule-modal hidden">
+            <div class="modal-content">
+                <button id="close-modal" class="close-modal">&times;</button>
+                <div id="modal-body"></div>
+            </div>
+        </div>
+        
+        <!-- BOTTOM NAVIGATION - TIDAK DIRUBAH -->
         <nav class="bottom-nav">
             <a href="dashboad siswa.html" class="nav-item">
                 <i class="fas fa-home nav-icon"></i>
@@ -404,494 +685,1140 @@
     </div>
 
     <script>
-        // Data unsur kimia untuk 5 level
-        const gameLevels = [
-            {
-                level: 1,
-                time: 120, // 2 menit
-                elements: [
-                    { symbol: "H", name: "Hidrogen", number: 1, group: "nonmetal", row: 1, col: 1 },
-                    { symbol: "He", name: "Helium", number: 2, group: "noble-gas", row: 1, col: 18 },
-                    { symbol: "Li", name: "Litium", number: 3, group: "alkali", row: 2, col: 1 },
-                    { symbol: "Na", name: "Natrium", number: 11, group: "alkali", row: 3, col: 1 },
-                    { symbol: "O", name: "Oksigen", number: 8, group: "nonmetal", row: 2, col: 16 }
-                ]
+        // Data Molekul Kimia
+        const molecules = [
+            // Molekul Organik
+            { id: 1, formula: "H₂O", name: "Air", mass: 18.02, category: "inorganic", colorClass: "inorganic", 
+              description: "Pelarut universal, penting untuk semua bentuk kehidupan.",
+              properties: ["Titik didih: 100°C", "Titik beku: 0°C", "Polar", "Pelarut universal"],
+              elements: ["H", "O"] },
+            
+            { id: 2, formula: "CO₂", name: "Karbon Dioksida", mass: 44.01, category: "gas", colorClass: "gas",
+              description: "Gas rumah kaca, dihasilkan dari respirasi dan pembakaran.",
+              properties: ["Gas tak berwarna", "Tidak terbakar", "Asam lemah", "Padat: es kering"],
+              elements: ["C", "O"] },
+            
+            { id: 3, formula: "CH₄", name: "Metana", mass: 16.04, category: "organic", colorClass: "organic",
+              description: "Komponen utama gas alam, gas rumah kaca yang kuat.",
+              properties: ["Gas mudah terbakar", "Tidak berwarna", "Lebih ringan dari udara", "Rumus paling sederhana"],
+              elements: ["C", "H"] },
+            
+            { id: 4, formula: "C₆H₁₂O₆", name: "Glukosa", mass: 180.16, category: "biomolecule", colorClass: "biomolecule",
+              description: "Gula sederhana, sumber energi utama untuk sel hidup.",
+              properties: ["Padatan kristal", "Larut dalam air", "Rasa manis", "Isomer: dekstrosa"],
+              elements: ["C", "H", "O"] },
+            
+            { id: 5, formula: "C₂H₅OH", name: "Etanol", mass: 46.07, category: "organic", colorClass: "organic",
+              description: "Alkohol dalam minuman, disinfektan, dan bahan bakar.",
+              properties: ["Cairan jernih", "Titik didih: 78°C", "Mudah terbakar", "Pelarut organik"],
+              elements: ["C", "H", "O"] },
+            
+            { id: 6, formula: "CH₃COOH", name: "Asam Asetat", mass: 60.05, category: "acid", colorClass: "acid",
+              description: "Komponen utama cuka, asam karboksilat sederhana.",
+              properties: ["Cairan asam", "Bau menyengat", "Titik didih: 118°C", "Larut dalam air"],
+              elements: ["C", "H", "O"] },
+            
+            { id: 7, formula: "NH₃", name: "Amonia", mass: 17.03, category: "base", colorClass: "base",
+              description: "Gas dengan bau tajam, digunakan dalam pupuk dan pembersih.",
+              properties: ["Basa kuat", "Larut dalam air", "Titik didih: -33°C", "Bentuk piramida"],
+              elements: ["N", "H"] },
+            
+            { id: 8, formula: "NaCl", name: "Natrium Klorida", mass: 58.44, category: "salt", colorClass: "salt",
+              description: "Garam dapur, senyawa ionik yang larut dalam air.",
+              properties: ["Titik lebur: 801°C", "Larut dalam air", "Konduktor lelehan", "Rasa asin"],
+              elements: ["Na", "Cl"] },
+            
+            { id: 9, formula: "H₂SO₄", name: "Asam Sulfat", mass: 98.08, category: "acid", colorClass: "acid",
+              description: "Asam kuat yang penting dalam industri kimia.",
+              properties: ["Korosif", "Densitas: 1.84 g/cm³", "Dehidrator kuat", "Dihasilkan dari belerang"],
+              elements: ["H", "S", "O"] },
+            
+            { id: 10, formula: "NaOH", name: "Natrium Hidroksida", mass: 40.00, category: "base", colorClass: "base",
+              description: "Basa kuat, dikenal sebagai soda kaustik, digunakan dalam sabun.",
+              properties: ["Basa kuat", "Higroskopis", "Larut dalam air", "Reaksi eksotermik"],
+              elements: ["Na", "O", "H"] },
+            
+            { id: 11, formula: "CaCO₃", name: "Kalsium Karbonat", mass: 100.09, category: "inorganic", colorClass: "inorganic",
+              description: "Komponen utama batu kapur, marmer, dan cangkang organisme.",
+              properties: ["Padatan putih", "Tidak larut dalam air", "Bereaksi dengan asam", "Struktur kristal"],
+              elements: ["Ca", "C", "O"] },
+            
+            { id: 12, formula: "HCl", name: "Asam Klorida", mass: 36.46, category: "acid", colorClass: "acid",
+              description: "Asam kuat yang ditemukan dalam lambung, digunakan dalam industri.",
+              properties: ["Gas larut dalam air", "Korosif", "Asam kuat", "Menghasilkan ion H⁺"],
+              elements: ["H", "Cl"] },
+            
+            { id: 13, formula: "C₁₂H₂₂O₁₁", name: "Sukrosa", mass: 342.30, category: "biomolecule", colorClass: "biomolecule",
+              description: "Gula meja, disakarida dari glukosa dan fruktosa.",
+              properties: ["Padatan kristal", "Larut dalam air", "Rasa manis", "Terdapat di tebu"],
+              elements: ["C", "H", "O"] },
+            
+            { id: 14, formula: "C₃H₈", name: "Propana", mass: 44.10, category: "gas", colorClass: "gas",
+              description: "Gas LPG, digunakan sebagai bahan bakar memasak dan pemanas.",
+              properties: ["Gas mudah terbakar", "Tidak berwarna", "Bau khas ditambahkan", "Bahan bakar"],
+              elements: ["C", "H"] },
+            
+            { id: 15, formula: "O₃", name: "Ozon", mass: 48.00, category: "gas", colorClass: "gas",
+              description: "Gas di atmosfer yang melindungi dari radiasi UV matahari.",
+              properties: ["Gas biru pucat", "Bau tajam", "Oksidator kuat", "Lapisan ozon"],
+              elements: ["O"] },
+            
+            { id: 16, formula: "C₈H₁₈", name: "Oktana", mass: 114.23, category: "organic", colorClass: "organic",
+              description: "Komponen utama bensin, digunakan sebagai standar bilangan oktan.",
+              properties: ["Cairan tak berwarna", "Mudah terbakar", "Bau khas", "Bahan bakar"],
+              elements: ["C", "H"] },
+            
+            { id: 17, formula: "DNA", name: "Asam Deoksiribonukleat", mass: null, category: "biomolecule", colorClass: "biomolecule",
+              description: "Materi genetik yang membawa instruksi untuk perkembangan organisme.",
+              properties: ["Double helix", "Mengandung gen", "Replikasi diri", "Kode genetik"],
+              elements: ["C", "H", "O", "N", "P"] },
+            
+            { id: 18, formula: "RNA", name: "Asam Ribonukleat", mass: null, category: "biomolecule", colorClass: "biomolecule",
+              description: "Berperan dalam sintesis protein dan regulasi gen.",
+              properties: ["Single strand", "Transfer informasi", "Beberapa jenis", "Berperan dalam sintesis protein"],
+              elements: ["C", "H", "O", "N", "P"] },
+            
+            { id: 19, formula: "CO", name: "Karbon Monoksida", mass: 28.01, category: "gas", colorClass: "gas",
+              description: "Gas beracun tak berwarna dan tak berbau, hasil pembakaran tak sempurna.",
+              properties: ["Beracun", "Tidak berwarna", "Mudah terbakar", "Afinitas tinggi dengan hemoglobin"],
+              elements: ["C", "O"] },
+            
+            { id: 20, formula: "NO₂", name: "Nitrogen Dioksida", mass: 46.01, category: "gas", colorClass: "gas",
+              description: "Gas berwarna coklat, polutan udara, bagian dari smog fotokimia.",
+              properties: ["Gas coklat", "Beracun", "Oksidator kuat", "Bereaksi dengan air"],
+              elements: ["N", "O"] },
+            
+            { id: 21, formula: "SO₂", name: "Sulfur Dioksida", mass: 64.07, category: "gas", colorClass: "gas",
+              description: "Gas tak berwarna dengan bau tajam, penyebab hujan asam.",
+              properties: ["Gas tak berwarna", "Bau menyengat", "Larut dalam air", "Penyebab hujan asam"],
+              elements: ["S", "O"] },
+            
+            { id: 22, formula: "H₂O₂", name: "Hidrogen Peroksida", mass: 34.01, category: "inorganic", colorClass: "inorganic",
+              description: "Cairan jernih, digunakan sebagai disinfektan dan pemutih.",
+              properties: ["Cairan jernih", "Oksidator", "Tidak stabil", "Konsentrasi 3%: disinfektan"],
+              elements: ["H", "O"] },
+            
+            { id: 23, formula: "CH₃OH", name: "Metanol", mass: 32.04, category: "organic", colorClass: "organic",
+              description: "Alkohol paling sederhana, beracun, digunakan sebagai pelarut dan bahan bakar.",
+              properties: ["Cairan jernih", "Beracun", "Titik didih: 65°C", "Pelarut polar"],
+              elements: ["C", "H", "O"] },
+            
+            { id: 24, formula: "C₆H₆", name: "Benzena", mass: 78.11, category: "organic", colorClass: "organic",
+              description: "Hidrokarbon aromatik sederhana, pelarut industri penting.",
+              properties: ["Cairan tak berwarna", "Bau manis", "Karsinogen", "Struktur cincin"],
+              elements: ["C", "H"] },
+            
+            { id: 25, formula: "C₂H₄", name: "Etilena", mass: 28.05, category: "gas", colorClass: "gas",
+              description: "Gas tak berwarna, hormon tumbuhan, digunakan dalam produksi plastik.",
+              properties: ["Gas tak berwarna", "Hormon tumbuhan", "Mudah terbakar", "Bahan baku plastik"],
+              elements: ["C", "H"] },
+            
+            { id: 26, formula: "C₂H₂", name: "Asetilena", mass: 26.04, category: "gas", colorClass: "gas",
+              description: "Gas tak berwarna, digunakan dalam pengelasan dan sintesis organik.",
+              properties: ["Gas tak berwarna", "Mudah terbakar", "Bau khas", "Digunakan dalam pengelasan"],
+              elements: ["C", "H"] },
+            
+            { id: 27, formula: "C₆H₈O₇", name: "Asam Sitrat", mass: 192.12, category: "organic", colorClass: "organic",
+              description: "Asam organik lemah, ditemukan dalam buah jeruk, pengawet alami.",
+              properties: ["Padatan kristal", "Rasa asam", "Pengawet alami", "Terdapat di jeruk"],
+              elements: ["C", "H", "O"] },
+            
+            { id: 28, formula: "NH₄NO₃", name: "Amonium Nitrat", mass: 80.04, category: "salt", colorClass: "salt",
+              description: "Garam putih, digunakan dalam pupuk dan bahan peledak.",
+              properties: ["Padatan putih", "Larut dalam air", "Oksidator", "Digunakan dalam pupuk"],
+              elements: ["N", "H", "O"] },
+            
+            { id: 29, formula: "KNO₃", name: "Kalium Nitrat", mass: 101.10, category: "salt", colorClass: "salt",
+              description: "Dikenal sebagai saltpeter, digunakan dalam pupuk dan kembang api.",
+              properties: ["Padatan putih", "Larut dalam air", "Oksidator", "Rasa dingin di lidah"],
+              elements: ["K", "N", "O"] },
+            
+            { id: 30, formula: "Ca(OH)₂", name: "Kalsium Hidroksida", mass: 74.09, category: "base", colorClass: "base",
+              description: "Dikenal sebagai air kapur, digunakan dalam konstruksi dan pengolahan air.",
+              properties: ["Basa sedang", "Sedikit larut dalam air", "Suspensi: susu kapur", "Reaksi dengan CO₂"],
+              elements: ["Ca", "O", "H"] },
+            
+            { id: 31, formula: "Mg(OH)₂", name: "Magnesium Hidroksida", mass: 58.32, category: "base", colorClass: "base",
+              description: "Dikenal sebagai milk of magnesia, digunakan sebagai antasida.",
+              properties: ["Basa lemah", "Sedikit larut", "Antasida", "Suspensi putih"],
+              elements: ["Mg", "O", "H"] },
+            
+            { id: 32, formula: "Al₂O₃", name: "Aluminium Oksida", mass: 101.96, category: "inorganic", colorClass: "inorganic",
+              description: "Komponen utama korundum dan batu permata seperti ruby dan safir.",
+              properties: ["Sangat keras", "Tahan panas", "Ampoterik", "Titik leleh: 2072°C"],
+              elements: ["Al", "O"] },
+            
+            { id: 33, formula: "SiO₂", name: "Silikon Dioksida", mass: 60.08, category: "inorganic", colorClass: "inorganic",
+              description: "Komponen utama pasir dan kuarsa, digunakan dalam kaca.",
+              properties: ["Padatan kristal", "Titik leleh tinggi", "Tidak larut dalam air", "Berbagai bentuk"],
+              elements: ["Si", "O"] },
+            
+            { id: 34, formula: "Fe₂O₃", name: "Besi(III) Oksida", mass: 159.69, category: "inorganic", colorClass: "inorganic",
+              description: "Bijih besi utama, dikenal sebagai hematit atau karat.",
+              properties: ["Padatan merah-coklat", "Feromagnetik", "Tidak larut dalam air", "Pigmen alam"],
+              elements: ["Fe", "O"] },
+            
+            { id: 35, formula: "CuSO₄", name: "Tembaga(II) Sulfat", mass: 159.61, category: "salt", colorClass: "salt",
+              description: "Kristal biru, digunakan sebagai fungisida dan dalam percobaan kimia.",
+              properties: ["Kristal biru", "Larut dalam air", "Hidrat: biru terang", "Fungisida"],
+              elements: ["Cu", "S", "O"] },
+            
+            { id: 36, formula: "NaHCO₃", name: "Natrium Bikarbonat", mass: 84.01, category: "salt", colorClass: "salt",
+              description: "Dikenal sebagai soda kue, digunakan dalam pembuatan kue dan antasida.",
+              properties: ["Padatan putih", "Larut dalam air", "Bereaksi dengan asam", "Pengembang kue"],
+              elements: ["Na", "H", "C", "O"] },
+            
+            { id: 37, formula: "Na₂CO₃", name: "Natrium Karbonat", mass: 105.99, category: "salt", colorClass: "salt",
+              description: "Dikenal sebagai soda cuci, digunakan dalam pembuatan kaca dan deterjen.",
+              properties: ["Padatan putih", "Larut dalam air", "Basa", "Higroskopis"],
+              elements: ["Na", "C", "O"] },
+            
+            { id: 38, formula: "CaSO₄", name: "Kalsium Sulfat", mass: 136.14, category: "salt", colorClass: "salt",
+              description: "Dikenal sebagai gipsum, digunakan dalam konstruksi dan pembalut patah tulang.",
+              properties: ["Padatan putih", "Sedikit larut", "Hidrat: gipsum", "Plester"],
+              elements: ["Ca", "S", "O"] },
+            
+            { id: 39, formula: "AgNO₃", name: "Perak Nitrat", mass: 169.87, category: "salt", colorClass: "salt",
+              description: "Kristal tak berwarna, digunakan dalam fotografi dan reagen kimia.",
+              properties: ["Kristal tak berwarna", "Larut dalam air", "Sensitif cahaya", "Reagen uji halida"],
+              elements: ["Ag", "N", "O"] },
+            
+            { id: 40, formula: "KMnO₄", name: "Kalium Permanganat", mass: 158.03, category: "salt", colorClass: "salt",
+              description: "Kristal ungu, oksidator kuat, digunakan sebagai disinfektan dan reagen.",
+              properties: ["Kristal ungu", "Oksidator kuat", "Larut dalam air", "Warna ungu intens"],
+              elements: ["K", "Mn", "O"] },
+            
+            { id: 41, formula: "C₆H₈O₆", name: "Vitamin C", mass: 176.12, category: "biomolecule", colorClass: "biomolecule",
+              description: "Asam askorbat, vitamin esensial dengan sifat antioksidan.",
+              properties: ["Padatan putih", "Larut dalam air", "Antioksidan", "Terdapat di buah jeruk"],
+              elements: ["C", "H", "O"] },
+            
+            { id: 42, formula: "C₆H₅OH", name: "Fenol", mass: 94.11, category: "organic", colorClass: "organic",
+              description: "Senyawa aromatik, digunakan sebagai disinfektan dan dalam produksi plastik.",
+              properties: ["Padatan kristal", "Bau khas", "Asam lemah", "Disinfektan"],
+              elements: ["C", "H", "O"] },
+            
+            { id: 43, formula: "CHCl₃", name: "Kloroform", mass: 119.38, category: "organic", colorClass: "organic",
+              description: "Cairan tak berwarna, dahulu digunakan sebagai anestesi, sekarang sebagai pelarut.",
+              properties: ["Cairan tak berwarna", "Bau manis", "Toksik", "Pelarut organik"],
+              elements: ["C", "H", "Cl"] },
+            
+            { id: 44, formula: "CCl₄", name: "Karbon Tetraklorida", mass: 153.82, category: "organic", colorClass: "organic",
+              description: "Cairan tak berwarna, dahulu digunakan sebagai pemadam kebakaran dan pelarut.",
+              properties: ["Cairan tak berwarna", "Tidak mudah terbakar", "Toksik", "Pelarut non-polar"],
+              elements: ["C", "Cl"] },
+            
+            { id: 45, formula: "HCN", name: "Asam Sianida", mass: 27.03, category: "acid", colorClass: "acid",
+              description: "Cairan atau gas sangat beracun dengan bau almond pahit.",
+              properties: ["Cairan tak berwarna", "Sangat beracun", "Bau almond", "Lemah asam"],
+              elements: ["H", "C", "N"] },
+            
+            { id: 46, formula: "C₇H₅N₃O₆", name: "TNT", mass: 227.13, category: "organic", colorClass: "organic",
+              description: "Trinitrotoluena, bahan peledak berwarna kuning pucat.",
+              properties: ["Padatan kuning", "Bahan peledak", "Stabil", "Densitas tinggi"],
+              elements: ["C", "H", "N", "O"] },
+            
+            { id: 47, formula: "C₃H₆O", name: "Aseton", mass: 58.08, category: "organic", colorClass: "organic",
+              description: "Pelarut organik umum, digunakan dalam penghapus cat kuku.",
+              properties: ["Cairan tak berwarna", "Bau khas", "Mudah menguap", "Pelarut polar"],
+              elements: ["C", "H", "O"] },
+            
+            { id: 48, formula: "CH₃NH₂", name: "Metilamin", mass: 31.06, category: "organic", colorClass: "organic",
+              description: "Gas dengan bau amis, digunakan dalam sintesis kimia.",
+              properties: ["Gas tak berwarna", "Bau amis", "Basa", "Larut dalam air"],
+              elements: ["C", "H", "N"] },
+            
+            { id: 49, formula: "C₅H₅N", name: "Piridina", mass: 79.10, category: "organic", colorClass: "organic",
+              description: "Cairan tak berwarna dengan bau tidak sedap, digunakan sebagai pelarut dan basa.",
+              properties: ["Cairan tak berwarna", "Bau tidak sedap", "Basa", "Pelarut"],
+              elements: ["C", "H", "N"] },
+            
+            { id: 50, formula: "C₁₀H₈", name: "Naftalena", mass: 128.17, category: "organic", colorClass: "organic",
+              description: "Padatan putih dengan bau khas, digunakan dalam kapur barus.",
+              properties: ["Padatan putih", "Bau khas", "Menyublim", "Kapur barus"],
+              elements: ["C", "H"] },
+            
+            { id: 51, formula: "C₂H₄O₂", name: "Asam Format", mass: 46.03, category: "acid", colorClass: "acid",
+              description: "Asam karboksilat paling sederhana, ditemukan pada sengat semut.",
+              properties: ["Cairan tak berwarna", "Bau menyengat", "Korosif", "Terdapat di semut"],
+              elements: ["C", "H", "O"] },
+            
+            { id: 52, formula: "C₃H₆O₃", name: "Asam Laktat", mass: 90.08, category: "organic", colorClass: "organic",
+              description: "Asam organik, dihasilkan dalam otot selama aktivitas intensif.",
+              properties: ["Cairan tak berwarna", "Rasa asam", "Dihasilkan di otot", "Terdapat di susu asam"],
+              elements: ["C", "H", "O"] },
+            
+            { id: 53, formula: "C₄H₆O₆", name: "Asam Tartarat", mass: 150.09, category: "organic", colorClass: "organic",
+              description: "Asam organik, ditemukan dalam buah anggur, digunakan dalam makanan.",
+              properties: ["Padatan putih", "Rasa asam", "Terdapat di anggur", "Pengemulsi"],
+              elements: ["C", "H", "O"] },
+            
+            { id: 54, formula: "C₅H₁₀O₅", name: "Ribosa", mass: 150.13, category: "biomolecule", colorClass: "biomolecule",
+              description: "Gula pentosa, komponen RNA dan ATP.",
+              properties: ["Padatan kristal", "Larut dalam air", "Gula pentosa", "Komponen RNA"],
+              elements: ["C", "H", "O"] },
+            
+            { id: 55, formula: "C₂H₂O₄", name: "Asam Oksalat", mass: 90.03, category: "acid", colorClass: "acid",
+              description: "Asam organik, ditemukan dalam beberapa tumbuhan seperti bayam.",
+              properties: ["Padatan kristal", "Rasa asam", "Terdapat di bayam", "Dapat membentuk batu ginjal"],
+              elements: ["C", "H", "O"] },
+            
+            { id: 56, formula: "C₇H₆O₃", name: "Asam Salisilat", mass: 138.12, category: "organic", colorClass: "organic",
+              description: "Asam organik, prekursor aspirin, ditemukan dalam kulit pohon willow.",
+              properties: ["Padatan kristal", "Sukar larut", "Prekursor aspirin", "Terdapat di pohon willow"],
+              elements: ["C", "H", "O"] },
+            
+            { id: 57, formula: "C₉H₈O₄", name: "Aspirin", mass: 180.16, category: "organic", colorClass: "organic",
+              description: "Asetilsalisilat, obat penghilang rasa sakit dan antiperadangan.",
+              properties: ["Padatan kristal", "Sukar larut", "Analgesik", "Antipiretik"],
+              elements: ["C", "H", "O"] },
+            
+            { id: 58, formula: "C₁₇H₂₁NO₄", name: "Kokain", mass: 303.35, category: "organic", colorClass: "organic",
+              description: "Alkaloid stimulan, berasal dari daun tanaman koka.",
+              properties: ["Padatan kristal", "Rasa pahit", "Stimulan", "Anestesi lokal"],
+              elements: ["C", "H", "N", "O"] },
+            
+            { id: 59, formula: "C₂₁H₃₀O₂", name: "THC", mass: 314.46, category: "organic", colorClass: "organic",
+              description: "Tetrahidrokanabinol, senyawa psikoaktif utama dalam ganja.",
+              properties: ["Padatan kristal", "Sukar larut", "Psikoaktif", "Terdapat di ganja"],
+              elements: ["C", "H", "O"] },
+            
+            { id: 60, formula: "C₈H₁₀N₄O₂", name: "Kafein", mass: 194.19, category: "organic", colorClass: "organic",
+              description: "Alkaloid stimulan, ditemukan dalam kopi, teh, dan cokelat.",
+              properties: ["Padatan kristal", "Rasa pahit", "Stimulan", "Terdapat di kopi"],
+              elements: ["C", "H", "N", "O"] }
+        ];
+
+        // Data Reaksi Kimia
+        const chemicalReactions = [
+            // Reaksi netralisasi
+            { 
+                molecules: ["HCl", "NaOH"], 
+                equation: "HCl + NaOH → NaCl + H₂O",
+                name: "Netralisasi Asam-Basa",
+                type: "netralisasi",
+                description: "Reaksi antara asam kuat dan basa kuat menghasilkan garam dan air.",
+                conditions: "Suhu ruang, dalam air",
+                products: ["NaCl", "H₂O"],
+                properties: ["Eksotermik", "Netral", "Menghasilkan garam", "pH mendekati 7"]
             },
-            {
-                level: 2,
-                time: 150,
-                elements: [
-                    { symbol: "C", name: "Karbon", number: 6, group: "nonmetal", row: 2, col: 14 },
-                    { symbol: "N", name: "Nitrogen", number: 7, group: "nonmetal", row: 2, col: 15 },
-                    { symbol: "F", name: "Fluor", number: 9, group: "halogen", row: 2, col: 17 },
-                    { symbol: "Ne", name: "Neon", number: 10, group: "noble-gas", row: 2, col: 18 },
-                    { symbol: "Mg", name: "Magnesium", number: 12, group: "alkaline-earth", row: 3, col: 2 }
-                ]
+            
+            // Pembakaran metana
+            { 
+                molecules: ["CH₄", "O₂"], 
+                equation: "CH₄ + 2O₂ → CO₂ + 2H₂O",
+                name: "Pembakaran Metana",
+                type: "pembakaran",
+                description: "Pembakaran sempurna metana menghasilkan karbon dioksida dan air.",
+                conditions: "Api, udara berlebih",
+                products: ["CO₂", "H₂O"],
+                properties: ["Eksotermik kuat", "Menghasilkan energi", "Bersih", "Membutuhkan oksigen"]
             },
-            {
-                level: 3,
-                time: 180,
-                elements: [
-                    { symbol: "Al", name: "Aluminium", number: 13, group: "basic-metal", row: 3, col: 13 },
-                    { symbol: "Si", name: "Silikon", number: 14, group: "metalloid", row: 3, col: 14 },
-                    { symbol: "P", name: "Fosfor", number: 15, group: "nonmetal", row: 3, col: 15 },
-                    { symbol: "S", name: "Belerang", number: 16, group: "nonmetal", row: 3, col: 16 },
-                    { symbol: "Cl", name: "Klor", number: 17, group: "halogen", row: 3, col: 17 },
-                    { symbol: "Ar", name: "Argon", number: 18, group: "noble-gas", row: 3, col: 18 }
-                ]
+            
+            // Fotosintesis
+            { 
+                molecules: ["CO₂", "H₂O"], 
+                equation: "6CO₂ + 6H₂O → C₆H₁₂O₆ + 6O₂",
+                name: "Fotosintesis",
+                type: "biokimia",
+                description: "Proses tumbuhan mengubah karbon dioksida dan air menjadi glukosa dan oksigen menggunakan cahaya.",
+                conditions: "Cahaya matahari, klorofil",
+                products: ["C₆H₁₂O₆", "O₂"],
+                properties: ["Endotermik", "Memerlukan cahaya", "Menghasilkan oksigen", "Dikatalisis oleh klorofil"]
             },
-            {
-                level: 4,
-                time: 210,
-                elements: [
-                    { symbol: "K", name: "Kalium", number: 19, group: "alkali", row: 4, col: 1 },
-                    { symbol: "Ca", name: "Kalsium", number: 20, group: "alkaline-earth", row: 4, col: 2 },
-                    { symbol: "Fe", name: "Besi", number: 26, group: "transition", row: 4, col: 8 },
-                    { symbol: "Cu", name: "Tembaga", number: 29, group: "transition", row: 4, col: 11 },
-                    { symbol: "Zn", name: "Seng", number: 30, group: "transition", row: 4, col: 12 },
-                    { symbol: "Br", name: "Brom", number: 35, group: "halogen", row: 4, col: 17 }
-                ]
+            
+            // Respirasi seluler
+            { 
+                molecules: ["C₆H₁₂O₆", "O₂"], 
+                equation: "C₆H₁₂O₆ + 6O₂ → 6CO₂ + 6H₂O + energi",
+                name: "Respirasi Seluler",
+                type: "biokimia",
+                description: "Proses sel menghasilkan energi dari glukosa dan oksigen.",
+                conditions: "Dalam sel, suhu tubuh",
+                products: ["CO₂", "H₂O"],
+                properties: ["Eksotermik", "Menghasilkan ATP", "Melepaskan energi", "Terjadi di mitokondria"]
             },
-            {
-                level: 5,
-                time: 240,
-                elements: [
-                    { symbol: "Ag", name: "Perak", number: 47, group: "transition", row: 5, col: 11 },
-                    { symbol: "I", name: "Iodium", number: 53, group: "halogen", row: 5, col: 17 },
-                    { symbol: "Xe", name: "Xenon", number: 54, group: "noble-gas", row: 5, col: 18 },
-                    { symbol: "Au", name: "Emas", number: 79, group: "transition", row: 6, col: 11 },
-                    { symbol: "Hg", name: "Raksa", number: 80, group: "transition", row: 6, col: 12 },
-                    { symbol: "Pb", name: "Timbal", number: 82, group: "basic-metal", row: 6, col: 14 },
-                    { symbol: "U", name: "Uranium", number: 92, group: "actinide", row: 7, col: 6 }
-                ]
+            
+            // Reaksi logam dengan asam
+            { 
+                molecules: ["Zn", "HCl"], 
+                equation: "Zn + 2HCl → ZnCl₂ + H₂",
+                name: "Logam dengan Asam",
+                type: "reduksi-oksidasi",
+                description: "Logam seng bereaksi dengan asam klorida menghasilkan seng klorida dan gas hidrogen.",
+                conditions: "Suhu ruang",
+                products: ["ZnCl₂", "H₂"],
+                properties: ["Eksotermik", "Menghasilkan gas", "Reaksi redoks", "Logam larut"]
+            },
+            
+            // Pembentukan amonia (Haber-Bosch)
+            { 
+                molecules: ["N₂", "H₂"], 
+                equation: "N₂ + 3H₂ ⇌ 2NH₃",
+                name: "Sintesis Amonia",
+                type: "sintesis",
+                description: "Reaksi nitrogen dan hidrogen membentuk amonia, proses Haber-Bosch.",
+                conditions: "Tekanan tinggi (200 atm), suhu tinggi (450°C), katalis besi",
+                products: ["NH₃"],
+                properties: ["Eksotermik", "Reversibel", "Dikatalisis", "Tekanan tinggi"]
+            },
+            
+            // Fermentasi alkohol
+            { 
+                molecules: ["C₆H₁₂O₆"], 
+                equation: "C₆H₁₂O₆ → 2C₂H₅OH + 2CO₂",
+                name: "Fermentasi Alkohol",
+                type: "biokimia",
+                description: "Ragi mengubah glukosa menjadi etanol dan karbon dioksida.",
+                conditions: "Anaerobic, suhu 20-30°C, ragi",
+                products: ["C₂H₅OH", "CO₂"],
+                properties: ["Anaerobic", "Menghasilkan alkohol", "Melepaskan CO₂", "Dikatalisis enzim"]
+            },
+            
+            // Reaksi soda kue dengan cuka
+            { 
+                molecules: ["NaHCO₃", "CH₃COOH"], 
+                equation: "NaHCO₃ + CH₃COOH → CH₃COONa + H₂O + CO₂",
+                name: "Reaksi Soda Kue dan Cuka",
+                type: "asam-basa",
+                description: "Natrium bikarbonat bereaksi dengan asam asetat menghasilkan natrium asetat, air, dan karbon dioksida.",
+                conditions: "Suhu ruang",
+                products: ["CH₃COONa", "H₂O", "CO₂"],
+                properties: ["Berbuih", "Eksotermik ringan", "Menghasilkan gas", "Reaksi cepat"]
+            },
+            
+            // Reaksi termit
+            { 
+                molecules: ["Fe₂O₃", "Al"], 
+                equation: "Fe₂O₃ + 2Al → Al₂O₃ + 2Fe",
+                name: "Reaksi Termit",
+                type: "redoks",
+                description: "Aluminium mereduksi besi oksida menghasilkan besi cair dan aluminium oksida.",
+                conditions: "Suhu tinggi (ignisi diperlukan)",
+                products: ["Al₂O₃", "Fe"],
+                properties: ["Eksotermik sangat kuat", "Menghasilkan logam cair", "Suhu sangat tinggi", "Digunakan untuk pengelasan"]
+            },
+            
+            // Elektrolisis air
+            { 
+                molecules: ["H₂O"], 
+                equation: "2H₂O → 2H₂ + O₂",
+                name: "Elektrolisis Air",
+                type: "elektrokimia",
+                description: "Penguraian air menjadi hidrogen dan oksigen menggunakan arus listrik.",
+                conditions: "Arus listrik DC, elektroda inert, elektrolit",
+                products: ["H₂", "O₂"],
+                properties: ["Endotermik", "Memerlukan listrik", "Menghasilkan gas", "Rasio volume 2:1 (H₂:O₂)"]
             }
         ];
 
-        // Game state
-        let currentLevel = 0;
-        let score = 0;
-        let timeLeft = 0;
-        let timerInterval = null;
-        let correctCount = 0;
-        let hintsLeft = 3;
-        let placedElements = new Map(); // Map slotId -> element
-        let elementPositions = new Map(); // Map elementId -> {row, col}
-
         // DOM Elements
-        const elementsContainer = document.getElementById('elementsContainer');
-        const periodicTable = document.getElementById('periodicTable');
-        const timerElement = document.getElementById('timer');
-        const scoreElement = document.getElementById('score');
-        const correctCountElement = document.getElementById('correctCount');
-        const currentLevelElement = document.getElementById('currentLevel');
-        const checkButton = document.getElementById('checkButton');
-        const hintButton = document.getElementById('hintButton');
-        const nextLevelButton = document.getElementById('nextLevelButton');
-        const resetButton = document.getElementById('resetButton');
+        const moleculesTableContainer = document.getElementById('molecules-table');
+        const reactionMoleculesTableContainer = document.getElementById('reaction-molecules-table');
+        const moleculeModal = document.getElementById('molecule-modal');
+        const closeModalBtn = document.getElementById('close-modal');
+        const modalBody = document.getElementById('modal-body');
+        const searchInput = document.getElementById('search-molecule');
+        const totalMoleculesSpan = document.getElementById('total-molecules');
+        const selectedMoleculesContainer = document.getElementById('selected-molecules');
+        const emptySelectionMsg = document.getElementById('empty-selection');
+        const reactionBtn = document.getElementById('reaction-btn');
+        const clearBtn = document.getElementById('clear-btn');
+        const reactionResult = document.getElementById('reaction-result');
+        const statusMessage = document.getElementById('status-message');
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
 
-        // Initialize game
-        function initGame() {
-            loadLevel(currentLevel);
-            setupEventListeners();
-            startTimer();
-        }
+        // State untuk sistem reaksi
+        let selectedMolecules = [];
+        let currentTab = 'table';
 
-        // Load a level
-        function loadLevel(levelIndex) {
-            const level = gameLevels[levelIndex];
+        // Inisialisasi Tabel Molekul
+        function initMoleculesTable() {
+            // Kosongkan kontainer
+            moleculesTableContainer.innerHTML = '';
             
-            // Update UI
-            currentLevelElement.textContent = level.level;
-            timeLeft = level.time;
-            updateTimerDisplay();
-            hintsLeft = 3;
-            updateHintButton();
-            placedElements.clear();
-            elementPositions.clear();
-            
-            // Clear containers
-            elementsContainer.innerHTML = '';
-            periodicTable.innerHTML = '';
-            
-            // Create element cards
-            level.elements.forEach((element, index) => {
-                const elementDiv = document.createElement('div');
-                elementDiv.className = `element-card color-${element.group}`;
-                elementDiv.id = `element-${element.symbol}`;
-                elementDiv.draggable = true;
-                elementDiv.dataset.elementId = element.symbol;
-                elementDiv.dataset.number = element.number;
-                elementDiv.dataset.group = element.group;
-                elementDiv.dataset.correctRow = element.row;
-                elementDiv.dataset.correctCol = element.col;
+            // Tampilkan semua molekul dalam grid 8x8
+            molecules.forEach((molecule, index) => {
+                const moleculeDiv = document.createElement('div');
+                moleculeDiv.className = `molecule-cell ${molecule.colorClass}`;
+                moleculeDiv.dataset.id = molecule.id;
+                moleculeDiv.dataset.formula = molecule.formula;
                 
-                elementDiv.innerHTML = `
-                    <div class="element-number">${element.number}</div>
-                    <div class="element-symbol">${element.symbol}</div>
-                    <div class="element-name">${element.name}</div>
+                moleculeDiv.innerHTML = `
+                    <div class="molecule-formula">${molecule.formula}</div>
+                    <div class="molecule-name">${molecule.name}</div>
+                    ${molecule.mass ? `<div class="molecule-mass">${molecule.mass}</div>` : ''}
                 `;
                 
-                elementsContainer.appendChild(elementDiv);
-            });
-            
-            // Create periodic table slots
-            // 7 baris x 18 kolom
-            for (let row = 1; row <= 7; row++) {
-                const rowDiv = document.createElement('div');
-                rowDiv.className = 'flex justify-center mb-1';
+                moleculeDiv.addEventListener('click', () => showMoleculeDetails(molecule));
                 
-                for (let col = 1; col <= 18; col++) {
-                    const slotDiv = document.createElement('div');
-                    slotDiv.className = 'slot';
-                    slotDiv.id = `slot-${row}-${col}`;
-                    slotDiv.dataset.row = row;
-                    slotDiv.dataset.col = col;
-                    
-                    // Add label for first row and column
-                    if (row === 1 && col === 1) {
-                        const label = document.createElement('div');
-                        label.className = 'text-xs text-gray-500 absolute -top-4';
-                        label.textContent = 'Baris/Kolom';
-                        slotDiv.appendChild(label);
-                    }
-                    
-                    rowDiv.appendChild(slotDiv);
-                }
+                moleculesTableContainer.appendChild(moleculeDiv);
+            });
+            
+            // Inisialisasi tabel untuk mode reaksi
+            initReactionMoleculesTable();
+            
+            // Hitung total molekul
+            totalMoleculesSpan.textContent = molecules.length;
+            
+            // Setup event listeners
+            setupEventListeners();
+        }
+
+        // Inisialisasi tabel untuk mode reaksi
+        function initReactionMoleculesTable() {
+            reactionMoleculesTableContainer.innerHTML = '';
+            
+            // Tampilkan molekul dalam grid 8x8 untuk mode reaksi
+            molecules.slice(0, 40).forEach(molecule => {
+                const moleculeDiv = document.createElement('div');
+                moleculeDiv.className = `molecule-cell ${molecule.colorClass}`;
+                moleculeDiv.dataset.id = molecule.id;
+                moleculeDiv.dataset.formula = molecule.formula;
                 
-                periodicTable.appendChild(rowDiv);
-            }
-            
-            // Add row and column labels
-            for (let i = 1; i <= 7; i++) {
-                const label = document.createElement('div');
-                label.className = 'text-xs text-gray-600 text-center mr-1';
-                label.textContent = i;
-                label.style.alignSelf = 'center';
-                periodicTable.children[i-1].insertBefore(label, periodicTable.children[i-1].firstChild);
-            }
-            
-            // Setup drag and drop
-            setupDragAndDrop();
-        }
-
-        // Setup drag and drop
-        function setupDragAndDrop() {
-            const elements = document.querySelectorAll('.element-card');
-            const slots = document.querySelectorAll('.slot');
-            
-            elements.forEach(element => {
-                element.addEventListener('dragstart', handleDragStart);
-                element.addEventListener('dragend', handleDragEnd);
-            });
-            
-            slots.forEach(slot => {
-                slot.addEventListener('dragover', handleDragOver);
-                slot.addEventListener('dragenter', handleDragEnter);
-                slot.addEventListener('dragleave', handleDragLeave);
-                slot.addEventListener('drop', handleDrop);
-            });
-        }
-
-        function handleDragStart(e) {
-            e.dataTransfer.setData('text/plain', e.target.dataset.elementId);
-            e.target.classList.add('dragging');
-            
-            // Add ghost image
-            setTimeout(() => {
-                e.target.classList.add('opacity-30');
-            }, 0);
-        }
-
-        function handleDragEnd(e) {
-            e.target.classList.remove('dragging');
-            e.target.classList.remove('opacity-30');
-        }
-
-        function handleDragOver(e) {
-            e.preventDefault();
-        }
-
-        function handleDragEnter(e) {
-            e.preventDefault();
-            e.target.classList.add('hover');
-        }
-
-        function handleDragLeave(e) {
-            e.target.classList.remove('hover');
-        }
-
-        function handleDrop(e) {
-            e.preventDefault();
-            e.target.classList.remove('hover');
-            
-            const elementId = e.dataTransfer.getData('text/plain');
-            const element = document.getElementById(`element-${elementId}`);
-            const slot = e.target;
-            
-            // Remove element from previous slot if exists
-            if (elementPositions.has(elementId)) {
-                const oldPos = elementPositions.get(elementId);
-                const oldSlot = document.getElementById(`slot-${oldPos.row}-${oldPos.col}`);
-                oldSlot.innerHTML = '';
-                oldSlot.classList.remove('filled');
-            }
-            
-            // Place element in new slot
-            slot.innerHTML = '';
-            const elementClone = element.cloneNode(true);
-            elementClone.classList.remove('dragging');
-            elementClone.classList.remove('opacity-30');
-            elementClone.draggable = false;
-            elementClone.classList.add('cursor-default');
-            
-            slot.appendChild(elementClone);
-            slot.classList.add('filled');
-            
-            // Store placement
-            placedElements.set(slot.id, elementId);
-            elementPositions.set(elementId, {
-                row: parseInt(slot.dataset.row),
-                col: parseInt(slot.dataset.col)
-            });
-            
-            // Visual feedback
-            slot.classList.add('bounce');
-            setTimeout(() => {
-                slot.classList.remove('bounce');
-            }, 500);
-        }
-
-        // Check answers
-        function checkAnswers() {
-            let correct = 0;
-            const levelElements = gameLevels[currentLevel].elements;
-            
-            // Reset all slots styling
-            document.querySelectorAll('.slot').forEach(slot => {
-                slot.classList.remove('correct', 'incorrect');
-            });
-            
-            // Check each placed element
-            placedElements.forEach((elementId, slotId) => {
-                const element = levelElements.find(e => e.symbol === elementId);
-                const [_, row, col] = slotId.split('-');
-                const slot = document.getElementById(slotId);
+                moleculeDiv.innerHTML = `
+                    <div class="molecule-formula">${molecule.formula}</div>
+                `;
                 
-                if (element && 
-                    parseInt(row) === element.row && 
-                    parseInt(col) === element.col) {
-                    // Correct placement
-                    slot.classList.add('correct');
-                    correct++;
+                moleculeDiv.addEventListener('click', () => selectMoleculeForReaction(molecule));
+                
+                reactionMoleculesTableContainer.appendChild(moleculeDiv);
+            });
+            
+            // Set grid template
+            reactionMoleculesTableContainer.style.gridTemplateColumns = 'repeat(8, 1fr)';
+        }
+
+        // Pilih molekul untuk reaksi
+        function selectMoleculeForReaction(molecule) {
+            // Cek apakah molekul sudah dipilih
+            const existingIndex = selectedMolecules.findIndex(m => m.id === molecule.id);
+            
+            if (existingIndex !== -1) {
+                // Hapus molekul jika sudah dipilih
+                selectedMolecules.splice(existingIndex, 1);
+            } else {
+                // Tambahkan molekul jika belum dipilih (maksimal 3)
+                if (selectedMolecules.length < 3) {
+                    selectedMolecules.push(molecule);
                 } else {
-                    // Incorrect placement
-                    slot.classList.add('incorrect');
+                    showStatusMessage("Maksimal 3 molekul yang dapat dipilih", "error");
+                    return;
                 }
+            }
+            
+            // Perbarui tampilan molekul yang dipilih
+            updateSelectedMoleculesDisplay();
+            
+            // Perbarui status tombol reaksi
+            updateReactionButton();
+            
+            // Perbarui status message
+            updateStatusMessage();
+            
+            // Highlight molekul di tabel
+            highlightSelectedMolecules();
+        }
+
+        // Perbarui tampilan molekul yang dipilih
+        function updateSelectedMoleculesDisplay() {
+            selectedMoleculesContainer.innerHTML = '';
+            
+            if (selectedMolecules.length === 0) {
+                emptySelectionMsg.style.display = 'block';
+                return;
+            }
+            
+            emptySelectionMsg.style.display = 'none';
+            
+            selectedMolecules.forEach((molecule, index) => {
+                const badge = document.createElement('div');
+                badge.className = 'selected-molecule-badge';
+                badge.innerHTML = `
+                    ${molecule.formula} - ${molecule.name}
+                    <button class="remove-btn" data-index="${index}">&times;</button>
+                `;
+                
+                badge.querySelector('.remove-btn').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    selectedMolecules.splice(index, 1);
+                    updateSelectedMoleculesDisplay();
+                    updateReactionButton();
+                    updateStatusMessage();
+                    highlightSelectedMolecules();
+                });
+                
+                selectedMoleculesContainer.appendChild(badge);
+            });
+        }
+
+        // Highlight molekul yang dipilih di tabel
+        function highlightSelectedMolecules() {
+            // Reset semua molekul di tabel reaksi
+            document.querySelectorAll('#reaction-molecules-table .molecule-cell').forEach(cell => {
+                cell.classList.remove('selected');
             });
             
-            // Update correct count
-            correctCount = correct;
-            correctCountElement.textContent = correctCount;
-            correctCountElement.classList.add('pulse');
-            setTimeout(() => {
-                correctCountElement.classList.remove('pulse');
-            }, 500);
-            
-            // Update score
-            if (correct === levelElements.length) {
-                // All correct!
-                const levelScore = timeLeft * 10 + (hintsLeft * 5);
-                score += levelScore;
-                scoreElement.textContent = score;
-                scoreElement.classList.add('bounce');
-                
-                // Show celebration
-                showCelebration();
-                
-                // Enable next level button
-                nextLevelButton.disabled = false;
-                nextLevelButton.classList.remove('opacity-50');
-                
-                // Stop timer
-                clearInterval(timerInterval);
-                
-                // Show success message
-                setTimeout(() => {
-                    alert(`🎉 Level ${currentLevel + 1} selesai!\nSkor: +${levelScore}\nWaktu tersisa: ${timeLeft} detik`);
-                }, 500);
+            // Highlight molekul yang dipilih
+            selectedMolecules.forEach(molecule => {
+                const cells = document.querySelectorAll(`#reaction-molecules-table [data-id="${molecule.id}"]`);
+                cells.forEach(cell => {
+                    cell.classList.add('selected');
+                });
+            });
+        }
+
+        // Perbarui status tombol reaksi
+        function updateReactionButton() {
+            if (selectedMolecules.length >= 1) {
+                reactionBtn.disabled = false;
+                reactionBtn.innerHTML = `<i class="fas fa-bolt mr-2"></i>Lihat Reaksi (${selectedMolecules.length})`;
             } else {
-                // Some incorrect
-                setTimeout(() => {
-                    alert(`⚠️ ${correct} dari ${levelElements.length} unsur tepat.\nCoba perbaiki penempatannya!`);
-                }, 300);
+                reactionBtn.disabled = true;
+                reactionBtn.innerHTML = `<i class="fas fa-bolt mr-2"></i>Lihat Reaksi`;
             }
         }
 
-        // Provide hint
-        function provideHint() {
-            if (hintsLeft <= 0) return;
-            
-            const levelElements = gameLevels[currentLevel].elements;
-            const unplacedElements = levelElements.filter(element => {
-                return !Array.from(placedElements.values()).includes(element.symbol);
-            });
-            
-            if (unplacedElements.length === 0) return;
-            
-            const randomElement = unplacedElements[Math.floor(Math.random() * unplacedElements.length)];
-            const elementCard = document.getElementById(`element-${randomElement.symbol}`);
-            
-            // Highlight the element card
-            elementCard.classList.add('pulse');
-            elementCard.style.boxShadow = '0 0 10px #3b82f6';
-            
-            // Show hint message
-            alert(`💡 Petunjuk: ${randomElement.name} (${randomElement.symbol})\nNomor atom: ${randomElement.number}\nGolongan: ${getGroupName(randomElement.group)}`);
-            
-            // Reduce hints
-            hintsLeft--;
-            updateHintButton();
-            
-            // Remove highlight after 2 seconds
-            setTimeout(() => {
-                elementCard.classList.remove('pulse');
-                elementCard.style.boxShadow = '';
-            }, 2000);
+        // Perbarui status message
+        function updateStatusMessage() {
+            if (selectedMolecules.length === 0) {
+                statusMessage.textContent = "Pilih 1-3 molekul untuk melihat reaksi kimia";
+            } else if (selectedMolecules.length === 1) {
+                statusMessage.textContent = "Klik 'Lihat Reaksi' untuk reaksi yang melibatkan molekul ini";
+            } else if (selectedMolecules.length === 2) {
+                statusMessage.textContent = "Klik 'Lihat Reaksi' untuk melihat reaksi antara 2 molekul";
+            } else if (selectedMolecules.length === 3) {
+                statusMessage.textContent = "Klik 'Lihat Reaksi' untuk melihat reaksi antara 3 molekul";
+            }
         }
 
-        function getGroupName(groupKey) {
-            const groupNames = {
-                'alkali': 'Alkali',
-                'alkaline-earth': 'Alkali Tanah',
-                'transition': 'Logam Transisi',
-                'basic-metal': 'Logam Dasar',
-                'metalloid': 'Metaloid',
-                'nonmetal': 'Non-Logam',
-                'halogen': 'Halogen',
-                'noble-gas': 'Gas Mulia',
-                'lanthanide': 'Lantanida',
-                'actinide': 'Aktinida'
+        // Tampilkan pesan status sementara
+        function showStatusMessage(message, type = "info") {
+            const originalMessage = statusMessage.textContent;
+            statusMessage.textContent = message;
+            statusMessage.style.color = type === "error" ? "#fecaca" : "rgba(255, 255, 255, 0.8)";
+            
+            setTimeout(() => {
+                statusMessage.textContent = originalMessage;
+                statusMessage.style.color = "rgba(255, 255, 255, 0.8)";
+            }, 3000);
+        }
+
+        // Tampilkan reaksi untuk molekul yang dipilih
+        function showReactions() {
+            if (selectedMolecules.length === 0) return;
+            
+            // Cari reaksi yang mengandung molekul yang dipilih
+            let foundReactions = [];
+            const selectedFormulas = selectedMolecules.map(m => m.formula);
+            
+            for (const reaction of chemicalReactions) {
+                // Cek jika semua molekul yang dipilih ada dalam reaksi
+                const allSelectedInReaction = selectedFormulas.every(formula => 
+                    reaction.molecules.includes(formula) || reaction.products.includes(formula)
+                );
+                
+                // Cek jika reaksi memiliki 1-2 molekul yang sama dengan yang dipilih
+                const commonMolecules = reaction.molecules.filter(formula => 
+                    selectedFormulas.includes(formula)
+                );
+                
+                if (allSelectedInReaction || commonMolecules.length >= 1) {
+                    foundReactions.push({...reaction, matchType: allSelectedInReaction ? "exact" : "partial"});
+                }
+            }
+            
+            // Jika tidak ditemukan, buat reaksi generik
+            if (foundReactions.length === 0) {
+                foundReactions = [generateGenericReaction(selectedMolecules)];
+            }
+            
+            // Tampilkan hasil
+            displayReactionResult(foundReactions, selectedMolecules);
+        }
+
+        // Hasilkan reaksi generik berdasarkan molekul
+        function generateGenericReaction(molecules) {
+            const moleculeCount = molecules.length;
+            let equation = "";
+            let name = "";
+            let type = "";
+            let description = "";
+            let conditions = "Suhu ruang";
+            let products = [];
+            let properties = [];
+            
+            // Buat persamaan reaksi berdasarkan jumlah molekul
+            if (moleculeCount === 1) {
+                const mol = molecules[0];
+                equation = `${mol.formula} → Produk`;
+                name = `Dekomposisi ${mol.name}`;
+                type = "dekomposisi";
+                description = `${mol.name} dapat terurai menjadi senyawa yang lebih sederhana dalam kondisi tertentu.`;
+                products = ["Produk dekomposisi"];
+                properties = [
+                    `Jenis: Reaksi dekomposisi`,
+                    `Molekul awal: ${mol.formula}`,
+                    `Memerlukan energi aktivasi`,
+                    `Dapat dikatalisis`
+                ];
+            } else if (moleculeCount === 2) {
+                const [mol1, mol2] = molecules;
+                equation = `${mol1.formula} + ${mol2.formula} → Produk`;
+                name = `Reaksi antara ${mol1.name} dan ${mol2.name}`;
+                type = "sintesis";
+                description = `${mol1.name} dan ${mol2.name} dapat bereaksi membentuk senyawa baru.`;
+                products = ["Senyawa baru"];
+                properties = [
+                    `Jenis: Reaksi sintesis`,
+                    `Reaktan 1: ${mol1.formula} (${mol1.name})`,
+                    `Reaktan 2: ${mol2.formula} (${mol2.name})`,
+                    `Dapat bersifat eksotermik atau endotermik`
+                ];
+            } else if (moleculeCount === 3) {
+                const [mol1, mol2, mol3] = molecules;
+                equation = `${mol1.formula} + ${mol2.formula} + ${mol3.formula} → Produk`;
+                name = `Reaksi kompleks`;
+                type = "kompleks";
+                description = `Reaksi antara tiga senyawa yang dapat menghasilkan produk kompleks.`;
+                products = ["Produk kompleks"];
+                properties = [
+                    `Jenis: Reaksi multi-komponen`,
+                    `Reaktan 1: ${mol1.formula}`,
+                    `Reaktan 2: ${mol2.formula}`,
+                    `Reaktan 3: ${mol3.formula}`
+                ];
+            }
+            
+            return {
+                molecules: molecules.map(m => m.formula),
+                equation,
+                name,
+                type,
+                description,
+                conditions,
+                products,
+                properties
             };
-            return groupNames[groupKey] || groupKey;
         }
 
-        function updateHintButton() {
-            hintButton.innerHTML = `<i class="fas fa-lightbulb mr-2"></i> Petunjuk (${hintsLeft})`;
-            hintButton.disabled = hintsLeft <= 0;
-            if (hintsLeft <= 0) {
-                hintButton.classList.add('opacity-50');
-            } else {
-                hintButton.classList.remove('opacity-50');
-            }
-        }
-
-        // Next level
-        function nextLevel() {
-            if (currentLevel < gameLevels.length - 1) {
-                currentLevel++;
-                loadLevel(currentLevel);
-                startTimer();
-                nextLevelButton.disabled = true;
-                nextLevelButton.classList.add('opacity-50');
-            } else {
-                // Game completed
-                alert(`🎊 Selamat! Anda menyelesaikan semua level!\nSkor akhir: ${score}\nKembali ke menu utama.`);
-                window.location.href = "dashboad siswa.html";
-            }
-        }
-
-        // Reset current level
-        function resetLevel() {
-            if (confirm('Apakah Anda yakin ingin mengulang level ini?')) {
-                loadLevel(currentLevel);
-                startTimer();
-                correctCount = 0;
-                correctCountElement.textContent = '0';
-            }
-        }
-
-        // Timer functions
-        function startTimer() {
-            clearInterval(timerInterval);
+        // Tampilkan hasil reaksi
+        function displayReactionResult(reactions, molecules) {
+            reactionResult.style.display = 'block';
             
-            timerInterval = setInterval(() => {
-                timeLeft--;
-                updateTimerDisplay();
+            let resultsHTML = '';
+            
+            if (reactions.length === 1) {
+                const reaction = reactions[0];
+                resultsHTML = `
+                    <div class="mb-4">
+                        <h3 class="reaction-name">${reaction.name}</h3>
+                        <div class="reaction-equation">${reaction.equation}</div>
+                        <p class="reaction-description">${reaction.description}</p>
+                        <div class="text-xs text-gray-500 mb-3">
+                            <i class="fas fa-flask mr-1"></i> Jenis: ${reaction.type.toUpperCase()} | 
+                            <i class="fas fa-thermometer-half mr-1 ml-2"></i> Kondisi: ${reaction.conditions}
+                        </div>
+                    </div>
+                    
+                    <div class="reaction-properties">
+                        ${reaction.properties.map(prop => `
+                            <div class="reaction-prop">
+                                <i class="fas fa-check text-green-500 mr-1"></i> ${prop}
+                            </div>
+                        `).join('')}
+                    </div>
+                    
+                    <div class="mt-4 text-xs text-gray-600">
+                        <p><i class="fas fa-lightbulb text-yellow-500 mr-1"></i> 
+                        ${getReactionTip(reaction)}</p>
+                    </div>
+                `;
+            } else {
+                resultsHTML = `
+                    <div class="mb-4">
+                        <h3 class="reaction-name">${reactions.length} Reaksi Ditemukan</h3>
+                        <p class="reaction-description">Berikut adalah reaksi kimia yang melibatkan molekul yang dipilih:</p>
+                    </div>
+                    
+                    ${reactions.map((reaction, index) => `
+                        <div class="mb-4 p-3 border border-gray-200 rounded-lg">
+                            <div class="reaction-equation text-sm">${reaction.equation}</div>
+                            <div class="text-xs text-gray-600 mt-1">${reaction.name} (${reaction.type})</div>
+                            <button class="view-reaction-detail mt-2 text-xs text-blue-500" data-index="${index}">
+                                <i class="fas fa-info-circle mr-1"></i>Detail Reaksi
+                            </button>
+                        </div>
+                    `).join('')}
+                `;
+            }
+            
+            resultsHTML += `
+                <button id="new-experiment" class="w-full mt-4 bg-teal-500 text-white py-2 rounded-lg font-bold">
+                    <i class="fas fa-redo mr-2"></i>Cari Reaksi Lain
+                </button>
+            `;
+            
+            reactionResult.innerHTML = resultsHTML;
+            
+            // Event listener untuk tombol detail reaksi (jika ada)
+            document.querySelectorAll('.view-reaction-detail').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const index = e.target.dataset.index;
+                    displaySingleReaction(reactions[index]);
+                });
+            });
+            
+            // Event listener untuk tombol eksperimen baru
+            document.getElementById('new-experiment').addEventListener('click', () => {
+                selectedMolecules = [];
+                updateSelectedMoleculesDisplay();
+                updateReactionButton();
+                updateStatusMessage();
+                highlightSelectedMolecules();
+                reactionResult.style.display = 'none';
+            });
+            
+            // Scroll ke hasil
+            reactionResult.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Tampilkan detail reaksi tunggal
+        function displaySingleReaction(reaction) {
+            reactionResult.innerHTML = `
+                <div class="mb-4">
+                    <h3 class="reaction-name">${reaction.name}</h3>
+                    <div class="reaction-equation">${reaction.equation}</div>
+                    <p class="reaction-description">${reaction.description}</p>
+                    <div class="text-xs text-gray-500 mb-3">
+                        <i class="fas fa-flask mr-1"></i> Jenis: ${reaction.type.toUpperCase()} | 
+                        <i class="fas fa-thermometer-half mr-1 ml-2"></i> Kondisi: ${reaction.conditions}
+                    </div>
+                </div>
                 
-                if (timeLeft <= 0) {
-                    clearInterval(timerInterval);
-                    timeUp();
-                } else if (timeLeft <= 30) {
-                    // Last 30 seconds warning
-                    timerElement.style.color = '#ef4444';
-                    timerElement.classList.add('pulse');
+                <div class="mb-4">
+                    <h4 class="font-bold text-sm mb-2">Reaktan:</h4>
+                    <div class="flex flex-wrap gap-2">
+                        ${reaction.molecules.map(formula => {
+                            const molecule = molecules.find(m => m.formula === formula);
+                            if (molecule) {
+                                return `<span class="px-2 py-1 text-xs rounded ${molecule.colorClass} text-white">${formula} - ${molecule.name}</span>`;
+                            }
+                            return `<span class="px-2 py-1 text-xs bg-gray-200 rounded">${formula}</span>`;
+                        }).join('')}
+                    </div>
+                </div>
+                
+                <div class="mb-4">
+                    <h4 class="font-bold text-sm mb-2">Produk:</h4>
+                    <div class="flex flex-wrap gap-2">
+                        ${reaction.products.map(formula => {
+                            const molecule = molecules.find(m => m.formula === formula);
+                            if (molecule) {
+                                return `<span class="px-2 py-1 text-xs rounded ${molecule.colorClass} text-white">${formula} - ${molecule.name}</span>`;
+                            }
+                            return `<span class="px-2 py-1 text-xs bg-gray-200 rounded">${formula}</span>`;
+                        }).join('')}
+                    </div>
+                </div>
+                
+                <div class="reaction-properties">
+                    ${reaction.properties.map(prop => `
+                        <div class="reaction-prop">
+                            <i class="fas fa-check text-green-500 mr-1"></i> ${prop}
+                        </div>
+                    `).join('')}
+                </div>
+                
+                <div class="mt-4 text-xs text-gray-600">
+                    <p><i class="fas fa-lightbulb text-yellow-500 mr-1"></i> 
+                    ${getReactionTip(reaction)}</p>
+                </div>
+                
+                <button id="back-to-results" class="w-full mt-4 bg-gray-500 text-white py-2 rounded-lg font-bold">
+                    <i class="fas fa-arrow-left mr-2"></i>Kembali ke Hasil
+                </button>
+            `;
+            
+            // Event listener untuk tombol kembali
+            document.getElementById('back-to-results').addEventListener('click', () => {
+                showReactions();
+            });
+        }
+
+        // Dapatkan tips tentang reaksi
+        function getReactionTip(reaction) {
+            const tips = [
+                "Reaksi ini dapat dikatalisis untuk meningkatkan laju reaksi.",
+                "Perubahan energi dalam reaksi ini dapat dimanfaatkan untuk aplikasi praktis.",
+                "Reaksi ini penting dalam proses industri dan biologis.",
+                "Perhatikan kondisi reaksi untuk hasil yang optimal.",
+                "Reaksi ini menunjukkan prinsip dasar stoikiometri kimia."
+            ];
+            
+            // Tips khusus berdasarkan jenis reaksi
+            if (reaction.type.includes("pembakaran")) {
+                return "Reaksi pembakaran melepaskan energi dalam bentuk panas dan cahaya.";
+            } else if (reaction.type.includes("fotosintesis")) {
+                return "Fotosintesis adalah proses vital yang menyediakan oksigen dan makanan bagi kehidupan di Bumi.";
+            } else if (reaction.type.includes("netralisasi")) {
+                return "Reaksi netralisasi penting dalam mengatur pH dan pengolahan limbah asam/basa.";
+            } else if (reaction.name.includes("Termit")) {
+                return "Reaksi termit menghasilkan suhu sangat tinggi (sekitar 2500°C) dan digunakan untuk pengelasan logam.";
+            }
+            
+            return tips[Math.floor(Math.random() * tips.length)];
+        }
+
+        // Tampilkan detail molekul dalam modal
+        function showMoleculeDetails(molecule) {
+            const categoryNames = {
+                "organic": "Organik",
+                "inorganic": "Anorganik",
+                "acid": "Asam",
+                "base": "Basa",
+                "biomolecule": "Biomolekul",
+                "gas": "Gas",
+                "polymer": "Polimer",
+                "salt": "Garam"
+            };
+            
+            modalBody.innerHTML = `
+                <div class="molecule-detail-card" style="border-left-color: ${getCategoryColor(molecule.category)}; background-color: ${getCategoryColor(molecule.category, 0.1)}">
+                    <div class="flex items-center mb-4">
+                        <div class="molecule-cell ${molecule.colorClass} w-16 h-16 mr-4">
+                            <div class="molecule-formula text-xl">${molecule.formula}</div>
+                            <div class="molecule-name">${molecule.name}</div>
+                            ${molecule.mass ? `<div class="molecule-mass">${molecule.mass}</div>` : ''}
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-bold text-gray-800">${molecule.name}</h2>
+                            <p class="text-gray-600 text-sm">${molecule.formula} • ${categoryNames[molecule.category] || molecule.category}</p>
+                            ${molecule.mass ? `<p class="text-gray-600 text-sm">Massa molar: ${molecule.mass} g/mol</p>` : ''}
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <div class="detail-row">
+                            <span class="detail-label">Rumus Kimia:</span>
+                            <span class="detail-value">${molecule.formula}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Kategori:</span>
+                            <span class="detail-value">${categoryNames[molecule.category] || molecule.category}</span>
+                        </div>
+                        ${molecule.mass ? `
+                        <div class="detail-row">
+                            <span class="detail-label">Massa Molar:</span>
+                            <span class="detail-value">${molecule.mass} g/mol</span>
+                        </div>
+                        ` : ''}
+                        <div class="detail-row">
+                            <span class="detail-label">Unsur Penyusun:</span>
+                            <span class="detail-value">${molecule.elements ? molecule.elements.join(', ') : 'Tidak tersedia'}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 p-3 bg-gray-50 rounded-lg">
+                        <h4 class="font-bold text-gray-700 mb-1 text-sm">Deskripsi:</h4>
+                        <p class="text-xs text-gray-600">${molecule.description}</p>
+                    </div>
+                    
+                    <div class="mt-3 p-3 bg-gray-50 rounded-lg">
+                        <h4 class="font-bold text-gray-700 mb-1 text-sm">Sifat-sifat:</h4>
+                        <ul class="text-xs text-gray-600 list-disc pl-4">
+                            ${molecule.properties.map(prop => `<li>${prop}</li>`).join('')}
+                        </ul>
+                    </div>
+                    
+                    ${currentTab === 'reaction' ? `
+                    <button id="select-for-reaction" class="w-full mt-4 bg-teal-500 text-white py-2 rounded-lg font-bold">
+                        <i class="fas fa-plus mr-2"></i>Pilih untuk Reaksi
+                    </button>
+                    ` : ''}
+                </div>
+            `;
+            
+            // Tambahkan event listener untuk tombol pilih jika di mode reaction
+            if (currentTab === 'reaction') {
+                const selectBtn = document.getElementById('select-for-reaction');
+                selectBtn.addEventListener('click', () => {
+                    selectMoleculeForReaction(molecule);
+                    moleculeModal.classList.add('hidden');
+                    
+                    // Switch ke tab reaction jika belum
+                    if (currentTab !== 'reaction') {
+                        switchTab('reaction');
+                    }
+                });
+            }
+            
+            moleculeModal.classList.remove('hidden');
+        }
+
+        // Fungsi untuk berpindah tab
+        function switchTab(tabName) {
+            // Update tab aktif
+            tabs.forEach(tab => {
+                if (tab.dataset.tab === tabName) {
+                    tab.classList.add('active');
+                } else {
+                    tab.classList.remove('active');
                 }
-            }, 1000);
-        }
-
-        function updateTimerDisplay() {
-            const minutes = Math.floor(timeLeft / 60);
-            const seconds = timeLeft % 60;
-            timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-        }
-
-        function timeUp() {
-            alert('⏰ Waktu habis! Level belum selesai.');
-            resetLevel();
-        }
-
-        // Celebration effects
-        function showCelebration() {
-            // Create confetti
-            for (let i = 0; i < 50; i++) {
-                const confetti = document.createElement('div');
-                confetti.className = 'confetti';
-                confetti.style.left = `${Math.random() * 100}%`;
-                confetti.style.backgroundColor = getRandomColor();
-                document.querySelector('.app-container').appendChild(confetti);
-                
-                // Remove confetti after animation
-                setTimeout(() => {
-                    confetti.remove();
-                }, 2000);
-            }
+            });
             
-            // Highlight periodic table
-            periodicTable.classList.add('game-complete');
+            // Update konten tab aktif
+            tabContents.forEach(content => {
+                if (content.id === `${tabName}-tab`) {
+                    content.classList.add('active');
+                } else {
+                    content.classList.remove('active');
+                }
+            });
+            
+            currentTab = tabName;
+            
+            // Scroll ke atas
+            window.scrollTo(0, 0);
         }
 
-        function getRandomColor() {
-            const colors = ['#FF6961', '#77DD77', '#84B6F4', '#FDFD96', '#FFB7C5', '#E6E6FA'];
-            return colors[Math.floor(Math.random() * colors.length)];
+        // Dapatkan warna berdasarkan kategori
+        function getCategoryColor(category, opacity = 1) {
+            const colors = {
+                "organic": "#4caf50",
+                "inorganic": "#2196f3",
+                "acid": "#f44336",
+                "base": "#ff9800",
+                "biomolecule": "#9c27b0",
+                "gas": "#00bcd4",
+                "polymer": "#795548",
+                "salt": "#607d8b"
+            };
+            
+            const color = colors[category] || "#cccccc";
+            if (opacity < 1) {
+                const r = parseInt(color.slice(1, 3), 16);
+                const g = parseInt(color.slice(3, 5), 16);
+                const b = parseInt(color.slice(5, 7), 16);
+                return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+            }
+            return color;
         }
 
         // Setup event listeners
         function setupEventListeners() {
-            checkButton.addEventListener('click', checkAnswers);
-            hintButton.addEventListener('click', provideHint);
-            nextLevelButton.addEventListener('click', nextLevel);
-            resetButton.addEventListener('click', resetLevel);
-        }
-
-        // Initialize game when page loads
-        document.addEventListener('DOMContentLoaded', initGame);
-
-        // Simple navigation for bottom nav
-        document.addEventListener('DOMContentLoaded', function() {
-            const navItems = document.querySelectorAll('.nav-item');
+            // Tutup modal
+            closeModalBtn.addEventListener('click', () => {
+                moleculeModal.classList.add('hidden');
+            });
             
-            navItems.forEach(item => {
-                item.addEventListener('click', function() {
-                    navItems.forEach(nav => {
-                        nav.classList.remove('active');
-                        nav.querySelector('.nav-icon').classList.remove('active');
+            // Tutup modal dengan klik di luar konten
+            moleculeModal.addEventListener('click', (e) => {
+                if (e.target === moleculeModal) {
+                    moleculeModal.classList.add('hidden');
+                }
+            });
+            
+            // Tutup modal dengan tombol ESC
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    if (!moleculeModal.classList.contains('hidden')) {
+                        moleculeModal.classList.add('hidden');
+                    }
+                }
+            });
+            
+            // Pencarian molekul
+            searchInput.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase().trim();
+                
+                // Sembunyikan semua molekul dulu
+                document.querySelectorAll('.molecule-cell').forEach(cell => {
+                    if (cell.dataset.formula) {
+                        cell.style.opacity = '0.3';
+                        cell.style.transform = 'scale(0.95)';
+                    }
+                });
+                
+                // Jika kosong, tampilkan semua
+                if (!searchTerm) {
+                    document.querySelectorAll('.molecule-cell').forEach(cell => {
+                        if (cell.dataset.formula) {
+                            cell.style.opacity = '1';
+                            cell.style.transform = 'scale(1)';
+                        }
                     });
-                    
-                    this.classList.add('active');
-                    this.querySelector('.nav-icon').classList.add('active');
+                    return;
+                }
+                
+                // Tampilkan molekul yang cocok
+                let found = false;
+                molecules.forEach(molecule => {
+                    if (molecule.formula.toLowerCase().includes(searchTerm) || 
+                        molecule.name.toLowerCase().includes(searchTerm)) {
+                        
+                        const cells = document.querySelectorAll(`[data-id="${molecule.id}"]`);
+                        cells.forEach(cell => {
+                            cell.style.opacity = '1';
+                            cell.style.transform = 'scale(1.08)';
+                            cell.style.zIndex = '10';
+                            cell.style.boxShadow = '0 0 8px rgba(0,0,0,0.2)';
+                        });
+                        found = true;
+                    }
+                });
+                
+                // Jika tidak ditemukan, reset semua
+                if (!found) {
+                    document.querySelectorAll('.molecule-cell').forEach(cell => {
+                        if (cell.dataset.formula) {
+                            cell.style.opacity = '1';
+                            cell.style.transform = 'scale(1)';
+                            cell.style.zIndex = '1';
+                            cell.style.boxShadow = '';
+                        }
+                    });
+                }
+            });
+            
+            // Fokus pada input pencarian dengan shortcut Ctrl+F
+            document.addEventListener('keydown', (e) => {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+                    e.preventDefault();
+                    searchInput.focus();
+                }
+            });
+            
+            // Tombol untuk sistem reaksi
+            reactionBtn.addEventListener('click', showReactions);
+            
+            clearBtn.addEventListener('click', () => {
+                selectedMolecules = [];
+                updateSelectedMoleculesDisplay();
+                updateReactionButton();
+                updateStatusMessage();
+                highlightSelectedMolecules();
+                reactionResult.style.display = 'none';
+                showStatusMessage("Semua molekul telah dihapus", "info");
+            });
+            
+            // Tab switching
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    switchTab(tab.dataset.tab);
                 });
             });
-        });
+            
+            // Tambahkan audio untuk efek suara reaksi
+            const audio = document.createElement('audio');
+            audio.id = 'reaction-sound';
+            audio.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEAQB8AAEAfAAABAAgAZGF0YQ';
+            document.body.appendChild(audio);
+        }
+
+        // Inisialisasi ketika halaman dimuat
+        document.addEventListener('DOMContentLoaded', initMoleculesTable);
     </script>
 </body>
 </html>

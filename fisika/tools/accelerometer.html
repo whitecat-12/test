@@ -1,0 +1,1503 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QUANTARA - Accelerometer dengan Camera</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Load TensorFlow.js dan PoseNet -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@3.0.0/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/pose-detection@2.0.0/dist/pose-detection.js"></script>
+    
+    <style>
+        :root {
+            --primary: #38b2ac;
+            --secondary: #0e7490;
+            --accent: #f59e0b;
+        }
+        
+        body {
+            font-family: 'Baloo 2', cursive;
+            background-color: #f8fafc;
+        }
+        
+        .app-container {
+            max-width: 414px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        /* NAVBAR */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            max-width: 414px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            background: white;
+            z-index: 10;
+            height: 70px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+            text-decoration: none;
+            flex: 1;
+            height: 100%;
+            padding: 0.5rem 0;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item span {
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
+        
+        .nav-item.active {
+            color: var(--primary);
+        }
+        
+        .nav-icon {
+            transition: all 0.3s ease;
+            font-size: 1.25rem;
+        }
+        
+        .nav-icon.active {
+            transform: translateY(-5px);
+            color: var(--primary);
+        }
+        
+        /* Video Container */
+        .video-container {
+            position: relative;
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            height: 300px;
+        }
+        
+        #video-preview {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            transform: scaleX(-1); /* Mirror effect for front camera */
+        }
+        
+        /* Canvas untuk analisis */
+        .analysis-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100% !important;
+            height: 100% !important;
+            pointer-events: none;
+        }
+        
+        /* Accelerometer Visualizer */
+        .accel-visualizer {
+            width: 100%;
+            height: 80px;
+            position: relative;
+            background: #1e293b;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        
+        .accel-axis {
+            position: absolute;
+            height: 100%;
+            width: 3px;
+            background: rgba(255,255,255,0.3);
+        }
+        
+        .accel-x {
+            left: 33.33%;
+            background: linear-gradient(to bottom, transparent, #ef4444, transparent);
+        }
+        
+        .accel-y {
+            left: 50%;
+            background: linear-gradient(to bottom, transparent, #10b981, transparent);
+        }
+        
+        .accel-z {
+            left: 66.66%;
+            background: linear-gradient(to bottom, transparent, #3b82f6, transparent);
+        }
+        
+        .accel-marker {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: all 0.1s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        
+        .accel-marker-x {
+            background: radial-gradient(circle, #ef4444, #991b1b);
+        }
+        
+        .accel-marker-y {
+            background: radial-gradient(circle, #10b981, #065f46);
+        }
+        
+        .accel-marker-z {
+            background: radial-gradient(circle, #3b82f6, #1e40af);
+        }
+        
+        /* Chart Container */
+        .chart-container {
+            height: 220px !important;
+            position: relative;
+            background: white;
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        /* Data panel */
+        .data-panel {
+            transition: all 0.3s ease;
+        }
+        
+        .data-panel.collapsed {
+            max-height: 60px;
+            overflow: hidden;
+        }
+        
+        /* Custom Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+        
+        /* Loading Spinner */
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #38b2ac;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Accelerometer Value Display */
+        .accel-value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-align: center;
+            padding: 10px;
+            border-radius: 10px;
+            margin: 5px 0;
+            background: #f8fafc;
+            border: 2px solid #e5e7eb;
+        }
+        
+        .accel-value-x { color: #ef4444; }
+        .accel-value-y { color: #10b981; }
+        .accel-value-z { color: #3b82f6; }
+        
+        /* G-Force Indicator */
+        .g-force-meter {
+            height: 20px;
+            background: linear-gradient(to right, #10b981, #f59e0b, #ef4444);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+            margin: 10px 0;
+        }
+        
+        .g-force-indicator {
+            height: 100%;
+            width: 4px;
+            background-color: rgba(255, 255, 255, 0.9);
+            position: absolute;
+            top: 0;
+            transform: translateX(-50%);
+            transition: left 0.3s ease;
+        }
+        
+        /* Pose Visualization */
+        .pose-skeleton {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 2;
+        }
+        
+        .pose-point {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 3;
+        }
+        
+        .pose-line {
+            position: absolute;
+            background: rgba(56, 178, 172, 0.8);
+            transform-origin: 0 0;
+            z-index: 2;
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile App Container -->
+    <div class="app-container">
+        
+        <!-- Loading Indicator -->
+        <div id="loading" class="fixed inset-0 bg-white bg-opacity-90 flex flex-col items-center justify-center z-50 hidden">
+            <div class="loading-spinner mb-4"></div>
+            <p class="text-gray-700 font-medium" id="loading-text">Memulai Accelerometer...</p>
+            <p class="text-gray-500 text-sm mt-2">Harap tunggu beberapa saat</p>
+        </div>
+        
+        <!-- Error Message -->
+        <div id="error-message" class="error-message m-4 hidden">
+            <div class="flex items-center">
+                <i class="fas fa-exclamation-triangle mr-3"></i>
+                <div>
+                    <p class="font-medium" id="error-title">Terjadi Kesalahan</p>
+                    <p class="text-sm" id="error-detail"></p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <main class="pb-24 p-4 custom-scrollbar" style="max-height: calc(100vh - 70px); overflow-y: auto;">
+            <!-- Page Title -->
+            <div class="mb-4">
+                <h1 class="text-lg font-bold text-gray-800 mb-1">
+                    <i class="fas fa-mobile-alt text-teal-500 mr-2"></i> Accelerometer dengan Camera
+                </h1>
+                <p class="text-gray-600 text-xs">
+                    Analisis percepatan dan gerakan menggunakan sensor perangkat dan pose detection
+                </p>
+            </div>
+            
+            <!-- Camera Preview -->
+            <div class="mb-4 p-4 bg-white border border-gray-200 rounded-xl shadow-sm">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-sm font-medium text-gray-700 flex items-center">
+                        <i class="fas fa-camera text-blue-500 mr-2"></i> Kamera Real-time
+                    </h3>
+                    <div class="flex space-x-2">
+                        <button id="btn-switch-camera" class="px-3 py-1 bg-gray-100 text-gray-700 rounded-lg text-xs hover:bg-gray-200">
+                            <i class="fas fa-sync-alt mr-1"></i> Switch Camera
+                        </button>
+                        <button id="btn-capture" class="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-xs hover:bg-blue-200">
+                            <i class="fas fa-camera mr-1"></i> Capture
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Camera Container -->
+                <div class="video-container">
+                    <video id="video-preview" autoplay playsinline muted></video>
+                    <canvas id="video-canvas" class="analysis-canvas"></canvas>
+                    <div id="pose-skeleton" class="pose-skeleton"></div>
+                </div>
+                
+                <!-- Camera Controls -->
+                <div class="flex items-center justify-between mt-3">
+                    <div class="flex items-center space-x-2">
+                        <button id="btn-start-camera" class="px-4 py-2 bg-teal-500 text-white rounded-lg text-sm hover:bg-teal-600">
+                            <i class="fas fa-play mr-1"></i> Start Camera
+                        </button>
+                        <button id="btn-stop-camera" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm hover:bg-gray-300">
+                            <i class="fas fa-stop mr-1"></i> Stop
+                        </button>
+                    </div>
+                    <div class="text-xs text-gray-500">
+                        <span id="camera-status">Camera Off</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Accelerometer Data Display -->
+            <div class="mb-4 p-4 bg-white border border-gray-200 rounded-xl shadow-sm">
+                <h3 class="text-sm font-medium text-gray-700 mb-3 flex items-center">
+                    <i class="fas fa-tachometer-alt text-purple-500 mr-2"></i> Data Accelerometer
+                </h3>
+                
+                <!-- Real-time Accelerometer Values -->
+                <div class="grid grid-cols-3 gap-2 mb-4">
+                    <div class="accel-value accel-value-x">
+                        <div class="text-xs text-gray-600 mb-1">X-axis</div>
+                        <div id="accel-x">0.000</div>
+                        <div class="text-xs text-gray-500 mt-1">m/s²</div>
+                    </div>
+                    <div class="accel-value accel-value-y">
+                        <div class="text-xs text-gray-600 mb-1">Y-axis</div>
+                        <div id="accel-y">0.000</div>
+                        <div class="text-xs text-gray-500 mt-1">m/s²</div>
+                    </div>
+                    <div class="accel-value accel-value-z">
+                        <div class="text-xs text-gray-600 mb-1">Z-axis</div>
+                        <div id="accel-z">0.000</div>
+                        <div class="text-xs text-gray-500 mt-1">m/s²</div>
+                    </div>
+                </div>
+                
+                <!-- G-Force Indicator -->
+                <div class="mb-4">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-xs font-medium text-gray-700">Total G-Force</span>
+                        <span id="g-force-value" class="text-sm font-bold text-gray-800">0.00g</span>
+                    </div>
+                    <div class="g-force-meter">
+                        <div id="g-force-indicator" class="g-force-indicator" style="left: 50%;"></div>
+                    </div>
+                    <div class="flex justify-between text-xs text-gray-500 mt-1">
+                        <span>0g</span>
+                        <span>1g</span>
+                        <span>2g</span>
+                        <span>3g</span>
+                    </div>
+                </div>
+                
+                <!-- Accelerometer Visualizer -->
+                <div class="mb-4">
+                    <div class="text-xs font-medium text-gray-700 mb-2">Visualisasi 3-Axis</div>
+                    <div class="accel-visualizer">
+                        <div class="accel-axis accel-x"></div>
+                        <div class="accel-axis accel-y"></div>
+                        <div class="accel-axis accel-z"></div>
+                        <div id="accel-marker-x" class="accel-marker accel-marker-x" style="left: 33.33%; top: 50%;"></div>
+                        <div id="accel-marker-y" class="accel-marker accel-marker-y" style="left: 50%; top: 50%;"></div>
+                        <div id="accel-marker-z" class="accel-marker accel-marker-z" style="left: 66.66%; top: 50%;"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Motion Statistics -->
+            <div class="mb-4 p-4 bg-white border border-gray-200 rounded-xl shadow-sm">
+                <h3 class="text-sm font-medium text-gray-700 mb-3 flex items-center">
+                    <i class="fas fa-chart-bar text-orange-500 mr-2"></i> Statistik Gerakan
+                </h3>
+                
+                <div class="grid grid-cols-2 gap-3 mb-4">
+                    <div class="bg-blue-50 p-3 rounded-lg">
+                        <p class="text-xs text-blue-700 font-medium">Max Acceleration</p>
+                        <p id="max-accel" class="text-xl font-bold text-blue-800">0.00</p>
+                        <p class="text-xs text-blue-600">m/s²</p>
+                    </div>
+                    <div class="bg-teal-50 p-3 rounded-lg">
+                        <p class="text-xs text-teal-700 font-medium">Average Accel</p>
+                        <p id="avg-accel" class="text-xl font-bold text-teal-800">0.00</p>
+                        <p class="text-xs text-teal-600">m/s²</p>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-3 gap-2">
+                    <div class="bg-red-50 p-2 rounded-lg text-center">
+                        <p class="text-xs text-red-600">Peak X</p>
+                        <p id="peak-x" class="font-bold text-red-800">0.00</p>
+                    </div>
+                    <div class="bg-green-50 p-2 rounded-lg text-center">
+                        <p class="text-xs text-green-600">Peak Y</p>
+                        <p id="peak-y" class="font-bold text-green-800">0.00</p>
+                    </div>
+                    <div class="bg-indigo-50 p-2 rounded-lg text-center">
+                        <p class="text-xs text-indigo-600">Peak Z</p>
+                        <p id="peak-z" class="font-bold text-indigo-800">0.00</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Chart Visualization -->
+            <div class="mb-4 p-4 bg-white border border-gray-200 rounded-xl shadow-sm">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-sm font-medium text-gray-700">Grafik Accelerometer</h3>
+                    <div class="flex space-x-2">
+                        <button id="btn-pause-chart" class="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs hover:bg-gray-200">
+                            <i class="fas fa-pause"></i>
+                        </button>
+                        <button id="btn-clear-chart" class="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs hover:bg-gray-200">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="chart-container">
+                    <canvas id="accel-chart"></canvas>
+                </div>
+                
+                <div class="flex justify-between mt-2">
+                    <button id="btn-chart-x" class="px-3 py-1 bg-red-100 text-red-700 rounded-lg text-xs hover:bg-red-200 active">
+                        X-axis
+                    </button>
+                    <button id="btn-chart-y" class="px-3 py-1 bg-green-100 text-green-700 rounded-lg text-xs hover:bg-green-200">
+                        Y-axis
+                    </button>
+                    <button id="btn-chart-z" class="px-3 py-1 bg-blue-100 text-blue-700 rounded-lg text-xs hover:bg-blue-200">
+                        Z-axis
+                    </button>
+                    <button id="btn-chart-all" class="px-3 py-1 bg-purple-100 text-purple-700 rounded-lg text-xs hover:bg-purple-200">
+                        All
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Data Recording -->
+            <div class="mb-4 p-4 bg-white border border-gray-200 rounded-xl shadow-sm">
+                <h3 class="text-sm font-medium text-gray-700 mb-3 flex items-center">
+                    <i class="fas fa-database text-purple-500 mr-2"></i> Rekaman Data
+                </h3>
+                
+                <div class="grid grid-cols-2 gap-2 mb-4">
+                    <button id="btn-start-recording" class="py-3 bg-red-500 text-white rounded-lg text-sm font-medium hover:bg-red-600">
+                        <i class="fas fa-circle mr-1"></i> Start Recording
+                    </button>
+                    <button id="btn-stop-recording" class="py-3 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-300" disabled>
+                        <i class="fas fa-stop mr-1"></i> Stop
+                    </button>
+                </div>
+                
+                <div class="bg-gray-50 p-3 rounded-lg mb-3">
+                    <div class="flex justify-between items-center">
+                        <span class="text-xs text-gray-700">Status:</span>
+                        <span id="recording-status" class="text-xs font-medium text-gray-600">Tidak merekam</span>
+                    </div>
+                    <div class="flex justify-between items-center mt-1">
+                        <span class="text-xs text-gray-700">Durasi:</span>
+                        <span id="recording-duration" class="text-xs font-medium text-gray-600">0:00</span>
+                    </div>
+                    <div class="flex justify-between items-center mt-1">
+                        <span class="text-xs text-gray-700">Data Points:</span>
+                        <span id="data-points" class="text-xs font-medium text-gray-600">0</span>
+                    </div>
+                </div>
+                
+                <div class="export-buttons mt-3">
+                    <button id="btn-download-csv" class="w-full py-2 bg-teal-500 text-white rounded-lg text-sm font-medium hover:bg-teal-600">
+                        <i class="fas fa-file-csv mr-1"></i> Download Data (CSV)
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Advanced Settings -->
+            <div class="mb-4 p-4 bg-white border border-gray-200 rounded-xl shadow-sm">
+                <h3 class="text-sm font-medium text-gray-700 mb-3 flex items-center">
+                    <i class="fas fa-cog text-gray-500 mr-2"></i> Pengaturan
+                </h3>
+                
+                <div class="space-y-3">
+                    <div>
+                        <label class="block text-xs text-gray-700 mb-1">Sample Rate (Hz)</label>
+                        <select id="sample-rate" class="w-full p-2 border border-gray-300 rounded-lg text-sm">
+                            <option value="10">10 Hz</option>
+                            <option value="20">20 Hz</option>
+                            <option value="30" selected>30 Hz</option>
+                            <option value="60">60 Hz</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-xs text-gray-700 mb-1">Pose Detection</label>
+                        <div class="flex items-center">
+                            <input type="checkbox" id="pose-detection" class="mr-2" checked>
+                            <label for="pose-detection" class="text-xs text-gray-600">Aktifkan deteksi pose tubuh</label>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-xs text-gray-700 mb-1">Filter Noise</label>
+                        <div class="flex items-center justify-between">
+                            <span class="text-xs text-gray-600">Low</span>
+                            <input type="range" id="filter-strength" min="0" max="100" value="50" class="w-48">
+                            <span class="text-xs text-gray-600">High</span>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-xs text-gray-700 mb-1">Kalibrasi</label>
+                        <button id="btn-calibrate" class="w-full py-2 bg-blue-100 text-blue-700 rounded-lg text-sm hover:bg-blue-200">
+                            <i class="fas fa-compress-arrows-alt mr-1"></i> Kalibrasi Accelerometer
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Information Panel -->
+            <div class="mb-6 p-4 bg-gradient-to-r from-blue-50 to-teal-50 border border-blue-100 rounded-xl">
+                <h3 class="text-sm font-medium text-gray-700 mb-2 flex items-center">
+                    <i class="fas fa-info-circle text-blue-500 mr-2"></i> Cara Penggunaan
+                </h3>
+                <div class="text-xs text-gray-700 space-y-2">
+                    <p>1. Klik "Start Camera" untuk mengaktifkan kamera</p>
+                    <p>2. Accelerometer akan otomatis membaca data gerakan</p>
+                    <p>3. Gunakan "Start Recording" untuk merekam data</p>
+                    <p>4. Download data dalam format CSV untuk analisis</p>
+                    <p class="font-medium mt-2">Nilai g: 1g = 9.81 m/s² (gravitasi bumi)</p>
+                </div>
+            </div>
+        </main>
+        
+        <!-- BOTTOM NAVIGATION -->
+        <nav class="bottom-nav">
+            <a href="dashboad siswa.html" class="nav-item">
+                <i class="fas fa-home nav-icon"></i>
+                <span>Beranda</span>
+            </a>
+            <a href="soal harian/dashboard soal.html" class="nav-item">
+                <i class="fas fa-flask nav-icon"></i>
+                <span>Soal Harian</span>
+            </a>
+            <a href="ai/nayra.html" class="nav-item">
+                <i class="fas fa-robot nav-icon"></i>
+                <span>Nayra AI</span>
+            </a>
+            <a href="materi harian/kategori materi.html" class="nav-item">
+                <i class="fas fa-chalkboard-teacher nav-icon"></i>
+                <span>Materi Harian</span>
+            </a>
+            <a href="profil/profil.html" class="nav-item">
+                <i class="fas fa-user nav-icon"></i>
+                <span>Profil</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Chart.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script>
+        // DOM Elements
+        const videoPreview = document.getElementById('video-preview');
+        const videoCanvas = document.getElementById('video-canvas');
+        const canvasContext = videoCanvas.getContext('2d');
+        const poseSkeleton = document.getElementById('pose-skeleton');
+        
+        // Control Buttons
+        const btnStartCamera = document.getElementById('btn-start-camera');
+        const btnStopCamera = document.getElementById('btn-stop-camera');
+        const btnSwitchCamera = document.getElementById('btn-switch-camera');
+        const btnCapture = document.getElementById('btn-capture');
+        
+        // Accelerometer Display Elements
+        const accelX = document.getElementById('accel-x');
+        const accelY = document.getElementById('accel-y');
+        const accelZ = document.getElementById('accel-z');
+        const gForceValue = document.getElementById('g-force-value');
+        const gForceIndicator = document.getElementById('g-force-indicator');
+        
+        // Visualizer Elements
+        const accelMarkerX = document.getElementById('accel-marker-x');
+        const accelMarkerY = document.getElementById('accel-marker-y');
+        const accelMarkerZ = document.getElementById('accel-marker-z');
+        
+        // Statistics Elements
+        const maxAccel = document.getElementById('max-accel');
+        const avgAccel = document.getElementById('avg-accel');
+        const peakX = document.getElementById('peak-x');
+        const peakY = document.getElementById('peak-y');
+        const peakZ = document.getElementById('peak-z');
+        
+        // Chart Elements
+        const btnPauseChart = document.getElementById('btn-pause-chart');
+        const btnClearChart = document.getElementById('btn-clear-chart');
+        const btnChartX = document.getElementById('btn-chart-x');
+        const btnChartY = document.getElementById('btn-chart-y');
+        const btnChartZ = document.getElementById('btn-chart-z');
+        const btnChartAll = document.getElementById('btn-chart-all');
+        
+        // Recording Elements
+        const btnStartRecording = document.getElementById('btn-start-recording');
+        const btnStopRecording = document.getElementById('btn-stop-recording');
+        const recordingStatus = document.getElementById('recording-status');
+        const recordingDuration = document.getElementById('recording-duration');
+        const dataPoints = document.getElementById('data-points');
+        const btnDownloadCSV = document.getElementById('btn-download-csv');
+        
+        // Settings Elements
+        const sampleRateSelect = document.getElementById('sample-rate');
+        const poseDetectionCheckbox = document.getElementById('pose-detection');
+        const filterStrength = document.getElementById('filter-strength');
+        const btnCalibrate = document.getElementById('btn-calibrate');
+        
+        // Status Elements
+        const cameraStatus = document.getElementById('camera-status');
+        const loading = document.getElementById('loading');
+        const loadingText = document.getElementById('loading-text');
+        const errorMessage = document.getElementById('error-message');
+        const errorTitle = document.getElementById('error-title');
+        const errorDetail = document.getElementById('error-detail');
+        
+        // Variables
+        let mediaStream = null;
+        let isCameraOn = false;
+        let isRecording = false;
+        let recordingStartTime = null;
+        let recordingInterval = null;
+        let chartPaused = false;
+        let currentChartMode = 'x'; // 'x', 'y', 'z', 'all'
+        let detector = null;
+        let poseDetectionActive = true;
+        let currentFacingMode = 'user'; // 'user' or 'environment'
+        
+        // Accelerometer Data
+        let accelerometer = null;
+        let accelerometerData = {
+            x: 0, y: 0, z: 0,
+            alpha: 0, beta: 0, gamma: 0, // For device orientation
+            timestamp: 0
+        };
+        
+        // Data Storage
+        let recordedData = [];
+        let chartData = {
+            time: [],
+            x: [],
+            y: [],
+            z: [],
+            magnitude: []
+        };
+        
+        // Statistics
+        let stats = {
+            maxAcceleration: 0,
+            avgAcceleration: 0,
+            peakX: 0,
+            peakY: 0,
+            peakZ: 0,
+            totalSamples: 0,
+            sumAcceleration: 0
+        };
+        
+        // Calibration
+        let calibration = {
+            x: 0, y: 0, z: 0,
+            samples: 0,
+            calibrating: false
+        };
+        
+        // Chart
+        let accelChart = null;
+        
+        // Constants
+        const EARTH_GRAVITY = 9.81; // m/s²
+        
+        // Error Handling
+        function showError(title, message) {
+            errorTitle.textContent = title;
+            errorDetail.textContent = message;
+            errorMessage.classList.remove('hidden');
+            
+            setTimeout(() => {
+                errorMessage.classList.add('hidden');
+            }, 5000);
+        }
+        
+        // Initialize Camera
+        async function startCamera(facingMode = 'user') {
+            try {
+                loading.classList.remove('hidden');
+                loadingText.textContent = 'Mengaktifkan kamera...';
+                
+                // Stop existing stream
+                if (mediaStream) {
+                    mediaStream.getTracks().forEach(track => track.stop());
+                }
+                
+                // Get camera stream
+                mediaStream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        facingMode: facingMode,
+                        width: { ideal: 640 },
+                        height: { ideal: 480 }
+                    },
+                    audio: false
+                });
+                
+                videoPreview.srcObject = mediaStream;
+                isCameraOn = true;
+                currentFacingMode = facingMode;
+                
+                // Setup canvas dimensions
+                videoPreview.onloadedmetadata = () => {
+                    videoCanvas.width = videoPreview.videoWidth;
+                    videoCanvas.height = videoPreview.videoHeight;
+                    cameraStatus.textContent = `Camera On (${facingMode === 'user' ? 'Front' : 'Back'})`;
+                };
+                
+                // Start pose detection if enabled
+                if (poseDetectionActive) {
+                    await initPoseDetection();
+                }
+                
+                loading.classList.add('hidden');
+                showError('Berhasil', 'Kamera berhasil diaktifkan');
+                
+            } catch (error) {
+                loading.classList.add('hidden');
+                showError('Kamera Error', 'Tidak dapat mengakses kamera: ' + error.message);
+            }
+        }
+        
+        // Stop Camera
+        function stopCamera() {
+            if (mediaStream) {
+                mediaStream.getTracks().forEach(track => track.stop());
+                mediaStream = null;
+            }
+            
+            isCameraOn = false;
+            cameraStatus.textContent = 'Camera Off';
+            videoPreview.srcObject = null;
+            
+            // Clear canvas
+            canvasContext.clearRect(0, 0, videoCanvas.width, videoCanvas.height);
+            poseSkeleton.innerHTML = '';
+        }
+        
+        // Switch Camera
+        function switchCamera() {
+            if (!isCameraOn) return;
+            
+            const newFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
+            startCamera(newFacingMode);
+        }
+        
+        // Capture Image
+        function captureImage() {
+            if (!isCameraOn) {
+                showError('Kamera Tidak Aktif', 'Aktifkan kamera terlebih dahulu');
+                return;
+            }
+            
+            // Draw current frame to canvas
+            canvasContext.drawImage(videoPreview, 0, 0, videoCanvas.width, videoCanvas.height);
+            
+            // Create download link
+            const link = document.createElement('a');
+            link.download = `accelerometer-capture-${new Date().toISOString().slice(0, 19)}.png`;
+            link.href = videoCanvas.toDataURL('image/png');
+            link.click();
+            
+            showError('Berhasil', 'Gambar berhasil disimpan');
+        }
+        
+        // Initialize Pose Detection
+        async function initPoseDetection() {
+            try {
+                loadingText.textContent = 'Memuat model pose detection...';
+                loading.classList.remove('hidden');
+                
+                // Check if TensorFlow.js is available
+                if (typeof poseDetection === 'undefined') {
+                    console.warn('Pose detection library not loaded');
+                    poseDetectionActive = false;
+                    poseDetectionCheckbox.checked = false;
+                    loading.classList.add('hidden');
+                    return;
+                }
+                
+                // Create detector
+                const model = poseDetection.SupportedModels.BlazePose;
+                const detectorConfig = {
+                    runtime: 'tfjs',
+                    enableSmoothing: true,
+                    modelType: 'lite'
+                };
+                
+                detector = await poseDetection.createDetector(model, detectorConfig);
+                
+                // Start pose detection loop
+                if (isCameraOn) {
+                    detectPose();
+                }
+                
+                loading.classList.add('hidden');
+                
+            } catch (error) {
+                console.error('Error initializing pose detection:', error);
+                poseDetectionActive = false;
+                poseDetectionCheckbox.checked = false;
+                loading.classList.add('hidden');
+                showError('Pose Detection Error', 'Tidak dapat memuat model pose detection');
+            }
+        }
+        
+        // Detect Pose
+        async function detectPose() {
+            if (!detector || !isCameraOn || !poseDetectionActive) return;
+            
+            try {
+                const poses = await detector.estimatePoses(videoPreview);
+                drawPose(poses);
+                
+                // Continue detection
+                requestAnimationFrame(() => detectPose());
+                
+            } catch (error) {
+                console.error('Error detecting pose:', error);
+            }
+        }
+        
+        // Draw Pose Skeleton
+        function drawPose(poses) {
+            poseSkeleton.innerHTML = '';
+            
+            if (!poses || poses.length === 0) return;
+            
+            const pose = poses[0];
+            const keypoints = pose.keypoints;
+            
+            // Draw keypoints
+            keypoints.forEach(keypoint => {
+                if (keypoint.score > 0.5) {
+                    const point = document.createElement('div');
+                    point.className = 'pose-point';
+                    point.style.left = `${keypoint.x}px`;
+                    point.style.top = `${keypoint.y}px`;
+                    point.style.backgroundColor = getKeypointColor(keypoint.name);
+                    poseSkeleton.appendChild(point);
+                }
+            });
+            
+            // Draw skeleton lines
+            const connections = [
+                // Body
+                ['left_shoulder', 'right_shoulder'],
+                ['left_shoulder', 'left_hip'],
+                ['right_shoulder', 'right_hip'],
+                ['left_hip', 'right_hip'],
+                
+                // Arms
+                ['left_shoulder', 'left_elbow'],
+                ['left_elbow', 'left_wrist'],
+                ['right_shoulder', 'right_elbow'],
+                ['right_elbow', 'right_wrist'],
+                
+                // Legs
+                ['left_hip', 'left_knee'],
+                ['left_knee', 'left_ankle'],
+                ['right_hip', 'right_knee'],
+                ['right_knee', 'right_ankle']
+            ];
+            
+            connections.forEach(([startName, endName]) => {
+                const start = keypoints.find(k => k.name === startName);
+                const end = keypoints.find(k => k.name === endName);
+                
+                if (start && end && start.score > 0.5 && end.score > 0.5) {
+                    const line = document.createElement('div');
+                    line.className = 'pose-line';
+                    
+                    const dx = end.x - start.x;
+                    const dy = end.y - start.y;
+                    const length = Math.sqrt(dx * dx + dy * dy);
+                    const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+                    
+                    line.style.width = `${length}px`;
+                    line.style.left = `${start.x}px`;
+                    line.style.top = `${start.y}px`;
+                    line.style.transform = `rotate(${angle}deg)`;
+                    
+                    poseSkeleton.appendChild(line);
+                }
+            });
+        }
+        
+        function getKeypointColor(name) {
+            const colors = {
+                'nose': '#ef4444',
+                'left_eye': '#3b82f6',
+                'right_eye': '#3b82f6',
+                'left_ear': '#10b981',
+                'right_ear': '#10b981',
+                'left_shoulder': '#8b5cf6',
+                'right_shoulder': '#8b5cf6',
+                'left_elbow': '#f59e0b',
+                'right_elbow': '#f59e0b',
+                'left_wrist': '#ef4444',
+                'right_wrist': '#ef4444',
+                'left_hip': '#10b981',
+                'right_hip': '#10b981',
+                'left_knee': '#3b82f6',
+                'right_knee': '#3b82f6',
+                'left_ankle': '#8b5cf6',
+                'right_ankle': '#8b5cf6'
+            };
+            
+            return colors[name] || '#ffffff';
+        }
+        
+        // Initialize Accelerometer
+        function initAccelerometer() {
+            // Check if DeviceMotionEvent is supported
+            if (!('DeviceMotionEvent' in window)) {
+                showError('Perangkat Tidak Mendukung', 'Accelerometer tidak tersedia di perangkat ini');
+                return;
+            }
+            
+            // Request permission for iOS 13+
+            if (typeof DeviceMotionEvent.requestPermission === 'function') {
+                DeviceMotionEvent.requestPermission()
+                    .then(permissionState => {
+                        if (permissionState === 'granted') {
+                            startAccelerometer();
+                        } else {
+                            showError('Izin Ditolak', 'Akses accelerometer ditolak');
+                        }
+                    })
+                    .catch(console.error);
+            } else {
+                startAccelerometer();
+            }
+        }
+        
+        function startAccelerometer() {
+            // Add event listeners for device motion and orientation
+            window.addEventListener('devicemotion', handleDeviceMotion);
+            window.addEventListener('deviceorientation', handleDeviceOrientation);
+            
+            // Start data processing loop
+            processAccelerometerData();
+            
+            showError('Berhasil', 'Accelerometer diaktifkan');
+        }
+        
+        function handleDeviceMotion(event) {
+            const acceleration = event.accelerationIncludingGravity;
+            
+            if (acceleration) {
+                // Update accelerometer data
+                accelerometerData.x = acceleration.x || 0;
+                accelerometerData.y = acceleration.y || 0;
+                accelerometerData.z = acceleration.z || 0;
+                accelerometerData.timestamp = Date.now();
+            }
+        }
+        
+        function handleDeviceOrientation(event) {
+            // Update orientation data
+            accelerometerData.alpha = event.alpha || 0; // Z-axis rotation
+            accelerometerData.beta = event.beta || 0;   // X-axis rotation
+            accelerometerData.gamma = event.gamma || 0; // Y-axis rotation
+        }
+        
+        function processAccelerometerData() {
+            if (!accelerometerData.timestamp) return;
+            
+            // Apply calibration
+            let x = accelerometerData.x - calibration.x;
+            let y = accelerometerData.y - calibration.y;
+            let z = accelerometerData.z - calibration.z;
+            
+            // Apply filter
+            const filterValue = filterStrength.value / 100;
+            x = applyLowPassFilter(x, filterValue);
+            y = applyLowPassFilter(y, filterValue);
+            z = applyLowPassFilter(z, filterValue);
+            
+            // Calculate magnitude
+            const magnitude = Math.sqrt(x * x + y * y + z * z);
+            
+            // Update display
+            updateAccelerometerDisplay(x, y, z, magnitude);
+            
+            // Update statistics
+            updateStatistics(x, y, z, magnitude);
+            
+            // Update chart data
+            updateChartData(x, y, z, magnitude);
+            
+            // Update visualizer
+            updateVisualizer(x, y, z);
+            
+            // Record data if recording is active
+            if (isRecording) {
+                recordDataPoint(x, y, z, magnitude);
+            }
+            
+            // Continue processing
+            setTimeout(processAccelerometerData, 1000 / parseInt(sampleRateSelect.value));
+        }
+        
+        let lastFilteredX = 0, lastFilteredY = 0, lastFilteredZ = 0;
+        
+        function applyLowPassFilter(value, alpha, lastFiltered = 0) {
+            return alpha * value + (1 - alpha) * lastFiltered;
+        }
+        
+        function updateAccelerometerDisplay(x, y, z, magnitude) {
+            // Update numeric values
+            accelX.textContent = x.toFixed(3);
+            accelY.textContent = y.toFixed(3);
+            accelZ.textContent = z.toFixed(3);
+            
+            // Calculate G-force (relative to Earth's gravity)
+            const gForce = magnitude / EARTH_GRAVITY;
+            gForceValue.textContent = gForce.toFixed(2) + 'g';
+            
+            // Update G-force indicator (0-3g range)
+            const gForcePercent = Math.min(gForce / 3, 1) * 100;
+            gForceIndicator.style.left = gForcePercent + '%';
+        }
+        
+        function updateStatistics(x, y, z, magnitude) {
+            stats.totalSamples++;
+            stats.sumAcceleration += magnitude;
+            
+            // Update max acceleration
+            if (magnitude > stats.maxAcceleration) {
+                stats.maxAcceleration = magnitude;
+            }
+            
+            // Update peak values
+            const absX = Math.abs(x);
+            const absY = Math.abs(y);
+            const absZ = Math.abs(z);
+            
+            if (absX > stats.peakX) stats.peakX = absX;
+            if (absY > stats.peakY) stats.peakY = absY;
+            if (absZ > stats.peakZ) stats.peakZ = absZ;
+            
+            // Calculate average
+            stats.avgAcceleration = stats.sumAcceleration / stats.totalSamples;
+            
+            // Update display
+            maxAccel.textContent = stats.maxAcceleration.toFixed(2);
+            avgAccel.textContent = stats.avgAcceleration.toFixed(2);
+            peakX.textContent = stats.peakX.toFixed(2);
+            peakY.textContent = stats.peakY.toFixed(2);
+            peakZ.textContent = stats.peakZ.toFixed(2);
+        }
+        
+        function updateVisualizer(x, y, z) {
+            // Normalize values for visualization (±20 m/s² range)
+            const maxRange = 20;
+            
+            // Calculate positions (0-100%)
+            const xPos = 50 + (x / maxRange) * 50;
+            const yPos = 50 + (y / maxRange) * 50;
+            const zPos = 50 + (z / maxRange) * 50;
+            
+            // Clamp values
+            const clamp = (value) => Math.max(10, Math.min(90, value));
+            
+            // Update marker positions
+            accelMarkerX.style.top = clamp(yPos) + '%'; // X-axis affects vertical position
+            accelMarkerY.style.top = clamp(xPos) + '%'; // Y-axis affects vertical position
+            accelMarkerZ.style.top = clamp(zPos) + '%'; // Z-axis affects vertical position
+        }
+        
+        // Initialize Chart
+        function initChart() {
+            const ctx = document.getElementById('accel-chart').getContext('2d');
+            
+            accelChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: chartData.time,
+                    datasets: [
+                        {
+                            label: 'X-axis',
+                            data: chartData.x,
+                            borderColor: '#ef4444',
+                            backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                            borderWidth: 2,
+                            fill: false,
+                            tension: 0.4,
+                            pointRadius: 0,
+                            hidden: currentChartMode !== 'x' && currentChartMode !== 'all'
+                        },
+                        {
+                            label: 'Y-axis',
+                            data: chartData.y,
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            borderWidth: 2,
+                            fill: false,
+                            tension: 0.4,
+                            pointRadius: 0,
+                            hidden: currentChartMode !== 'y' && currentChartMode !== 'all'
+                        },
+                        {
+                            label: 'Z-axis',
+                            data: chartData.z,
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            borderWidth: 2,
+                            fill: false,
+                            tension: 0.4,
+                            pointRadius: 0,
+                            hidden: currentChartMode !== 'z' && currentChartMode !== 'all'
+                        },
+                        {
+                            label: 'Magnitude',
+                            data: chartData.magnitude,
+                            borderColor: '#8b5cf6',
+                            backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                            borderWidth: 2,
+                            fill: false,
+                            tension: 0.4,
+                            pointRadius: 0,
+                            hidden: currentChartMode !== 'all'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                font: {
+                                    size: 10
+                                }
+                            }
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Time (s)'
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        y: {
+                            display: true,
+                            title: {
+                                display: true,
+                                text: 'Acceleration (m/s²)'
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 0
+                    }
+                }
+            });
+        }
+        
+        function updateChartData(x, y, z, magnitude) {
+            if (chartPaused) return;
+            
+            const currentTime = (Date.now() - (recordingStartTime || Date.now())) / 1000;
+            
+            // Add new data
+            chartData.time.push(currentTime.toFixed(1));
+            chartData.x.push(x);
+            chartData.y.push(y);
+            chartData.z.push(z);
+            chartData.magnitude.push(magnitude);
+            
+            // Limit data points (keep last 100)
+            const maxPoints = 100;
+            if (chartData.time.length > maxPoints) {
+                chartData.time.shift();
+                chartData.x.shift();
+                chartData.y.shift();
+                chartData.z.shift();
+                chartData.magnitude.shift();
+            }
+            
+            // Update chart
+            if (accelChart) {
+                accelChart.data.labels = chartData.time;
+                accelChart.data.datasets[0].data = chartData.x;
+                accelChart.data.datasets[1].data = chartData.y;
+                accelChart.data.datasets[2].data = chartData.z;
+                accelChart.data.datasets[3].data = chartData.magnitude;
+                accelChart.update('none');
+            }
+        }
+        
+        function startRecording() {
+            if (isRecording) return;
+            
+            isRecording = true;
+            recordingStartTime = Date.now();
+            
+            // Reset recorded data
+            recordedData = [];
+            
+            // Update UI
+            btnStartRecording.disabled = true;
+            btnStopRecording.disabled = false;
+            recordingStatus.textContent = 'Merekam...';
+            recordingStatus.style.color = '#ef4444';
+            
+            // Start duration timer
+            updateRecordingDuration();
+            recordingInterval = setInterval(updateRecordingDuration, 1000);
+            
+            showError('Rekaman Dimulai', 'Sedang merekam data accelerometer');
+        }
+        
+        function stopRecording() {
+            if (!isRecording) return;
+            
+            isRecording = false;
+            
+            // Update UI
+            btnStartRecording.disabled = false;
+            btnStopRecording.disabled = true;
+            recordingStatus.textContent = 'Selesai';
+            recordingStatus.style.color = '#10b981';
+            
+            // Stop duration timer
+            clearInterval(recordingInterval);
+            
+            showError('Rekaman Berhenti', `Data direkam: ${recordedData.length} poin`);
+        }
+        
+        function updateRecordingDuration() {
+            if (!isRecording) return;
+            
+            const elapsed = Date.now() - recordingStartTime;
+            const seconds = Math.floor(elapsed / 1000);
+            const minutes = Math.floor(seconds / 60);
+            
+            recordingDuration.textContent = `${minutes}:${(seconds % 60).toString().padStart(2, '0')}`;
+            dataPoints.textContent = recordedData.length;
+        }
+        
+        function recordDataPoint(x, y, z, magnitude) {
+            const timestamp = new Date().toISOString();
+            const gForce = magnitude / EARTH_GRAVITY;
+            
+            recordedData.push({
+                timestamp,
+                x: x.toFixed(6),
+                y: y.toFixed(6),
+                z: z.toFixed(6),
+                magnitude: magnitude.toFixed(6),
+                gForce: gForce.toFixed(6),
+                alpha: accelerometerData.alpha.toFixed(2),
+                beta: accelerometerData.beta.toFixed(2),
+                gamma: accelerometerData.gamma.toFixed(2)
+            });
+            
+            dataPoints.textContent = recordedData.length;
+        }
+        
+        function downloadCSV() {
+            if (recordedData.length === 0) {
+                showError('Data Kosong', 'Tidak ada data yang direkam');
+                return;
+            }
+            
+            // Create CSV header
+            let csvContent = "timestamp,x_acceleration,y_acceleration,z_acceleration,magnitude,g_force,alpha,beta,gamma\n";
+            
+            // Add data rows
+            recordedData.forEach(data => {
+                csvContent += `${data.timestamp},${data.x},${data.y},${data.z},${data.magnitude},${data.gForce},${data.alpha},${data.beta},${data.gamma}\n`;
+            });
+            
+            // Create download link
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            
+            link.href = url;
+            link.download = `accelerometer-data-${new Date().toISOString().slice(0, 10)}.csv`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            window.URL.revokeObjectURL(url);
+            
+            showError('Berhasil', `Data berhasil diunduh: ${recordedData.length} poin`);
+        }
+        
+        function calibrateAccelerometer() {
+            calibration.calibrating = true;
+            calibration.samples = 0;
+            calibration.x = 0;
+            calibration.y = 0;
+            calibration.z = 0;
+            
+            showError('Kalibrasi', 'Letakkan perangkat pada permukaan datar dan diam...');
+            
+            // Collect samples for 3 seconds
+            const calibrationInterval = setInterval(() => {
+                if (calibration.samples < 30) { // 30 samples at ~10Hz
+                    calibration.x += accelerometerData.x;
+                    calibration.y += accelerometerData.y;
+                    calibration.z += accelerometerData.z;
+                    calibration.samples++;
+                } else {
+                    clearInterval(calibrationInterval);
+                    
+                    // Calculate average
+                    calibration.x /= calibration.samples;
+                    calibration.y /= calibration.samples;
+                    calibration.z /= calibration.samples;
+                    
+                    // Adjust Z for gravity (should be ~9.81 when flat)
+                    calibration.z -= EARTH_GRAVITY;
+                    
+                    calibration.calibrating = false;
+                    showError('Kalibrasi Selesai', 'Accelerometer berhasil dikalibrasi');
+                }
+            }, 100);
+        }
+        
+        // Event Listeners
+        btnStartCamera.addEventListener('click', () => startCamera('user'));
+        btnStopCamera.addEventListener('click', stopCamera);
+        btnSwitchCamera.addEventListener('click', switchCamera);
+        btnCapture.addEventListener('click', captureImage);
+        
+        btnStartRecording.addEventListener('click', startRecording);
+        btnStopRecording.addEventListener('click', stopRecording);
+        btnDownloadCSV.addEventListener('click', downloadCSV);
+        
+        btnPauseChart.addEventListener('click', () => {
+            chartPaused = !chartPaused;
+            btnPauseChart.innerHTML = chartPaused ? 
+                '<i class="fas fa-play"></i>' : 
+                '<i class="fas fa-pause"></i>';
+        });
+        
+        btnClearChart.addEventListener('click', () => {
+            chartData.time = [];
+            chartData.x = [];
+            chartData.y = [];
+            chartData.z = [];
+            chartData.magnitude = [];
+            
+            if (accelChart) {
+                accelChart.update();
+            }
+        });
+        
+        btnChartX.addEventListener('click', () => {
+            currentChartMode = 'x';
+            updateChartVisibility();
+            setActiveChartButton(btnChartX);
+        });
+        
+        btnChartY.addEventListener('click', () => {
+            currentChartMode = 'y';
+            updateChartVisibility();
+            setActiveChartButton(btnChartY);
+        });
+        
+        btnChartZ.addEventListener('click', () => {
+            currentChartMode = 'z';
+            updateChartVisibility();
+            setActiveChartButton(btnChartZ);
+        });
+        
+        btnChartAll.addEventListener('click', () => {
+            currentChartMode = 'all';
+            updateChartVisibility();
+            setActiveChartButton(btnChartAll);
+        });
+        
+        poseDetectionCheckbox.addEventListener('change', (e) => {
+            poseDetectionActive = e.target.checked;
+            
+            if (poseDetectionActive && isCameraOn) {
+                initPoseDetection();
+            } else {
+                poseSkeleton.innerHTML = '';
+            }
+        });
+        
+        btnCalibrate.addEventListener('click', calibrateAccelerometer);
+        
+        // Helper Functions
+        function updateChartVisibility() {
+            if (!accelChart) return;
+            
+            accelChart.data.datasets[0].hidden = currentChartMode !== 'x' && currentChartMode !== 'all';
+            accelChart.data.datasets[1].hidden = currentChartMode !== 'y' && currentChartMode !== 'all';
+            accelChart.data.datasets[2].hidden = currentChartMode !== 'z' && currentChartMode !== 'all';
+            accelChart.data.datasets[3].hidden = currentChartMode !== 'all';
+            accelChart.update();
+        }
+        
+        function setActiveChartButton(activeButton) {
+            [btnChartX, btnChartY, btnChartZ, btnChartAll].forEach(btn => {
+                btn.classList.remove('bg-red-500', 'bg-green-500', 'bg-blue-500', 'bg-purple-500', 'text-white');
+                btn.classList.add('bg-red-100', 'bg-green-100', 'bg-blue-100', 'bg-purple-100');
+            });
+            
+            activeButton.classList.remove('bg-red-100', 'bg-green-100', 'bg-blue-100', 'bg-purple-100');
+            activeButton.classList.add('text-white');
+            
+            if (activeButton === btnChartX) {
+                activeButton.classList.add('bg-red-500');
+            } else if (activeButton === btnChartY) {
+                activeButton.classList.add('bg-green-500');
+            } else if (activeButton === btnChartZ) {
+                activeButton.classList.add('bg-blue-500');
+            } else if (activeButton === btnChartAll) {
+                activeButton.classList.add('bg-purple-500');
+            }
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize chart
+            initChart();
+            setActiveChartButton(btnChartX);
+            
+            // Initialize accelerometer
+            initAccelerometer();
+            
+            // Show welcome message
+            setTimeout(() => {
+                showError('Selamat Datang', 'Aktifkan kamera dan accelerometer akan otomatis membaca data');
+            }, 1000);
+        });
+    </script>
+</body>
+  </html>

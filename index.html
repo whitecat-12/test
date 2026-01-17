@@ -220,7 +220,7 @@
           <div class="auth-logo-icon">
             <i class="fas fa-atom"></i>
           </div>
-          <h1 class="text-3xl font-bold">TETA SAINS</h1>
+          <h1 class="text-3xl font-bold">QUANTARA</h1>
         </div>
         <p class="text-lg text-gray-600">Belajar sains dengan cara menyenangkan</p>
       </div>
@@ -271,7 +271,13 @@
               </button>
             </div>
           </div>
-          <!-- ROLE SELECTION REMOVED -->
+          <div class="form-group">
+            <label for="regRole" class="form-label">Role</label>
+            <select id="regRole" class="form-input w-full">
+              <option value="siswa">Siswa</option>
+              <option value="guru">Guru</option>
+            </select>
+          </div>
           <button type="submit" class="btn-primary w-full py-3 mt-2">Daftar Sekarang</button>
         </form>
 
@@ -399,6 +405,7 @@
       const name = document.getElementById("regName").value;
       const email = document.getElementById("regEmail").value;
       const password = document.getElementById("regPassword").value;
+      let role = document.getElementById("regRole").value;
       
       // Show loading state
       const submitBtn = forms.register.querySelector('button[type="submit"]');
@@ -409,14 +416,25 @@
       try {
         const cred = await createUserWithEmailAndPassword(auth, email, password);
         
+        // If role is guru, set to pending
+        if (role === "guru") {
+          role = "pending";
+        }
+        
         // Save user data to Firestore including name
         await setDoc(doc(db, "users", cred.user.uid), {
           name: name,
           email: cred.user.email,
+          role: role,
           createdAt: new Date()
         });
         
-        infoMsg.textContent = "✅ Akun berhasil dibuat, silakan login.";
+        if (role === "pending") {
+          infoMsg.textContent = "✅ Akun berhasil dibuat, menunggu persetujuan admin untuk menjadi Guru.";
+        } else {
+          infoMsg.textContent = "✅ Akun berhasil dibuat, silakan login.";
+        }
+        
         infoMsg.classList.remove("hidden");
         errorMsg.classList.add("hidden");
         
@@ -462,8 +480,26 @@
     // Auth State Change Handler
     onAuthStateChanged(auth, async (user) => {
       if (user) {
-        // Redirect semua user ke halaman yang sama
-        window.location.href = "dashboard siswa.html";
+        try {
+          const userDoc = await getDoc(doc(db, "users", user.uid));
+          if (userDoc.exists()) {
+            const role = userDoc.data().role;
+            
+            if (role === "guru") {
+              window.location.href = "dashboard guru/dashboard guru.html";
+            } else if (role === "siswa") {
+              window.location.href = "dashboard siswa.html";
+            } else if (role === "pending") {
+              alert("Akun Anda masih menunggu persetujuan admin untuk menjadi Guru.");
+              await signOut(auth);
+            }
+          } else {
+            alert("Data user tidak ditemukan di sistem.");
+            await signOut(auth);
+          }
+        } catch (err) {
+          console.error("Error mengambil data user:", err);
+        }
       }
     });
 

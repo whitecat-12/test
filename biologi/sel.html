@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TETA SAINS - Biologi Sel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #38b2ac;
+            --secondary: #0e7490;
+            --accent: #f59e0b;
+        }
+        
+        body {
+            font-family: 'Baloo 2', cursive;
+            background-color: #f8fafc;
+        }
+        
+        .app-container {
+            max-width: 414px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        /* NAVBAR - TIDAK DIRUBAH */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            max-width: 414px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            background: white;
+            z-index: 10;
+            height: 70px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+            text-decoration: none;
+            flex: 1;
+            height: 100%;
+            padding: 0.5rem 0;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item span {
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
+        
+        .nav-item.active {
+            color: var(--primary);
+        }
+        
+        .nav-icon {
+            transition: all 0.3s ease;
+            font-size: 1.25rem;
+        }
+        
+        .nav-icon.active {
+            transform: translateY(-5px);
+            color: var(--primary);
+        }
+        
+        /* TABLE STYLES - Disesuaikan untuk jenis sel */
+        .cell-table {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            padding: 10px;
+            overflow-x: auto;
+        }
+        
+        .cell-card {
+            min-width: 110px;
+            height: 110px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            padding: 10px;
+            text-align: center;
+        }
+        
+        .cell-card:hover {
+            transform: scale(1.05);
+            z-index: 2;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .cell-card.selected {
+            border: 2px solid #f59e0b;
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
+            70% { box-shadow: 0 0 0 5px rgba(245, 158, 11, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+        }
+        
+        .cell-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+        
+        .cell-name {
+            font-size: 12px;
+            font-weight: 700;
+            line-height: 1.1;
+            margin-bottom: 4px;
+        }
+        
+        .cell-type {
+            font-size: 9px;
+            opacity: 0.8;
+        }
+        
+        /* Legend styles */
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+            margin-right: 8px;
+            flex-shrink: 0;
+        }
+        
+        /* CELL TYPE COLORS */
+        .animal-cell { background-color: #ff6b6b; color: white; }
+        .plant-cell { background-color: #66bb6a; color: white; }
+        .bacterial-cell { background-color: #42a5f5; color: white; }
+        .blood-cell { background-color: #ec407a; color: white; }
+        .nerve-cell { background-color: #ab47bc; color: white; }
+        .stem-cell { background-color: #26c6da; color: white; }
+        .immune-cell { background-color: #ffa726; color: white; }
+        .reproductive-cell { background-color: #7e57c2; color: white; }
+        .epithelial-cell { background-color: #5c6bc0; color: white; }
+        
+        /* Modal styles */
+        .cell-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            padding: 20px;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            max-width: 350px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+        
+        .app-logo {
+            display: flex;
+            align-items: center;
+        }
+        
+        .app-logo-icon {
+            background: #9999ff;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 8px;
+        }
+        
+        .app-name {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: #9999ff;
+        }
+        
+        /* Cell detail styles */
+        .cell-detail-card {
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 10px;
+        }
+        
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .detail-label {
+            font-weight: 600;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .detail-value {
+            font-weight: 700;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        /* Combine System Styles - Disesuaikan untuk sistem organ */
+        .combine-panel {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+        }
+        
+        .selected-cells {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+            min-height: 40px;
+        }
+        
+        .selected-cell-badge {
+            background: white;
+            color: #333;
+            padding: 5px 10px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .selected-cell-badge .remove-btn {
+            background: none;
+            border: none;
+            color: #ff6b6b;
+            margin-left: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        .combine-result {
+            background: white;
+            color: #333;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .system-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .system-function {
+            font-size: 24px;
+            font-weight: 800;
+            color: #4f46e5;
+            margin-bottom: 10px;
+        }
+        
+        .system-description {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .system-properties {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            font-size: 12px;
+        }
+        
+        .system-prop {
+            background: #f8fafc;
+            padding: 8px;
+            border-radius: 6px;
+        }
+        
+        .combine-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .combine-btn {
+            flex: 1;
+            background: #f59e0b;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .combine-btn:hover {
+            background: #d97706;
+        }
+        
+        .combine-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .clear-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .clear-btn:hover {
+            background: #dc2626;
+        }
+        
+        .status-message {
+            text-align: center;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 5px;
+            min-height: 16px;
+        }
+        
+        /* Tab Styles */
+        .tab-container {
+            display: flex;
+            background: #f1f5f9;
+            border-radius: 10px;
+            padding: 5px;
+            margin-bottom: 15px;
+        }
+        
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 8px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+        
+        .tab.active {
+            background: white;
+            color: #4f46e5;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .cell-image {
+            width: 80px;
+            height: 80px;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile App Container -->
+    <div class="app-container">
+        <!-- App Header -->
+        <header class="bg-gradient-to-r from-primary to-secondary p-4 text-white">
+            <div class="flex justify-between items-center">
+                <div class="app-logo">
+                    <div class="app-logo-icon">
+                        <i class="fas fa-microscope"></i>
+                    </div>
+                    <h1 class="app-name">QUANTARA</h1>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-search"></i>
+                    <i class="fas fa-user-circle text-xl"></i>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Main Content -->
+        <main class="pb-24 p-4">
+            <!-- Page Title -->
+            <div class="mb-4">
+                <h1 class="text-xl font-bold text-gray-800 mb-1">
+                    <i class="fas fa-microscope text-teal-500 mr-2"></i> Biologi Sel
+                </h1>
+                <p class="text-gray-600 text-sm">
+                    Jenis-jenis sel dalam tubuh makhluk hidup
+                </p>
+            </div>
+            
+            <!-- Tabs -->
+            <div class="tab-container">
+                <div class="tab active" data-tab="table">Jenis Sel</div>
+                <div class="tab" data-tab="combine">Sistem Organ</div>
+            </div>
+            
+            <!-- Tab Content: Table -->
+            <div id="table-tab" class="tab-content active">
+                <!-- Search Bar -->
+                <div class="mb-4">
+                    <div class="relative">
+                        <input type="text" id="search-cell" placeholder="Cari jenis sel..." 
+                               class="w-full p-3 pl-10 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm">
+                        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    </div>
+                </div>
+                
+                <!-- Tabel Sel -->
+                <div class="mb-6">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="font-bold text-gray-700 text-sm flex items-center">
+                            <i class="fas fa-microscope text-blue-500 mr-2 text-xs"></i> Jenis-jenis Sel
+                        </h3>
+                        <div class="text-xs text-gray-500">
+                            <span id="total-cells">16</span> jenis sel
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white border border-gray-200 rounded-xl p-3">
+                        <div id="cell-table" class="cell-table">
+                            <!-- Cells will be generated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Legend -->
+                <div class="mb-6 p-3 bg-gray-50 rounded-xl">
+                    <h3 class="font-bold text-gray-700 mb-2 text-sm">Kategori Warna:</h3>
+                    <div class="grid grid-cols-2 gap-1">
+                        <div class="legend-item">
+                            <div class="legend-color animal-cell"></div>
+                            <span class="text-xs">Sel Hewan</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color plant-cell"></div>
+                            <span class="text-xs">Sel Tumbuhan</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color bacterial-cell"></div>
+                            <span class="text-xs">Sel Bakteri</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color blood-cell"></div>
+                            <span class="text-xs">Sel Darah</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color nerve-cell"></div>
+                            <span class="text-xs">Sel Saraf</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color stem-cell"></div>
+                            <span class="text-xs">Sel Induk</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color immune-cell"></div>
+                            <span class="text-xs">Sel Imun</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color reproductive-cell"></div>
+                            <span class="text-xs">Sel Reproduksi</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tab Content: Combine Cells -->
+            <div id="combine-tab" class="tab-content">
+                <div class="combine-panel">
+                    <h3 class="font-bold text-lg mb-3">
+                        <i class="fas fa-heartbeat mr-2"></i>Bentuk Sistem Organ
+                    </h3>
+                    <p class="text-sm mb-4">
+                        Pilih 2-3 jenis sel untuk membentuk sistem organ.
+                        Klik pada sel di tabel untuk memilih.
+                    </p>
+                    
+                    <div class="selected-cells" id="selected-cells">
+                        <div class="text-sm text-center w-full py-2" id="empty-selection">
+                            Belum ada sel dipilih
+                        </div>
+                    </div>
+                    
+                    <div class="combine-actions">
+                        <button id="combine-btn" class="combine-btn" disabled>
+                            <i class="fas fa-heartbeat mr-2"></i>Bentuk Sistem
+                        </button>
+                        <button id="clear-btn" class="clear-btn">
+                            <i class="fas fa-trash mr-2"></i>Hapus
+                        </button>
+                    </div>
+                    
+                    <div class="status-message" id="status-message">
+                        Pilih 2 atau 3 jenis sel untuk membentuk sistem organ
+                    </div>
+                </div>
+                
+                <div id="combine-result" class="combine-result">
+                    <!-- Results will be displayed here -->
+                </div>
+                
+                <div class="bg-white border border-gray-200 rounded-xl p-3 mt-4">
+                    <h3 class="font-bold text-gray-700 mb-3 text-sm flex items-center">
+                        <i class="fas fa-microscope text-blue-500 mr-2 text-xs"></i> Jenis Sel yang Tersedia
+                    </h3>
+                    <div class="cell-table" id="combine-cell-table">
+                        <!-- Cells for combine mode will be generated -->
+                    </div>
+                    <p class="text-xs text-gray-500 mt-3 text-center">
+                        Klik pada sel untuk memilih/dipilih ulang
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Quick Facts -->
+            <div class="mb-6 p-3 bg-teal-50 rounded-xl">
+                <h3 class="font-bold text-gray-700 mb-2 text-sm flex items-center">
+                    <i class="fas fa-lightbulb text-teal-500 mr-2 text-xs"></i> Fakta Sel
+                </h3>
+                <div class="text-xs text-gray-700 space-y-1">
+                    <p>• Sel adalah unit terkecil kehidupan</p>
+                    <p>• Tubuh manusia memiliki sekitar 37 triliun sel</p>
+                    <p>• Sel saraf bisa mencapai panjang 1 meter</p>
+                    <p>• Sel darah merah hidup sekitar 120 hari</p>
+                </div>
+            </div>
+        </main>
+        
+        <!-- Cell Detail Modal -->
+        <div id="cell-modal" class="cell-modal hidden">
+            <div class="modal-content">
+                <button id="close-modal" class="close-modal">&times;</button>
+                <div id="modal-body"></div>
+            </div>
+        </div>
+        
+        <!-- BOTTOM NAVIGATION - TIDAK DIRUBAH -->
+        <nav class="bottom-nav">
+            <a href="dashboad siswa.html" class="nav-item">
+                <i class="fas fa-home nav-icon"></i>
+                <span>Beranda</span>
+            </a>
+            <a href="soal harian/dashboard soal.html" class="nav-item">
+                <i class="fas fa-flask nav-icon"></i>
+                <span>Soal Harian</span>
+            </a>
+            <a href="ai/nayra.html" class="nav-item">
+                <i class="fas fa-robot nav-icon"></i>
+                <span>Nayra AI</span>
+            </a>
+            <a href="materi harian/kategori materi.html" class="nav-item">
+                <i class="fas fa-chalkboard-teacher nav-icon"></i>
+                <span>Materi Harian</span>
+            </a>
+            <a href="profil/profil.html" class="nav-item">
+                <i class="fas fa-user nav-icon"></i>
+                <span>Profil</span>
+            </a>
+        </nav>
+    </div>
+
+    <script>
+        // Data Jenis Sel
+        const cellTypes = [
+            // Sel Hewan
+            { name: "Sel Epitel", type: "animal-cell", category: "epithelial", icon: "fas fa-layer-group",
+              description: "Sel yang melapisi permukaan tubuh dan organ", 
+              function: "Perlindungan, Sekresi, Absorpsi", location: "Kulit, Usus, Paru-paru", size: "10-20 μm" },
+            
+            { name: "Sel Otot", type: "animal-cell", category: "animal-cell", icon: "fas fa-running",
+              description: "Sel yang berkontraksi untuk menghasilkan gerakan", 
+              function: "Kontraksi, Gerakan", location: "Jantung, Otot rangka", size: "1-40 mm" },
+            
+            { name: "Sel Saraf", type: "nerve-cell", category: "nerve", icon: "fas fa-brain",
+              description: "Sel yang menghantarkan impuls saraf", 
+              function: "Komunikasi saraf", location: "Otak, Sumsum tulang", size: "0.01-1 m" },
+            
+            { name: "Sel Darah Merah", type: "blood-cell", category: "blood", icon: "fas fa-tint",
+              description: "Sel yang mengangkut oksigen ke seluruh tubuh", 
+              function: "Transportasi O₂ dan CO₂", location: "Darah", size: "7-8 μm" },
+            
+            { name: "Sel Darah Putih", type: "immune-cell", category: "immune", icon: "fas fa-shield-alt",
+              description: "Sel yang melawan infeksi dan penyakit", 
+              function: "Pertahanan tubuh", location: "Darah, Limfa", size: "10-15 μm" },
+            
+            { name: "Sel Induk", type: "stem-cell", category: "stem", icon: "fas fa-seedling",
+              description: "Sel yang dapat berdiferensiasi menjadi berbagai jenis sel", 
+              function: "Regenerasi, Perbaikan", location: "Sumsum tulang, Embrio", size: "10-15 μm" },
+            
+            // Sel Tumbuhan
+            { name: "Sel Parenkim", type: "plant-cell", category: "plant", icon: "fas fa-leaf",
+              description: "Sel dasar tumbuhan dengan berbagai fungsi", 
+              function: "Fotosintesis, Penyimpanan", location: "Daun, Batang, Akar", size: "20-30 μm" },
+            
+            { name: "Sel Xilem", type: "plant-cell", category: "plant", icon: "fas fa-water",
+              description: "Sel yang mengangkut air dan mineral", 
+              function: "Transportasi air", location: "Batang, Akar", size: "20-500 μm" },
+            
+            { name: "Sel Floem", type: "plant-cell", category: "plant", icon: "fas fa-seedling",
+              description: "Sel yang mengangkut hasil fotosintesis", 
+              function: "Transportasi nutrisi", location: "Batang, Daun", size: "20-30 μm" },
+            
+            { name: "Sel Epidermis", type: "plant-cell", category: "plant", icon: "fas fa-shield-alt",
+              description: "Sel pelindung pada permukaan tumbuhan", 
+              function: "Perlindungan", location: "Permukaan organ", size: "10-20 μm" },
+            
+            // Sel Bakteri
+            { name: "Bakteri Kokus", type: "bacterial-cell", category: "bacterial", icon: "fas fa-circle",
+              description: "Bakteri berbentuk bulat", 
+              function: "Berbagai fungsi", location: "Setiap habitat", size: "0.5-1 μm" },
+            
+            { name: "Bakteri Basil", type: "bacterial-cell", category: "bacterial", icon: "fas fa-minus",
+              description: "Bakteri berbentuk batang", 
+              function: "Berbagai fungsi", location: "Setiap habitat", size: "1-5 μm" },
+            
+            { name: "Bakteri Spirilum", type: "bacterial-cell", category: "bacterial", icon: "fas fa-wave-square",
+              description: "Bakteri berbentuk spiral", 
+              function: "Berbagai fungsi", location: "Setiap habitat", size: "10-20 μm" },
+            
+            // Sel Khusus
+            { name: "Sel Sperma", type: "reproductive-cell", category: "reproductive", icon: "fas fa-mars",
+              description: "Sel kelamin jantan pada hewan", 
+              function: "Fertilisasi", location: "Testis", size: "50-60 μm" },
+            
+            { name: "Sel Telur", type: "reproductive-cell", category: "reproductive", icon: "fas fa-venus",
+              description: "Sel kelamin betina pada hewan", 
+              function: "Fertilisasi", location: "Ovarium", size: "100-150 μm" },
+            
+            { name: "Sel Hepatosit", type: "animal-cell", category: "animal", icon: "fas fa-liver",
+              description: "Sel utama hati dengan fungsi metabolisme", 
+              function: "Detoksifikasi, Metabolisme", location: "Hati", size: "20-30 μm" },
+            
+            { name: "Sel Osteosit", type: "animal-cell", category: "animal", icon: "fas fa-bone",
+              description: "Sel tulang yang mempertahankan matriks tulang", 
+              function: "Pemeliharaan tulang", location: "Tulang", size: "10-20 μm" },
+            
+            { name: "Sel Adiposit", type: "animal-cell", category: "animal", icon: "fas fa-weight",
+              description: "Sel lemak yang menyimpan energi", 
+              function: "Penyimpanan lemak", location: "Jaringan adiposa", size: "50-100 μm" }
+        ];
+
+        // Data Sistem Organ yang Diketahui
+        const knownSystems = [
+            // Sistem Peredaran Darah
+            { cells: ["Sel Darah Merah", "Sel Darah Putih"], name: "Sistem Peredaran Darah", 
+              function: "Transportasi", 
+              description: "Mengangkut oksigen, nutrisi, dan hormon ke seluruh tubuh.",
+              properties: ["Komponen: Darah", "Organ: Jantung", "Fungsi: Transportasi", "Penting untuk kehidupan"] },
+            
+            // Sistem Saraf
+            { cells: ["Sel Saraf", "Sel Glial"], name: "Sistem Saraf", 
+              function: "Koordinasi", 
+              description: "Mengatur dan mengkoordinasi aktivitas tubuh.",
+              properties: ["Komponen: Neuron", "Organ: Otak", "Fungsi: Koordinasi", "Kecepatan: 120 m/s"] },
+            
+            // Sistem Pencernaan
+            { cells: ["Sel Epitel", "Sel Otot"], name: "Sistem Pencernaan", 
+              function: "Pencernaan", 
+              description: "Memecah makanan menjadi nutrisi yang dapat diserap.",
+              properties: ["Organ: Lambung", "Panjang: 9 m", "Fungsi: Pencernaan", "Enzim: Amilase"] },
+            
+            // Sistem Pernapasan
+            { cells: ["Sel Epitel", "Sel Darah Merah"], name: "Sistem Pernapasan", 
+              function: "Pernapasan", 
+              description: "Pertukaran oksigen dan karbon dioksida.",
+              properties: ["Organ: Paru-paru", "Kapasitas: 6L", "Fungsi: Respirasi", "Pertukaran gas"] },
+            
+            // Sistem Ekskresi
+            { cells: ["Sel Epitel", "Sel Otot"], name: "Sistem Ekskresi", 
+              function: "Ekskresi", 
+              description: "Membuang limbah metabolisme dari tubuh.",
+              properties: ["Organ: Ginjal", "Filtrasi: 180L/hari", "Fungsi: Ekskresi", "pH: 6.0-7.4"] },
+            
+            // Sistem Reproduksi
+            { cells: ["Sel Sperma", "Sel Telur"], name: "Sistem Reproduksi", 
+              function: "Reproduksi", 
+              description: "Menghasilkan keturunan untuk melanjutkan spesies.",
+              properties: ["Organ: Gonad", "Fungsi: Reproduksi", "Pembelahan: Meiosis", "Fertilisasi"] },
+            
+            // Sistem Muskuloskeletal
+            { cells: ["Sel Otot", "Sel Osteosit"], name: "Sistem Muskuloskeletal", 
+              function: "Gerakan", 
+              description: "Memberikan struktur, perlindungan, dan kemampuan bergerak.",
+              properties: ["Tulang: 206", "Otot: 600+", "Fungsi: Gerakan", "Support"] },
+            
+            // Sistem Imun
+            { cells: ["Sel Darah Putih", "Sel Induk"], name: "Sistem Imun", 
+              function: "Pertahanan", 
+              description: "Melindungi tubuh dari patogen dan penyakit.",
+              properties: ["Sel: Limfosit", "Organ: Limfa", "Fungsi: Pertahanan", "Memori imun"] },
+            
+            // Sistem Endokrin
+            { cells: ["Sel Epitel", "Sel Saraf"], name: "Sistem Endokrin", 
+              function: "Regulasi", 
+              description: "Mengatur fungsi tubuh melalui hormon.",
+              properties: ["Kelenjar: 8+", "Hormon: 50+", "Fungsi: Regulasi", "Feedback"] },
+            
+            // Sistem Integumen
+            { cells: ["Sel Epitel", "Sel Adiposit"], name: "Sistem Integumen", 
+              function: "Perlindungan", 
+              description: "Melindungi tubuh dari kerusakan dan infeksi.",
+              properties: ["Organ: Kulit", "Luas: 2 m²", "Fungsi: Perlindungan", "Sensasi"] }
+        ];
+
+        // DOM Elements
+        const cellTableContainer = document.getElementById('cell-table');
+        const combineCellTableContainer = document.getElementById('combine-cell-table');
+        const cellModal = document.getElementById('cell-modal');
+        const closeModalBtn = document.getElementById('close-modal');
+        const modalBody = document.getElementById('modal-body');
+        const searchInput = document.getElementById('search-cell');
+        const totalCellsSpan = document.getElementById('total-cells');
+        const selectedCellsContainer = document.getElementById('selected-cells');
+        const emptySelectionMsg = document.getElementById('empty-selection');
+        const combineBtn = document.getElementById('combine-btn');
+        const clearBtn = document.getElementById('clear-btn');
+        const combineResult = document.getElementById('combine-result');
+        const statusMessage = document.getElementById('status-message');
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        // State untuk sistem penggabungan
+        let selectedCells = [];
+        let currentTab = 'table';
+
+        // Inisialisasi Tabel Sel
+        function initCellTable() {
+            // Kosongkan kontainer
+            cellTableContainer.innerHTML = '';
+            
+            // Tambahkan semua sel
+            cellTypes.forEach(cell => {
+                const cellDiv = document.createElement('div');
+                cellDiv.className = `cell-card ${cell.type}`;
+                cellDiv.dataset.name = cell.name;
+                
+                cellDiv.innerHTML = `
+                    <div class="cell-icon">
+                        <i class="${cell.icon}"></i>
+                    </div>
+                    <div class="cell-name">${cell.name}</div>
+                    <div class="cell-type">${getCategoryName(cell.category)}</div>
+                `;
+                
+                cellDiv.addEventListener('click', () => showCellDetails(cell));
+                cellTableContainer.appendChild(cellDiv);
+            });
+            
+            // Inisialisasi tabel untuk mode gabungkan
+            initCombineCellTable();
+            
+            // Hitung total sel yang ditampilkan
+            totalCellsSpan.textContent = cellTypes.length;
+            
+            // Setup event listeners
+            setupEventListeners();
+        }
+
+        // Inisialisasi tabel untuk mode gabungkan
+        function initCombineCellTable() {
+            combineCellTableContainer.innerHTML = '';
+            
+            // Tambahkan semua sel untuk mode gabungkan
+            cellTypes.forEach(cell => {
+                const cellDiv = document.createElement('div');
+                cellDiv.className = `cell-card ${cell.type}`;
+                cellDiv.dataset.name = cell.name;
+                
+                cellDiv.innerHTML = `
+                    <div class="cell-icon">
+                        <i class="${cell.icon}"></i>
+                    </div>
+                    <div class="cell-name">${cell.name}</div>
+                    <div class="cell-type">${getCategoryName(cell.category)}</div>
+                `;
+                
+                cellDiv.addEventListener('click', () => selectCellForCombination(cell));
+                combineCellTableContainer.appendChild(cellDiv);
+            });
+            
+            // Set grid template untuk tampilan yang lebih baik
+            combineCellTableContainer.style.gridTemplateColumns = 'repeat(3, 1fr)';
+        }
+
+        // Pilih sel untuk kombinasi
+        function selectCellForCombination(cell) {
+            // Cek apakah sel sudah dipilih
+            const existingIndex = selectedCells.findIndex(c => c.name === cell.name);
+            
+            if (existingIndex !== -1) {
+                // Hapus sel jika sudah dipilih
+                selectedCells.splice(existingIndex, 1);
+            } else {
+                // Tambahkan sel jika belum dipilih (maksimal 3)
+                if (selectedCells.length < 3) {
+                    selectedCells.push(cell);
+                } else {
+                    showStatusMessage("Maksimal 3 sel yang dapat digabungkan", "error");
+                    return;
+                }
+            }
+            
+            // Perbarui tampilan sel yang dipilih
+            updateSelectedCellsDisplay();
+            
+            // Perbarui status tombol gabungkan
+            updateCombineButton();
+            
+            // Perbarui status message
+            updateStatusMessage();
+            
+            // Highlight sel di tabel
+            highlightSelectedCells();
+        }
+
+        // Perbarui tampilan sel yang dipilih
+        function updateSelectedCellsDisplay() {
+            selectedCellsContainer.innerHTML = '';
+            
+            if (selectedCells.length === 0) {
+                emptySelectionMsg.style.display = 'block';
+                return;
+            }
+            
+            emptySelectionMsg.style.display = 'none';
+            
+            selectedCells.forEach((cell, index) => {
+                const badge = document.createElement('div');
+                badge.className = 'selected-cell-badge';
+                badge.innerHTML = `
+                    ${cell.name}
+                    <button class="remove-btn" data-index="${index}">&times;</button>
+                `;
+                
+                badge.querySelector('.remove-btn').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    selectedCells.splice(index, 1);
+                    updateSelectedCellsDisplay();
+                    updateCombineButton();
+                    updateStatusMessage();
+                    highlightSelectedCells();
+                });
+                
+                selectedCellsContainer.appendChild(badge);
+            });
+        }
+
+        // Highlight sel yang dipilih di tabel
+        function highlightSelectedCells() {
+            // Reset semua sel di tabel gabungkan
+            document.querySelectorAll('#combine-cell-table .cell-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+            
+            // Highlight sel yang dipilih
+            selectedCells.forEach(cell => {
+                const cards = document.querySelectorAll(`#combine-cell-table [data-name="${cell.name}"]`);
+                cards.forEach(card => {
+                    card.classList.add('selected');
+                });
+            });
+        }
+
+        // Perbarui status tombol gabungkan
+        function updateCombineButton() {
+            if (selectedCells.length >= 2) {
+                combineBtn.disabled = false;
+                combineBtn.innerHTML = `<i class="fas fa-heartbeat mr-2"></i>Bentuk Sistem (${selectedCells.length})`;
+            } else {
+                combineBtn.disabled = true;
+                combineBtn.innerHTML = `<i class="fas fa-heartbeat mr-2"></i>Bentuk Sistem`;
+            }
+        }
+
+        // Perbarui status message
+        function updateStatusMessage() {
+            if (selectedCells.length === 0) {
+                statusMessage.textContent = "Pilih 2 atau 3 jenis sel untuk membentuk sistem organ";
+            } else if (selectedCells.length === 1) {
+                statusMessage.textContent = "Pilih 1 sel lagi untuk membentuk sistem organ";
+            } else if (selectedCells.length === 2) {
+                statusMessage.textContent = "Klik 'Bentuk Sistem' untuk membuat sistem dari 2 jenis sel";
+            } else if (selectedCells.length === 3) {
+                statusMessage.textContent = "Klik 'Bentuk Sistem' untuk membuat sistem dari 3 jenis sel";
+            }
+        }
+
+        // Tampilkan pesan status sementara
+        function showStatusMessage(message, type = "info") {
+            const originalMessage = statusMessage.textContent;
+            statusMessage.textContent = message;
+            statusMessage.style.color = type === "error" ? "#fecaca" : "rgba(255, 255, 255, 0.8)";
+            
+            setTimeout(() => {
+                statusMessage.textContent = originalMessage;
+                statusMessage.style.color = "rgba(255, 255, 255, 0.8)";
+            }, 3000);
+        }
+
+        // Gabungkan sel yang dipilih
+        function combineCells() {
+            if (selectedCells.length < 2) return;
+            
+            // Urutkan sel berdasarkan nama
+            const sortedCells = [...selectedCells].sort((a, b) => a.name.localeCompare(b.name));
+            const cellNames = sortedCells.map(c => c.name);
+            
+            // Cari sistem organ yang diketahui
+            let foundSystem = null;
+            
+            for (const system of knownSystems) {
+                const systemCells = [...system.cells].sort();
+                const selectedCellNames = [...cellNames].sort();
+                
+                // Cek apakah ada kecocokan
+                let match = true;
+                for (let i = 0; i < Math.min(systemCells.length, selectedCellNames.length); i++) {
+                    if (systemCells[i] !== selectedCellNames[i]) {
+                        match = false;
+                        break;
+                    }
+                }
+                
+                if (match) {
+                    foundSystem = system;
+                    break;
+                }
+            }
+            
+            // Jika tidak ditemukan, buat sistem generik
+            if (!foundSystem) {
+                foundSystem = generateGenericSystem(sortedCells);
+            }
+            
+            // Tampilkan hasil
+            displayCombineResult(foundSystem, sortedCells);
+        }
+
+        // Hasilkan sistem organ generik berdasarkan sel
+        function generateGenericSystem(cells) {
+            const cellCount = cells.length;
+            let name = "";
+            let functionText = "";
+            let description = "";
+            let properties = [];
+            
+            // Buat sistem berdasarkan jenis sel
+            if (cellCount === 2) {
+                const [cell1, cell2] = cells;
+                name = `Sistem ${cell1.category} dan ${cell2.category}`;
+                functionText = `${cell1.function.split(',')[0]} & ${cell2.function.split(',')[0]}`;
+                description = `Sistem yang terdiri dari ${cell1.name.toLowerCase()} dan ${cell2.name.toLowerCase()}.`;
+                properties = [
+                    `Sel 1: ${cell1.name}`,
+                    `Sel 2: ${cell2.name}`,
+                    `Fungsi: ${functionText}`,
+                    `Interaksi: Saling mendukung`
+                ];
+            } else if (cellCount === 3) {
+                const [cell1, cell2, cell3] = cells;
+                name = `Sistem ${cell1.category}, ${cell2.category}, dan ${cell3.category}`;
+                functionText = `${cell1.function.split(',')[0]}, ${cell2.function.split(',')[0]}, ${cell3.function.split(',')[0]}`;
+                description = `Sistem kompleks yang terdiri dari ${cell1.name.toLowerCase()}, ${cell2.name.toLowerCase()}, dan ${cell3.name.toLowerCase()}.`;
+                properties = [
+                    `Sel 1: ${cell1.name}`,
+                    `Sel 2: ${cell2.name}`,
+                    `Sel 3: ${cell3.name}`,
+                    `Fungsi: ${functionText}`
+                ];
+            }
+            
+            return {
+                cells: cells.map(c => c.name),
+                name,
+                function: functionText,
+                description,
+                properties
+            };
+        }
+
+        // Tampilkan hasil kombinasi
+        function displayCombineResult(system, cells) {
+            const reactionSound = document.getElementById('reaction-sound');
+            if (reactionSound) {
+                reactionSound.currentTime = 0;
+                reactionSound.play();
+            }
+            
+            combineResult.style.display = 'block';
+            combineResult.innerHTML = `
+                <div class="mb-4">
+                    <h3 class="system-name">${system.name}</h3>
+                    <div class="system-function">${system.function}</div>
+                    <p class="system-description">${system.description}</p>
+                    <div class="text-xs text-gray-500 mb-3">
+                        <i class="fas fa-heartbeat mr-1"></i> Terdiri dari: ${cells.map(c => c.name).join(', ')}
+                    </div>
+                </div>
+                
+                <div class="system-properties">
+                    ${system.properties.map(prop => `
+                        <div class="system-prop">
+                            <i class="fas fa-check text-green-500 mr-1"></i> ${prop}
+                        </div>
+                    `).join('')}
+                </div>
+                
+                <div class="mt-4 text-xs text-gray-600">
+                    <p><i class="fas fa-lightbulb text-yellow-500 mr-1"></i> 
+                    ${getSystemTip(system, cells)}</p>
+                </div>
+                
+                <button id="new-experiment" class="w-full mt-4 bg-teal-500 text-white py-2 rounded-lg font-bold">
+                    <i class="fas fa-redo mr-2"></i>Eksperimen Baru
+                </button>
+            `;
+            
+            // Scroll ke hasil
+            combineResult.scrollIntoView({ behavior: 'smooth' });
+            
+            // Event listener untuk tombol eksperimen baru
+            document.getElementById('new-experiment').addEventListener('click', () => {
+                selectedCells = [];
+                updateSelectedCellsDisplay();
+                updateCombineButton();
+                updateStatusMessage();
+                highlightSelectedCells();
+                combineResult.style.display = 'none';
+            });
+        }
+
+        // Dapatkan tips tentang sistem organ
+        function getSystemTip(system, cells) {
+            const tips = [
+                "Sistem ini bekerja secara terintegrasi dengan sistem lain.",
+                "Kesehatan sistem ini penting untuk homeostasis tubuh.",
+                "Gangguan pada sistem ini dapat mempengaruhi sistem lain.",
+                "Sistem ini berkembang selama proses evolusi.",
+                "Fungsinya diatur oleh sistem saraf dan endokrin."
+            ];
+            
+            // Tips khusus berdasarkan jenis sistem
+            if (system.name.includes("Peredaran Darah")) {
+                return "Sistem peredaran darah memompa 7000 liter darah per hari.";
+            } else if (system.name.includes("Saraf")) {
+                return "Sistem saraf memiliki sekitar 100 miliar neuron.";
+            } else if (system.name.includes("Pencernaan")) {
+                return "Sistem pencernaan memproses sekitar 1-2 kg makanan per hari.";
+            } else if (system.name.includes("Pernapasan")) {
+                return "Sistem pernapasan menghirup sekitar 11.000 liter udara per hari.";
+            }
+            
+            return tips[Math.floor(Math.random() * tips.length)];
+        }
+
+        // Tampilkan detail sel dalam modal
+        function showCellDetails(cell) {
+            const categoryNames = {
+                "animal": "Sel Hewan",
+                "plant": "Sel Tumbuhan",
+                "bacterial": "Sel Bakteri",
+                "blood": "Sel Darah",
+                "nerve": "Sel Saraf",
+                "stem": "Sel Induk",
+                "immune": "Sel Imun",
+                "reproductive": "Sel Reproduksi",
+                "epithelial": "Sel Epitel"
+            };
+            
+            modalBody.innerHTML = `
+                <div class="cell-detail-card" style="border-left-color: ${getCategoryColor(cell.category)}; background-color: ${getCategoryColor(cell.category, 0.1)}">
+                    <div class="flex items-center mb-4">
+                        <div class="cell-card ${cell.type} w-20 h-20 mr-4 flex-shrink-0">
+                            <div class="cell-icon">
+                                <i class="${cell.icon}"></i>
+                            </div>
+                            <div class="cell-name text-xs">${cell.name}</div>
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-bold text-gray-800">${cell.name}</h2>
+                            <p class="text-gray-600 text-sm">${categoryNames[cell.category] || cell.category}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <div class="detail-row">
+                            <span class="detail-label">Fungsi:</span>
+                            <span class="detail-value">${cell.function}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Lokasi:</span>
+                            <span class="detail-value">${cell.location}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Ukuran:</span>
+                            <span class="detail-value">${cell.size}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Kategori:</span>
+                            <span class="detail-value">${categoryNames[cell.category] || cell.category}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 p-3 bg-gray-50 rounded-lg">
+                        <h4 class="font-bold text-gray-700 mb-1 text-sm">Deskripsi:</h4>
+                        <p class="text-xs text-gray-600">${cell.description}</p>
+                    </div>
+                    
+                    <div class="mt-4 p-3 bg-teal-50 rounded-lg">
+                        <h4 class="font-bold text-gray-700 mb-1 text-sm">Fakta Menarik:</h4>
+                        <p class="text-xs text-gray-600">${getCellFact(cell)}</p>
+                    </div>
+                    
+                    ${currentTab === 'combine' ? `
+                    <button id="select-for-combine" class="w-full mt-4 bg-teal-500 text-white py-2 rounded-lg font-bold">
+                        <i class="fas fa-plus mr-2"></i>Pilih untuk Sistem Organ
+                    </button>
+                    ` : ''}
+                </div>
+            `;
+            
+            // Tambahkan event listener untuk tombol pilih jika di mode combine
+            if (currentTab === 'combine') {
+                const selectBtn = document.getElementById('select-for-combine');
+                selectBtn.addEventListener('click', () => {
+                    selectCellForCombination(cell);
+                    cellModal.classList.add('hidden');
+                    
+                    // Switch ke tab combine jika belum
+                    if (currentTab !== 'combine') {
+                        switchTab('combine');
+                    }
+                });
+            }
+            
+            cellModal.classList.remove('hidden');
+        }
+
+        // Fungsi untuk berpindah tab
+        function switchTab(tabName) {
+            // Update tab aktif
+            tabs.forEach(tab => {
+                if (tab.dataset.tab === tabName) {
+                    tab.classList.add('active');
+                } else {
+                    tab.classList.remove('active');
+                }
+            });
+            
+            // Update konten tab aktif
+            tabContents.forEach(content => {
+                if (content.id === `${tabName}-tab`) {
+                    content.classList.add('active');
+                } else {
+                    content.classList.remove('active');
+                }
+            });
+            
+            currentTab = tabName;
+            
+            // Scroll ke atas
+            window.scrollTo(0, 0);
+        }
+
+        // Dapatkan nama kategori
+        function getCategoryName(category) {
+            const names = {
+                "animal": "Hewan",
+                "plant": "Tumbuhan",
+                "bacterial": "Bakteri",
+                "blood": "Darah",
+                "nerve": "Saraf",
+                "stem": "Induk",
+                "immune": "Imun",
+                "reproductive": "Reproduksi",
+                "epithelial": "Epitel"
+            };
+            return names[category] || category;
+        }
+
+        // Dapatkan warna berdasarkan kategori
+        function getCategoryColor(category, opacity = 1) {
+            const colors = {
+                "animal": "#ff6b6b",
+                "plant": "#66bb6a",
+                "bacterial": "#42a5f5",
+                "blood": "#ec407a",
+                "nerve": "#ab47bc",
+                "stem": "#26c6da",
+                "immune": "#ffa726",
+                "reproductive": "#7e57c2",
+                "epithelial": "#5c6bc0"
+            };
+            
+            const color = colors[category] || "#cccccc";
+            if (opacity < 1) {
+                const r = parseInt(color.slice(1, 3), 16);
+                const g = parseInt(color.slice(3, 5), 16);
+                const b = parseInt(color.slice(5, 7), 16);
+                return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+            }
+            return color;
+        }
+
+        // Dapatkan fakta menarik tentang sel
+        function getCellFact(cell) {
+            const facts = {
+                "Sel Darah Merah": "Tidak memiliki nukleus dan hidup sekitar 120 hari.",
+                "Sel Saraf": "Dapat menghantarkan impuls dengan kecepatan hingga 120 m/detik.",
+                "Sel Sperma": "Sel terkecil dalam tubuh manusia, hanya kepala berukuran 5μm.",
+                "Sel Telur": "Sel terbesar dalam tubuh manusia, diameter 0.1 mm.",
+                "Bakteri Kokus": "Dapat menyebabkan pneumonia dan meningitis.",
+                "Sel Parenkim": "Dapat kembali menjadi meristematik jika diperlukan.",
+                "Sel Induk": "Dapat membelah diri tanpa batas dan berdiferensiasi.",
+                "Sel Darah Putih": "Beberapa jenis dapat hidup selama bertahun-tahun."
+            };
+            
+            return facts[cell.name] || `Sel ${getCategoryName(cell.category).toLowerCase()} dengan fungsi khusus.`;
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Tutup modal
+            closeModalBtn.addEventListener('click', () => {
+                cellModal.classList.add('hidden');
+            });
+            
+            // Tutup modal dengan klik di luar konten
+            cellModal.addEventListener('click', (e) => {
+                if (e.target === cellModal) {
+                    cellModal.classList.add('hidden');
+                }
+            });
+            
+            // Tutup modal dengan tombol ESC
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    if (!cellModal.classList.contains('hidden')) {
+                        cellModal.classList.add('hidden');
+                    }
+                }
+            });
+            
+            // Pencarian sel
+            searchInput.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase().trim();
+                
+                // Sembunyikan semua sel dulu
+                document.querySelectorAll('.cell-card').forEach(card => {
+                    if (card.dataset.name) {
+                        card.style.opacity = '0.3';
+                        card.style.transform = 'scale(0.95)';
+                    }
+                });
+                
+                // Jika kosong, tampilkan semua
+                if (!searchTerm) {
+                    document.querySelectorAll('.cell-card').forEach(card => {
+                        if (card.dataset.name) {
+                            card.style.opacity = '1';
+                            card.style.transform = 'scale(1)';
+                        }
+                    });
+                    return;
+                }
+                
+                // Tampilkan sel yang cocok
+                let found = false;
+                cellTypes.forEach(cell => {
+                    if (cell.name.toLowerCase().includes(searchTerm) || 
+                        getCategoryName(cell.category).toLowerCase().includes(searchTerm) ||
+                        cell.description.toLowerCase().includes(searchTerm)) {
+                        
+                        const cards = document.querySelectorAll(`[data-name="${cell.name}"]`);
+                        cards.forEach(card => {
+                            card.style.opacity = '1';
+                            card.style.transform = 'scale(1.05)';
+                            card.style.zIndex = '10';
+                            card.style.boxShadow = '0 0 8px rgba(0,0,0,0.2)';
+                        });
+                        found = true;
+                    }
+                });
+                
+                // Jika tidak ditemukan, reset semua
+                if (!found) {
+                    document.querySelectorAll('.cell-card').forEach(card => {
+                        if (card.dataset.name) {
+                            card.style.opacity = '1';
+                            card.style.transform = 'scale(1)';
+                            card.style.zIndex = '1';
+                            card.style.boxShadow = '';
+                        }
+                    });
+                }
+            });
+            
+            // Fokus pada input pencarian dengan shortcut Ctrl+F
+            document.addEventListener('keydown', (e) => {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+                    e.preventDefault();
+                    searchInput.focus();
+                }
+            });
+            
+            // Tombol untuk sistem penggabungan
+            combineBtn.addEventListener('click', combineCells);
+            
+            clearBtn.addEventListener('click', () => {
+                selectedCells = [];
+                updateSelectedCellsDisplay();
+                updateCombineButton();
+                updateStatusMessage();
+                highlightSelectedCells();
+                combineResult.style.display = 'none';
+                showStatusMessage("Semua sel telah dihapus", "info");
+            });
+            
+            // Tab switching
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    switchTab(tab.dataset.tab);
+                });
+            });
+            
+            // Tambahkan audio untuk efek suara reaksi
+            const audio = document.createElement('audio');
+            audio.id = 'reaction-sound';
+            audio.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEAQB8AAEAfAAABAAgAZGF0YQ';
+            document.body.appendChild(audio);
+        }
+
+        // Inisialisasi ketika halaman dimuat
+        document.addEventListener('DOMContentLoaded', initCellTable);
+    </script>
+</body>
+</html>

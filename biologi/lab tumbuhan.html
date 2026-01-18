@@ -1,0 +1,1630 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QUANTARA - Tabel Klasifikasi Tumbuhan</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #38b2ac;
+            --secondary: #0e7490;
+            --accent: #f59e0b;
+        }
+        
+        body {
+            font-family: 'Baloo 2', cursive;
+            background-color: #f8fafc;
+        }
+        
+        .app-container {
+            max-width: 414px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        /* NAVBAR - TIDAK DIRUBAH */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            max-width: 414px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            background: white;
+            z-index: 10;
+            height: 70px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+            text-decoration: none;
+            flex: 1;
+            height: 100%;
+            padding: 0.5rem 0;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item span {
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
+        
+        .nav-item.active {
+            color: var(--primary);
+        }
+        
+        .nav-icon {
+            transition: all 0.3s ease;
+            font-size: 1.25rem;
+        }
+        
+        .nav-icon.active {
+            transform: translateY(-5px);
+            color: var(--primary);
+        }
+        
+        /* TABLE STYLES */
+        .periodic-table {
+            display: grid;
+            grid-template-columns: repeat(18, 1fr);
+            gap: 2px;
+            padding: 5px;
+            overflow-x: auto;
+        }
+        
+        .plant-cell {
+            min-width: 35px;
+            height: 35px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        .plant-cell:hover {
+            transform: scale(1.05);
+            z-index: 2;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+        }
+        
+        .plant-cell.selected {
+            border: 2px solid #f59e0b;
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
+            70% { box-shadow: 0 0 0 5px rgba(245, 158, 11, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+        }
+        
+        .plant-id {
+            position: absolute;
+            top: 2px;
+            left: 3px;
+            font-size: 7px;
+            font-weight: bold;
+        }
+        
+        .plant-symbol {
+            font-size: 12px;
+            font-weight: 800;
+            line-height: 1;
+        }
+        
+        .plant-name {
+            font-size: 5px;
+            margin-top: 1px;
+            text-align: center;
+            display: none;
+        }
+        
+        .plant-cell:hover .plant-name {
+            display: block;
+        }
+        
+        /* Legend styles */
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+            margin-right: 8px;
+            flex-shrink: 0;
+        }
+        
+        /* PLANT CATEGORY COLORS */
+        .tree { background-color: #2e7d32; color: white; }
+        .shrub { background-color: #66bb6a; color: white; }
+        .herb { background-color: #9ccc65; color: white; }
+        .vine { background-color: #7e57c2; color: white; }
+        .grass { background-color: #c5e1a5; color: #000; }
+        .fern { background-color: #388e3c; color: white; }
+        .aquatic { background-color: #0288d1; color: white; }
+        .succulent { background-color: #ffa726; color: #000; }
+        .epiphyte { background-color: #ab47bc; color: white; }
+        .carnivorous { background-color: #d32f2f; color: white; }
+        
+        /* Modal styles */
+        .plant-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            padding: 20px;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            max-width: 350px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+        
+        .app-logo {
+            display: flex;
+            align-items: center;
+        }
+        
+        .app-logo-icon {
+            background: #9999ff;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 8px;
+        }
+        
+        .app-name {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: #9999ff;
+        }
+        
+        /* Plant detail styles */
+        .plant-detail-card {
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 10px;
+        }
+        
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .detail-label {
+            font-weight: 600;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .detail-value {
+            font-weight: 700;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        /* Scrollbar styling */
+        .periodic-table::-webkit-scrollbar {
+            height: 6px;
+        }
+        
+        .periodic-table::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+        
+        .periodic-table::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+        
+        /* Group labels */
+        .group-label {
+            font-size: 10px;
+            text-align: center;
+            color: #666;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        
+        /* Period labels */
+        .period-label {
+            font-size: 10px;
+            text-align: right;
+            color: #666;
+            font-weight: 600;
+            padding-right: 5px;
+            width: 20px;
+        }
+        
+        /* Layout grid untuk tabel dengan label */
+        .table-container {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .table-header {
+            display: grid;
+            grid-template-columns: 20px repeat(18, 1fr);
+            gap: 2px;
+            margin-bottom: 5px;
+        }
+        
+        .table-body {
+            display: flex;
+        }
+        
+        .period-labels {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            margin-right: 5px;
+        }
+        
+        .period-row {
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Combine System Styles */
+        .combine-panel {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+        }
+        
+        .selected-plants {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+            min-height: 40px;
+        }
+        
+        .selected-plant-badge {
+            background: white;
+            color: #333;
+            padding: 5px 10px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .selected-plant-badge .remove-btn {
+            background: none;
+            border: none;
+            color: #ff6b6b;
+            margin-left: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        .combine-result {
+            background: white;
+            color: #333;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .ecosystem-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .ecosystem-formula {
+            font-size: 24px;
+            font-weight: 800;
+            color: #4f46e5;
+            margin-bottom: 10px;
+        }
+        
+        .ecosystem-description {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .ecosystem-properties {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            font-size: 12px;
+        }
+        
+        .ecosystem-prop {
+            background: #f8fafc;
+            padding: 8px;
+            border-radius: 6px;
+        }
+        
+        .combine-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .combine-btn {
+            flex: 1;
+            background: #f59e0b;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .combine-btn:hover {
+            background: #d97706;
+        }
+        
+        .combine-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .clear-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .clear-btn:hover {
+            background: #dc2626;
+        }
+        
+        .status-message {
+            text-align: center;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 5px;
+            min-height: 16px;
+        }
+        
+        /* Tab Styles */
+        .tab-container {
+            display: flex;
+            background: #f1f5f9;
+            border-radius: 10px;
+            padding: 5px;
+            margin-bottom: 15px;
+        }
+        
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 8px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+        
+        .tab.active {
+            background: white;
+            color: #4f46e5;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile App Container -->
+    <div class="app-container">
+        <!-- App Header -->
+        <header class="bg-gradient-to-r from-primary to-secondary p-4 text-white">
+            <div class="flex justify-between items-center">
+                <div class="app-logo">
+                    <div class="app-logo-icon">
+                        <i class="fas fa-seedling"></i>
+                    </div>
+                    <h1 class="app-name">QUANTARA</h1>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-search"></i>
+                    <i class="fas fa-user-circle text-xl"></i>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Main Content -->
+        <main class="pb-24 p-4">
+            <!-- Page Title -->
+            <div class="mb-4">
+                <h1 class="text-xl font-bold text-gray-800 mb-1">
+                    <i class="fas fa-leaf text-teal-500 mr-2"></i> Tabel Klasifikasi Tumbuhan
+                </h1>
+                <p class="text-gray-600 text-sm">
+                    Klasifikasi tumbuhan berdasarkan jenis dan karakteristik
+                </p>
+            </div>
+            
+            <!-- Tabs -->
+            <div class="tab-container">
+                <div class="tab active" data-tab="table">Tabel Tumbuhan</div>
+                <div class="tab" data-tab="combine">Buat Ekosistem</div>
+            </div>
+            
+            <!-- Tab Content: Table -->
+            <div id="table-tab" class="tab-content active">
+                <!-- Search Bar -->
+                <div class="mb-4">
+                    <div class="relative">
+                        <input type="text" id="search-plant" placeholder="Cari tumbuhan..." 
+                               class="w-full p-3 pl-10 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm">
+                        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    </div>
+                </div>
+                
+                <!-- Tabel Tumbuhan -->
+                <div class="mb-6">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="font-bold text-gray-700 text-sm flex items-center">
+                            <i class="fas fa-leaf text-blue-500 mr-2 text-xs"></i> Jenis Tumbuhan
+                        </h3>
+                        <div class="text-xs text-gray-500">
+                            <span id="total-plants">48</span> jenis
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white border border-gray-200 rounded-xl p-3">
+                        <div class="table-container">
+                            <!-- Header untuk golongan -->
+                            <div class="table-header">
+                                <div></div> <!-- Kolom kosong untuk label periode -->
+                                <div class="group-label">1</div>
+                                <div class="group-label">2</div>
+                                <div class="group-label">3</div>
+                                <div class="group-label">4</div>
+                                <div class="group-label">5</div>
+                                <div class="group-label">6</div>
+                                <div class="group-label">7</div>
+                                <div class="group-label">8</div>
+                                <div class="group-label">9</div>
+                                <div class="group-label">10</div>
+                                <div class="group-label">11</div>
+                                <div class="group-label">12</div>
+                                <div class="group-label">13</div>
+                                <div class="group-label">14</div>
+                                <div class="group-label">15</div>
+                                <div class="group-label">16</div>
+                                <div class="group-label">17</div>
+                                <div class="group-label">18</div>
+                            </div>
+                            
+                            <div class="table-body">
+                                <!-- Label periode -->
+                                <div class="period-labels">
+                                    <div class="period-row"></div> <!-- Baris kosong untuk header -->
+                                    <div class="period-row">1</div>
+                                    <div class="period-row">2</div>
+                                    <div class="period-row">3</div>
+                                    <div class="period-row">4</div>
+                                    <div class="period-row">5</div>
+                                    <div class="period-row">6</div>
+                                    <div class="period-row">7</div>
+                                </div>
+                                
+                                <!-- Tabel tumbuhan utama -->
+                                <div id="plant-table" class="periodic-table">
+                                    <!-- Plants will be generated by JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Note untuk tumbuhan khusus -->
+                        <div class="mt-4 text-center">
+                            <div class="text-xs text-gray-500 mb-2">
+                                * Tumbuhan khusus ditampilkan terpisah
+                            </div>
+                            <div class="flex justify-center space-x-4">
+                                <button id="show-ferns" class="text-xs bg-purple-100 text-purple-700 px-3 py-1 rounded-full">
+                                    Lihat Pakis
+                                </button>
+                                <button id="show-aquatics" class="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full">
+                                    Lihat Air
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Legend - Dipindah ke bawah tabel -->
+                <div class="mb-6 p-3 bg-gray-50 rounded-xl">
+                    <h3 class="font-bold text-gray-700 mb-2 text-sm">Kategori Warna:</h3>
+                    <div class="grid grid-cols-2 gap-1">
+                        <div class="legend-item">
+                            <div class="legend-color tree"></div>
+                            <span class="text-xs">Pohon</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color shrub"></div>
+                            <span class="text-xs">Semak</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color herb"></div>
+                            <span class="text-xs">Herba</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color vine"></div>
+                            <span class="text-xs">Merambat</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color grass"></div>
+                            <span class="text-xs">Rumput</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color fern"></div>
+                            <span class="text-xs">Pakis</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color aquatic"></div>
+                            <span class="text-xs">Air</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color succulent"></div>
+                            <span class="text-xs">Sukulen</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tab Content: Combine Elements -->
+            <div id="combine-tab" class="tab-content">
+                <div class="combine-panel">
+                    <h3 class="font-bold text-lg mb-3">
+                        <i class="fas fa-tree mr-2"></i>Buat Ekosistem
+                    </h3>
+                    <p class="text-sm mb-4">
+                        Pilih 2-3 jenis tumbuhan untuk membuat ekosistem mini.
+                        Klik pada tumbuhan di tabel untuk memilih.
+                    </p>
+                    
+                    <div class="selected-plants" id="selected-plants">
+                        <div class="text-sm text-center w-full py-2" id="empty-selection">
+                            Belum ada tumbuhan dipilih
+                        </div>
+                    </div>
+                    
+                    <div class="combine-actions">
+                        <button id="combine-btn" class="combine-btn" disabled>
+                            <i class="fas fa-bolt mr-2"></i>Buat Ekosistem
+                        </button>
+                        <button id="clear-btn" class="clear-btn">
+                            <i class="fas fa-trash mr-2"></i>Hapus
+                        </button>
+                    </div>
+                    
+                    <div class="status-message" id="status-message">
+                        Pilih 2 atau 3 tumbuhan untuk membuat ekosistem
+                    </div>
+                </div>
+                
+                <div id="combine-result" class="combine-result">
+                    <!-- Results will be displayed here -->
+                </div>
+                
+                <div class="bg-white border border-gray-200 rounded-xl p-3 mt-4">
+                    <h3 class="font-bold text-gray-700 mb-3 text-sm flex items-center">
+                        <i class="fas fa-leaf text-blue-500 mr-2 text-xs"></i> Tumbuhan yang Tersedia
+                    </h3>
+                    <div class="table-container">
+                        <div id="combine-plant-table" class="periodic-table">
+                            <!-- Plants for combine mode will be generated -->
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-3 text-center">
+                        Klik pada tumbuhan untuk memilih/dipilih ulang
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Quick Facts -->
+            <div class="mb-6 p-3 bg-teal-50 rounded-xl">
+                <h3 class="font-bold text-gray-700 mb-2 text-sm flex items-center">
+                    <i class="fas fa-lightbulb text-teal-500 mr-2 text-xs"></i> Fakta Singkat
+                </h3>
+                <div class="text-xs text-gray-700 space-y-1">
+                    <p>• Tumbuhan menghasilkan oksigen melalui fotosintesis</p>
+                    <p>• Ada lebih dari 390,000 spesies tumbuhan di dunia</p>
+                    <p>• Tumbuhan tertua di dunia adalah pohon pinus berusia 5,000 tahun</p>
+                    <p>• Rafflesia arnoldii adalah bunga terbesar di dunia</p>
+                </div>
+            </div>
+        </main>
+        
+        <!-- Plant Detail Modal -->
+        <div id="plant-modal" class="plant-modal hidden">
+            <div class="modal-content">
+                <button id="close-modal" class="close-modal">&times;</button>
+                <div id="modal-body"></div>
+            </div>
+        </div>
+        
+        <!-- Modal untuk tumbuhan khusus -->
+        <div id="special-modal" class="plant-modal hidden">
+            <div class="modal-content">
+                <button id="close-special-modal" class="close-modal">&times;</button>
+                <div id="special-modal-body"></div>
+            </div>
+        </div>
+        
+        <!-- BOTTOM NAVIGATION - TIDAK DIRUBAH -->
+        <nav class="bottom-nav">
+            <a href="dashboad siswa.html" class="nav-item">
+                <i class="fas fa-home nav-icon"></i>
+                <span>Beranda</span>
+            </a>
+            <a href="soal harian/dashboard soal.html" class="nav-item">
+                <i class="fas fa-flask nav-icon"></i>
+                <span>Soal Harian</span>
+            </a>
+            <a href="ai/nayra.html" class="nav-item">
+                <i class="fas fa-robot nav-icon"></i>
+                <span>Nayra AI</span>
+            </a>
+            <a href="materi harian/kategori materi.html" class="nav-item">
+                <i class="fas fa-chalkboard-teacher nav-icon"></i>
+                <span>Materi Harian</span>
+            </a>
+            <a href="profil/profil.html" class="nav-item">
+                <i class="fas fa-user nav-icon"></i>
+                <span>Profil</span>
+            </a>
+        </nav>
+    </div>
+
+    <script>
+        // Data Tumbuhan Lengkap
+        const plants = [
+            // Pohon (Trees)
+            { symbol: "MG", name: "Mangga", id: 1, height: 10, category: "tree", colorClass: "tree", period: 1, group: 1, family: "Anacardiaceae", habitat: "Tropis" },
+            { symbol: "JP", name: "Jati", id: 2, height: 30, category: "tree", colorClass: "tree", period: 1, group: 2, family: "Lamiaceae", habitat: "Hutan tropis" },
+            { symbol: "MA", name: "Mahoni", id: 3, height: 25, category: "tree", colorClass: "tree", period: 1, group: 3, family: "Meliaceae", habitat: "Hutan tropis" },
+            { symbol: "JR", name: "Jambu", id: 4, height: 8, category: "tree", colorClass: "tree", period: 1, group: 4, family: "Myrtaceae", habitat: "Tropis" },
+            { symbol: "KL", name: "Kelapa", id: 5, height: 20, category: "tree", colorClass: "tree", period: 1, group: 5, family: "Arecaceae", habitat: "Pesisir" },
+            
+            // Semak (Shrubs)
+            { symbol: "MR", name: "Mawar", id: 6, height: 1.5, category: "shrub", colorClass: "shrub", period: 2, group: 1, family: "Rosaceae", habitat: "Temperate" },
+            { symbol: "ML", name: "Melati", id: 7, height: 2, category: "shrub", colorClass: "shrub", period: 2, group: 2, family: "Oleaceae", habitat: "Tropis" },
+            { symbol: "BG", name: "Bougainville", id: 8, height: 4, category: "shrub", colorClass: "shrub", period: 2, group: 3, family: "Nyctaginaceae", habitat: "Tropis" },
+            { symbol: "KT", name: "Kaktus", id: 9, height: 3, category: "shrub", colorClass: "succulent", period: 2, group: 4, family: "Cactaceae", habitat: "Gurun" },
+            { symbol: "AZ", name: "Azalea", id: 10, height: 2, category: "shrub", colorClass: "shrub", period: 2, group: 5, family: "Ericaceae", habitat: "Temperate" },
+            
+            // Herba (Herbs)
+            { symbol: "BL", name: "Bayam", id: 11, height: 0.5, category: "herb", colorClass: "herb", period: 3, group: 1, family: "Amaranthaceae", habitat: "Kebun" },
+            { symbol: "KG", name: "Kangkung", id: 12, height: 0.3, category: "herb", colorClass: "herb", period: 3, group: 2, family: "Convolvulaceae", habitat: "Berasah" },
+            { symbol: "SB", name: "Sawi", id: 13, height: 0.4, category: "herb", colorClass: "herb", period: 3, group: 3, family: "Brassicaceae", habitat: "Kebun" },
+            { symbol: "KD", name: "Kedelai", id: 14, height: 1, category: "herb", colorClass: "herb", period: 3, group: 4, family: "Fabaceae", habitat: "Ladang" },
+            { symbol: "JG", name: "Jahe", id: 15, height: 1.2, category: "herb", colorClass: "herb", period: 3, group: 5, family: "Zingiberaceae", habitat: "Tropis" },
+            
+            // Merambat (Vines)
+            { symbol: "AG", name: "Anggur", id: 16, height: 15, category: "vine", colorClass: "vine", period: 4, group: 1, family: "Vitaceae", habitat: "Temperate" },
+            { symbol: "MRM", name: "Markisa", id: 17, height: 10, category: "vine", colorClass: "vine", period: 4, group: 2, family: "Passifloraceae", habitat: "Tropis" },
+            { symbol: "LV", name: "Lada", id: 18, height: 8, category: "vine", colorClass: "vine", period: 4, group: 3, family: "Piperaceae", habitat: "Tropis" },
+            { symbol: "UP", name: "Ubi", id: 19, height: 5, category: "vine", colorClass: "vine", period: 4, group: 4, family: "Convolvulaceae", habitat: "Tropis" },
+            { symbol: "KV", name: "Kacang Panjang", id: 20, height: 3, category: "vine", colorClass: "vine", period: 4, group: 5, family: "Fabaceae", habitat: "Kebun" },
+            
+            // Rumput (Grasses)
+            { symbol: "PD", name: "Padi", id: 21, height: 1.2, category: "grass", colorClass: "grass", period: 5, group: 1, family: "Poaceae", habitat: "Sawah" },
+            { symbol: "JG2", name: "Jagung", id: 22, height: 2.5, category: "grass", colorClass: "grass", period: 5, group: 2, family: "Poaceae", habitat: "Ladang" },
+            { symbol: "GN", name: "Gandum", id: 23, height: 1, category: "grass", colorClass: "grass", period: 5, group: 3, family: "Poaceae", habitat: "Temperate" },
+            { symbol: "TB", name: "Tebu", id: 24, height: 3, category: "grass", colorClass: "grass", period: 5, group: 4, family: "Poaceae", habitat: "Tropis" },
+            { symbol: "RM", name: "Rumput Gajah", id: 25, height: 2, category: "grass", colorClass: "grass", period: 5, group: 5, family: "Poaceae", habitat: "Padang rumput" },
+            
+            // Pakis (Ferns)
+            { symbol: "PK", name: "Pakis", id: 26, height: 1, category: "fern", colorClass: "fern", period: 6, group: 1, family: "Polypodiaceae", habitat: "Lembab" },
+            { symbol: "SD", name: "Suplir", id: 27, height: 0.5, category: "fern", colorClass: "fern", period: 6, group: 2, family: "Adiantaceae", habitat: "Teduh" },
+            { symbol: "PR", name: "Paku Sarang Burung", id: 28, height: 1.2, category: "fern", colorClass: "fern", period: 6, group: 3, family: "Aspleniaceae", habitat: "Epifit" },
+            { symbol: "PS", name: "Paku Pedang", id: 29, height: 1.5, category: "fern", colorClass: "fern", period: 6, group: 4, family: "Nephrolepidaceae", habitat: "Hutan" },
+            
+            // Tumbuhan Air (Aquatic)
+            { symbol: "TR", name: "Teratai", id: 30, height: 0.2, category: "aquatic", colorClass: "aquatic", period: 7, group: 1, family: "Nymphaeaceae", habitat: "Air tawar" },
+            { symbol: "EC", name: "Eceng Gondok", id: 31, height: 0.3, category: "aquatic", colorClass: "aquatic", period: 7, group: 2, family: "Pontederiaceae", habitat: "Air tawar" },
+            { symbol: "GG", name: "Ganggang", id: 32, height: 0.1, category: "aquatic", colorClass: "aquatic", period: 7, group: 3, family: "Chlorophyta", habitat: "Air" },
+            { symbol: "LM", name: "Lumut", id: 33, height: 0.05, category: "aquatic", colorClass: "aquatic", period: 7, group: 4, family: "Bryophyta", habitat: "Lembab" },
+            
+            // Sukulen (Succulents)
+            { symbol: "AL", name: "Aloe Vera", id: 34, height: 0.6, category: "succulent", colorClass: "succulent", period: 1, group: 14, family: "Asphodelaceae", habitat: "Kering" },
+            { symbol: "KD2", name: "Kaktus Mini", id: 35, height: 0.2, category: "succulent", colorClass: "succulent", period: 2, group: 14, family: "Cactaceae", habitat: "Gurun" },
+            { symbol: "AG2", name: "Agave", id: 36, height: 1, category: "succulent", colorClass: "succulent", period: 3, group: 14, family: "Asparagaceae", habitat: "Kering" },
+            
+            // Epifit (Epiphytes)
+            { symbol: "AG3", name: "Anggrek", id: 37, height: 0.5, category: "epiphyte", colorClass: "epiphyte", period: 4, group: 15, family: "Orchidaceae", habitat: "Epifit" },
+            { symbol: "BR", name: "Bromelia", id: 38, height: 0.8, category: "epiphyte", colorClass: "epiphyte", period: 5, group: 15, family: "Bromeliaceae", habitat: "Epifit" },
+            
+            // Karnivora (Carnivorous)
+            { symbol: "KR", name: "Kantong Semar", id: 39, height: 0.3, category: "carnivorous", colorClass: "carnivorous", period: 6, group: 16, family: "Nepenthaceae", habitat: "Rawa" },
+            { symbol: "VN", name: "Venus Flytrap", id: 40, height: 0.1, category: "carnivorous", colorClass: "carnivorous", period: 7, group: 16, family: "Droseraceae", habitat: "Rawa" }
+        ];
+
+        // Data Ekosistem yang Diketahui
+        const knownEcosystems = [
+            // Hutan tropis
+            { plants: ["MG", "JP", "MA"], name: "Hutan Tropis", type: "forest", 
+              description: "Ekosistem dengan keanekaragaman hayati tinggi, curah hujan tinggi.",
+              properties: ["Curah hujan: 2000-4000mm/tahun", "Suhu: 20-30°C", "Kelembaban: 70-90%", "Biodiversitas tinggi"] },
+            
+            // Kebun campuran
+            { plants: ["MG", "JR", "BL"], name: "Kebun Campuran", type: "garden",
+              description: "Kebun dengan kombinasi pohon buah dan sayuran.",
+              properties: ["Produksi buah & sayur", "Tanah subur", "Pemeliharaan sedang", "Polinasi alami"] },
+            
+            // Sawah
+            { plants: ["PD", "JG2", "EC"], name: "Ekosistem Sawah", type: "agriculture",
+              description: "Lahan basah buatan untuk budidaya padi dengan tanaman pendamping.",
+              properties: ["Lahan basah", "Produksi pangan", "Irigasi teratur", "Siklus tanam"] },
+            
+            // Taman bunga
+            { plants: ["MR", "ML", "BG"], name: "Taman Bunga", type: "garden",
+              description: "Koleksi tanaman hias berbunga untuk keindahan visual.",
+              properties: ["Warna-warni", "Aroma wangi", "Pemeliharaan tinggi", "Atraksi serangga"] },
+            
+            // Hutan bakau
+            { plants: ["KL", "TR", "LM"], name: "Hutan Bakau", type: "coastal",
+              description: "Ekosistem pesisir dengan adaptasi khusus terhadap air asin.",
+              properties: ["Adaptasi air asin", "Stabilisasi pantai", "Nursery ikan", "Filter polutan"] },
+            
+            // Gurun
+            { plants: ["KT", "KD2", "AG2"], name: "Ekosistem Gurun", type: "desert",
+              description: "Lingkungan kering dengan tanaman beradaptasi terhadap kekurangan air.",
+              properties: ["Curah hujan <250mm/tahun", "Adaptasi xerofit", "Suhu ekstrem", "Transpirasi rendah"] },
+            
+            // Hutan hujan
+            { plants: ["PK", "PR", "AG3"], name: "Hutan Hujan", type: "forest",
+              description: "Hutan dengan kanopi rapat dan kelembaban tinggi, banyak epifit.",
+              properties: ["Kanopi bertingkat", "Kelembaban tinggi", "Banyak epifit", "Cahaya rendah di dasar"] },
+            
+            // Kolam air tawar
+            { plants: ["TR", "EC", "GG"], name: "Kolam Air Tawar", type: "aquatic",
+              description: "Ekosistem perairan dengan tanaman mengapung dan terendam.",
+              properties: ["Siklus oksigen", "Habitat ikan", "Filter alami", "Stabilisasi suhu"] },
+            
+            // Kebun obat
+            { plants: ["JG", "AL", "LV"], name: "Kebun Obat", type: "garden",
+              description: "Koleksi tanaman dengan khasiat pengobatan tradisional.",
+              properties: ["Kandungan fitokimia", "Pengobatan alami", "Pemanenan khusus", "Pengetahuan tradisional"] },
+            
+            // Rawa
+            { plants: ["KG", "KR", "VN"], name: "Ekosistem Rawa", type: "wetland",
+              description: "Lahan basah dengan tanaman karnivora dan adaptasi khusus.",
+              properties: ["Tanah asam", "Nutrien rendah", "Adaptasi karnivora", "Kelembaban tinggi"] }
+        ];
+
+        // DOM Elements
+        const plantTableContainer = document.getElementById('plant-table');
+        const combinePlantTableContainer = document.getElementById('combine-plant-table');
+        const plantModal = document.getElementById('plant-modal');
+        const specialModal = document.getElementById('special-modal');
+        const closeModalBtn = document.getElementById('close-modal');
+        const closeSpecialModalBtn = document.getElementById('close-special-modal');
+        const modalBody = document.getElementById('modal-body');
+        const specialModalBody = document.getElementById('special-modal-body');
+        const searchInput = document.getElementById('search-plant');
+        const totalPlantsSpan = document.getElementById('total-plants');
+        const showFernsBtn = document.getElementById('show-ferns');
+        const showAquaticsBtn = document.getElementById('show-aquatics');
+        const selectedPlantsContainer = document.getElementById('selected-plants');
+        const emptySelectionMsg = document.getElementById('empty-selection');
+        const combineBtn = document.getElementById('combine-btn');
+        const clearBtn = document.getElementById('clear-btn');
+        const combineResult = document.getElementById('combine-result');
+        const statusMessage = document.getElementById('status-message');
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        // State untuk sistem pembuatan ekosistem
+        let selectedPlants = [];
+        let currentTab = 'table';
+
+        // Inisialisasi Tabel Tumbuhan
+        function initPlantTable() {
+            // Kosongkan kontainer
+            plantTableContainer.innerHTML = '';
+            
+            // Buat 7 baris (periode) x 18 kolom (golongan)
+            for (let period = 1; period <= 7; period++) {
+                for (let group = 1; group <= 18; group++) {
+                    const plant = findPlantByPosition(period, group);
+                    
+                    const plantDiv = document.createElement('div');
+                    plantDiv.className = `plant-cell ${plant ? plant.colorClass : 'bg-transparent'}`;
+                    
+                    if (plant) {
+                        plantDiv.dataset.symbol = plant.symbol;
+                        plantDiv.dataset.id = plant.id;
+                        plantDiv.dataset.period = period;
+                        plantDiv.dataset.group = group;
+                        
+                        plantDiv.innerHTML = `
+                            <div class="plant-id">${plant.id}</div>
+                            <div class="plant-symbol">${plant.symbol}</div>
+                            <div class="plant-name">${plant.name}</div>
+                        `;
+                        
+                        plantDiv.addEventListener('click', () => showPlantDetails(plant));
+                    } else {
+                        // Kosong, tapi bisa berisi placeholder untuk posisi khusus
+                        if (period === 6 && group === 15) {
+                            plantDiv.innerHTML = `<div class="text-xs text-gray-400">Epi</div>`;
+                            plantDiv.classList.add('bg-gray-100');
+                            plantDiv.addEventListener('click', showEpiphytes);
+                        } else if (period === 7 && group === 16) {
+                            plantDiv.innerHTML = `<div class="text-xs text-gray-400">Karn</div>`;
+                            plantDiv.classList.add('bg-gray-100');
+                            plantDiv.addEventListener('click', showCarnivorous);
+                        } else {
+                            plantDiv.style.visibility = 'hidden';
+                        }
+                    }
+                    
+                    plantTableContainer.appendChild(plantDiv);
+                }
+            }
+            
+            // Inisialisasi tabel untuk mode gabungkan
+            initCombinePlantTable();
+            
+            // Hitung total tumbuhan yang ditampilkan
+            const visiblePlants = plants.filter(p => 
+                !['epiphyte', 'carnivorous'].includes(p.category) || 
+                (p.symbol === 'AG3' || p.symbol === 'KR')
+            ).length;
+            
+            totalPlantsSpan.textContent = visiblePlants;
+            
+            // Setup event listeners
+            setupEventListeners();
+        }
+
+        // Inisialisasi tabel untuk mode gabungkan
+        function initCombinePlantTable() {
+            combinePlantTableContainer.innerHTML = '';
+            
+            // Buat grid 8x10 untuk mode gabungkan (lebih sederhana)
+            const plantsForCombine = plants.filter(p => 
+                !['epiphyte', 'carnivorous'].includes(p.category) &&
+                p.id <= 30 // Hanya sebagian untuk kesederhanaan
+            );
+            
+            // Buat grid 6x8 untuk tampilan yang lebih rapi
+            for (let i = 0; i < 48; i++) {
+                const plantDiv = document.createElement('div');
+                
+                if (i < plantsForCombine.length) {
+                    const plant = plantsForCombine[i];
+                    plantDiv.className = `plant-cell ${plant.colorClass}`;
+                    plantDiv.dataset.symbol = plant.symbol;
+                    plantDiv.dataset.id = plant.id;
+                    
+                    plantDiv.innerHTML = `
+                        <div class="plant-id">${plant.id}</div>
+                        <div class="plant-symbol">${plant.symbol}</div>
+                    `;
+                    
+                    plantDiv.addEventListener('click', () => selectPlantForCombination(plant));
+                } else {
+                    plantDiv.style.visibility = 'hidden';
+                }
+                
+                combinePlantTableContainer.appendChild(plantDiv);
+            }
+            
+            // Set grid template untuk tampilan yang lebih baik
+            combinePlantTableContainer.style.gridTemplateColumns = 'repeat(8, 1fr)';
+        }
+
+        // Cari tumbuhan berdasarkan posisi (periode dan golongan)
+        function findPlantByPosition(period, group) {
+            return plants.find(plant => 
+                plant.period === period && 
+                plant.group === group &&
+                !['epiphyte', 'carnivorous'].includes(plant.category)
+            );
+        }
+
+        // Pilih tumbuhan untuk kombinasi
+        function selectPlantForCombination(plant) {
+            // Cek apakah tumbuhan sudah dipilih
+            const existingIndex = selectedPlants.findIndex(p => p.symbol === plant.symbol);
+            
+            if (existingIndex !== -1) {
+                // Hapus tumbuhan jika sudah dipilih
+                selectedPlants.splice(existingIndex, 1);
+            } else {
+                // Tambahkan tumbuhan jika belum dipilih (maksimal 3)
+                if (selectedPlants.length < 3) {
+                    selectedPlants.push(plant);
+                } else {
+                    showStatusMessage("Maksimal 3 tumbuhan yang dapat digabungkan", "error");
+                    return;
+                }
+            }
+            
+            // Perbarui tampilan tumbuhan yang dipilih
+            updateSelectedPlantsDisplay();
+            
+            // Perbarui status tombol gabungkan
+            updateCombineButton();
+            
+            // Perbarui status message
+            updateStatusMessage();
+            
+            // Highlight tumbuhan di tabel
+            highlightSelectedPlants();
+        }
+
+        // Perbarui tampilan tumbuhan yang dipilih
+        function updateSelectedPlantsDisplay() {
+            selectedPlantsContainer.innerHTML = '';
+            
+            if (selectedPlants.length === 0) {
+                emptySelectionMsg.style.display = 'block';
+                return;
+            }
+            
+            emptySelectionMsg.style.display = 'none';
+            
+            selectedPlants.forEach((plant, index) => {
+                const badge = document.createElement('div');
+                badge.className = 'selected-plant-badge';
+                badge.innerHTML = `
+                    ${plant.symbol} - ${plant.name}
+                    <button class="remove-btn" data-index="${index}">&times;</button>
+                `;
+                
+                badge.querySelector('.remove-btn').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    selectedPlants.splice(index, 1);
+                    updateSelectedPlantsDisplay();
+                    updateCombineButton();
+                    updateStatusMessage();
+                    highlightSelectedPlants();
+                });
+                
+                selectedPlantsContainer.appendChild(badge);
+            });
+        }
+
+        // Highlight tumbuhan yang dipilih di tabel
+        function highlightSelectedPlants() {
+            // Reset semua tumbuhan di tabel gabungkan
+            document.querySelectorAll('#combine-plant-table .plant-cell').forEach(cell => {
+                cell.classList.remove('selected');
+            });
+            
+            // Highlight tumbuhan yang dipilih
+            selectedPlants.forEach(plant => {
+                const cells = document.querySelectorAll(`#combine-plant-table [data-symbol="${plant.symbol}"]`);
+                cells.forEach(cell => {
+                    cell.classList.add('selected');
+                });
+            });
+        }
+
+        // Perbarui status tombol gabungkan
+        function updateCombineButton() {
+            if (selectedPlants.length >= 2) {
+                combineBtn.disabled = false;
+                combineBtn.innerHTML = `<i class="fas fa-bolt mr-2"></i>Buat Ekosistem (${selectedPlants.length})`;
+            } else {
+                combineBtn.disabled = true;
+                combineBtn.innerHTML = `<i class="fas fa-bolt mr-2"></i>Buat Ekosistem`;
+            }
+        }
+
+        // Perbarui status message
+        function updateStatusMessage() {
+            if (selectedPlants.length === 0) {
+                statusMessage.textContent = "Pilih 2 atau 3 tumbuhan untuk membuat ekosistem";
+            } else if (selectedPlants.length === 1) {
+                statusMessage.textContent = "Pilih 1 tumbuhan lagi untuk membuat ekosistem";
+            } else if (selectedPlants.length === 2) {
+                statusMessage.textContent = "Klik 'Buat Ekosistem' untuk membuat ekosistem dari 2 tumbuhan";
+            } else if (selectedPlants.length === 3) {
+                statusMessage.textContent = "Klik 'Buat Ekosistem' untuk membuat ekosistem dari 3 tumbuhan";
+            }
+        }
+
+        // Tampilkan pesan status sementara
+        function showStatusMessage(message, type = "info") {
+            const originalMessage = statusMessage.textContent;
+            statusMessage.textContent = message;
+            statusMessage.style.color = type === "error" ? "#fecaca" : "rgba(255, 255, 255, 0.8)";
+            
+            setTimeout(() => {
+                statusMessage.textContent = originalMessage;
+                statusMessage.style.color = "rgba(255, 255, 255, 0.8)";
+            }, 3000);
+        }
+
+        // Gabungkan tumbuhan yang dipilih
+        function combinePlants() {
+            if (selectedPlants.length < 2) return;
+            
+            // Urutkan tumbuhan berdasarkan id
+            const sortedPlants = [...selectedPlants].sort((a, b) => a.id - b.id);
+            const plantSymbols = sortedPlants.map(p => p.symbol);
+            
+            // Cari ekosistem yang diketahui
+            let foundEcosystem = null;
+            
+            for (const ecosystem of knownEcosystems) {
+                const ecosystemPlants = [...ecosystem.plants].sort();
+                const selectedPlantSymbols = [...plantSymbols].sort();
+                
+                if (JSON.stringify(ecosystemPlants) === JSON.stringify(selectedPlantSymbols)) {
+                    foundEcosystem = ecosystem;
+                    break;
+                }
+            }
+            
+            // Jika tidak ditemukan, buat ekosistem generik
+            if (!foundEcosystem) {
+                foundEcosystem = generateGenericEcosystem(sortedPlants);
+            }
+            
+            // Tampilkan hasil
+            displayCombineResult(foundEcosystem, sortedPlants);
+        }
+
+        // Hasilkan ekosistem generik berdasarkan tumbuhan
+        function generateGenericEcosystem(plants) {
+            const plantCount = plants.length;
+            let name = "";
+            let type = "";
+            let description = "";
+            let properties = [];
+            
+            // Tentukan jenis ekosistem berdasarkan kategori tumbuhan
+            const categories = plants.map(p => p.category);
+            
+            if (categories.includes("tree") && categories.includes("shrub")) {
+                type = "hutan";
+                name = "Hutan Campuran";
+                description = `Ekosistem hutan dengan kombinasi ${plants.map(p => p.name).join(", ")}.`;
+            } else if (categories.includes("herb") && categories.includes("grass")) {
+                type = "padang rumput";
+                name = "Padang Rumput";
+                description = `Ekosistem padang rumput dengan dominasi tanaman herba dan rumput.`;
+            } else if (categories.includes("aquatic")) {
+                type = "perairan";
+                name = "Ekosistem Perairan";
+                description = `Ekosistem perairan dengan tanaman air.`;
+            } else {
+                type = "kebun";
+                name = "Kebun Campuran";
+                description = `Kebun dengan kombinasi ${plants.map(p => p.name).join(", ")}.`;
+            }
+            
+            // Buat properti
+            properties = [
+                `Tipe: ${type}`,
+                `Jumlah spesies: ${plantCount}`,
+                `Tinggi rata-rata: ${(plants.reduce((sum, p) => sum + p.height, 0) / plantCount).toFixed(1)} m`,
+                `Habitat: ${plants[0].habitat}`
+            ];
+            
+            // Tambahkan fakta berdasarkan kategori
+            if (categories.includes("tree")) {
+                properties.push("Menghasilkan oksigen tinggi");
+            }
+            if (categories.includes("herb")) {
+                properties.push("Siklus pertumbuhan cepat");
+            }
+            
+            return {
+                plants: plants.map(p => p.symbol),
+                name,
+                type,
+                description,
+                properties
+            };
+        }
+
+        // Tampilkan hasil kombinasi
+        function displayCombineResult(ecosystem, plants) {
+            combineResult.style.display = 'block';
+            combineResult.innerHTML = `
+                <div class="mb-4">
+                    <h3 class="ecosystem-name">${ecosystem.name}</h3>
+                    <div class="text-lg font-bold text-green-600 mb-2">
+                        <i class="fas fa-tree mr-2"></i>Ekosistem ${ecosystem.type}
+                    </div>
+                    <p class="ecosystem-description">${ecosystem.description}</p>
+                    <div class="text-xs text-gray-500 mb-3">
+                        <i class="fas fa-seedling mr-1"></i> Terdiri dari: ${plants.map(p => p.name).join(", ")}
+                    </div>
+                </div>
+                
+                <div class="ecosystem-properties">
+                    ${ecosystem.properties.map(prop => `
+                        <div class="ecosystem-prop">
+                            <i class="fas fa-check text-green-500 mr-1"></i> ${prop}
+                        </div>
+                    `).join('')}
+                </div>
+                
+                <div class="mt-4 text-xs text-gray-600">
+                    <p><i class="fas fa-lightbulb text-yellow-500 mr-1"></i> 
+                    ${getEcosystemTip(ecosystem, plants)}</p>
+                </div>
+                
+                <button id="new-experiment" class="w-full mt-4 bg-teal-500 text-white py-2 rounded-lg font-bold">
+                    <i class="fas fa-redo mr-2"></i>Buat Ekosistem Baru
+                </button>
+            `;
+            
+            // Scroll ke hasil
+            combineResult.scrollIntoView({ behavior: 'smooth' });
+            
+            // Event listener untuk tombol eksperimen baru
+            document.getElementById('new-experiment').addEventListener('click', () => {
+                selectedPlants = [];
+                updateSelectedPlantsDisplay();
+                updateCombineButton();
+                updateStatusMessage();
+                highlightSelectedPlants();
+                combineResult.style.display = 'none';
+            });
+        }
+
+        // Dapatkan tips tentang ekosistem
+        function getEcosystemTip(ecosystem, plants) {
+            const tips = [
+                "Ekosistem ini dapat tumbuh dengan baik di iklim tropis.",
+                "Pastikan penyiraman yang cukup untuk pertumbuhan optimal.",
+                "Gunakan pupuk organik untuk hasil terbaik.",
+                "Ekosistem ini menarik serangga penyerbuk alami.",
+                "Lakukan rotasi tanaman untuk menjaga kesuburan tanah."
+            ];
+            
+            // Tips khusus berdasarkan jenis ekosistem
+            if (ecosystem.type.includes("hutan")) {
+                return "Ekosistem hutan membantu mengurangi polusi udara dan menyimpan karbon.";
+            } else if (ecosystem.type.includes("kebun")) {
+                return "Kebun campuran meningkatkan biodiversitas dan mengurangi hama.";
+            } else if (ecosystem.type.includes("perairan")) {
+                return "Ekosistem perairan membantu menjaga kualitas air dan habitat akuatik.";
+            } else if (ecosystem.name.includes("Gurun")) {
+                return "Ekosistem gurun membutuhkan drainase yang baik dan sinar matahari penuh.";
+            }
+            
+            return tips[Math.floor(Math.random() * tips.length)];
+        }
+
+        // Tampilkan detail tumbuhan dalam modal
+        function showPlantDetails(plant) {
+            const categoryNames = {
+                "tree": "Pohon",
+                "shrub": "Semak",
+                "herb": "Herba",
+                "vine": "Merambat",
+                "grass": "Rumput",
+                "fern": "Pakis",
+                "aquatic": "Tumbuhan Air",
+                "succulent": "Sukulen",
+                "epiphyte": "Epifit",
+                "carnivorous": "Karnivora"
+            };
+            
+            modalBody.innerHTML = `
+                <div class="plant-detail-card" style="border-left-color: ${getCategoryColor(plant.category)}; background-color: ${getCategoryColor(plant.category, 0.1)}">
+                    <div class="flex items-center mb-4">
+                        <div class="plant-cell ${plant.colorClass} w-16 h-16 mr-4">
+                            <div class="plant-id">${plant.id}</div>
+                            <div class="plant-symbol text-xl">${plant.symbol}</div>
+                            <div class="plant-name">${plant.name}</div>
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-bold text-gray-800">${plant.name}</h2>
+                            <p class="text-gray-600 text-sm">${plant.symbol} • ${categoryNames[plant.category] || plant.category}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <div class="detail-row">
+                            <span class="detail-label">ID Tumbuhan:</span>
+                            <span class="detail-value">${plant.id}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Tinggi Maks:</span>
+                            <span class="detail-value">${plant.height} m</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Famili:</span>
+                            <span class="detail-value">${plant.family}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Habitat:</span>
+                            <span class="detail-value">${plant.habitat}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Kategori:</span>
+                            <span class="detail-value">${categoryNames[plant.category]}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 p-3 bg-gray-50 rounded-lg">
+                        <h4 class="font-bold text-gray-700 mb-1 text-sm">Fakta Menarik:</h4>
+                        <p class="text-xs text-gray-600">${getPlantFact(plant)}</p>
+                    </div>
+                    
+                    ${currentTab === 'combine' ? `
+                    <button id="select-for-combine" class="w-full mt-4 bg-teal-500 text-white py-2 rounded-lg font-bold">
+                        <i class="fas fa-plus mr-2"></i>Pilih untuk Ekosistem
+                    </button>
+                    ` : ''}
+                </div>
+            `;
+            
+            // Tambahkan event listener untuk tombol pilih jika di mode combine
+            if (currentTab === 'combine') {
+                const selectBtn = document.getElementById('select-for-combine');
+                selectBtn.addEventListener('click', () => {
+                    selectPlantForCombination(plant);
+                    plantModal.classList.add('hidden');
+                    
+                    // Switch ke tab combine jika belum
+                    if (currentTab !== 'combine') {
+                        switchTab('combine');
+                    }
+                });
+            }
+            
+            plantModal.classList.remove('hidden');
+        }
+
+        // Tampilkan pakis
+        function showFerns() {
+            const ferns = plants.filter(p => p.category === 'fern');
+            showSpecialPlants(ferns, "Pakis (Tumbuhan Paku)");
+        }
+
+        // Tampilkan tumbuhan air
+        function showAquatics() {
+            const aquatics = plants.filter(p => p.category === 'aquatic');
+            showSpecialPlants(aquatics, "Tumbuhan Air (Hidrofit)");
+        }
+
+        // Tampilkan epifit
+        function showEpiphytes() {
+            const epiphytes = plants.filter(p => p.category === 'epiphyte');
+            showSpecialPlants(epiphytes, "Epifit (Tumbuhan Menumpang)");
+        }
+
+        // Tampilkan karnivora
+        function showCarnivorous() {
+            const carnivorous = plants.filter(p => p.category === 'carnivorous');
+            showSpecialPlants(carnivorous, "Tumbuhan Karnivora");
+        }
+
+        // Tampilkan tumbuhan khusus
+        function showSpecialPlants(plants, title) {
+            specialModalBody.innerHTML = `
+                <div class="mb-4">
+                    <h2 class="text-xl font-bold text-gray-800 mb-2">${title}</h2>
+                    <p class="text-gray-600 text-sm mb-4">Kelompok tumbuhan dengan adaptasi khusus</p>
+                </div>
+                <div class="grid grid-cols-3 gap-2 mb-4">
+                    ${plants.map(plant => `
+                        <div class="plant-cell ${plant.colorClass} w-full" onclick="showPlantDetailsFromModal(${plant.id})">
+                            <div class="plant-id">${plant.id}</div>
+                            <div class="plant-symbol">${plant.symbol}</div>
+                            <div class="plant-name">${plant.name}</div>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="text-xs text-gray-500">
+                    <p>• ${getSpecialDescription(title)}</p>
+                    <p>• Memiliki adaptasi khusus untuk lingkungan tertentu</p>
+                    <p>• Penting untuk keanekaragaman hayati</p>
+                </div>
+            `;
+            
+            specialModal.classList.remove('hidden');
+        }
+
+        // Helper untuk showPlantDetails dari modal khusus
+        window.showPlantDetailsFromModal = function(id) {
+            const plant = plants.find(p => p.id === id);
+            if (plant) {
+                specialModal.classList.add('hidden');
+                showPlantDetails(plant);
+            }
+        };
+
+        // Fungsi untuk berpindah tab
+        function switchTab(tabName) {
+            // Update tab aktif
+            tabs.forEach(tab => {
+                if (tab.dataset.tab === tabName) {
+                    tab.classList.add('active');
+                } else {
+                    tab.classList.remove('active');
+                }
+            });
+            
+            // Update konten tab aktif
+            tabContents.forEach(content => {
+                if (content.id === `${tabName}-tab`) {
+                    content.classList.add('active');
+                } else {
+                    content.classList.remove('active');
+                }
+            });
+            
+            currentTab = tabName;
+            
+            // Scroll ke atas
+            window.scrollTo(0, 0);
+        }
+
+        // Dapatkan warna berdasarkan kategori
+        function getCategoryColor(category, opacity = 1) {
+            const colors = {
+                "tree": "#2e7d32",
+                "shrub": "#66bb6a",
+                "herb": "#9ccc65",
+                "vine": "#7e57c2",
+                "grass": "#c5e1a5",
+                "fern": "#388e3c",
+                "aquatic": "#0288d1",
+                "succulent": "#ffa726",
+                "epiphyte": "#ab47bc",
+                "carnivorous": "#d32f2f"
+            };
+            
+            const color = colors[category] || "#cccccc";
+            if (opacity < 1) {
+                const r = parseInt(color.slice(1, 3), 16);
+                const g = parseInt(color.slice(3, 5), 16);
+                const b = parseInt(color.slice(5, 7), 16);
+                return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+            }
+            return color;
+        }
+
+        // Dapatkan fakta menarik tentang tumbuhan
+        function getPlantFact(plant) {
+            const facts = {
+                "MG": "Pohon mangga dapat hidup hingga 300 tahun dan masih berbuah.",
+                "JP": "Kayu jati sangat tahan lama dan digunakan untuk furnitur berkualitas tinggi.",
+                "KL": "Kelapa disebut 'pohon kehidupan' karena semua bagiannya bermanfaat.",
+                "MR": "Mawar telah dibudidayakan selama 5,000 tahun dan memiliki 100+ spesies.",
+                "KT": "Kaktus dapat menyimpan air hingga 1,000 liter untuk bertahan di gurun.",
+                "BL": "Bayam kaya zat besi, vitamin A, C, dan K, serta antioksidan.",
+                "PD": "Padi adalah makanan pokok untuk lebih dari setengah populasi dunia.",
+                "TR": "Teratai suci dalam beberapa agama, melambangkan kesucian dan pencerahan.",
+                "AL": "Aloe vera telah digunakan selama 6,000 tahun untuk pengobatan.",
+                "KR": "Kantong semar mencerna serangga untuk mendapatkan nutrisi di tanah miskin."
+            };
+            
+            return facts[plant.symbol] || `${plant.name} adalah tumbuhan ${plant.category} yang tumbuh di habitat ${plant.habitat}.`;
+        }
+
+        // Dapatkan deskripsi khusus
+        function getSpecialDescription(title) {
+            const descriptions = {
+                "Pakis (Tumbuhan Paku)": "Berkembang biak dengan spora bukan biji, indikator lingkungan sehat.",
+                "Tumbuhan Air (Hidrofit)": "Beradaptasi hidup di air, membantu menjaga kualitas air.",
+                "Epifit (Tumbuhan Menumpang)": "Tumbuh di tanaman lain tanpa merugikan inangnya.",
+                "Tumbuhan Karnivora": "Memperoleh nutrisi dengan menjebak dan mencerna hewan kecil."
+            };
+            
+            return descriptions[title] || "Kelompok tumbuhan dengan karakteristik unik.";
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Tutup modal
+            closeModalBtn.addEventListener('click', () => {
+                plantModal.classList.add('hidden');
+            });
+            
+            closeSpecialModalBtn.addEventListener('click', () => {
+                specialModal.classList.add('hidden');
+            });
+            
+            // Tutup modal dengan klik di luar konten
+            plantModal.addEventListener('click', (e) => {
+                if (e.target === plantModal) {
+                    plantModal.classList.add('hidden');
+                }
+            });
+            
+            specialModal.addEventListener('click', (e) => {
+                if (e.target === specialModal) {
+                    specialModal.classList.add('hidden');
+                }
+            });
+            
+            // Tutup modal dengan tombol ESC
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    if (!plantModal.classList.contains('hidden')) {
+                        plantModal.classList.add('hidden');
+                    }
+                    if (!specialModal.classList.contains('hidden')) {
+                        specialModal.classList.add('hidden');
+                    }
+                }
+            });
+            
+            // Pencarian tumbuhan
+            searchInput.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase().trim();
+                
+                // Sembunyikan semua tumbuhan dulu
+                document.querySelectorAll('.plant-cell').forEach(cell => {
+                    if (cell.dataset.symbol) {
+                        cell.style.opacity = '0.3';
+                        cell.style.transform = 'scale(0.95)';
+                    }
+                });
+                
+                // Jika kosong, tampilkan semua
+                if (!searchTerm) {
+                    document.querySelectorAll('.plant-cell').forEach(cell => {
+                        if (cell.dataset.symbol) {
+                            cell.style.opacity = '1';
+                            cell.style.transform = 'scale(1)';
+                        }
+                    });
+                    return;
+                }
+                
+                // Tampilkan tumbuhan yang cocok
+                let found = false;
+                plants.forEach(plant => {
+                    if (plant.symbol.toLowerCase().includes(searchTerm) || 
+                        plant.name.toLowerCase().includes(searchTerm) ||
+                        plant.id.toString().includes(searchTerm) ||
+                        plant.category.toLowerCase().includes(searchTerm)) {
+                        
+                        const cells = document.querySelectorAll(`[data-symbol="${plant.symbol}"]`);
+                        cells.forEach(cell => {
+                            cell.style.opacity = '1';
+                            cell.style.transform = 'scale(1.05)';
+                            cell.style.zIndex = '10';
+                            cell.style.boxShadow = '0 0 8px rgba(0,0,0,0.2)';
+                        });
+                        found = true;
+                    }
+                });
+                
+                // Jika tidak ditemukan, reset semua
+                if (!found) {
+                    document.querySelectorAll('.plant-cell').forEach(cell => {
+                        if (cell.dataset.symbol) {
+                            cell.style.opacity = '1';
+                            cell.style.transform = 'scale(1)';
+                            cell.style.zIndex = '1';
+                            cell.style.boxShadow = '';
+                        }
+                    });
+                }
+            });
+            
+            // Fokus pada input pencarian dengan shortcut Ctrl+F
+            document.addEventListener('keydown', (e) => {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+                    e.preventDefault();
+                    searchInput.focus();
+                }
+            });
+            
+            // Tombol untuk pakis dan tumbuhan air
+            showFernsBtn.addEventListener('click', showFerns);
+            showAquaticsBtn.addEventListener('click', showAquatics);
+            
+            // Tombol untuk sistem pembuatan ekosistem
+            combineBtn.addEventListener('click', combinePlants);
+            
+            clearBtn.addEventListener('click', () => {
+                selectedPlants = [];
+                updateSelectedPlantsDisplay();
+                updateCombineButton();
+                updateStatusMessage();
+                highlightSelectedPlants();
+                combineResult.style.display = 'none';
+                showStatusMessage("Semua tumbuhan telah dihapus", "info");
+            });
+            
+            // Tab switching
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    switchTab(tab.dataset.tab);
+                });
+            });
+        }
+
+        // Inisialisasi ketika halaman dimuat
+        document.addEventListener('DOMContentLoaded', initPlantTable);
+    </script>
+</body>
+</html>

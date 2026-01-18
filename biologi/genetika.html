@@ -1,0 +1,1553 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QUANTARA - Genetika & DNA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #38b2ac;
+            --secondary: #0e7490;
+            --accent: #f59e0b;
+        }
+        
+        body {
+            font-family: 'Baloo 2', cursive;
+            background-color: #f8fafc;
+        }
+        
+        .app-container {
+            max-width: 414px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        /* NAVBAR - TIDAK DIRUBAH */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            max-width: 414px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            background: white;
+            z-index: 10;
+            height: 70px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+            text-decoration: none;
+            flex: 1;
+            height: 100%;
+            padding: 0.5rem 0;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item span {
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
+        
+        .nav-item.active {
+            color: var(--primary);
+        }
+        
+        .nav-icon {
+            transition: all 0.3s ease;
+            font-size: 1.25rem;
+        }
+        
+        .nav-icon.active {
+            transform: translateY(-5px);
+            color: var(--primary);
+        }
+        
+        /* TABLE STYLES - DIMODIFIKASI UNTUK ASAM AMINO */
+        .amino-table {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 4px;
+            padding: 5px;
+            overflow-x: auto;
+        }
+        
+        .amino-cell {
+            min-width: 50px;
+            height: 50px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        .amino-cell:hover {
+            transform: scale(1.05);
+            z-index: 2;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+        }
+        
+        .amino-cell.selected {
+            border: 2px solid #f59e0b;
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
+            70% { box-shadow: 0 0 0 5px rgba(245, 158, 11, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+        }
+        
+        .amino-code {
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            font-size: 8px;
+            font-weight: bold;
+        }
+        
+        .amino-symbol {
+            font-size: 14px;
+            font-weight: 800;
+            line-height: 1;
+        }
+        
+        .amino-name {
+            font-size: 6px;
+            margin-top: 1px;
+            text-align: center;
+            display: none;
+        }
+        
+        .amino-cell:hover .amino-name {
+            display: block;
+        }
+        
+        /* Legend styles */
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+            margin-right: 8px;
+            flex-shrink: 0;
+        }
+        
+        /* AMINO ACID CATEGORY COLORS */
+        .nonpolar { background-color: #4caf50; color: white; }
+        .polar { background-color: #2196f3; color: white; }
+        .acidic { background-color: #f44336; color: white; }
+        .basic { background-color: #ff9800; color: white; }
+        .aromatic { background-color: #9c27b0; color: white; }
+        .special { background-color: #00bcd4; color: white; }
+        
+        /* Modal styles */
+        .amino-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            padding: 20px;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            max-width: 350px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+        
+        .app-logo {
+            display: flex;
+            align-items: center;
+        }
+        
+        .app-logo-icon {
+            background: #9999ff;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 8px;
+        }
+        
+        .app-name {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: #9999ff;
+        }
+        
+        /* Amino acid detail styles */
+        .amino-detail-card {
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 10px;
+        }
+        
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .detail-label {
+            font-weight: 600;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .detail-value {
+            font-weight: 700;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        /* Scrollbar styling */
+        .amino-table::-webkit-scrollbar {
+            height: 6px;
+        }
+        
+        .amino-table::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+        
+        .amino-table::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+        
+        /* Layout grid untuk tabel dengan label */
+        .table-container {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        /* Combine System Styles */
+        .combine-panel {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+        }
+        
+        .selected-amino {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+            min-height: 40px;
+        }
+        
+        .selected-amino-badge {
+            background: white;
+            color: #333;
+            padding: 5px 10px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .selected-amino-badge .remove-btn {
+            background: none;
+            border: none;
+            color: #ff6b6b;
+            margin-left: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        .combine-result {
+            background: white;
+            color: #333;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .peptide-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .peptide-sequence {
+            font-size: 24px;
+            font-weight: 800;
+            color: #4f46e5;
+            margin-bottom: 10px;
+            font-family: monospace;
+        }
+        
+        .peptide-description {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .peptide-properties {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            font-size: 12px;
+        }
+        
+        .peptide-prop {
+            background: #f8fafc;
+            padding: 8px;
+            border-radius: 6px;
+        }
+        
+        .combine-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .combine-btn {
+            flex: 1;
+            background: #f59e0b;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .combine-btn:hover {
+            background: #d97706;
+        }
+        
+        .combine-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .clear-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .clear-btn:hover {
+            background: #dc2626;
+        }
+        
+        .status-message {
+            text-align: center;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 5px;
+            min-height: 16px;
+        }
+        
+        /* Tab Styles */
+        .tab-container {
+            display: flex;
+            background: #f1f5f9;
+            border-radius: 10px;
+            padding: 5px;
+            margin-bottom: 15px;
+        }
+        
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 8px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+        
+        .tab.active {
+            background: white;
+            color: #4f46e5;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        /* DNA Sequence Styles */
+        .dna-sequence {
+            font-family: monospace;
+            background: #f3f4f6;
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 12px;
+            overflow-x: auto;
+            margin-bottom: 10px;
+        }
+        
+        .dna-strand {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        
+        .dna-base {
+            width: 20px;
+            height: 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin: 1px;
+            font-weight: bold;
+        }
+        
+        .base-A { background-color: #ff6b6b; color: white; }
+        .base-T { background-color: #4ecdc4; color: white; }
+        .base-C { background-color: #45b7d1; color: white; }
+        .base-G { background-color: #96ceb4; color: #333; }
+    </style>
+</head>
+<body>
+    <!-- Mobile App Container -->
+    <div class="app-container">
+        <!-- App Header -->
+        <header class="bg-gradient-to-r from-primary to-secondary p-4 text-white">
+            <div class="flex justify-between items-center">
+                <div class="app-logo">
+                    <div class="app-logo-icon">
+                        <i class="fas fa-dna"></i>
+                    </div>
+                    <h1 class="app-name">QUANTARA</h1>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-search"></i>
+                    <i class="fas fa-user-circle text-xl"></i>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Main Content -->
+        <main class="pb-24 p-4">
+            <!-- Page Title -->
+            <div class="mb-4">
+                <h1 class="text-xl font-bold text-gray-800 mb-1">
+                    <i class="fas fa-dna text-teal-500 mr-2"></i> Genetika & Biologi Molekuler
+                </h1>
+                <p class="text-gray-600 text-sm">
+                    Asam amino, kode genetik, dan sintesis protein
+                </p>
+            </div>
+            
+            <!-- Tabs -->
+            <div class="tab-container">
+                <div class="tab active" data-tab="table">Asam Amino</div>
+                <div class="tab" data-tab="combine">Sintesis Protein</div>
+            </div>
+            
+            <!-- Tab Content: Table -->
+            <div id="table-tab" class="tab-content active">
+                <!-- Search Bar -->
+                <div class="mb-4">
+                    <div class="relative">
+                        <input type="text" id="search-amino" placeholder="Cari asam amino..." 
+                               class="w-full p-3 pl-10 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm">
+                        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    </div>
+                </div>
+                
+                <!-- Tabel Asam Amino -->
+                <div class="mb-6">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="font-bold text-gray-700 text-sm flex items-center">
+                            <i class="fas fa-dna text-blue-500 mr-2 text-xs"></i> 20 Asam Amino Esensial
+                        </h3>
+                        <div class="text-xs text-gray-500">
+                            <span id="total-amino">20</span> asam amino
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white border border-gray-200 rounded-xl p-3">
+                        <div class="table-container">
+                            <!-- Tabel asam amino utama -->
+                            <div id="amino-table" class="amino-table">
+                                <!-- Asam amino akan dibuat oleh JavaScript -->
+                            </div>
+                        </div>
+                        
+                        <!-- Kode Genetik -->
+                        <div class="mt-4 text-center">
+                            <div class="text-xs text-gray-500 mb-2">
+                                * Kode genetik: 3 basa DNA → 1 asam amino
+                            </div>
+                            <button id="show-codons" class="text-xs bg-purple-100 text-purple-700 px-3 py-1 rounded-full">
+                                Lihat Kode Genetik
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Legend - Dipindah ke bawah tabel -->
+                <div class="mb-6 p-3 bg-gray-50 rounded-xl">
+                    <h3 class="font-bold text-gray-700 mb-2 text-sm">Kategori Sifat:</h3>
+                    <div class="grid grid-cols-2 gap-1">
+                        <div class="legend-item">
+                            <div class="legend-color nonpolar"></div>
+                            <span class="text-xs">Nonpolar</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color polar"></div>
+                            <span class="text-xs">Polar</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color acidic"></div>
+                            <span class="text-xs">Asam</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color basic"></div>
+                            <span class="text-xs">Basa</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color aromatic"></div>
+                            <span class="text-xs">Aromatik</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color special"></div>
+                            <span class="text-xs">Khusus</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tab Content: Combine Elements -->
+            <div id="combine-tab" class="tab-content">
+                <div class="combine-panel">
+                    <h3 class="font-bold text-lg mb-3">
+                        <i class="fas fa-flask mr-2"></i>Sintesis Protein
+                    </h3>
+                    <p class="text-sm mb-4">
+                        Pilih 3-6 asam amino untuk membuat rantai peptida.
+                        Klik pada asam amino di tabel untuk memilih.
+                    </p>
+                    
+                    <div class="selected-amino" id="selected-amino">
+                        <div class="text-sm text-center w-full py-2" id="empty-selection">
+                            Belum ada asam amino dipilih
+                        </div>
+                    </div>
+                    
+                    <div class="combine-actions">
+                        <button id="combine-btn" class="combine-btn" disabled>
+                            <i class="fas fa-bolt mr-2"></i>Sintesis
+                        </button>
+                        <button id="clear-btn" class="clear-btn">
+                            <i class="fas fa-trash mr-2"></i>Hapus
+                        </button>
+                    </div>
+                    
+                    <div class="status-message" id="status-message">
+                        Pilih 3-6 asam amino untuk sintesis
+                    </div>
+                </div>
+                
+                <div id="combine-result" class="combine-result">
+                    <!-- Results will be displayed here -->
+                </div>
+                
+                <div class="bg-white border border-gray-200 rounded-xl p-3 mt-4">
+                    <h3 class="font-bold text-gray-700 mb-3 text-sm flex items-center">
+                        <i class="fas fa-dna text-blue-500 mr-2 text-xs"></i> Asam Amino yang Tersedia
+                    </h3>
+                    <div class="table-container">
+                        <div id="combine-amino-table" class="amino-table">
+                            <!-- Asam amino untuk sintesis mode akan dibuat -->
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-3 text-center">
+                        Klik pada asam amino untuk memilih/dipilih ulang
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Quick Facts -->
+            <div class="mb-6 p-3 bg-teal-50 rounded-xl">
+                <h3 class="font-bold text-gray-700 mb-2 text-sm flex items-center">
+                    <i class="fas fa-lightbulb text-teal-500 mr-2 text-xs"></i> Fakta Genetika
+                </h3>
+                <div class="text-xs text-gray-700 space-y-1">
+                    <p>• DNA manusia memiliki ~3 miliar pasang basa</p>
+                    <p>• Hanya 2% DNA yang mengkode protein</p>
+                    <p>• Gen manusia hanya berbeda 1% dengan simpanse</p>
+                    <p>• Setiap sel memiliki ~2 meter DNA</p>
+                </div>
+            </div>
+            
+            <!-- DNA Sequence Example -->
+            <div class="mb-6 p-3 bg-blue-50 rounded-xl">
+                <h3 class="font-bold text-gray-700 mb-2 text-sm flex items-center">
+                    <i class="fas fa-code text-blue-500 mr-2 text-xs"></i> Contoh Kode DNA
+                </h3>
+                <div class="dna-sequence">
+                    <div class="mb-2">DNA: <span class="font-mono">ATG CCT GAA TTC GGA</span></div>
+                    <div>Protein: <span class="font-mono">Met - Pro - Glu - Phe - Gly</span></div>
+                </div>
+                <p class="text-xs text-gray-600 mt-2">
+                    Kodon ATG = Start, TAA/TAG/TGA = Stop
+                </p>
+            </div>
+        </main>
+        
+        <!-- Amino Acid Detail Modal -->
+        <div id="amino-modal" class="amino-modal hidden">
+            <div class="modal-content">
+                <button id="close-modal" class="close-modal">&times;</button>
+                <div id="modal-body"></div>
+            </div>
+        </div>
+        
+        <!-- Modal untuk Kode Genetik -->
+        <div id="codon-modal" class="amino-modal hidden">
+            <div class="modal-content">
+                <button id="close-codon-modal" class="close-modal">&times;</button>
+                <div id="codon-modal-body"></div>
+            </div>
+        </div>
+        
+        <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+      <a href="../dashboard siswa.html" class="nav-item">
+        <i class="fas fa-home nav-icon"></i>
+        <span>Beranda</span>
+      </a>
+      <a href="../soal harian/dashboard soal.html" class="nav-item">
+        <i class="fas fa-flask nav-icon"></i>
+        <span>Soal Harian</span>
+      </a>
+      <a href="../ai/nayra.html" class="nav-item">
+        <i class="fas fa-robot nav-icon"></i>
+        <span>Nayra AI</span>
+      </a>
+      <a href="../materi harian/kategori materi.html" class="nav-item">
+        <i class="fas fa-chalkboard-teacher nav-icon"></i>
+        <span>Materi Harian</span>
+      </a>
+      <a href="../profil/profil.html" class="nav-item">
+        <i class="fas fa-user nav-icon"></i>
+        <span>Profil</span>
+      </a>
+    </nav>
+    </div>
+
+    <script>
+        // Data 20 Asam Amino Esensial
+        const aminoAcids = [
+            // Nonpolar (Alifatik)
+            { symbol: "G", name: "Glisin", code: "Gly", codon: ["GGU", "GGC", "GGA", "GGG"], category: "nonpolar", colorClass: "nonpolar", 
+              mass: 75.07, polarity: "Nonpolar", charge: "Netral", hydrophobicity: -0.4 },
+            { symbol: "A", name: "Alanin", code: "Ala", codon: ["GCU", "GCC", "GCA", "GCG"], category: "nonpolar", colorClass: "nonpolar",
+              mass: 89.09, polarity: "Nonpolar", charge: "Netral", hydrophobicity: 1.8 },
+            { symbol: "V", name: "Valin", code: "Val", codon: ["GUU", "GUC", "GUA", "GUG"], category: "nonpolar", colorClass: "nonpolar",
+              mass: 117.15, polarity: "Nonpolar", charge: "Netral", hydrophobicity: 4.2 },
+            { symbol: "L", name: "Leusin", code: "Leu", codon: ["UUA", "UUG", "CUU", "CUC", "CUA", "CUG"], category: "nonpolar", colorClass: "nonpolar",
+              mass: 131.17, polarity: "Nonpolar", charge: "Netral", hydrophobicity: 3.8 },
+            { symbol: "I", name: "Isoleusin", code: "Ile", codon: ["AUU", "AUC", "AUA"], category: "nonpolar", colorClass: "nonpolar",
+              mass: 131.17, polarity: "Nonpolar", charge: "Netral", hydrophobicity: 4.5 },
+            { symbol: "P", name: "Prolin", code: "Pro", codon: ["CCU", "CCC", "CCA", "CCG"], category: "nonpolar", colorClass: "nonpolar",
+              mass: 115.13, polarity: "Nonpolar", charge: "Netral", hydrophobicity: -1.6 },
+            { symbol: "M", name: "Metionin", code: "Met", codon: ["AUG"], category: "nonpolar", colorClass: "nonpolar",
+              mass: 149.21, polarity: "Nonpolar", charge: "Netral", hydrophobicity: 1.9 },
+            
+            // Polar (Tak bermuatan)
+            { symbol: "S", name: "Serin", code: "Ser", codon: ["UCU", "UCC", "UCA", "UCG", "AGU", "AGC"], category: "polar", colorClass: "polar",
+              mass: 105.09, polarity: "Polar", charge: "Netral", hydrophobicity: -0.8 },
+            { symbol: "T", name: "Treonin", code: "Thr", codon: ["ACU", "ACC", "ACA", "ACG"], category: "polar", colorClass: "polar",
+              mass: 119.12, polarity: "Polar", charge: "Netral", hydrophobicity: -0.7 },
+            { symbol: "C", name: "Sistein", code: "Cys", codon: ["UGU", "UGC"], category: "polar", colorClass: "polar",
+              mass: 121.16, polarity: "Polar", charge: "Netral", hydrophobicity: 2.5 },
+            { symbol: "N", name: "Asparagin", code: "Asn", codon: ["AAU", "AAC"], category: "polar", colorClass: "polar",
+              mass: 132.12, polarity: "Polar", charge: "Netral", hydrophobicity: -3.5 },
+            { symbol: "Q", name: "Glutamin", code: "Gln", codon: ["CAA", "CAG"], category: "polar", colorClass: "polar",
+              mass: 146.15, polarity: "Polar", charge: "Netral", hydrophobicity: -3.5 },
+            
+            // Asam (Bermuatan negatif)
+            { symbol: "D", name: "Asam Aspartat", code: "Asp", codon: ["GAU", "GAC"], category: "acidic", colorClass: "acidic",
+              mass: 133.10, polarity: "Polar", charge: "Negatif (-1)", hydrophobicity: -3.5 },
+            { symbol: "E", name: "Asam Glutamat", code: "Glu", codon: ["GAA", "GAG"], category: "acidic", colorClass: "acidic",
+              mass: 147.13, polarity: "Polar", charge: "Negatif (-1)", hydrophobicity: -3.5 },
+            
+            // Basa (Bermuatan positif)
+            { symbol: "K", name: "Lisin", code: "Lys", codon: ["AAA", "AAG"], category: "basic", colorClass: "basic",
+              mass: 146.19, polarity: "Polar", charge: "Positif (+1)", hydrophobicity: -3.9 },
+            { symbol: "R", name: "Arginin", code: "Arg", codon: ["CGU", "CGC", "CGA", "CGG", "AGA", "AGG"], category: "basic", colorClass: "basic",
+              mass: 174.20, polarity: "Polar", charge: "Positif (+1)", hydrophobicity: -4.5 },
+            { symbol: "H", name: "Histidin", code: "His", codon: ["CAU", "CAC"], category: "basic", colorClass: "basic",
+              mass: 155.16, polarity: "Polar", charge: "Positif (+½)", hydrophobicity: -3.2 },
+            
+            // Aromatik
+            { symbol: "F", name: "Fenilalanin", code: "Phe", codon: ["UUU", "UUC"], category: "aromatic", colorClass: "aromatic",
+              mass: 165.19, polarity: "Nonpolar", charge: "Netral", hydrophobicity: 2.8 },
+            { symbol: "Y", name: "Tirosin", code: "Tyr", codon: ["UAU", "UAC"], category: "aromatic", colorClass: "aromatic",
+              mass: 181.19, polarity: "Polar", charge: "Netral", hydrophobicity: -1.3 },
+            { symbol: "W", name: "Triptofan", code: "Trp", codon: ["UGG"], category: "aromatic", colorClass: "aromatic",
+              mass: 204.23, polarity: "Nonpolar", charge: "Netral", hydrophobicity: -0.9 }
+        ];
+
+        // Data Protein yang Diketahui
+        const knownProteins = [
+            // Protein pendek umum
+            { aminoAcids: ["M", "E", "T"], sequence: "MET", name: "Tripeptida MET", type: "tripeptide",
+              description: "Tripeptida sederhana dengan metionin di ujung N.",
+              properties: ["Panjang: 3 aa", "Massa: ~350 Da", "Fungsi: Sinyal", "Struktur: Fleksibel"] },
+            
+            { aminoAcids: ["A", "L", "A"], sequence: "ALA", name: "Poly-Alanin", type: "structural",
+              description: "Rantai alanin membentuk heliks alfa.",
+              properties: ["Panjang: 3 aa", "Heliks alfa", "Hidrofobik", "Stabil"] },
+            
+            { aminoAcids: ["G", "L", "Y"], sequence: "GLY", name: "Tripeptida Glisin", type: "tripeptide",
+              description: "Rantai fleksibel karena glisin tanpa rantai samping.",
+              properties: ["Panjang: 3 aa", "Fleksibel", "Tidak ada konformasi", "Putar bebas"] },
+            
+            // Motif protein pendek
+            { aminoAcids: ["L", "E", "U", "G", "L", "Y"], sequence: "LEUGLY", name: "Heksapeptida", type: "hexapeptide",
+              description: "Heksapeptida dengan sifat campuran polar dan nonpolar.",
+              properties: ["Panjang: 6 aa", "Massa: ~650 Da", "Campuran sifat", "Potensi bioaktif"] },
+            
+            { aminoAcids: ["A", "R", "G"], sequence: "ARG", name: "Tripeptida Basa", type: "basic-peptide",
+              description: "Kaya residu basa, bermuatan positif.",
+              properties: ["Panjang: 3 aa", "Bermuatan +", "Berinteraksi dengan DNA", "Larut air"] },
+            
+            { aminoAcids: ["D", "E", "K"], sequence: "DEK", name: "Motif Asam-Basa", type: "mixed-charge",
+              description: "Memiliki residu asam dan basa.",
+              properties: ["Panjang: 3 aa", "Muatan campuran", "pH sensitif", "Amfoterik"] },
+            
+            // Analog peptida bioaktif
+            { aminoAcids: ["Y", "G", "G", "F", "M"], sequence: "YGGFM", name: "Analog Enkefalin", type: "neuropeptide",
+              description: "Analog dari enkefalin, peptida opioid alami.",
+              properties: ["Panjang: 5 aa", "Massa: ~573 Da", "Aktivitas opioid", "Penghilang nyeri"] },
+            
+            { aminoAcids: ["R", "G", "D"], sequence: "RGD", name: "Motif RGD", type: "cell-adhesion",
+              description: "Motif pengenalan sel penting untuk adhesi.",
+              properties: ["Panjang: 3 aa", "Pengikat integrin", "Adhesi sel", "Target obat"] }
+        ];
+
+        // Kode Genetik Lengkap
+        const geneticCode = {
+            // Nonpolar
+            "UUU": "F", "UUC": "F", // Fenilalanin
+            "UUA": "L", "UUG": "L", "CUU": "L", "CUC": "L", "CUA": "L", "CUG": "L", // Leusin
+            "AUU": "I", "AUC": "I", "AUA": "I", // Isoleusin
+            "AUG": "M", // Metionin (Start)
+            "GUU": "V", "GUC": "V", "GUA": "V", "GUG": "V", // Valin
+            "GCU": "A", "GCC": "A", "GCA": "A", "GCG": "A", // Alanin
+            "GGU": "G", "GGC": "G", "GGA": "G", "GGG": "G", // Glisin
+            "CCU": "P", "CCC": "P", "CCA": "P", "CCG": "P", // Prolin
+            
+            // Polar
+            "UCU": "S", "UCC": "S", "UCA": "S", "UCG": "S", "AGU": "S", "AGC": "S", // Serin
+            "ACU": "T", "ACC": "T", "ACA": "T", "ACG": "T", // Treonin
+            "UGU": "C", "UGC": "C", // Sistein
+            "UGG": "W", // Triptofan
+            "AAU": "N", "AAC": "N", // Asparagin
+            "CAA": "Q", "CAG": "Q", // Glutamin
+            
+            // Asam
+            "GAU": "D", "GAC": "D", // Asam Aspartat
+            "GAA": "E", "GAG": "E", // Asam Glutamat
+            
+            // Basa
+            "AAA": "K", "AAG": "K", // Lisin
+            "CGU": "R", "CGC": "R", "CGA": "R", "CGG": "R", "AGA": "R", "AGG": "R", // Arginin
+            "CAU": "H", "CAC": "H", // Histidin
+            
+            // Stop codons
+            "UAA": "STOP", "UAG": "STOP", "UGA": "STOP"
+        };
+
+        // DOM Elements
+        const aminoTableContainer = document.getElementById('amino-table');
+        const combineAminoTableContainer = document.getElementById('combine-amino-table');
+        const aminoModal = document.getElementById('amino-modal');
+        const codonModal = document.getElementById('codon-modal');
+        const closeModalBtn = document.getElementById('close-modal');
+        const closeCodonModalBtn = document.getElementById('close-codon-modal');
+        const modalBody = document.getElementById('modal-body');
+        const codonModalBody = document.getElementById('codon-modal-body');
+        const searchInput = document.getElementById('search-amino');
+        const totalAminoSpan = document.getElementById('total-amino');
+        const showCodonsBtn = document.getElementById('show-codons');
+        const selectedAminoContainer = document.getElementById('selected-amino');
+        const emptySelectionMsg = document.getElementById('empty-selection');
+        const combineBtn = document.getElementById('combine-btn');
+        const clearBtn = document.getElementById('clear-btn');
+        const combineResult = document.getElementById('combine-result');
+        const statusMessage = document.getElementById('status-message');
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        // State untuk sistem sintesis
+        let selectedAminoAcids = [];
+        let currentTab = 'table';
+
+        // Inisialisasi Tabel Asam Amino
+        function initAminoTable() {
+            // Kosongkan kontainer
+            aminoTableContainer.innerHTML = '';
+            
+            // Tampilkan semua 20 asam amino dalam grid 5x4
+            aminoAcids.forEach((amino, index) => {
+                const aminoDiv = document.createElement('div');
+                aminoDiv.className = `amino-cell ${amino.colorClass}`;
+                aminoDiv.dataset.symbol = amino.symbol;
+                aminoDiv.dataset.code = amino.code;
+                aminoDiv.dataset.index = index;
+                
+                aminoDiv.innerHTML = `
+                    <div class="amino-code">${amino.code}</div>
+                    <div class="amino-symbol">${amino.symbol}</div>
+                    <div class="amino-name">${amino.name}</div>
+                `;
+                
+                aminoDiv.addEventListener('click', () => showAminoDetails(amino));
+                
+                aminoTableContainer.appendChild(aminoDiv);
+            });
+            
+            // Inisialisasi tabel untuk mode sintesis
+            initCombineAminoTable();
+            
+            // Setup event listeners
+            setupEventListeners();
+        }
+
+        // Inisialisasi tabel untuk mode sintesis
+        function initCombineAminoTable() {
+            combineAminoTableContainer.innerHTML = '';
+            
+            // Tampilkan semua asam amino untuk sintesis
+            aminoAcids.forEach((amino, index) => {
+                const aminoDiv = document.createElement('div');
+                aminoDiv.className = `amino-cell ${amino.colorClass}`;
+                aminoDiv.dataset.symbol = amino.symbol;
+                aminoDiv.dataset.code = amino.code;
+                aminoDiv.dataset.index = index;
+                
+                aminoDiv.innerHTML = `
+                    <div class="amino-code">${amino.code}</div>
+                    <div class="amino-symbol">${amino.symbol}</div>
+                `;
+                
+                aminoDiv.addEventListener('click', () => selectAminoForSynthesis(amino));
+                
+                combineAminoTableContainer.appendChild(aminoDiv);
+            });
+            
+            // Set grid template untuk tampilan yang lebih baik
+            combineAminoTableContainer.style.gridTemplateColumns = 'repeat(5, 1fr)';
+        }
+
+        // Pilih asam amino untuk sintesis
+        function selectAminoForSynthesis(amino) {
+            // Cek apakah asam amino sudah dipilih
+            const existingIndex = selectedAminoAcids.findIndex(a => a.symbol === amino.symbol);
+            
+            if (existingIndex !== -1) {
+                // Hapus asam amino jika sudah dipilih
+                selectedAminoAcids.splice(existingIndex, 1);
+            } else {
+                // Tambahkan asam amino jika belum dipilih (maksimal 6)
+                if (selectedAminoAcids.length < 6) {
+                    selectedAminoAcids.push(amino);
+                } else {
+                    showStatusMessage("Maksimal 6 asam amino untuk sintesis peptida", "error");
+                    return;
+                }
+            }
+            
+            // Perbarui tampilan asam amino yang dipilih
+            updateSelectedAminoDisplay();
+            
+            // Perbarui status tombol sintesis
+            updateCombineButton();
+            
+            // Perbarui status message
+            updateStatusMessage();
+            
+            // Highlight asam amino di tabel
+            highlightSelectedAmino();
+        }
+
+        // Perbarui tampilan asam amino yang dipilih
+        function updateSelectedAminoDisplay() {
+            selectedAminoContainer.innerHTML = '';
+            
+            if (selectedAminoAcids.length === 0) {
+                emptySelectionMsg.style.display = 'block';
+                return;
+            }
+            
+            emptySelectionMsg.style.display = 'none';
+            
+            selectedAminoAcids.forEach((amino, index) => {
+                const badge = document.createElement('div');
+                badge.className = 'selected-amino-badge';
+                badge.innerHTML = `
+                    ${amino.symbol} - ${amino.name}
+                    <button class="remove-btn" data-index="${index}">&times;</button>
+                `;
+                
+                badge.querySelector('.remove-btn').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    selectedAminoAcids.splice(index, 1);
+                    updateSelectedAminoDisplay();
+                    updateCombineButton();
+                    updateStatusMessage();
+                    highlightSelectedAmino();
+                });
+                
+                selectedAminoContainer.appendChild(badge);
+            });
+        }
+
+        // Highlight asam amino yang dipilih di tabel
+        function highlightSelectedAmino() {
+            // Reset semua asam amino di tabel sintesis
+            document.querySelectorAll('#combine-amino-table .amino-cell').forEach(cell => {
+                cell.classList.remove('selected');
+            });
+            
+            // Highlight asam amino yang dipilih
+            selectedAminoAcids.forEach(amino => {
+                const cells = document.querySelectorAll(`#combine-amino-table [data-symbol="${amino.symbol}"]`);
+                cells.forEach(cell => {
+                    cell.classList.add('selected');
+                });
+            });
+        }
+
+        // Perbarui status tombol sintesis
+        function updateCombineButton() {
+            if (selectedAminoAcids.length >= 3) {
+                combineBtn.disabled = false;
+                combineBtn.innerHTML = `<i class="fas fa-bolt mr-2"></i>Sintesis (${selectedAminoAcids.length})`;
+            } else {
+                combineBtn.disabled = true;
+                combineBtn.innerHTML = `<i class="fas fa-bolt mr-2"></i>Sintesis`;
+            }
+        }
+
+        // Perbarui status message
+        function updateStatusMessage() {
+            if (selectedAminoAcids.length === 0) {
+                statusMessage.textContent = "Pilih 3-6 asam amino untuk sintesis peptida";
+            } else if (selectedAminoAcids.length === 1) {
+                statusMessage.textContent = "Pilih 2 asam amino lagi untuk sintesis";
+            } else if (selectedAminoAcids.length === 2) {
+                statusMessage.textContent = "Pilih 1 asam amino lagi untuk sintesis";
+            } else if (selectedAminoAcids.length >= 3) {
+                statusMessage.textContent = `Klik 'Sintesis' untuk membuat peptida dari ${selectedAminoAcids.length} asam amino`;
+            }
+        }
+
+        // Tampilkan pesan status sementara
+        function showStatusMessage(message, type = "info") {
+            const originalMessage = statusMessage.textContent;
+            statusMessage.textContent = message;
+            statusMessage.style.color = type === "error" ? "#fecaca" : "rgba(255, 255, 255, 0.8)";
+            
+            setTimeout(() => {
+                statusMessage.textContent = originalMessage;
+                statusMessage.style.color = "rgba(255, 255, 255, 0.8)";
+            }, 3000);
+        }
+
+        // Sintesis peptida dari asam amino yang dipilih
+        function synthesizePeptide() {
+            if (selectedAminoAcids.length < 3) return;
+            
+            // Buat urutan peptida
+            const peptideSequence = selectedAminoAcids.map(a => a.symbol).join('');
+            const peptideName = generatePeptideName(selectedAminoAcids);
+            const peptideType = getPeptideType(selectedAminoAcids);
+            const description = generatePeptideDescription(selectedAminoAcids);
+            const properties = generatePeptideProperties(selectedAminoAcids);
+            
+            // Cari apakah peptida ini dikenal
+            let knownPeptide = knownProteins.find(p => 
+                p.sequence === peptideSequence
+            );
+            
+            // Jika tidak ditemukan, buat peptida generik
+            if (!knownPeptide) {
+                knownPeptide = {
+                    aminoAcids: selectedAminoAcids.map(a => a.symbol),
+                    sequence: peptideSequence,
+                    name: peptideName,
+                    type: peptideType,
+                    description: description,
+                    properties: properties
+                };
+            }
+            
+            // Tampilkan hasil
+            displaySynthesisResult(knownPeptide, selectedAminoAcids);
+        }
+
+        // Hasilkan nama peptida
+        function generatePeptideName(aminoAcids) {
+            const length = aminoAcids.length;
+            const type = getPeptideType(aminoAcids);
+            
+            if (length === 3) return `Tripeptida ${aminoAcids[0].code}-${aminoAcids[1].code}-${aminoAcids[2].code}`;
+            if (length === 4) return `Tetrapeptida ${aminoAcids.map(a => a.code).join('-')}`;
+            if (length === 5) return `Pentapeptida ${aminoAcids.map(a => a.code.slice(0, 2)).join('')}`;
+            if (length === 6) return `Heksapeptida ${aminoAcids.map(a => a.code.slice(0, 2)).join('')}`;
+            
+            return `Oligopeptida (${length} aa)`;
+        }
+
+        // Tentukan tipe peptida
+        function getPeptideType(aminoAcids) {
+            const categories = aminoAcids.map(a => a.category);
+            
+            if (categories.every(c => c === "basic")) return "basic-peptide";
+            if (categories.every(c => c === "acidic")) return "acidic-peptide";
+            if (categories.every(c => c === "nonpolar")) return "hydrophobic-peptide";
+            if (categories.every(c => c === "polar" || c === "nonpolar")) return "mixed-peptide";
+            
+            return "oligopeptide";
+        }
+
+        // Hasilkan deskripsi peptida
+        function generatePeptideDescription(aminoAcids) {
+            const length = aminoAcids.length;
+            const types = [...new Set(aminoAcids.map(a => a.category))];
+            
+            if (types.length === 1) {
+                return `Peptida homogen dengan ${length} residu ${getCategoryName(types[0])}.`;
+            } else {
+                return `Peptida ${length}-mer dengan sifat campuran ${types.map(t => getCategoryName(t)).join(' dan ')}.`;
+            }
+        }
+
+        // Hasilkan properti peptida
+        function generatePeptideProperties(aminoAcids) {
+            const mass = aminoAcids.reduce((sum, a) => sum + a.mass, 0).toFixed(1);
+            const length = aminoAcids.length;
+            const charge = calculateNetCharge(aminoAcids);
+            const hydrophobicity = calculateHydrophobicity(aminoAcids).toFixed(2);
+            
+            return [
+                `Panjang: ${length} asam amino`,
+                `Massa: ${mass} Da`,
+                `Muatan bersih: ${charge}`,
+                `Hidrofobisitas: ${hydrophobicity}`
+            ];
+        }
+
+        // Helper functions
+        function getCategoryName(category) {
+            const names = {
+                "nonpolar": "nonpolar",
+                "polar": "polar",
+                "acidic": "asam",
+                "basic": "basa",
+                "aromatic": "aromatik",
+                "special": "khusus"
+            };
+            return names[category] || category;
+        }
+
+        function calculateNetCharge(aminoAcids) {
+            let charge = 0;
+            aminoAcids.forEach(a => {
+                if (a.charge.includes("Positif")) charge += a.charge.includes("+1") ? 1 : 0.5;
+                if (a.charge.includes("Negatif")) charge -= 1;
+            });
+            return charge > 0 ? `+${charge.toFixed(1)}` : charge.toFixed(1);
+        }
+
+        function calculateHydrophobicity(aminoAcids) {
+            const sum = aminoAcids.reduce((total, a) => total + a.hydrophobicity, 0);
+            return sum / aminoAcids.length;
+        }
+
+        // Tampilkan hasil sintesis
+        function displaySynthesisResult(peptide, aminoAcids) {
+            combineResult.style.display = 'block';
+            combineResult.innerHTML = `
+                <div class="mb-4">
+                    <h3 class="peptide-name">${peptide.name}</h3>
+                    <div class="peptide-sequence">${peptide.sequence}</div>
+                    <p class="peptide-description">${peptide.description}</p>
+                    <div class="text-xs text-gray-500 mb-3">
+                        <i class="fas fa-dna mr-1"></i> Tipe: ${peptide.type.toUpperCase()}
+                    </div>
+                </div>
+                
+                <div class="peptide-properties">
+                    ${peptide.properties.map(prop => `
+                        <div class="peptide-prop">
+                            <i class="fas fa-check text-green-500 mr-1"></i> ${prop}
+                        </div>
+                    `).join('')}
+                </div>
+                
+                <div class="mt-4">
+                    <h4 class="font-bold text-gray-700 mb-2 text-sm">Kode DNA:</h4>
+                    <div class="dna-sequence">
+                        ${generateDNASequence(aminoAcids)}
+                    </div>
+                </div>
+                
+                <div class="mt-4 text-xs text-gray-600">
+                    <p><i class="fas fa-lightbulb text-yellow-500 mr-1"></i> 
+                    ${getPeptideTip(peptide, aminoAcids)}</p>
+                </div>
+                
+                <button id="new-experiment" class="w-full mt-4 bg-teal-500 text-white py-2 rounded-lg font-bold">
+                    <i class="fas fa-redo mr-2"></i>Sintesis Baru
+                </button>
+            `;
+            
+            // Scroll ke hasil
+            combineResult.scrollIntoView({ behavior: 'smooth' });
+            
+            // Event listener untuk tombol sintesis baru
+            document.getElementById('new-experiment').addEventListener('click', () => {
+                selectedAminoAcids = [];
+                updateSelectedAminoDisplay();
+                updateCombineButton();
+                updateStatusMessage();
+                highlightSelectedAmino();
+                combineResult.style.display = 'none';
+            });
+        }
+
+        // Hasilkan urutan DNA dari asam amino
+        function generateDNASequence(aminoAcids) {
+            let dnaSequence = "";
+            aminoAcids.forEach(amino => {
+                // Ambil kodon pertama untuk setiap asam amino
+                const codon = amino.codon[0];
+                dnaSequence += codon + " ";
+            });
+            
+            return `<div class="font-mono">${dnaSequence.trim()}</div>`;
+        }
+
+        // Dapatkan tips tentang peptida
+        function getPeptideTip(peptide, aminoAcids) {
+            const tips = [
+                "Peptida ini dapat difungsikan sebagai ligan atau inhibitor.",
+                "Rantai pendek seperti ini sering ditemukan sebagai motif sinyal.",
+                "Stabilitas peptida bergantung pada urutan asam amino.",
+                "Peptida dapat dimodifikasi untuk meningkatkan stabilitas.",
+                "Sintesis peptida solid-phase digunakan untuk produksi skala lab."
+            ];
+            
+            // Tips khusus berdasarkan jenis peptida
+            if (peptide.type.includes("basic")) {
+                return "Peptida basa dapat berinteraksi dengan DNA/RNA karena muatan positif.";
+            } else if (peptide.type.includes("acidic")) {
+                return "Peptida asam bermuatan negatif pada pH fisiologis.";
+            } else if (peptide.type.includes("hydrophobic")) {
+                return "Peptida hidrofobik cenderung agregat atau masuk ke membran.";
+            }
+            
+            return tips[Math.floor(Math.random() * tips.length)];
+        }
+
+        // Tampilkan detail asam amino dalam modal
+        function showAminoDetails(amino) {
+            const categoryNames = {
+                "nonpolar": "Nonpolar (Alifatik)",
+                "polar": "Polar (Tak bermuatan)",
+                "acidic": "Asam (Bermuatan negatif)",
+                "basic": "Basa (Bermuatan positif)",
+                "aromatic": "Aromatik",
+                "special": "Khusus"
+            };
+            
+            modalBody.innerHTML = `
+                <div class="amino-detail-card" style="border-left-color: ${getCategoryColor(amino.category)}; background-color: ${getCategoryColor(amino.category, 0.1)}">
+                    <div class="flex items-center mb-4">
+                        <div class="amino-cell ${amino.colorClass} w-16 h-16 mr-4">
+                            <div class="amino-code">${amino.code}</div>
+                            <div class="amino-symbol text-xl">${amino.symbol}</div>
+                            <div class="amino-name">${amino.name}</div>
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-bold text-gray-800">${amino.name}</h2>
+                            <p class="text-gray-600 text-sm">${amino.symbol} • ${categoryNames[amino.category] || amino.category}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <div class="detail-row">
+                            <span class="detail-label">Kode 3-huruf:</span>
+                            <span class="detail-value">${amino.code}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Massa Molekul:</span>
+                            <span class="detail-value">${amino.mass} Da</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Kodon:</span>
+                            <span class="detail-value text-xs">${amino.codon.join(', ')}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Sifat:</span>
+                            <span class="detail-value">${amino.polarity}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Muatan:</span>
+                            <span class="detail-value">${amino.charge}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Hidrofobisitas:</span>
+                            <span class="detail-value">${amino.hydrophobicity}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 p-3 bg-gray-50 rounded-lg">
+                        <h4 class="font-bold text-gray-700 mb-1 text-sm">Fakta Menarik:</h4>
+                        <p class="text-xs text-gray-600">${getAminoFact(amino)}</p>
+                    </div>
+                    
+                    ${currentTab === 'combine' ? `
+                    <button id="select-for-synthesis" class="w-full mt-4 bg-teal-500 text-white py-2 rounded-lg font-bold">
+                        <i class="fas fa-plus mr-2"></i>Pilih untuk Sintesis
+                    </button>
+                    ` : ''}
+                </div>
+            `;
+            
+            // Tambahkan event listener untuk tombol pilih jika di mode combine
+            if (currentTab === 'combine') {
+                const selectBtn = document.getElementById('select-for-synthesis');
+                selectBtn.addEventListener('click', () => {
+                    selectAminoForSynthesis(amino);
+                    aminoModal.classList.add('hidden');
+                    
+                    // Switch ke tab combine jika belum
+                    if (currentTab !== 'combine') {
+                        switchTab('combine');
+                    }
+                });
+            }
+            
+            aminoModal.classList.remove('hidden');
+        }
+
+        // Tampilkan kode genetik
+        function showGeneticCode() {
+            let codonTable = '<div class="mb-4"><h2 class="text-xl font-bold text-gray-800 mb-2">Kode Genetik</h2>';
+            codonTable += '<p class="text-gray-600 text-sm mb-4">64 kodon untuk 20 asam amino + sinyal start/stop</p></div>';
+            
+            // Buat tabel kode genetik
+            const bases = ['U', 'C', 'A', 'G'];
+            let tableHTML = '<div class="overflow-x-auto"><table class="w-full text-xs border-collapse">';
+            tableHTML += '<tr><th class="border p-1 bg-gray-100">Posisi 1</th><th class="border p-1 bg-gray-100">Posisi 2</th><th class="border p-1 bg-gray-100">Posisi 3</th><th class="border p-1 bg-gray-100">Asam Amino</th></tr>';
+            
+            for (let base1 of bases) {
+                for (let base2 of bases) {
+                    for (let base3 of bases) {
+                        const codon = base1 + base2 + base3;
+                        const amino = geneticCode[codon] || '???';
+                        const aminoObj = aminoAcids.find(a => a.symbol === amino);
+                        const colorClass = aminoObj ? aminoObj.colorClass : 'bg-gray-200';
+                        
+                        tableHTML += `<tr>`;
+                        tableHTML += `<td class="border p-1 text-center font-bold ${getBaseColorClass(base1)}">${base1}</td>`;
+                        tableHTML += `<td class="border p-1 text-center font-bold ${getBaseColorClass(base2)}">${base2}</td>`;
+                        tableHTML += `<td class="border p-1 text-center font-bold ${getBaseColorClass(base3)}">${base3}</td>`;
+                        tableHTML += `<td class="border p-1 text-center ${colorClass} text-white font-bold">${amino}</td>`;
+                        tableHTML += `</tr>`;
+                    }
+                }
+            }
+            
+            tableHTML += '</table></div>';
+            
+            codonTable += tableHTML;
+            
+            codonTable += `<div class="mt-4 text-xs text-gray-500">
+                <p>• Kodon AUG = Metionin (Start)</p>
+                <p>• Kodon UAA, UAG, UGA = Stop</p>
+                <p>• Kode genetik hampir universal di semua organisme</p>
+            </div>`;
+            
+            codonModalBody.innerHTML = codonTable;
+            codonModal.classList.remove('hidden');
+        }
+
+        // Fungsi untuk berpindah tab
+        function switchTab(tabName) {
+            // Update tab aktif
+            tabs.forEach(tab => {
+                if (tab.dataset.tab === tabName) {
+                    tab.classList.add('active');
+                } else {
+                    tab.classList.remove('active');
+                }
+            });
+            
+            // Update konten tab aktif
+            tabContents.forEach(content => {
+                if (content.id === `${tabName}-tab`) {
+                    content.classList.add('active');
+                } else {
+                    content.classList.remove('active');
+                }
+            });
+            
+            currentTab = tabName;
+            
+            // Scroll ke atas
+            window.scrollTo(0, 0);
+        }
+
+        // Dapatkan warna berdasarkan kategori
+        function getCategoryColor(category, opacity = 1) {
+            const colors = {
+                "nonpolar": "#4caf50",
+                "polar": "#2196f3",
+                "acidic": "#f44336",
+                "basic": "#ff9800",
+                "aromatic": "#9c27b0",
+                "special": "#00bcd4"
+            };
+            
+            const color = colors[category] || "#cccccc";
+            if (opacity < 1) {
+                const r = parseInt(color.slice(1, 3), 16);
+                const g = parseInt(color.slice(3, 5), 16);
+                const b = parseInt(color.slice(5, 7), 16);
+                return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+            }
+            return color;
+        }
+
+        // Dapatkan kelas warna untuk basa nukleotida
+        function getBaseColorClass(base) {
+            switch(base) {
+                case 'A': return 'base-A';
+                case 'U': return 'base-T'; // U dalam RNA = T dalam DNA
+                case 'C': return 'base-C';
+                case 'G': return 'base-G';
+                default: return '';
+            }
+        }
+
+        // Dapatkan fakta menarik tentang asam amino
+        function getAminoFact(amino) {
+            const facts = {
+                "G": "Satu-satunya asam amino yang tidak memiliki rantai samping kiral.",
+                "P": "Memiliki rantai samping siklik yang membatasi fleksibilitas rantai utama.",
+                "M": "Selalu menjadi asam amino pertama dalam sintesis protein (kodon start).",
+                "C": "Dapat membentuk ikatan disulfida dengan sistein lain untuk stabilisasi protein.",
+                "W": "Asam amino terbesar dan paling kompleks, jarang ditemukan dalam protein.",
+                "H": "Sering ditemukan di situs aktif enzim karena dapat menerima dan mendonorkan proton.",
+                "K": "Memiliki rantai samping terpanjang di antara asam amino bermuatan positif.",
+                "D": "Bersama E, bertanggung jawab untuk muatan negatif pada banyak protein."
+            };
+            
+            return facts[amino.symbol] || `${amino.name} adalah asam amino ${amino.category} yang penting untuk struktur protein.`;
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Tutup modal
+            closeModalBtn.addEventListener('click', () => {
+                aminoModal.classList.add('hidden');
+            });
+            
+            closeCodonModalBtn.addEventListener('click', () => {
+                codonModal.classList.add('hidden');
+            });
+            
+            // Tutup modal dengan klik di luar konten
+            aminoModal.addEventListener('click', (e) => {
+                if (e.target === aminoModal) {
+                    aminoModal.classList.add('hidden');
+                }
+            });
+            
+            codonModal.addEventListener('click', (e) => {
+                if (e.target === codonModal) {
+                    codonModal.classList.add('hidden');
+                }
+            });
+            
+            // Tutup modal dengan tombol ESC
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    if (!aminoModal.classList.contains('hidden')) {
+                        aminoModal.classList.add('hidden');
+                    }
+                    if (!codonModal.classList.contains('hidden')) {
+                        codonModal.classList.add('hidden');
+                    }
+                }
+            });
+            
+            // Pencarian asam amino
+            searchInput.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase().trim();
+                
+                // Sembunyikan semua asam amino dulu
+                document.querySelectorAll('.amino-cell').forEach(cell => {
+                    if (cell.dataset.symbol) {
+                        cell.style.opacity = '0.3';
+                        cell.style.transform = 'scale(0.95)';
+                    }
+                });
+                
+                // Jika kosong, tampilkan semua
+                if (!searchTerm) {
+                    document.querySelectorAll('.amino-cell').forEach(cell => {
+                        if (cell.dataset.symbol) {
+                            cell.style.opacity = '1';
+                            cell.style.transform = 'scale(1)';
+                        }
+                    });
+                    return;
+                }
+                
+                // Tampilkan asam amino yang cocok
+                let found = false;
+                aminoAcids.forEach(amino => {
+                    if (amino.symbol.toLowerCase().includes(searchTerm) || 
+                        amino.name.toLowerCase().includes(searchTerm) ||
+                        amino.code.toLowerCase().includes(searchTerm)) {
+                        
+                        const cells = document.querySelectorAll(`[data-symbol="${amino.symbol}"]`);
+                        cells.forEach(cell => {
+                            cell.style.opacity = '1';
+                            cell.style.transform = 'scale(1.05)';
+                            cell.style.zIndex = '10';
+                            cell.style.boxShadow = '0 0 8px rgba(0,0,0,0.2)';
+                        });
+                        found = true;
+                    }
+                });
+                
+                // Jika tidak ditemukan, reset semua
+                if (!found) {
+                    document.querySelectorAll('.amino-cell').forEach(cell => {
+                        if (cell.dataset.symbol) {
+                            cell.style.opacity = '1';
+                            cell.style.transform = 'scale(1)';
+                            cell.style.zIndex = '1';
+                            cell.style.boxShadow = '';
+                        }
+                    });
+                }
+            });
+            
+            // Fokus pada input pencarian dengan shortcut Ctrl+F
+            document.addEventListener('keydown', (e) => {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+                    e.preventDefault();
+                    searchInput.focus();
+                }
+            });
+            
+            // Tombol untuk kode genetik
+            showCodonsBtn.addEventListener('click', showGeneticCode);
+            
+            // Tombol untuk sistem sintesis
+            combineBtn.addEventListener('click', synthesizePeptide);
+            
+            clearBtn.addEventListener('click', () => {
+                selectedAminoAcids = [];
+                updateSelectedAminoDisplay();
+                updateCombineButton();
+                updateStatusMessage();
+                highlightSelectedAmino();
+                combineResult.style.display = 'none';
+                showStatusMessage("Semua asam amino telah dihapus", "info");
+            });
+            
+            // Tab switching
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    switchTab(tab.dataset.tab);
+                });
+            });
+        }
+
+        // Inisialisasi ketika halaman dimuat
+        document.addEventListener('DOMContentLoaded', initAminoTable);
+    </script>
+</body>
+</html>

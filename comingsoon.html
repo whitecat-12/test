@@ -8,391 +8,371 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --primary: #38b2ac;
-            --secondary: #0e7490;
-            --accent: #f59e0b;
-            --physics: #3b82f6;
-            --chemistry: #10b981;
-            --biology: #8b5cf6;
-            --astronomy: #ec4899;
-        }
-        
         body {
             font-family: 'Baloo 2', cursive;
-            background-color: #f8fafc;
-        }
-        
-        .app-container {
-            max-width: 414px;
-            margin: 0 auto;
-            background: white;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            position: relative;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
-        }
-        
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            max-width: 414px;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
-            background: white;
-            z-index: 10;
-            height: 70px;
             display: flex;
-            align-items: center;
-        }
-        
-        .nav-item {
-            display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            color: #6b7280;
-            text-decoration: none;
-            flex: 1;
-            height: 100%;
-            padding: 0.5rem 0;
-            transition: all 0.3s ease;
+            padding: 20px;
         }
         
-        .nav-item span {
-            font-size: 0.75rem;
-            margin-top: 0.25rem;
+        .coming-soon-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 40px 30px;
+            text-align: center;
+            max-width: 500px;
+            width: 100%;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            animation: fadeIn 0.5s ease;
         }
         
-        .nav-item.active {
-            color: var(--primary);
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
-        .nav-icon {
-            transition: all 0.3s ease;
-            font-size: 1.25rem;
-        }
-        
-        .nav-icon.active {
-            transform: translateY(-5px);
-            color: var(--primary);
-        }
-        
-        .floating-btn {
-            animation: float 4s ease-in-out infinite;
-        }
-        
-        @keyframes float {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
-            100% { transform: translateY(0px); }
-        }
-        
-        .bounce {
-            animation: bounce 2s infinite;
-        }
-        
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-5px); }
-        }
-        
-        .islamic-pattern {
-            background-image: radial-gradient(rgba(56, 178, 172, 0.1) 1px, transparent 1px);
-            background-size: 20px 20px;
-        }
-        
-        .coming-soon-icon {
-            width: 120px;
-            height: 120px;
+        .logo {
+            background: #9999ff;
+            color: white;
+            width: 80px;
+            height: 80px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 48px;
-            margin: 0 auto;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-            position: relative;
-            overflow: hidden;
+            margin: 0 auto 20px;
+            font-size: 36px;
         }
         
-        .coming-soon-icon::after {
-            content: '';
-            position: absolute;
-            top: -5px;
-            left: -5px;
-            right: -5px;
-            bottom: -5px;
-            border-radius: 50%;
-            border: 2px dashed currentColor;
-            opacity: 0.3;
-            animation: spin 10s linear infinite;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        .progress-container {
-            width: 100%;
-            height: 8px;
-            background-color: #e5e7eb;
-            border-radius: 4px;
-            overflow: hidden;
-            margin: 20px 0;
-        }
-        
-        .progress-bar {
-            height: 100%;
-            border-radius: 4px;
-            transition: width 0.5s ease;
-            background: linear-gradient(90deg, #9999ff, #b399ff, #d1b3ff);
+        .countdown {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 30px 0;
         }
         
         .countdown-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
             background: white;
-            border-radius: 12px;
-            padding: 12px;
-            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
-            min-width: 60px;
+            border-radius: 10px;
+            padding: 15px;
+            min-width: 70px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
         
         .countdown-value {
-            font-size: 1.5rem;
+            font-size: 28px;
             font-weight: 700;
-            color: #9999ff;
+            color: #667eea;
+            line-height: 1;
         }
         
         .countdown-label {
-            font-size: 0.75rem;
-            color: #6b7280;
-            margin-top: 4px;
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
         }
         
-        .app-logo {
+        .progress-bar {
+            height: 6px;
+            background: #e0e0e0;
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 30px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(to right, #667eea, #764ba2);
+            width: 0%;
+            border-radius: 3px;
+            transition: width 1s ease;
+        }
+        
+        .time-info {
+            color: #666;
+            font-size: 14px;
+            margin-top: 20px;
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .feature-list {
+            text-align: left;
+            background: #f8f9ff;
+            border-radius: 10px;
+            padding: 15px;
+            margin: 20px 0;
+            border-left: 4px solid #667eea;
+        }
+        
+        .feature-item {
             display: flex;
             align-items: center;
+            margin-bottom: 8px;
+            font-size: 14px;
         }
         
-        .app-logo-icon {
-            background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+        .feature-item i {
+            color: #667eea;
+            margin-right: 10px;
+            font-size: 16px;
+        }
+        
+        .night-theme {
+            background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%);
+        }
+        
+        .night-theme .coming-soon-container {
+            background: rgba(30, 41, 59, 0.95);
+            color: #f8fafc;
+        }
+        
+        .night-theme .countdown-item {
+            background: #334155;
             color: white;
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 8px;
         }
         
-        .app-name {
-            font-weight: 700;
-            font-size: 1.25rem;
+        .night-theme .countdown-value {
             color: #60a5fa;
         }
         
-        @media (max-width: 414px) {
-            .bottom-nav {
-                height: 65px;
-            }
-            
-            .nav-icon {
-                font-size: 1.1rem;
-            }
+        .night-theme .countdown-label {
+            color: #cbd5e1;
+        }
+        
+        .night-theme .feature-list {
+            background: #1e293b;
+            border-left-color: #60a5fa;
+            color: #e2e8f0;
+        }
+        
+        .night-theme .feature-item i {
+            color: #60a5fa;
+        }
+        
+        .night-theme h1, 
+        .night-theme h2, 
+        .night-theme h3,
+        .night-theme p {
+            color: #f8fafc;
+        }
+        
+        .night-theme .text-gray-600,
+        .night-theme .text-gray-800 {
+            color: #e2e8f0 !important;
+        }
+        
+        .night-theme .bg-blue-50 {
+            background: rgba(30, 64, 175, 0.3);
+            border-color: #1e40af;
         }
     </style>
 </head>
 <body>
-    <!-- Mobile App Container -->
-    <div class="app-container">
-        <!-- App Header -->
-        <header class="bg-gradient-to-r from-primary to-secondary p-4 text-white">
-            <div class="flex justify-between items-center">
-                <div class="app-logo">
-                    <div class="app-logo-icon" style="background: #9999ff; color: white;">
-                        <i class="fas fa-atom"></i>
-                    </div>
-                    <h1 class="app-name" style="color: #9999ff;">TETA SAINS</h1>
+    <div class="coming-soon-container">
+        <div class="logo pulse">
+            <i class="fas fa-moon"></i>
+        </div>
+        
+        <h1 class="text-3xl font-bold text-gray-800 mb-2">QUANTARA</h1>
+        <p class="text-lg text-gray-600 mb-6">Persiapan Peluncuran</p>
+        
+        <div class="text-gray-700 mb-8">
+            <h2 class="text-xl font-bold text-gray-800 mb-3">Coming Soon!</h2>
+            <p class="mb-4">Server masih 70 persen beroperasi, beroperasi penuh untuk pukul 19.00 WIB.</p>
+            
+            <div class="feature-list">
+                <h3 class="font-bold text-gray-800 mb-3 flex items-center">
+                    <i class="fas fa-tools mr-2"></i>Fitur yang Sedang Dikembangkan:
+                </h3>
+                <div class="feature-item">
+                    <i class="fas fa-cube"></i>
+                    <span><strong>3D AR Category Builder</strong> - Pembelajaran interaktif dengan augmented reality</span>
                 </div>
-                <div class="flex items-center space-x-3">
-                    <i class="fas fa-search"></i>
-                    <i class="fas fa-user-circle text-xl"></i>
+                <div class="feature-item">
+                    <i class="fas fa-vr-cardboard"></i>
+                    <span><strong>Update 3D VR Biologi Molekuler</strong> - Eksplorasi virus dalam virtual reality</span>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-clock"></i>
+                    <span><strong>Waktu Real-time</strong> - Update dan simulasi waktu nyata</span>
+                </div>
+                <div class="feature-item">
+                    <i class="fas fa-dna"></i>
+                    <span><strong>Simulasi Interaktif</strong> - Interaksi dengan struktur virus secara detail</span>
                 </div>
             </div>
-        </header>
+            
+            <p class="text-sm bg-blue-50 p-3 rounded-lg border border-blue-200 mt-4">
+                <i class="fas fa-clock text-blue-500 mr-2"></i>
+                Materi akan tersedia pada pukul <span class="font-bold text-blue-600">19:00 WIB</span> (7 malam)
+            </p>
+        </div>
         
-        <!-- Main Content Area -->
-        <main class="pb-20 islamic-pattern">
-            <!-- Coming Soon Content -->
-            <section class="p-6 flex flex-col items-center justify-center min-h-[70vh]">
-                <div class="coming-soon-icon bg-gradient-to-br from-purple-100 to-blue-100 text-purple-500 mb-6">
-                    <i class="fas fa-rocket"></i>
-                </div>
-                
-                <h2 class="text-2xl font-bold text-center text-gray-800 mb-2">Fitur Segera Hadir!</h2>
-                <p class="text-center text-gray-600 mb-6">
-                    Kami sedang mengembangkan fitur ini dengan penuh semangat. 
-                    Tunggu sebentar ya, akan segera tersedia!
-                </p>
-                
-                <!-- Progress Bar -->
-                <div class="w-full mb-8">
-                    <div class="flex justify-between text-sm text-gray-600 mb-1">
-                        <span>Status Pengembangan</span>
-                        <span id="progress-percentage">65%</span>
-                    </div>
-                    <div class="progress-container">
-                        <div id="progress-bar" class="progress-bar" style="width: 65%"></div>
-                    </div>
-                </div>
-                
-                <!-- Countdown Timer -->
-                <div class="mb-8">
-                    <h3 class="text-center text-lg font-semibold text-gray-700 mb-4">Perkiraan Waktu Rilis</h3>
-                    <div class="flex space-x-4">
-                        <div class="countdown-item">
-                            <div id="days" class="countdown-value">14</div>
-                            <div class="countdown-label">Hari</div>
-                        </div>
-                        <div class="countdown-item">
-                            <div id="hours" class="countdown-value">08</div>
-                            <div class="countdown-label">Jam</div>
-                        </div>
-                        <div class="countdown-item">
-                            <div id="minutes" class="countdown-value">45</div>
-                            <div class="countdown-label">Menit</div>
-                        </div>
-                        <div class="countdown-item">
-                            <div id="seconds" class="countdown-value">30</div>
-                            <div class="countdown-label">Detik</div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Notification Form -->
-                <div class="w-full bg-white rounded-xl shadow-md p-4 border border-gray-200">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-2">Ingin Diberitahu Saat Sudah Rilis?</h3>
-                    <p class="text-sm text-gray-600 mb-4">
-                        Masukkan email Anda dan kami akan mengirimkan pemberitahuan ketika fitur ini sudah tersedia.
-                    </p>
-                    <div class="flex">
-                        <input type="email" placeholder="Alamat email Anda" class="flex-1 border border-gray-300 rounded-l-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500">
-                        <button class="bg-gradient-to-r from-purple-500 to-blue-500 text-white px-4 py-2 rounded-r-lg font-medium hover:opacity-90 transition">
-                            Kirim
-                        </button>
-                    </div>
-                </div>
-                
-                <!-- Back Button -->
-                <a href="dashboad siswa.html" class="mt-8 w-full py-3 bg-gradient-to-r from-purple-500 to-blue-500 text-white rounded-lg text-center font-medium flex items-center justify-center">
-                    <i class="fas fa-arrow-left mr-2"></i> Kembali ke Beranda
-                </a>
-            </section>
-        </main>
+        <div class="countdown">
+            <div class="countdown-item">
+                <div class="countdown-value" id="hours">00</div>
+                <div class="countdown-label">Jam</div>
+            </div>
+            <div class="countdown-item">
+                <div class="countdown-value" id="minutes">00</div>
+                <div class="countdown-label">Menit</div>
+            </div>
+            <div class="countdown-item">
+                <div class="countdown-value" id="seconds">00</div>
+                <div class="countdown-label">Detik</div>
+            </div>
+        </div>
         
-        <!-- Bottom Navigation -->
-        <nav class="bottom-nav">
-            <a href="dashboard siswa.html" class="nav-item">
-                <i class="fas fa-home nav-icon"></i>
-                <span>Beranda</span>
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress"></div>
+        </div>
+        
+        <div class="time-info">
+            <i class="fas fa-info-circle text-blue-500 mr-2"></i>
+            <span id="time-message">Menunggu waktu yang ditentukan...</span>
+        </div>
+        
+        <div class="mt-8 pt-6 border-t border-gray-200">
+            <a href="../dashboard siswa.html" 
+               class="inline-flex items-center gap-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white px-6 py-3 rounded-full font-bold hover:shadow-lg transition-all">
+                <i class="fas fa-home"></i>
+                Kembali ke Beranda
             </a>
-            <a href="soal harian/dashboard soal.html" class="nav-item">
-                <i class="fas fa-flask nav-icon"></i>
-                <span>Soal Harian</span>
-            </a>
-            <a href="ai/nayra.html" class="nav-item">
-                <i class="fas fa-robot nav-icon"></i>
-                <span>Nayra AI</span>
-            </a>
-            <a href="materi harian/kategori materi.html" class="nav-item">
-                <i class="fas fa-chalkboard-teacher nav-icon"></i>
-                <span>Materi Harian</span>
-            </a>
-            <a href="profil/profil.html" class="nav-item">
-                <i class="fas fa-user nav-icon"></i>
-                <span>Profil</span>
-            </a>
-        </nav>
+        </div>
     </div>
 
     <script>
-        // Countdown Timer
+        // Waktu target: pukul 19:00 (7 malam) hari ini
+        const now = new Date();
+        const targetTime = new Date();
+        targetTime.setHours(19, 0, 0, 0); // 7 malam
+        
+        // Jika sudah lewat pukul 19:00 hari ini, targetkan pukul 19:00 besok
+        if (now > targetTime) {
+            targetTime.setDate(targetTime.getDate() + 1);
+        }
+        
+        // Cek apakah sekarang sudah malam (setelah jam 18:00)
+        function isNightTime() {
+            const currentHour = now.getHours();
+            return currentHour >= 18 || currentHour < 6;
+        }
+        
+        // Terapkan tema malam jika waktu malam
+        if (isNightTime()) {
+            document.body.classList.add('night-theme');
+            document.querySelector('.logo i').className = 'fas fa-moon';
+        }
+        
         function updateCountdown() {
-            // Set target date (14 days from now)
-            const targetDate = new Date();
-            targetDate.setDate(targetDate.getDate() + 14);
+            const now = new Date();
+            const diff = targetTime - now;
             
-            const now = new Date().getTime();
-            const distance = targetDate - now;
+            // Jika waktu sudah tercapai
+            if (diff <= 0) {
+                document.getElementById('hours').textContent = '00';
+                document.getElementById('minutes').textContent = '00';
+                document.getElementById('seconds').textContent = '00';
+                document.getElementById('progress').style.width = '100%';
+                document.getElementById('time-message').innerHTML = 
+                    '<span class="text-green-600 font-bold">Materi sudah tersedia! <a href="#" class="underline" onclick="location.reload()">Muat ulang halaman</a></span>';
+                return;
+            }
             
-            // Calculate days, hours, minutes, seconds
-            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            // Hitung jam, menit, detik
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
             
-            // Update display
-            document.getElementById("days").textContent = days.toString().padStart(2, '0');
-            document.getElementById("hours").textContent = hours.toString().padStart(2, '0');
-            document.getElementById("minutes").textContent = minutes.toString().padStart(2, '0');
-            document.getElementById("seconds").textContent = seconds.toString().padStart(2, '0');
+            // Update tampilan
+            document.getElementById('hours').textContent = hours.toString().padStart(2, '0');
+            document.getElementById('minutes').textContent = minutes.toString().padStart(2, '0');
+            document.getElementById('seconds').textContent = seconds.toString().padStart(2, '0');
             
-            // If the countdown is over
-            if (distance < 0) {
-                clearInterval(countdownTimer);
-                document.querySelector(".countdown-item").innerHTML = "<div class='text-green-500 font-bold'>Sudah Rilis!</div>";
+            // Hitung progress (dari pukul 00:00 sampai 19:00)
+            const totalDayMs = 19 * 60 * 60 * 1000; // 19 jam dalam milidetik
+            const timeSinceMidnight = now.getHours() * 60 * 60 * 1000 + 
+                                     now.getMinutes() * 60 * 1000 + 
+                                     now.getSeconds() * 1000;
+            
+            let progress = 0;
+            if (now.getHours() < 19) {
+                progress = (timeSinceMidnight / totalDayMs) * 100;
+            } else {
+                progress = 100;
+            }
+            
+            document.getElementById('progress').style.width = `${progress}%`;
+            
+            // Update pesan
+            if (hours > 0) {
+                document.getElementById('time-message').textContent = 
+                    `Materi akan tersedia dalam ${hours} jam ${minutes} menit`;
+            } else if (minutes > 0) {
+                document.getElementById('time-message').textContent = 
+                    `Materi akan tersedia dalam ${minutes} menit ${seconds} detik`;
+            } else {
+                document.getElementById('time-message').textContent = 
+                    `Materi akan tersedia dalam ${seconds} detik`;
             }
         }
         
-        // Initialize countdown
-        let countdownTimer = setInterval(updateCountdown, 1000);
+        // Update setiap detik
         updateCountdown();
+        setInterval(updateCountdown, 1000);
         
-        // Animated progress bar
-        function animateProgressBar() {
-            const progressBar = document.getElementById('progress-bar');
-            const progressPercentage = document.getElementById('progress-percentage');
-            
-            let width = 65;
-            const targetWidth = 100;
-            const interval = setInterval(() => {
-                if (width >= targetWidth) {
-                    clearInterval(interval);
-                    return;
+        // Tambahkan efek ketik pada pesan fitur
+        const featureText = "3D AR Category Builder sedang dalam perkembangan, akan ada update 3D VR untuk biologi molekuler, dan buat waktunya bisa realtime";
+        
+        function typeFeatureText() {
+            const timeMessage = document.getElementById('time-message');
+            let i = 0;
+            const typingInterval = setInterval(() => {
+                if (i < featureText.length) {
+                    timeMessage.textContent = featureText.substring(0, i + 1);
+                    i++;
+                } else {
+                    clearInterval(typingInterval);
+                    // Setelah selesai, kembali ke countdown normal setelah 5 detik
+                    setTimeout(() => {
+                        updateCountdown();
+                        setInterval(updateCountdown, 1000);
+                    }, 5000);
                 }
-                
-                width += 0.5;
-                progressBar.style.width = width + '%';
-                progressPercentage.textContent = Math.floor(width) + '%';
-            }, 100);
+            }, 50);
         }
         
-        // Start animation after page loads
-        window.addEventListener('load', () => {
-            setTimeout(animateProgressBar, 1000);
-        });
+        // Mulai efek ketik pada pesan fitur setelah 2 detik
+        setTimeout(typeFeatureText, 2000);
         
-        // Bottom navigation interaction
-        document.addEventListener('DOMContentLoaded', function() {
-            const navItems = document.querySelectorAll('.nav-item');
-            
-            navItems.forEach(item => {
-                item.addEventListener('click', function() {
-                    navItems.forEach(nav => {
-                        nav.classList.remove('active');
-                        nav.querySelector('.nav-icon').classList.remove('active');
-                    });
-                    
-                    this.classList.add('active');
-                    this.querySelector('.nav-icon').classList.add('active');
-                });
-            });
-        });
+        // Efek ketik pada judul
+        const title = document.querySelector('h1');
+        const originalText = title.textContent;
+        title.textContent = '';
+        
+        let i = 0;
+        function typeWriter() {
+            if (i < originalText.length) {
+                title.textContent += originalText.charAt(i);
+                i++;
+                setTimeout(typeWriter, 100);
+            }
+        }
+        
+        // Mulai efek ketik pada judul
+        setTimeout(typeWriter, 100);
     </script>
 </body>
 </html>

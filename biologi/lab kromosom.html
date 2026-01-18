@@ -1,1 +1,2015 @@
 
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TETA SAINS - Lab Kromosom</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #8b5cf6;
+            --secondary: #7c3aed;
+            --accent: #10b981;
+        }
+        
+        body {
+            font-family: 'Baloo 2', cursive;
+            background-color: #f8fafc;
+        }
+        
+        .app-container {
+            max-width: 414px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        /* NAVBAR - TIDAK DIRUBAH */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            max-width: 414px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            background: white;
+            z-index: 10;
+            height: 70px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+            text-decoration: none;
+            flex: 1;
+            height: 100%;
+            padding: 0.5rem 0;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item span {
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
+        
+        .nav-item.active {
+            color: var(--primary);
+        }
+        
+        .nav-icon {
+            transition: all 0.3s ease;
+            font-size: 1.25rem;
+        }
+        
+        .nav-icon.active {
+            transform: translateY(-5px);
+            color: var(--primary);
+        }
+        
+        /* CHROMOSOME STYLES */
+        .chromosome-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            padding: 10px;
+        }
+        
+        .chromosome-pair {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border-left: 4px solid var(--primary);
+        }
+        
+        .chromosome-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .chromosome-title {
+            font-weight: 700;
+            font-size: 16px;
+            color: #4f46e5;
+        }
+        
+        .chromosome-number {
+            background: var(--primary);
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .chromosome-visual {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 15px 0;
+            position: relative;
+        }
+        
+        .chromosome-arm {
+            width: 60px;
+            height: 120px;
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            border-radius: 30px;
+            position: relative;
+            margin: 0 5px;
+        }
+        
+        .chromosome-centromere {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            background: #10b981;
+            border-radius: 50%;
+            z-index: 2;
+            border: 3px solid white;
+            box-shadow: 0 0 0 2px #10b981;
+        }
+        
+        .chromosome-info {
+            font-size: 12px;
+            color: #666;
+            line-height: 1.4;
+        }
+        
+        .gene-marker {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            border: 2px solid white;
+            box-shadow: 0 0 0 1px rgba(0,0,0,0.2);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .gene-marker:hover {
+            transform: translate(-50%, -50%) scale(1.3);
+            z-index: 10;
+        }
+        
+        /* Legend styles */
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+            margin-right: 8px;
+            flex-shrink: 0;
+        }
+        
+        /* Modal styles */
+        .gene-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            padding: 20px;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            max-width: 350px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+        
+        .app-logo {
+            display: flex;
+            align-items: center;
+        }
+        
+        .app-logo-icon {
+            background: #9999ff;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 8px;
+        }
+        
+        .app-name {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: #9999ff;
+        }
+        
+        /* Gene detail styles */
+        .gene-detail-card {
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 10px;
+        }
+        
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .detail-label {
+            font-weight: 600;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .detail-value {
+            font-weight: 700;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        /* Scrollbar styling */
+        .chromosome-container::-webkit-scrollbar {
+            height: 6px;
+        }
+        
+        .chromosome-container::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+        
+        .chromosome-container::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+        
+        /* Tab Styles */
+        .tab-container {
+            display: flex;
+            background: #f1f5f9;
+            border-radius: 10px;
+            padding: 5px;
+            margin-bottom: 15px;
+        }
+        
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 8px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+        
+        .tab.active {
+            background: white;
+            color: #4f46e5;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Cell Division Animation - IMPROVED */
+        .cell-division-container {
+            width: 100%;
+            height: 220px;
+            position: relative;
+            background: #f8fafc;
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 15px 0;
+        }
+        
+        .cell {
+            position: absolute;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            transition: all 1s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border: 2px solid white;
+        }
+        
+        .cell::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(255,255,255,0.4), transparent);
+        }
+        
+        .chromosome-in-cell {
+            position: absolute;
+            width: 6px;
+            height: 16px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 3px;
+            transition: all 1s ease;
+        }
+        
+        .sister-chromatids {
+            display: flex;
+            gap: 2px;
+            position: absolute;
+        }
+        
+        .sister-chromatid {
+            width: 4px;
+            height: 12px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 2px;
+        }
+        
+        .division-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .division-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            flex: 1;
+            min-width: 100px;
+            text-align: center;
+        }
+        
+        .division-btn:hover:not(:disabled) {
+            background: var(--secondary);
+        }
+        
+        .division-btn:disabled {
+            background: #cbd5e1;
+            cursor: not-allowed;
+        }
+        
+        /* Phase indicators */
+        .phase-indicators {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        
+        .phase-indicator {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #e2e8f0;
+            transition: all 0.3s;
+        }
+        
+        .phase-indicator.active {
+            background: var(--primary);
+            transform: scale(1.2);
+            box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.2);
+        }
+        
+        /* Division info panel */
+        .division-info-panel {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+        }
+        
+        .division-phase-details {
+            margin-top: 10px;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        
+        /* Inheritance Simulator */
+        .inheritance-panel {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+        }
+        
+        .parent-traits {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 15px;
+        }
+        
+        .parent-box {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px;
+            border-radius: 8px;
+            width: 48%;
+        }
+        
+        .trait-option {
+            background: white;
+            color: #333;
+            padding: 8px;
+            border-radius: 6px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+        
+        .trait-option.selected {
+            background: #fbbf24;
+            color: #000;
+            font-weight: bold;
+        }
+        
+        .offspring-result {
+            background: white;
+            color: #333;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            display: none;
+        }
+        
+        .offspring-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .offspring-item {
+            background: #f3f4f6;
+            padding: 8px;
+            border-radius: 6px;
+            text-align: center;
+            font-size: 12px;
+        }
+        
+        /* Color coding for chromosomes */
+        .autosome { border-left-color: #4f46e5; }
+        .sex-chromosome { border-left-color: #ec4899; }
+        
+        .chromosome-arm.autosome { background: linear-gradient(135deg, #4f46e5, #6366f1); }
+        .chromosome-arm.sex-chromosome { background: linear-gradient(135deg, #ec4899, #f472b6); }
+        
+        /* Gene color coding */
+        .gene-color-1 { background-color: #ef4444; }
+        .gene-color-2 { background-color: #f59e0b; }
+        .gene-color-3 { background-color: #10b981; }
+        .gene-color-4 { background-color: #3b82f6; }
+        .gene-color-5 { background-color: #8b5cf6; }
+    </style>
+</head>
+<body>
+    <!-- Mobile App Container -->
+    <div class="app-container">
+        <!-- App Header -->
+        <header class="bg-gradient-to-r from-primary to-secondary p-4 text-white">
+            <div class="flex justify-between items-center">
+                <div class="app-logo">
+                    <div class="app-logo-icon">
+                        <i class="fas fa-dna"></i>
+                    </div>
+                    <h1 class="app-name">QUANTARA</h1>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-search"></i>
+                    <i class="fas fa-user-circle text-xl"></i>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Main Content -->
+        <main class="pb-24 p-4">
+            <!-- Page Title -->
+            <div class="mb-4">
+                <h1 class="text-xl font-bold text-gray-800 mb-1">
+                    <i class="fas fa-dna text-purple-500 mr-2"></i> Lab Kromosom
+                </h1>
+                <p class="text-gray-600 text-sm">
+                    Simulasi struktur kromosom manusia dan pewarisan sifat
+                </p>
+            </div>
+            
+            <!-- Tabs -->
+            <div class="tab-container">
+                <div class="tab active" data-tab="chromosomes">Kromosom</div>
+                <div class="tab" data-tab="division">Pembelahan Sel</div>
+                <div class="tab" data-tab="inheritance">Pewarisan Sifat</div>
+            </div>
+            
+            <!-- Tab Content: Chromosomes -->
+            <div id="chromosomes-tab" class="tab-content active">
+                <!-- Search Bar -->
+                <div class="mb-4">
+                    <div class="relative">
+                        <input type="text" id="search-chromosome" placeholder="Cari kromosom atau gen..." 
+                               class="w-full p-3 pl-10 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm">
+                        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    </div>
+                </div>
+                
+                <!-- Kromosom Manusia -->
+                <div class="mb-6">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="font-bold text-gray-700 text-sm flex items-center">
+                            <i class="fas fa-dna text-purple-500 mr-2 text-xs"></i> Kromosom Manusia
+                        </h3>
+                        <div class="text-xs text-gray-500">
+                            <span id="total-chromosomes">23</span> pasang
+                        </div>
+                    </div>
+                    
+                    <div class="chromosome-container" id="chromosome-container">
+                        <!-- Kromosom akan dibuat oleh JavaScript -->
+                    </div>
+                    
+                    <div class="text-center mt-4">
+                        <button id="show-all-chromosomes" class="text-xs bg-purple-100 text-purple-700 px-3 py-1 rounded-full">
+                            <i class="fas fa-expand mr-1"></i> Tampilkan Semua Kromosom
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Legend -->
+                <div class="mb-6 p-3 bg-gray-50 rounded-xl">
+                    <h3 class="font-bold text-gray-700 mb-2 text-sm">Kategori Kromosom:</h3>
+                    <div class="grid grid-cols-2 gap-1">
+                        <div class="legend-item">
+                            <div class="legend-color" style="background-color: #4f46e5;"></div>
+                            <span class="text-xs">Autosom (1-22)</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background-color: #ec4899;"></div>
+                            <span class="text-xs">Kromosom Seks (X/Y)</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background-color: #10b981;"></div>
+                            <span class="text-xs">Sentromer</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background-color: #ef4444;"></div>
+                            <span class="text-xs">Gen Dominan</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color" style="background-color: #3b82f6;"></div>
+                            <span class="text-xs">Gen Resesif</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tab Content: Cell Division - IMPROVED -->
+            <div id="division-tab" class="tab-content">
+                <div class="mb-6">
+                    <h3 class="font-bold text-gray-700 mb-3 text-sm flex items-center">
+                        <i class="fas fa-divide text-green-500 mr-2 text-xs"></i> Simulasi Pembelahan Sel
+                    </h3>
+                    
+                    <!-- Phase Indicators -->
+                    <div class="phase-indicators">
+                        <div class="phase-indicator" data-phase="interphase" title="Interfase"></div>
+                        <div class="phase-indicator" data-phase="prophase" title="Profase"></div>
+                        <div class="phase-indicator" data-phase="metaphase" title="Metafase"></div>
+                        <div class="phase-indicator" data-phase="anaphase" title="Anafase"></div>
+                        <div class="phase-indicator" data-phase="telophase" title="Telofase"></div>
+                    </div>
+                    
+                    <div class="cell-division-container" id="cell-division-container">
+                        <!-- Cell animation akan dibuat oleh JavaScript -->
+                    </div>
+                    
+                    <div class="text-center">
+                        <div class="text-sm font-bold text-gray-700 mb-1" id="division-stage">
+                            Tahap: Interfase
+                        </div>
+                        <div class="text-xs text-gray-600 mb-2" id="division-description">
+                            Sel belum membelah, kromosom dalam bentuk benang kromatin
+                        </div>
+                        
+                        <div class="division-controls">
+                            <button id="prev-phase" class="division-btn bg-blue-500">
+                                <i class="fas fa-backward mr-1"></i> Sebelumnya
+                            </button>
+                            <button id="next-phase" class="division-btn bg-green-500">
+                                <i class="fas fa-forward mr-1"></i> Berikutnya
+                            </button>
+                            <button id="start-mitosis" class="division-btn">
+                                <i class="fas fa-play mr-1"></i> Otomatis Mitosis
+                            </button>
+                            <button id="start-meiosis" class="division-btn bg-pink-500">
+                                <i class="fas fa-play mr-1"></i> Otomatis Meiosis
+                            </button>
+                            <button id="reset-division" class="division-btn bg-gray-500">
+                                <i class="fas fa-redo mr-1"></i> Reset
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Division Info Panel -->
+                    <div class="division-info-panel mt-4">
+                        <h4 class="font-bold text-lg mb-2 flex items-center">
+                            <i class="fas fa-info-circle mr-2"></i> Informasi Tahap Pembelahan
+                        </h4>
+                        <div class="division-phase-details" id="phase-details">
+                            <p><span class="font-bold">Interfase:</span> Fase persiapan dimana sel tumbuh dan DNA direplikasi.</p>
+                            <p><span class="font-bold">Profase:</span> Kromosom memadat, membran inti mulai menghilang.</p>
+                            <p><span class="font-bold">Metafase:</span> Kromosom berjajar di bidang ekuator sel.</p>
+                            <p><span class="font-bold">Anafase:</span> Kromatid saudara berpisah ke kutub berlawanan.</p>
+                            <p><span class="font-bold">Telofase:</span> Membran inti terbentuk kembali, sitokinesis terjadi.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 p-3 bg-purple-50 rounded-xl">
+                        <h4 class="font-bold text-gray-700 mb-1 text-sm flex items-center">
+                            <i class="fas fa-lightbulb text-purple-500 mr-2 text-xs"></i> Perbedaan Mitosis dan Meiosis
+                        </h4>
+                        <div class="text-xs text-gray-700 space-y-1">
+                            <p><span class="font-bold">Mitosis:</span> Hasil 2 sel anak identik (diploid, 2n), untuk pertumbuhan dan perbaikan</p>
+                            <p><span class="font-bold">Meiosis:</span> Hasil 4 sel anak berbeda (haploid, n), untuk reproduksi seksual</p>
+                            <p><span class="font-bold">Metafase I:</span> Pada meiosis, pasangan kromosom homolog berjajar</p>
+                            <p><span class="font-bold">Pindah Silang:</span> Hanya terjadi pada meiosis I, meningkatkan variasi genetik</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tab Content: Inheritance -->
+            <div id="inheritance-tab" class="tab-content">
+                <div class="inheritance-panel">
+                    <h3 class="font-bold text-lg mb-3">
+                        <i class="fas fa-baby mr-2"></i>Simulator Pewarisan Sifat
+                    </h3>
+                    <p class="text-sm mb-4">
+                        Pilih sifat dari kedua orang tua untuk memprediksi kemungkinan sifat anak.
+                    </p>
+                    
+                    <div class="parent-traits">
+                        <div class="parent-box">
+                            <div class="text-sm font-bold mb-2">Orang Tua 1</div>
+                            <div class="trait-option" data-trait="eye" data-value="brown" data-parent="1">Mata Coklat</div>
+                            <div class="trait-option" data-trait="eye" data-value="blue" data-parent="1">Mata Biru</div>
+                            <div class="trait-option" data-trait="hair" data-value="curly" data-parent="1">Rambut Keriting</div>
+                            <div class="trait-option" data-trait="hair" data-value="straight" data-parent="1">Rambut Lurus</div>
+                        </div>
+                        
+                        <div class="parent-box">
+                            <div class="text-sm font-bold mb-2">Orang Tua 2</div>
+                            <div class="trait-option" data-trait="eye" data-value="brown" data-parent="2">Mata Coklat</div>
+                            <div class="trait-option" data-trait="eye" data-value="blue" data-parent="2">Mata Biru</div>
+                            <div class="trait-option" data-trait="hair" data-value="curly" data-parent="2">Rambut Keriting</div>
+                            <div class="trait-option" data-trait="hair" data-value="straight" data-parent="2">Rambut Lurus</div>
+                        </div>
+                    </div>
+                    
+                    <button id="calculate-inheritance" class="w-full bg-amber-500 text-white py-2 rounded-lg font-bold">
+                        <i class="fas fa-calculator mr-2"></i>Hitung Kemungkinan Sifat Anak
+                    </button>
+                </div>
+                
+                <div id="inheritance-result" class="offspring-result">
+                    <!-- Results will be displayed here -->
+                </div>
+                
+                <div class="mt-4 p-3 bg-purple-50 rounded-xl">
+                    <h4 class="font-bold text-gray-700 mb-2 text-sm flex items-center">
+                        <i class="fas fa-dna text-purple-500 mr-2 text-xs"></i> Konsep Genetika
+                    </h4>
+                    <div class="text-xs text-gray-700 space-y-1">
+                        <p><span class="font-bold">Gen Dominan:</span> Mengekspresikan sifat meskipun hanya satu salinan</p>
+                        <p><span class="font-bold">Gen Resesif:</span> Mengekspresikan sifat hanya jika dua salinan hadir</p>
+                        <p><span class="font-bold">Hukum Mendel:</span> Dasar pewarisan sifat dari orang tua ke anak</p>
+                        <p><span class="font-bold">Genotipe:</span> Kombinasi gen yang dimiliki suatu individu</p>
+                        <p><span class="font-bold">Fenotipe:</span> Sifat yang terlihat pada suatu individu</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quick Facts -->
+            <div class="mb-6 p-3 bg-purple-50 rounded-xl">
+                <h3 class="font-bold text-gray-700 mb-2 text-sm flex items-center">
+                    <i class="fas fa-lightbulb text-purple-500 mr-2 text-xs"></i> Fakta Singkat Genetika
+                </h3>
+                <div class="text-xs text-gray-700 space-y-1">
+                    <p>• Manusia memiliki 23 pasang kromosom (46 total)</p>
+                    <p>• Kromosom tersusun dari DNA yang mengandung gen</p>
+                    <p>• Setiap gen mengkode protein tertentu</p>
+                    <p>• Mutasi pada gen dapat menyebabkan penyakit genetik</p>
+                    <p>• DNA manusia 99.9% identik antar individu</p>
+                </div>
+            </div>
+        </main>
+        
+        <!-- Gene Detail Modal -->
+        <div id="gene-modal" class="gene-modal hidden">
+            <div class="modal-content">
+                <button id="close-modal" class="close-modal">&times;</button>
+                <div id="modal-body"></div>
+            </div>
+        </div>
+        
+        <!-- BOTTOM NAVIGATION - TIDAK DIRUBAH -->
+        <nav class="bottom-nav">
+            <a href="dashboad siswa.html" class="nav-item">
+                <i class="fas fa-home nav-icon"></i>
+                <span>Beranda</span>
+            </a>
+            <a href="soal harian/dashboard soal.html" class="nav-item">
+                <i class="fas fa-flask nav-icon"></i>
+                <span>Soal Harian</span>
+            </a>
+            <a href="ai/nayra.html" class="nav-item">
+                <i class="fas fa-robot nav-icon"></i>
+                <span>Nayra AI</span>
+            </a>
+            <a href="materi harian/kategori materi.html" class="nav-item">
+                <i class="fas fa-chalkboard-teacher nav-icon"></i>
+                <span>Materi Harian</span>
+            </a>
+            <a href="profil/profil.html" class="nav-item">
+                <i class="fas fa-user nav-icon"></i>
+                <span>Profil</span>
+            </a>
+        </nav>
+    </div>
+
+    <script>
+        // Data Kromosom Manusia
+        const humanChromosomes = [
+            { number: 1, type: "autosome", genes: 2000, length: "249 Mbp", 
+              description: "Kromosom terbesar manusia, mengandung gen untuk faktor pembekuan darah dan reseptor bau.",
+              notableGenes: ["GBA", "PSEN2", "USH2A"] },
+            
+            { number: 2, type: "autosome", genes: 1300, length: "242 Mbp",
+              description: "Hasil fusi dua kromosom primata, mengandung gen untuk perkembangan otak.",
+              notableGenes: ["MSH2", "MSH6", "HOXD"] },
+            
+            { number: 3, type: "autosome", genes: 1100, length: "198 Mbp",
+              description: "Mengandung gen yang terkait dengan kanker paru-paru dan kanker ginjal.",
+              notableGenes: ["VHL", "MLH1", "SLC2A2"] },
+            
+            { number: 4, type: "autosome", genes: 1000, length: "191 Mbp",
+              description: "Mengandung gen untuk penyakit Huntington dan faktor pertumbuhan fibroblast.",
+              notableGenes: ["HTT", "FGFR3", "EVC"] },
+            
+            { number: 5, type: "autosome", genes: 900, length: "181 Mbp",
+              description: "Mengandung kluster gen untuk reseptor bau dan gen untuk penyakit Crohn.",
+              notableGenes: ["APC", "TERT", "SMN1"] },
+            
+            { number: 6, type: "autosome", genes: 1100, length: "171 Mbp",
+              description: "Mengandung kompleks HLA (sistem kekebalan) yang penting untuk transplantasi organ.",
+              notableGenes: ["HLA-A", "HLA-B", "HLA-C"] },
+            
+            { number: 7, type: "autosome", genes: 900, length: "159 Mbp",
+              description: "Mengandung gen untuk fibrosis kistik dan faktor pertumbuhan epidermal.",
+              notableGenes: ["CFTR", "EGFR", "PON1"] },
+            
+            { number: 8, type: "autosome", genes: 700, length: "146 Mbp",
+              description: "Mengandung gen yang terkait dengan kanker prostat dan penyakit Werner.",
+              notableGenes: ["MYC", "WRN", "LPL"] },
+            
+            { number: 9, type: "autosome", genes: 800, length: "141 Mbp",
+              description: "Mengandung gen untuk golongan darah ABO dan penyakit kanker tertentu.",
+              notableGenes: ["ABO", "TSC1", "CDKN2A"] },
+            
+            { number: 10, type: "autosome", genes: 700, length: "135 Mbp",
+              description: "Mengandung gen untuk enzim yang memetabolisme obat dan penyakit Cowden.",
+              notableGenes: ["PTEN", "RET", "ERCC6"] },
+            
+            { number: 11, type: "autosome", genes: 1300, length: "135 Mbp",
+              description: "Mengandung kluster gen globin untuk hemoglobin dan gen untuk insulin.",
+              notableGenes: ["HBB", "INS", "WT1"] },
+            
+            { number: 12, type: "autosome", genes: 1100, length: "134 Mbp",
+              description: "Mengandung gen untuk enzim pencernaan dan penyakit kanker tertentu.",
+              notableGenes: ["KRAS", "PAH", "VWF"] },
+            
+            { number: 13, type: "autosome", genes: 300, length: "115 Mbp",
+              description: "Kromosom akrosentrik, terkait dengan sindrom Patau dan kanker payudara.",
+              notableGenes: ["BRCA2", "RB1", "EDNRB"] },
+            
+            { number: 14, type: "autosome", genes: 800, length: "107 Mbp",
+              description: "Mengandung gen untuk imunoglobulin berat dan penyakit Alzheimer dini.",
+              notableGenes: ["IGH", "PSEN1", "GCH1"] },
+            
+            { number: 15, type: "autosome", genes: 600, length: "102 Mbp",
+              description: "Mengandung gen untuk sindrom Prader-Willi dan sindrom Angelman.",
+              notableGenes: ["UBE3A", "SNRPN", "OCA2"] },
+            
+            { number: 16, type: "autosome", genes: 800, length: "90 Mbp",
+              description: "Mengandung gen untuk penyakit ginjal polikistik dan metabolisme logam.",
+              notableGenes: ["PKD1", "TSC2", "HP"] },
+            
+            { number: 17, type: "autosome", genes: 1200, length: "83 Mbp",
+              description: "Mengandung gen untuk kanker payudara (BRCA1) dan protein p53 tumor suppressor.",
+              notableGenes: ["BRCA1", "TP53", "ERBB2"] },
+            
+            { number: 18, type: "autosome", genes: 200, length: "80 Mbp",
+              description: "Kromosom terkecil kedua, terkait dengan sindrom Edwards.",
+              notableGenes: ["NPC1", "SMAD4", "DCC"] },
+            
+            { number: 19, type: "autosome", genes: 1500, length: "59 Mbp",
+              description: "Kepadatan gen tertinggi, mengandung banyak gen untuk metabolisme lipid.",
+              notableGenes: ["APOE", "LDLR", "INSR"] },
+            
+            { number: 20, type: "autosome", genes: 500, length: "63 Mbp",
+              description: "Mengandung gen untuk penyakit Creutzfeldt-Jakob dan kekebalan tubuh.",
+              notableGenes: ["PRNP", "ADA", "BMP2"] },
+            
+            { number: 21, type: "autosome", genes: 200, length: "48 Mbp",
+              description: "Kromosom terkecil, trisomi menyebabkan sindrom Down.",
+              notableGenes: ["APP", "SOD1", "CBS"] },
+            
+            { number: 22, type: "autosome", genes: 500, length: "51 Mbp",
+              description: "Kromosom akrosentrik kedua terkecil, terkait dengan sindrom DiGeorge.",
+              notableGenes: ["COMT", "TIMP3", "NF2"] },
+            
+            { number: "X", type: "sex-chromosome", genes: 800, length: "155 Mbp",
+              description: "Kromosom seks X, terkait dengan buta warna, hemofilia, dan distrofi otot Duchenne.",
+              notableGenes: ["F8", "F9", "DMD", "COL4A5"] },
+            
+            { number: "Y", type: "sex-chromosome", genes: 50, length: "59 Mbp",
+              description: "Kromosom seks Y, menentukan jenis kelamin laki-laki, mengandung gen SRY.",
+              notableGenes: ["SRY", "DAZ", "RBMY1A1"] }
+        ];
+
+        // Data Gen untuk Simulasi
+        const geneData = {
+            // Gen untuk sifat mata
+            eyeColor: {
+                brown: { symbol: "EYCL3", name: "Gen Warna Mata Coklat", chromosome: 15, position: 20, type: "dominant", description: "Mengatur produksi melanin pada iris mata." },
+                blue: { symbol: "EYCL2", name: "Gen Warna Mata Biru", chromosome: 19, position: 60, type: "recessive", description: "Variasi gen yang menghasilkan pigmentasi lebih sedikit." }
+            },
+            
+            // Gen untuk sifat rambut
+            hairType: {
+                curly: { symbol: "TCHH", name: "Gen Rambut Keriting", chromosome: 1, position: 40, type: "dominant", description: "Mempengaruhi bentuk dan tekstur rambut." },
+                straight: { symbol: "EDAR", name: "Gen Rambut Lurus", chromosome: 2, position: 80, type: "recessive", description: "Berpengaruh pada ketebalan dan kelurusan rambut." }
+            },
+            
+            // Gen untuk penyakit
+            geneticDiseases: [
+                { symbol: "HBB", name: "Beta-globin", chromosome: 11, position: 30, type: "recessive", description: "Mutasi menyebabkan anemia sel sabit." },
+                { symbol: "CFTR", name: "Cystic Fibrosis Transmembrane", chromosome: 7, position: 50, type: "recessive", description: "Mutasi menyebabkan fibrosis kistik." },
+                { symbol: "HTT", name: "Huntingtin", chromosome: 4, position: 70, type: "dominant", description: "Mutasi menyebabkan penyakit Huntington." },
+                { symbol: "BRCA1", name: "Breast Cancer 1", chromosome: 17, position: 40, type: "dominant", description: "Meningkatkan risiko kanker payudara dan ovarium." }
+            ]
+        };
+
+        // DOM Elements
+        const chromosomeContainer = document.getElementById('chromosome-container');
+        const geneModal = document.getElementById('gene-modal');
+        const closeModalBtn = document.getElementById('close-modal');
+        const modalBody = document.getElementById('modal-body');
+        const searchInput = document.getElementById('search-chromosome');
+        const totalChromosomesSpan = document.getElementById('total-chromosomes');
+        const showAllChromosomesBtn = document.getElementById('show-all-chromosomes');
+        const cellDivisionContainer = document.getElementById('cell-division-container');
+        const divisionStageSpan = document.getElementById('division-stage');
+        const divisionDescriptionSpan = document.getElementById('division-description');
+        const startMitosisBtn = document.getElementById('start-mitosis');
+        const startMeiosisBtn = document.getElementById('start-meiosis');
+        const resetDivisionBtn = document.getElementById('reset-division');
+        const prevPhaseBtn = document.getElementById('prev-phase');
+        const nextPhaseBtn = document.getElementById('next-phase');
+        const phaseIndicators = document.querySelectorAll('.phase-indicator');
+        const phaseDetailsDiv = document.getElementById('phase-details');
+        const traitOptions = document.querySelectorAll('.trait-option');
+        const calculateInheritanceBtn = document.getElementById('calculate-inheritance');
+        const inheritanceResult = document.getElementById('inheritance-result');
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        // State untuk pembelahan sel
+        let currentTab = 'chromosomes';
+        let selectedTraits = { parent1: {}, parent2: {} };
+        let isDivisionAnimating = false;
+        let currentPhase = 0; // 0: interfase, 1: profase, 2: metafase, 3: anafase, 4: telofase
+        let mitosisCompleted = false;
+        let meiosisCompleted = false;
+        let isMeiosis = false;
+        let meiosisPhase = 0; // Untuk meiosis: 0-8 (profase I - telofase II)
+
+        // Data fase pembelahan sel
+        const mitosisPhases = [
+            { 
+                name: "Interfase", 
+                description: "Sel belum membelah, kromosom dalam bentuk benang kromatin yang longgar. DNA sudah direplikasi.",
+                chromosomeCount: 8,
+                chromosomeState: "relaxed",
+                cellCount: 1
+            },
+            { 
+                name: "Profase", 
+                description: "Kromosom mulai memadat dan menjadi terlihat. Membran inti mulai menghilang.",
+                chromosomeCount: 8,
+                chromosomeState: "condensing",
+                cellCount: 1
+            },
+            { 
+                name: "Metafase", 
+                description: "Kromosom berjajar rapi di bidang ekuator sel. Setiap kromosom terdiri dari dua kromatid saudara.",
+                chromosomeCount: 8,
+                chromosomeState: "aligned",
+                cellCount: 1
+            },
+            { 
+                name: "Anafase", 
+                description: "Kromatid saudara berpisah dan bergerak ke kutub sel yang berlawanan.",
+                chromosomeCount: 16, // Kromatid terpisah
+                chromosomeState: "separating",
+                cellCount: 1
+            },
+            { 
+                name: "Telofase", 
+                description: "Kromosom mencapai kutub sel, membran inti terbentuk kembali, sitokinesis dimulai.",
+                chromosomeCount: 8,
+                chromosomeState: "separated",
+                cellCount: 2
+            }
+        ];
+
+        const meiosisPhases = [
+            // Meiosis I
+            { 
+                name: "Profase I", 
+                description: "Kromosom homolog berpasangan, terjadi pindah silang (crossing over) yang meningkatkan variasi genetik.",
+                chromosomeCount: 4, // 4 pasang homolog
+                chromosomeState: "pairing",
+                cellCount: 1,
+                isMeiosisI: true
+            },
+            { 
+                name: "Metafase I", 
+                description: "Pasangan kromosom homolog berjajar di bidang ekuator sel, bukan kromosom individu.",
+                chromosomeCount: 4,
+                chromosomeState: "homologousAligned",
+                cellCount: 1,
+                isMeiosisI: true
+            },
+            { 
+                name: "Anafase I", 
+                description: "Kromosom homolog berpisah dan bergerak ke kutub berlawanan, kromatid saudara masih menempel.",
+                chromosomeCount: 4,
+                chromosomeState: "homologousSeparating",
+                cellCount: 1,
+                isMeiosisI: true
+            },
+            { 
+                name: "Telofase I", 
+                description: "Kromosom mencapai kutub, terbentuk dua sel haploid dengan kromosom masih terdiri dari dua kromatid.",
+                chromosomeCount: 4,
+                chromosomeState: "homologousSeparated",
+                cellCount: 2,
+                isMeiosisI: true
+            },
+            // Meiosis II
+            { 
+                name: "Profase II", 
+                description: "Kromosom memadat kembali pada kedua sel haploid. Tidak terjadi replikasi DNA.",
+                chromosomeCount: 4,
+                chromosomeState: "condensing",
+                cellCount: 2,
+                isMeiosisII: true
+            },
+            { 
+                name: "Metafase II", 
+                description: "Kromosom berjajar di bidang ekuator pada kedua sel haploid, mirip dengan metafase mitosis.",
+                chromosomeCount: 4,
+                chromosomeState: "aligned",
+                cellCount: 2,
+                isMeiosisII: true
+            },
+            { 
+                name: "Anafase II", 
+                description: "Kromatid saudara berpisah dan bergerak ke kutub berlawanan pada kedua sel.",
+                chromosomeCount: 8,
+                chromosomeState: "separating",
+                cellCount: 2,
+                isMeiosisII: true
+            },
+            { 
+                name: "Telofase II", 
+                description: "Terbentuk empat sel haploid (gamet) dengan kromosom tunggal.",
+                chromosomeCount: 4,
+                chromosomeState: "separated",
+                cellCount: 4,
+                isMeiosisII: true
+            }
+        ];
+
+        // Inisialisasi Kromosom
+        function initChromosomes() {
+            chromosomeContainer.innerHTML = '';
+            
+            // Tampilkan 5 kromosom pertama secara default
+            const chromosomesToShow = humanChromosomes.slice(0, 5);
+            
+            chromosomesToShow.forEach(chromosome => {
+                const chromosomeElement = createChromosomeElement(chromosome);
+                chromosomeContainer.appendChild(chromosomeElement);
+            });
+            
+            totalChromosomesSpan.textContent = humanChromosomes.length;
+            
+            setupEventListeners();
+        }
+
+        // Buat elemen kromosom
+        function createChromosomeElement(chromosome) {
+            const div = document.createElement('div');
+            div.className = `chromosome-pair ${chromosome.type}`;
+            div.dataset.chromosome = chromosome.number;
+            
+            // Buat beberapa posisi gen acak pada kromosom
+            const genePositions = [];
+            const geneCount = Math.min(chromosome.genes / 100, 10); // Sederhanakan jumlah gen untuk tampilan
+            
+            for (let i = 0; i < geneCount; i++) {
+                genePositions.push({
+                    top: Math.random() * 80 + 10, // 10-90%
+                    left: Math.random() > 0.5 ? 30 : 70, // Kiri atau kanan dari sentromer
+                    colorClass: `gene-color-${Math.floor(Math.random() * 5) + 1}`,
+                    type: Math.random() > 0.5 ? "dominant" : "recessive"
+                });
+            }
+            
+            div.innerHTML = `
+                <div class="chromosome-header">
+                    <div class="chromosome-title">Kromosom ${chromosome.number}</div>
+                    <div class="chromosome-number">${chromosome.number}</div>
+                </div>
+                
+                <div class="chromosome-visual">
+                    <div class="chromosome-arm ${chromosome.type}"></div>
+                    <div class="chromosome-centromere"></div>
+                    <div class="chromosome-arm ${chromosome.type}"></div>
+                </div>
+                
+                <div class="chromosome-info">
+                    <div class="text-xs mb-1"><span class="font-bold">Gen:</span> ${chromosome.genes} gen</div>
+                    <div class="text-xs mb-2"><span class="font-bold">Panjang:</span> ${chromosome.length}</div>
+                    <div class="text-xs text-gray-600">${chromosome.description.substring(0, 100)}...</div>
+                </div>
+            `;
+            
+            // Tambahkan penanda gen setelah elemen dimuat
+            setTimeout(() => {
+                const visualContainer = div.querySelector('.chromosome-visual');
+                
+                genePositions.forEach(genePos => {
+                    const geneMarker = document.createElement('div');
+                    geneMarker.className = `gene-marker ${genePos.colorClass}`;
+                    geneMarker.style.top = `${genePos.top}%`;
+                    geneMarker.style.left = `${genePos.left}%`;
+                    geneMarker.title = `Gen ${genePos.type}`;
+                    
+                    // Tambahkan tooltip info
+                    geneMarker.addEventListener('click', () => {
+                        showGeneDetails(chromosome, genePos);
+                    });
+                    
+                    visualContainer.appendChild(geneMarker);
+                });
+            }, 10);
+            
+            // Tambahkan event listener untuk klik pada kromosom
+            div.addEventListener('click', (e) => {
+                if (!e.target.classList.contains('gene-marker')) {
+                    showChromosomeDetails(chromosome);
+                }
+            });
+            
+            return div;
+        }
+
+        // Tampilkan detail kromosom
+        function showChromosomeDetails(chromosome) {
+            modalBody.innerHTML = `
+                <div class="gene-detail-card">
+                    <div class="flex items-center mb-4">
+                        <div class="chromosome-number" style="width: 40px; height: 40px; font-size: 16px;">${chromosome.number}</div>
+                        <div class="ml-4">
+                            <h2 class="text-xl font-bold text-gray-800">Kromosom ${chromosome.number}</h2>
+                            <p class="text-gray-600 text-sm">${chromosome.type === "autosome" ? "Autosom" : "Kromosom Seks"}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <div class="detail-row">
+                            <span class="detail-label">Jumlah Gen:</span>
+                            <span class="detail-value">${chromosome.genes} gen</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Panjang DNA:</span>
+                            <span class="detail-value">${chromosome.length}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Tipe:</span>
+                            <span class="detail-value">${chromosome.type === "autosome" ? "Autosom (bukan kromosom seks)" : "Kromosom Seks"}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <h4 class="font-bold text-gray-700 mb-2 text-sm">Deskripsi:</h4>
+                        <p class="text-sm text-gray-600">${chromosome.description}</p>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <h4 class="font-bold text-gray-700 mb-2 text-sm">Gen Penting:</h4>
+                        <div class="flex flex-wrap gap-2">
+                            ${chromosome.notableGenes.map(gene => `
+                                <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs">${gene}</span>
+                            `).join('')}
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 p-3 bg-gray-50 rounded-lg">
+                        <h4 class="font-bold text-gray-700 mb-1 text-sm">Fakta Menarik:</h4>
+                        <p class="text-xs text-gray-600">${getChromosomeFact(chromosome)}</p>
+                    </div>
+                </div>
+            `;
+            
+            geneModal.classList.remove('hidden');
+        }
+
+        // Tampilkan detail gen
+        function showGeneDetails(chromosome, geneInfo) {
+            // Cari contoh gen dari data
+            let geneExample;
+            
+            if (chromosome.number === 11) {
+                geneExample = geneData.geneticDiseases[0]; // HBB pada kromosom 11
+            } else if (chromosome.number === 7) {
+                geneExample = geneData.geneticDiseases[1]; // CFTR pada kromosom 7
+            } else if (chromosome.number === 4) {
+                geneExample = geneData.geneticDiseases[2]; // HTT pada kromosom 4
+            } else if (chromosome.number === 17) {
+                geneExample = geneData.geneticDiseases[3]; // BRCA1 pada kromosom 17
+            } else {
+                // Buat gen contoh
+                geneExample = {
+                    symbol: `GEN${chromosome.number}${Math.floor(Math.random() * 100)}`,
+                    name: `Protein Pengkode ${chromosome.number}`,
+                    chromosome: chromosome.number,
+                    position: Math.floor(Math.random() * 100),
+                    type: geneInfo.type,
+                    description: `Gen ${geneInfo.type} pada kromosom ${chromosome.number} yang mengkode protein tertentu.`
+                };
+            }
+            
+            modalBody.innerHTML = `
+                <div class="gene-detail-card">
+                    <div class="flex items-center mb-4">
+                        <div class="w-10 h-10 rounded-full ${geneInfo.colorClass} flex items-center justify-center text-white font-bold">
+                            G
+                        </div>
+                        <div class="ml-4">
+                            <h2 class="text-xl font-bold text-gray-800">${geneExample.symbol}</h2>
+                            <p class="text-gray-600 text-sm">${geneExample.name}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <div class="detail-row">
+                            <span class="detail-label">Lokasi:</span>
+                            <span class="detail-value">Kromosom ${geneExample.chromosome}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Tipe:</span>
+                            <span class="detail-value">${geneExample.type === "dominant" ? "Dominan" : "Resesif"}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Posisi:</span>
+                            <span class="detail-value">${geneExample.position} cM</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <h4 class="font-bold text-gray-700 mb-2 text-sm">Fungsi:</h4>
+                        <p class="text-sm text-gray-600">${geneExample.description}</p>
+                    </div>
+                    
+                    <div class="mt-4 p-3 ${geneExample.type === "dominant" ? "bg-red-50" : "bg-blue-50"} rounded-lg">
+                        <h4 class="font-bold text-gray-700 mb-1 text-sm">Pewarisan ${geneExample.type === "dominant" ? "Dominan" : "Resesif"}:</h4>
+                        <p class="text-xs text-gray-600">
+                            ${geneExample.type === "dominant" 
+                                ? "Gen dominan mengekspresikan sifat meskipun hanya satu salinan yang hadir. Sifat akan muncul jika diwarisi dari salah satu orang tua."
+                                : "Gen resesif hanya mengekspresikan sifat jika dua salinan hadir (satu dari setiap orang tua). Jika hanya satu salinan, individu akan menjadi pembawa (carrier)."
+                            }
+                        </p>
+                    </div>
+                    
+                    ${currentTab === 'inheritance' ? `
+                    <button id="use-in-inheritance" class="w-full mt-4 bg-green-500 text-white py-2 rounded-lg font-bold">
+                        <i class="fas fa-plus mr-2"></i>Gunakan dalam Simulasi Pewarisan
+                    </button>
+                    ` : ''}
+                </div>
+            `;
+            
+            geneModal.classList.remove('hidden');
+        }
+
+        // Inisialisasi simulasi pembelahan sel
+        function initCellDivision() {
+            // Reset container
+            cellDivisionContainer.innerHTML = '';
+            currentPhase = 0;
+            meiosisPhase = 0;
+            mitosisCompleted = false;
+            meiosisCompleted = false;
+            isMeiosis = false;
+            isDivisionAnimating = false;
+            
+            // Update phase indicators
+            updatePhaseIndicators();
+            
+            // Buat sel awal untuk mitosis
+            createCellForPhase(0, false);
+            
+            // Update UI
+            updateDivisionUI();
+        }
+
+        // Buat sel untuk fase tertentu
+        function createCellForPhase(phaseIndex, isMeiosisMode) {
+            cellDivisionContainer.innerHTML = '';
+            
+            const phases = isMeiosisMode ? meiosisPhases : mitosisPhases;
+            const phase = phases[phaseIndex];
+            
+            if (!phase) return;
+            
+            const cellCount = phase.cellCount;
+            const chromosomeCount = phase.chromosomeCount;
+            
+            // Hitung posisi sel
+            const positions = calculateCellPositions(cellCount);
+            
+            // Buat setiap sel
+            for (let i = 0; i < cellCount; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'cell';
+                cell.id = `cell-${i}`;
+                
+                // Atur ukuran berdasarkan jumlah sel
+                const cellSize = cellCount === 1 ? 120 : cellCount === 2 ? 90 : 70;
+                cell.style.width = `${cellSize}px`;
+                cell.style.height = `${cellSize}px`;
+                cell.style.top = `${positions[i].top}px`;
+                cell.style.left = `${positions[i].left}px`;
+                
+                // Tambahkan label sel (ploidi)
+                let ploidy = '2n';
+                if (isMeiosisMode) {
+                    if (phaseIndex >= 4) ploidy = 'n'; // Meiosis II dan seterusnya
+                    else if (phaseIndex >= 3) ploidy = 'n'; // Telofase I
+                }
+                cell.textContent = ploidy;
+                cell.style.fontSize = cellCount === 1 ? '16px' : '14px';
+                
+                // Tambahkan kromosom ke dalam sel
+                addChromosomesToCell(cell, chromosomeCount, phase.chromosomeState, isMeiosisMode, phaseIndex);
+                
+                cellDivisionContainer.appendChild(cell);
+            }
+        }
+
+        // Hitung posisi sel
+        function calculateCellPositions(cellCount) {
+            const positions = [];
+            const containerWidth = 414; // Lebar container
+            const containerHeight = 220; // Tinggi container
+            
+            if (cellCount === 1) {
+                positions.push({
+                    top: (containerHeight - 120) / 2,
+                    left: (containerWidth - 120) / 2
+                });
+            } else if (cellCount === 2) {
+                positions.push({
+                    top: (containerHeight - 90) / 2,
+                    left: (containerWidth - 200) / 2
+                });
+                positions.push({
+                    top: (containerHeight - 90) / 2,
+                    left: (containerWidth - 200) / 2 + 110
+                });
+            } else if (cellCount === 4) {
+                positions.push({
+                    top: 30,
+                    left: 60
+                });
+                positions.push({
+                    top: 30,
+                    left: 210
+                });
+                positions.push({
+                    top: 120,
+                    left: 60
+                });
+                positions.push({
+                    top: 120,
+                    left: 210
+                });
+            }
+            
+            return positions;
+        }
+
+        // Tambahkan kromosom ke dalam sel
+        function addChromosomesToCell(cell, count, state, isMeiosisMode, phaseIndex) {
+            // Hapus kromosom yang ada
+            const existingChromosomes = cell.querySelectorAll('.chromosome-in-cell, .sister-chromatids');
+            existingChromosomes.forEach(chr => chr.remove());
+            
+            // Buat kromosom baru
+            for (let i = 0; i < count; i++) {
+                if (state === 'relaxed') {
+                    // Kromosom dalam keadaan longgar (interfase)
+                    const chromosome = document.createElement('div');
+                    chromosome.className = 'chromosome-in-cell';
+                    chromosome.style.opacity = '0.5';
+                    
+                    // Posisi acak dalam sel
+                    const radius = parseInt(cell.style.width) / 2 - 10;
+                    const angle = Math.random() * 2 * Math.PI;
+                    const distance = Math.random() * radius * 0.7;
+                    
+                    chromosome.style.left = `calc(50% + ${Math.cos(angle) * distance}px)`;
+                    chromosome.style.top = `calc(50% + ${Math.sin(angle) * distance}px)`;
+                    
+                    cell.appendChild(chromosome);
+                    
+                } else if (state === 'condensing' || state === 'pairing') {
+                    // Kromosom mulai memadat
+                    const chromosome = document.createElement('div');
+                    chromosome.className = 'chromosome-in-cell';
+                    
+                    if (isMeiosisMode && state === 'pairing' && phaseIndex === 0) {
+                        // Untuk meiosis profase I, buat pasangan kromosom homolog
+                        const pair = document.createElement('div');
+                        pair.className = 'sister-chromatids';
+                        
+                        for (let j = 0; j < 2; j++) {
+                            const chromatid = document.createElement('div');
+                            chromatid.className = 'sister-chromatid';
+                            pair.appendChild(chromatid);
+                        }
+                        
+                        // Atur posisi pasangan
+                        const radius = parseInt(cell.style.width) / 2 - 20;
+                        const angle = (i / count) * 2 * Math.PI;
+                        
+                        pair.style.left = `calc(50% + ${Math.cos(angle) * radius * 0.5}px)`;
+                        pair.style.top = `calc(50% + ${Math.sin(angle) * radius * 0.5}px)`;
+                        pair.style.transform = `rotate(${Math.random() * 360}deg)`;
+                        
+                        cell.appendChild(pair);
+                    } else {
+                        // Untuk mitosis atau fase lainnya
+                        const radius = parseInt(cell.style.width) / 2 - 20;
+                        const angle = (i / count) * 2 * Math.PI;
+                        
+                        chromosome.style.left = `calc(50% + ${Math.cos(angle) * radius * 0.7}px)`;
+                        chromosome.style.top = `calc(50% + ${Math.sin(angle) * radius * 0.7}px)`;
+                        chromosome.style.transform = `rotate(${Math.random() * 360}deg)`;
+                        
+                        cell.appendChild(chromosome);
+                    }
+                    
+                } else if (state === 'aligned' || state === 'homologousAligned') {
+                    // Kromosom berjajar di tengah
+                    const chromosome = document.createElement('div');
+                    chromosome.className = 'chromosome-in-cell';
+                    
+                    const cellWidth = parseInt(cell.style.width);
+                    const cellHeight = parseInt(cell.style.height);
+                    
+                    if (isMeiosisMode && state === 'homologousAligned') {
+                        // Untuk meiosis metafase I, pasangan homolog berjajar
+                        const pair = document.createElement('div');
+                        pair.className = 'sister-chromatids';
+                        
+                        for (let j = 0; j < 2; j++) {
+                            const chromatid = document.createElement('div');
+                            chromatid.className = 'sister-chromatid';
+                            pair.appendChild(chromatid);
+                        }
+                        
+                        // Atur posisi di bidang ekuator
+                        const spacing = cellWidth / (count + 1);
+                        pair.style.left = `${spacing * (i + 1) - 10}px`;
+                        pair.style.top = `calc(50% - 6px)`;
+                        pair.style.transform = 'rotate(0deg)';
+                        
+                        cell.appendChild(pair);
+                    } else {
+                        // Untuk mitosis metafase
+                        const spacing = cellWidth / (count + 1);
+                        chromosome.style.left = `${spacing * (i + 1) - 3}px`;
+                        chromosome.style.top = `calc(50% - 8px)`;
+                        chromosome.style.transform = 'rotate(0deg)';
+                        
+                        cell.appendChild(chromosome);
+                    }
+                    
+                } else if (state === 'separating' || state === 'homologousSeparating') {
+                    // Kromatid/kromosom berpisah
+                    if (isMeiosisMode && state === 'homologousSeparating') {
+                        // Untuk meiosis anafase I, kromosom homolog berpisah
+                        const radius = parseInt(cell.style.width) / 2 - 20;
+                        const angle = (i / count) * 2 * Math.PI;
+                        const direction = i % 2 === 0 ? -1 : 1;
+                        
+                        const chromosome = document.createElement('div');
+                        chromosome.className = 'chromosome-in-cell';
+                        chromosome.style.left = `calc(50% + ${direction * radius * 0.4}px)`;
+                        chromosome.style.top = `calc(50% + ${Math.sin(angle) * radius * 0.3}px)`;
+                        
+                        cell.appendChild(chromosome);
+                    } else {
+                        // Untuk mitosis anafase atau meiosis anafase II
+                        const radius = parseInt(cell.style.width) / 2 - 20;
+                        const angle = (i / (count/2)) * 2 * Math.PI;
+                        const direction = i % 2 === 0 ? -1 : 1;
+                        
+                        const chromosome = document.createElement('div');
+                        chromosome.className = 'chromosome-in-cell';
+                        chromosome.style.left = `calc(50% + ${direction * radius * 0.4}px)`;
+                        chromosome.style.top = `calc(50% + ${Math.sin(angle) * radius * 0.3}px)`;
+                        
+                        cell.appendChild(chromosome);
+                    }
+                    
+                } else if (state === 'separated' || state === 'homologousSeparated') {
+                    // Kromosom sudah terpisah ke kutub
+                    const radius = parseInt(cell.style.width) / 2 - 15;
+                    const angle = (i / count) * 2 * Math.PI;
+                    
+                    const chromosome = document.createElement('div');
+                    chromosome.className = 'chromosome-in-cell';
+                    chromosome.style.left = `calc(50% + ${Math.cos(angle) * radius * 0.6}px)`;
+                    chromosome.style.top = `calc(50% + ${Math.sin(angle) * radius * 0.6}px)`;
+                    chromosome.style.opacity = '0.8';
+                    
+                    cell.appendChild(chromosome);
+                }
+            }
+        }
+
+        // Update indikator fase
+        function updatePhaseIndicators() {
+            phaseIndicators.forEach((indicator, index) => {
+                if (isMeiosis) {
+                    // Untuk meiosis, hanya aktifkan indikator yang relevan
+                    const phases = meiosisPhases;
+                    const currentPhaseIndex = meiosisPhase;
+                    
+                    if (index === 0 && currentPhaseIndex < 4) {
+                        // Fase meiosis I
+                        indicator.classList.toggle('active', currentPhaseIndex === index);
+                    } else if (index > 0 && currentPhaseIndex >= 4) {
+                        // Fase meiosis II (disesuaikan)
+                        const adjustedIndex = currentPhaseIndex - 3;
+                        indicator.classList.toggle('active', adjustedIndex === index);
+                    } else {
+                        indicator.classList.remove('active');
+                    }
+                } else {
+                    // Untuk mitosis
+                    indicator.classList.toggle('active', index === currentPhase);
+                }
+            });
+        }
+
+        // Update UI pembelahan
+        function updateDivisionUI() {
+            if (isMeiosis) {
+                const phase = meiosisPhases[meiosisPhase];
+                if (phase) {
+                    divisionStageSpan.textContent = `Tahap: ${phase.name}`;
+                    divisionDescriptionSpan.textContent = phase.description;
+                    
+                    // Update tombol navigasi
+                    prevPhaseBtn.disabled = meiosisPhase === 0 || isDivisionAnimating;
+                    nextPhaseBtn.disabled = meiosisPhase === meiosisPhases.length - 1 || isDivisionAnimating;
+                    
+                    // Update info fase
+                    updatePhaseDetails(phase);
+                }
+            } else {
+                const phase = mitosisPhases[currentPhase];
+                if (phase) {
+                    divisionStageSpan.textContent = `Tahap: ${phase.name}`;
+                    divisionDescriptionSpan.textContent = phase.description;
+                    
+                    // Update tombol navigasi
+                    prevPhaseBtn.disabled = currentPhase === 0 || isDivisionAnimating;
+                    nextPhaseBtn.disabled = currentPhase === mitosisPhases.length - 1 || isDivisionAnimating;
+                    
+                    // Update info fase
+                    updatePhaseDetails(phase);
+                }
+            }
+            
+            // Update status animasi
+            startMitosisBtn.disabled = isDivisionAnimating;
+            startMeiosisBtn.disabled = isDivisionAnimating;
+        }
+
+        // Update detail fase
+        function updatePhaseDetails(phase) {
+            let detailsHTML = '';
+            
+            if (isMeiosis) {
+                if (phase.isMeiosisI) {
+                    detailsHTML = `
+                        <p><span class="font-bold">${phase.name}:</span> ${phase.description}</p>
+                        <p class="mt-2"><i class="fas fa-dna mr-1"></i> Meiosis I: Mengurangi jumlah kromosom dari diploid (2n) menjadi haploid (n)</p>
+                    `;
+                } else if (phase.isMeiosisII) {
+                    detailsHTML = `
+                        <p><span class="font-bold">${phase.name}:</span> ${phase.description}</p>
+                        <p class="mt-2"><i class="fas fa-dna mr-1"></i> Meiosis II: Memisahkan kromatid saudara, mirip dengan mitosis</p>
+                    `;
+                }
+            } else {
+                detailsHTML = `
+                    <p><span class="font-bold">${phase.name}:</span> ${phase.description}</p>
+                    <p class="mt-2"><i class="fas fa-dna mr-1"></i> Mitosis: Menghasilkan 2 sel anak identik dengan sel induk</p>
+                `;
+            }
+            
+            phaseDetailsDiv.innerHTML = detailsHTML;
+        }
+
+        // Pindah ke fase berikutnya
+        function nextPhase() {
+            if (isDivisionAnimating) return;
+            
+            if (isMeiosis) {
+                if (meiosisPhase < meiosisPhases.length - 1) {
+                    meiosisPhase++;
+                    createCellForPhase(meiosisPhase, true);
+                    updatePhaseIndicators();
+                    updateDivisionUI();
+                } else {
+                    meiosisCompleted = true;
+                }
+            } else {
+                if (currentPhase < mitosisPhases.length - 1) {
+                    currentPhase++;
+                    createCellForPhase(currentPhase, false);
+                    updatePhaseIndicators();
+                    updateDivisionUI();
+                } else {
+                    mitosisCompleted = true;
+                }
+            }
+        }
+
+        // Pindah ke fase sebelumnya
+        function prevPhase() {
+            if (isDivisionAnimating) return;
+            
+            if (isMeiosis) {
+                if (meiosisPhase > 0) {
+                    meiosisPhase--;
+                    createCellForPhase(meiosisPhase, true);
+                    updatePhaseIndicators();
+                    updateDivisionUI();
+                }
+            } else {
+                if (currentPhase > 0) {
+                    currentPhase--;
+                    createCellForPhase(currentPhase, false);
+                    updatePhaseIndicators();
+                    updateDivisionUI();
+                }
+            }
+        }
+
+        // Animasi mitosis otomatis
+        function animateMitosis() {
+            if (isDivisionAnimating) return;
+            
+            isDivisionAnimating = true;
+            isMeiosis = false;
+            mitosisCompleted = false;
+            currentPhase = 0;
+            
+            updatePhaseIndicators();
+            updateDivisionUI();
+            
+            // Reset dan mulai dari interfase
+            createCellForPhase(0, false);
+            
+            // Animasi melalui setiap fase
+            const phases = mitosisPhases;
+            let phaseIndex = 0;
+            
+            function animateNextPhase() {
+                if (phaseIndex < phases.length) {
+                    createCellForPhase(phaseIndex, false);
+                    updatePhaseIndicators();
+                    updateDivisionUI();
+                    
+                    phaseIndex++;
+                    setTimeout(animateNextPhase, 1500); // 1.5 detik per fase
+                } else {
+                    isDivisionAnimating = false;
+                    mitosisCompleted = true;
+                    updateDivisionUI();
+                }
+            }
+            
+            // Mulai animasi
+            setTimeout(animateNextPhase, 1000);
+        }
+
+        // Animasi meiosis otomatis
+        function animateMeiosis() {
+            if (isDivisionAnimating) return;
+            
+            isDivisionAnimating = true;
+            isMeiosis = true;
+            meiosisCompleted = false;
+            meiosisPhase = 0;
+            
+            updatePhaseIndicators();
+            updateDivisionUI();
+            
+            // Reset dan mulai dari profase I
+            createCellForPhase(0, true);
+            
+            // Animasi melalui setiap fase
+            const phases = meiosisPhases;
+            let phaseIndex = 0;
+            
+            function animateNextPhase() {
+                if (phaseIndex < phases.length) {
+                    createCellForPhase(phaseIndex, true);
+                    updatePhaseIndicators();
+                    updateDivisionUI();
+                    
+                    phaseIndex++;
+                    setTimeout(animateNextPhase, 1500); // 1.5 detik per fase
+                } else {
+                    isDivisionAnimating = false;
+                    meiosisCompleted = true;
+                    updateDivisionUI();
+                }
+            }
+            
+            // Mulai animasi
+            setTimeout(animateNextPhase, 1000);
+        }
+
+        // Hitung pewarisan sifat
+        function calculateInheritance() {
+            // Pastikan ada sifat yang dipilih
+            if (Object.keys(selectedTraits.parent1).length === 0 || 
+                Object.keys(selectedTraits.parent2).length === 0) {
+                inheritanceResult.innerHTML = `
+                    <div class="p-3 bg-red-50 text-red-700 rounded-lg">
+                        <i class="fas fa-exclamation-circle mr-2"></i>
+                        Pilih sifat untuk kedua orang tua terlebih dahulu.
+                    </div>
+                `;
+                inheritanceResult.style.display = 'block';
+                return;
+            }
+            
+            // Contoh perhitungan untuk sifat mata
+            let resultsHTML = '';
+            
+            if (selectedTraits.parent1.eye && selectedTraits.parent2.eye) {
+                const parent1Eye = selectedTraits.parent1.eye;
+                const parent2Eye = selectedTraits.parent2.eye;
+                
+                resultsHTML += `
+                    <div class="mb-4">
+                        <h4 class="font-bold text-gray-700 mb-2">Warna Mata</h4>
+                        <div class="text-sm mb-1">Orang Tua 1: ${parent1Eye === 'brown' ? 'Mata Coklat (BB/Bb)' : 'Mata Biru (bb)'}</div>
+                        <div class="text-sm mb-2">Orang Tua 2: ${parent2Eye === 'brown' ? 'Mata Coklat (BB/Bb)' : 'Mata Biru (bb)'}</div>
+                        
+                        <div class="offspring-grid">
+                            <div class="offspring-item bg-green-100">Coklat</div>
+                            <div class="offspring-item ${parent1Eye === 'brown' && parent2Eye === 'brown' ? 'bg-green-100' : 'bg-yellow-100'}">Coklat</div>
+                            <div class="offspring-item ${parent1Eye === 'brown' && parent2Eye === 'brown' ? 'bg-green-100' : 'bg-yellow-100'}">Coklat</div>
+                            <div class="offspring-item ${parent1Eye === 'brown' && parent2Eye === 'brown' ? 'bg-green-100' : parent1Eye === 'blue' && parent2Eye === 'blue' ? 'bg-blue-100' : 'bg-yellow-100'}">${parent1Eye === 'brown' && parent2Eye === 'brown' ? 'Coklat' : parent1Eye === 'blue' && parent2Eye === 'blue' ? 'Biru' : 'Coklat/Biru'}</div>
+                        </div>
+                        
+                        <div class="text-xs text-gray-600 mt-2">
+                            ${getEyeColorProbability(parent1Eye, parent2Eye)}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            if (selectedTraits.parent1.hair && selectedTraits.parent2.hair) {
+                const parent1Hair = selectedTraits.parent1.hair;
+                const parent2Hair = selectedTraits.parent2.hair;
+                
+                resultsHTML += `
+                    <div class="mb-4">
+                        <h4 class="font-bold text-gray-700 mb-2">Tipe Rambut</h4>
+                        <div class="text-sm mb-1">Orang Tua 1: ${parent1Hair === 'curly' ? 'Rambut Keriting (CC/Cc)' : 'Rambut Lurus (cc)'}</div>
+                        <div class="text-sm mb-2">Orang Tua 2: ${parent2Hair === 'curly' ? 'Rambut Keriting (CC/Cc)' : 'Rambut Lurus (cc)'}</div>
+                        
+                        <div class="offspring-grid">
+                            <div class="offspring-item ${parent1Hair === 'curly' || parent2Hair === 'curly' ? 'bg-green-100' : 'bg-gray-100'}">${parent1Hair === 'curly' || parent2Hair === 'curly' ? 'Keriting' : 'Lurus'}</div>
+                            <div class="offspring-item ${parent1Hair === 'curly' ? 'bg-green-100' : 'bg-gray-100'}">${parent1Hair === 'curly' ? 'Keriting' : 'Lurus'}</div>
+                            <div class="offspring-item ${parent2Hair === 'curly' ? 'bg-green-100' : 'bg-gray-100'}">${parent2Hair === 'curly' ? 'Keriting' : 'Lurus'}</div>
+                            <div class="offspring-item ${parent1Hair === 'curly' && parent2Hair === 'curly' ? 'bg-green-100' : parent1Hair === 'straight' && parent2Hair === 'straight' ? 'bg-gray-100' : 'bg-yellow-100'}">${parent1Hair === 'curly' && parent2Hair === 'curly' ? 'Keriting' : parent1Hair === 'straight' && parent2Hair === 'straight' ? 'Lurus' : 'Keriting/Lurus'}</div>
+                        </div>
+                        
+                        <div class="text-xs text-gray-600 mt-2">
+                            ${getHairTypeProbability(parent1Hair, parent2Hair)}
+                        </div>
+                    </div>
+                `;
+            }
+            
+            inheritanceResult.innerHTML = `
+                <h3 class="font-bold text-gray-700 mb-3">Hasil Prediksi Sifat Anak</h3>
+                ${resultsHTML}
+                <div class="mt-4 p-3 bg-blue-50 rounded-lg">
+                    <p class="text-xs text-gray-600">
+                        <i class="fas fa-info-circle text-blue-500 mr-1"></i>
+                        Hasil di atas merupakan prediksi berdasarkan hukum Mendel. 
+                        Kenyataannya, pewarisan sifat lebih kompleks karena dipengaruhi banyak gen dan faktor lingkungan.
+                    </p>
+                </div>
+            `;
+            
+            inheritanceResult.style.display = 'block';
+            
+            // Scroll ke hasil
+            inheritanceResult.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Helper functions untuk pewarisan sifat
+        function getEyeColorProbability(parent1, parent2) {
+            if (parent1 === 'brown' && parent2 === 'brown') {
+                return "Kemungkinan: 75% mata coklat, 25% mata biru (jika kedua orang tua heterozigot Bb)";
+            } else if (parent1 === 'blue' && parent2 === 'blue') {
+                return "Kemungkinan: 100% mata biru (kedua orang tua homozigot resesif bb)";
+            } else {
+                return "Kemungkinan: 50% mata coklat, 50% mata biru (jika satu orang tua homozigot dominan BB, yang lain homozigot resesif bb)";
+            }
+        }
+        
+        function getHairTypeProbability(parent1, parent2) {
+            if (parent1 === 'curly' && parent2 === 'curly') {
+                return "Kemungkinan: 75% rambut keriting, 25% rambut lurus (jika kedua orang tua heterozigot Cc)";
+            } else if (parent1 === 'straight' && parent2 === 'straight') {
+                return "Kemungkinan: 100% rambut lurus (kedua orang tua homozigot resesif cc)";
+            } else {
+                return "Kemungkinan: 50% rambut keriting, 50% rambut lurus (jika satu orang tua heterozigot Cc, yang lain homozigot resesif cc)";
+            }
+        }
+
+        // Fungsi untuk berpindah tab
+        function switchTab(tabName) {
+            // Update tab aktif
+            tabs.forEach(tab => {
+                if (tab.dataset.tab === tabName) {
+                    tab.classList.add('active');
+                } else {
+                    tab.classList.remove('active');
+                }
+            });
+            
+            // Update konten tab aktif
+            tabContents.forEach(content => {
+                if (content.id === `${tabName}-tab`) {
+                    content.classList.add('active');
+                } else {
+                    content.classList.remove('active');
+                }
+            });
+            
+            currentTab = tabName;
+            
+            // Inisialisasi konten tab jika diperlukan
+            if (tabName === 'division') {
+                initCellDivision();
+            }
+            
+            // Scroll ke atas
+            window.scrollTo(0, 0);
+        }
+
+        // Dapatkan fakta tentang kromosom
+        function getChromosomeFact(chromosome) {
+            const facts = {
+                1: "Kromosom 1 adalah yang terbesar, mengandung sekitar 8% dari total DNA manusia.",
+                2: "Kromosom 2 terbentuk dari fusi dua kromosom leluhur primata.",
+                6: "Kromosom 6 mengandung kompleks HLA yang penting untuk sistem kekebalan tubuh.",
+                13: "Kromosom 13 memiliki kepadatan gen terendah dari semua kromosom manusia.",
+                16: "Kromosom 16 memiliki kluster gen alpha-globin untuk hemoglobin.",
+                17: "Kromosom 17 memiliki kepadatan gen tertinggi kedua setelah kromosom 19.",
+                19: "Kromosom 19 memiliki kepadatan gen tertinggi dari semua kromosom manusia.",
+                21: "Kromosom 21 adalah yang terkecil, trisomi menyebabkan sindrom Down.",
+                22: "Kromosom 22 adalah kromosom akrosentrik kedua terkecil.",
+                "X": "Kromosom X mengandung sekitar 800-900 gen, beberapa terkait dengan kecerdasan.",
+                "Y": "Kromosom Y adalah yang terkecil, hanya mengandung sekitar 50-60 gen."
+            };
+            
+            return facts[chromosome.number] || `Kromosom ${chromosome.number} merupakan salah satu dari 23 pasang kromosom manusia.`;
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Tutup modal
+            closeModalBtn.addEventListener('click', () => {
+                geneModal.classList.add('hidden');
+            });
+            
+            // Tutup modal dengan klik di luar konten
+            geneModal.addEventListener('click', (e) => {
+                if (e.target === geneModal) {
+                    geneModal.classList.add('hidden');
+                }
+            });
+            
+            // Tutup modal dengan tombol ESC
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    geneModal.classList.add('hidden');
+                }
+            });
+            
+            // Pencarian kromosom/gen
+            searchInput.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase().trim();
+                
+                // Sembunyikan semua kromosom dulu
+                document.querySelectorAll('.chromosome-pair').forEach(chr => {
+                    chr.style.display = 'none';
+                });
+                
+                // Jika kosong, tampilkan 5 pertama
+                if (!searchTerm) {
+                    document.querySelectorAll('.chromosome-pair').forEach((chr, index) => {
+                        if (index < 5) {
+                            chr.style.display = 'block';
+                        }
+                    });
+                    return;
+                }
+                
+                // Tampilkan kromosom yang cocok
+                let found = false;
+                humanChromosomes.forEach(chromosome => {
+                    if (chromosome.number.toString().toLowerCase().includes(searchTerm) || 
+                        chromosome.description.toLowerCase().includes(searchTerm) ||
+                        chromosome.notableGenes.some(gene => gene.toLowerCase().includes(searchTerm))) {
+                        
+                        const chrElement = document.querySelector(`[data-chromosome="${chromosome.number}"]`);
+                        if (chrElement) {
+                            chrElement.style.display = 'block';
+                            found = true;
+                        }
+                    }
+                });
+                
+                // Jika tidak ditemukan, tampilkan pesan
+                if (!found) {
+                    chromosomeContainer.innerHTML = `
+                        <div class="text-center p-8 text-gray-500">
+                            <i class="fas fa-search mb-2 text-2xl"></i>
+                            <p>Tidak ditemukan kromosom atau gen yang sesuai dengan pencarian "${searchTerm}"</p>
+                        </div>
+                    `;
+                }
+            });
+            
+            // Tombol tampilkan semua kromosom
+            showAllChromosomesBtn.addEventListener('click', () => {
+                chromosomeContainer.innerHTML = '';
+                
+                humanChromosomes.forEach(chromosome => {
+                    const chromosomeElement = createChromosomeElement(chromosome);
+                    chromosomeContainer.appendChild(chromosomeElement);
+                });
+                
+                showAllChromosomesBtn.style.display = 'none';
+            });
+            
+            // Tombol untuk pembelahan sel
+            prevPhaseBtn.addEventListener('click', prevPhase);
+            nextPhaseBtn.addEventListener('click', nextPhase);
+            startMitosisBtn.addEventListener('click', animateMitosis);
+            startMeiosisBtn.addEventListener('click', animateMeiosis);
+            resetDivisionBtn.addEventListener('click', initCellDivision);
+            
+            // Pemilihan sifat untuk pewarisan
+            traitOptions.forEach(option => {
+                option.addEventListener('click', function() {
+                    const parent = this.dataset.parent;
+                    const trait = this.dataset.trait;
+                    const value = this.dataset.value;
+                    
+                    // Hapus seleksi sebelumnya untuk sifat yang sama
+                    document.querySelectorAll(`.trait-option[data-parent="${parent}"][data-trait="${trait}"]`)
+                        .forEach(opt => opt.classList.remove('selected'));
+                    
+                    // Tandai sebagai terpilih
+                    this.classList.add('selected');
+                    
+                    // Simpan dalam state
+                    selectedTraits[`parent${parent}`][trait] = value;
+                });
+            });
+            
+            // Tombol hitung pewarisan
+            calculateInheritanceBtn.addEventListener('click', calculateInheritance);
+            
+            // Tab switching
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    switchTab(tab.dataset.tab);
+                });
+            });
+        }
+
+        // Inisialisasi ketika halaman dimuat
+        document.addEventListener('DOMContentLoaded', () => {
+            initChromosomes();
+            initCellDivision();
+        });
+    </script>
+</body>
+</html>

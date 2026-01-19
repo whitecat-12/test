@@ -1,0 +1,1404 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TETA SAINS - Osiloskop Digital</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #38b2ac;
+            --secondary: #0e7490;
+            --accent: #f59e0b;
+        }
+        
+        body {
+            font-family: 'Baloo 2', cursive;
+            background-color: #f8fafc;
+        }
+        
+        .app-container {
+            max-width: 414px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            max-width: 414px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            background: white;
+            z-index: 10;
+            height: 70px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+            text-decoration: none;
+            flex: 1;
+            height: 100%;
+            padding: 0.5rem 0;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item span {
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
+        
+        .nav-item.active {
+            color: var(--primary);
+        }
+        
+        .nav-icon {
+            transition: all 0.3s ease;
+            font-size: 1.25rem;
+        }
+        
+        .nav-icon.active {
+            transform: translateY(-5px);
+            color: var(--primary);
+        }
+        
+        .app-logo {
+            display: flex;
+            align-items: center;
+        }
+        
+        .app-logo-icon {
+            background: #9999ff;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 8px;
+        }
+        
+        .app-name {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: #9999ff;
+        }
+        
+        .data-card {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border: 1px solid #e5e7eb;
+        }
+        
+        .value-display {
+            font-size: 24px;
+            font-weight: 700;
+            text-align: center;
+            padding: 10px;
+            border-radius: 10px;
+            margin: 5px 0;
+        }
+        
+        .axis-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            text-transform: uppercase;
+        }
+        
+        .unit {
+            font-size: 12px;
+            color: #6b7280;
+            margin-left: 2px;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        
+        .status-active {
+            background-color: #10b981;
+            animation: pulse 2s infinite;
+        }
+        
+        .status-inactive {
+            background-color: #ef4444;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .tab-container {
+            display: flex;
+            background: #f1f5f9;
+            border-radius: 10px;
+            padding: 5px;
+            margin-bottom: 15px;
+        }
+        
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 8px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+        
+        .tab.active {
+            background: white;
+            color: #4f46e5;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .control-btn {
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2d9c97;
+        }
+        
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+        
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+        
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #0da271;
+        }
+        
+        .btn-warning {
+            background: #f59e0b;
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            background: #d97706;
+        }
+        
+        canvas {
+            max-width: 100%;
+            max-height: 250px;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+        
+        .data-table th {
+            background: #f3f4f6;
+            padding: 8px;
+            text-align: left;
+            font-weight: 600;
+            color: #374151;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .data-table td {
+            padding: 8px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .data-table tr:hover {
+            background: #f9fafb;
+        }
+        
+        .download-section {
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        
+        .download-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 15px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-weight: 600;
+            color: #374151;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        
+        .download-btn:hover {
+            background: #f3f4f6;
+            border-color: #d1d5db;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 80px;
+            right: 10px;
+            background: #10b981;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+            display: none;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        /* Osiloskop Styling */
+        .oscilloscope-grid {
+            background: #000;
+            border-radius: 8px;
+            padding: 5px;
+            margin-bottom: 10px;
+        }
+        
+        .waveform-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .control-group {
+            flex: 1;
+            min-width: 120px;
+        }
+        
+        .control-label {
+            display: block;
+            font-size: 11px;
+            color: #666;
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+        
+        .control-input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            font-size: 12px;
+            background: #f9fafb;
+        }
+        
+        .control-range {
+            width: 100%;
+        }
+        
+        .trigger-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 5px;
+        }
+        
+        .trigger-active {
+            background-color: #f59e0b;
+            animation: pulse 1s infinite;
+        }
+        
+        .measurement-panel {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .measurement-item {
+            background: #f8fafc;
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 11px;
+        }
+        
+        .measurement-value {
+            font-weight: 700;
+            color: #4f46e5;
+            margin-left: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header class="bg-gradient-to-r from-primary to-secondary p-4 text-white">
+            <div class="flex justify-between items-center">
+                <div class="app-logo">
+                    <div class="app-logo-icon">
+                        <i class="fas fa-wave-square"></i>
+                    </div>
+                    <h1 class="app-name">QUANTARA</h1>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-bell"></i>
+                    <i class="fas fa-user-circle text-xl"></i>
+                </div>
+            </div>
+        </header>
+        
+        <main class="pb-24 p-4">
+            <div class="mb-4">
+                <h1 class="text-xl font-bold text-gray-800 mb-1">
+                    <i class="fas fa-wave-square text-teal-500 mr-2"></i> Osiloskop Digital
+                </h1>
+                <p class="text-gray-600 text-sm">
+                    Osiloskop berbasis sensor dengan visualisasi gelombang real-time
+                </p>
+            </div>
+            
+            <div class="tab-container">
+                <div class="tab active" data-tab="oscilloscope">Osiloskop</div>
+                <div class="tab" data-tab="measurements">Pengukuran</div>
+                <div class="tab" data-tab="settings">Pengaturan</div>
+            </div>
+            
+            <div id="oscilloscope-tab" class="tab-content active">
+                <div class="data-card">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-bold text-gray-700 flex items-center">
+                            <i class="fas fa-tachometer-alt text-blue-500 mr-2"></i> Status Osiloskop
+                        </h3>
+                        <div class="flex items-center">
+                            <span class="status-indicator status-inactive" id="status-indicator"></span>
+                            <span class="text-sm font-medium" id="status-text">Nonaktif</span>
+                        </div>
+                    </div>
+                    
+                    <div class="oscilloscope-grid">
+                        <canvas id="oscilloscope-canvas"></canvas>
+                    </div>
+                    
+                    <div class="waveform-controls">
+                        <div class="control-group">
+                            <label class="control-label">Time/Div (ms)</label>
+                            <input type="range" id="time-div" class="control-range" min="1" max="1000" value="100">
+                            <input type="number" id="time-div-value" class="control-input" value="100" min="1" max="1000">
+                        </div>
+                        
+                        <div class="control-group">
+                            <label class="control-label">Volt/Div (V)</label>
+                            <input type="range" id="volt-div" class="control-range" min="0.1" max="10" step="0.1" value="2">
+                            <input type="number" id="volt-div-value" class="control-input" value="2" min="0.1" max="10" step="0.1">
+                        </div>
+                        
+                        <div class="control-group">
+                            <label class="control-label">Trigger Level</label>
+                            <input type="range" id="trigger-level" class="control-range" min="-10" max="10" step="0.1" value="0">
+                            <input type="number" id="trigger-level-value" class="control-input" value="0" min="-10" max="10" step="0.1">
+                        </div>
+                        
+                        <div class="control-group">
+                            <label class="control-label">Mode Trigger</label>
+                            <select id="trigger-mode" class="control-input">
+                                <option value="auto">Auto</option>
+                                <option value="normal">Normal</option>
+                                <option value="single">Single</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center mb-4">
+                        <span class="trigger-indicator" id="trigger-indicator"></span>
+                        <span class="text-sm font-medium mr-4" id="trigger-status">Trigger: Auto</span>
+                        <span class="text-sm text-gray-600">Sampling Rate: <span id="sampling-rate">0</span> Hz</span>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-3">
+                        <button id="start-btn" class="control-btn btn-primary">
+                            <i class="fas fa-play"></i> Mulai
+                        </button>
+                        <button id="stop-btn" class="control-btn btn-danger" disabled>
+                            <i class="fas fa-stop"></i> Berhenti
+                        </button>
+                        <button id="single-btn" class="control-btn btn-warning">
+                            <i class="fas fa-camera"></i> Single Shot
+                        </button>
+                        <button id="autoscale-btn" class="control-btn btn-success">
+                            <i class="fas fa-expand"></i> Auto Scale
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="data-card">
+                    <h3 class="font-bold text-gray-700 mb-3 flex items-center">
+                        <i class="fas fa-chart-area text-purple-500 mr-2"></i> Waveform Channels
+                    </h3>
+                    
+                    <div class="grid grid-cols-3 gap-3 mb-4">
+                        <div class="text-center">
+                            <div class="axis-label">Channel 1</div>
+                            <div class="value-display bg-blue-50 text-blue-600" id="channel1-value">0.00</div>
+                            <div class="text-xs text-gray-500">V</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="axis-label">Channel 2</div>
+                            <div class="value-display bg-green-50 text-green-600" id="channel2-value">0.00</div>
+                            <div class="text-xs text-gray-500">V</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="axis-label">Channel 3</div>
+                            <div class="value-display bg-purple-50 text-purple-600" id="channel3-value">0.00</div>
+                            <div class="text-xs text-gray-500">V</div>
+                        </div>
+                    </div>
+                    
+                    <div class="measurement-panel">
+                        <div class="measurement-item">Freq: <span class="measurement-value" id="frequency">0 Hz</span></div>
+                        <div class="measurement-item">Period: <span class="measurement-value" id="period">0 ms</span></div>
+                        <div class="measurement-item">Vpp: <span class="measurement-value" id="vpp">0 V</span></div>
+                        <div class="measurement-item">Vavg: <span class="measurement-value" id="vavg">0 V</span></div>
+                        <div class="measurement-item">Vrms: <span class="measurement-value" id="vrms">0 V</span></div>
+                        <div class="measurement-item">Duty Cycle: <span class="measurement-value" id="duty">0%</span></div>
+                    </div>
+                </div>
+                
+                <div class="data-card">
+                    <h3 class="font-bold text-gray-700 mb-3 flex items-center">
+                        <i class="fas fa-sliders-h text-teal-500 mr-2"></i> Kontrol Channel
+                    </h3>
+                    
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <div class="w-3 h-3 rounded-full bg-blue-500 mr-2"></div>
+                                <span class="text-sm font-medium">Channel 1 (X-Axis)</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <label class="text-xs">
+                                    <input type="checkbox" id="ch1-enabled" checked> On
+                                </label>
+                                <select id="ch1-coupling" class="text-xs border rounded px-2 py-1">
+                                    <option value="ac">AC</option>
+                                    <option value="dc">DC</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <div class="w-3 h-3 rounded-full bg-green-500 mr-2"></div>
+                                <span class="text-sm font-medium">Channel 2 (Y-Axis)</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <label class="text-xs">
+                                    <input type="checkbox" id="ch2-enabled" checked> On
+                                </label>
+                                <select id="ch2-coupling" class="text-xs border rounded px-2 py-1">
+                                    <option value="ac">AC</option>
+                                    <option value="dc">DC</option>
+                                </select>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <div class="w-3 h-3 rounded-full bg-purple-500 mr-2"></div>
+                                <span class="text-sm font-medium">Channel 3 (Z-Axis)</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <label class="text-xs">
+                                    <input type="checkbox" id="ch3-enabled" checked> On
+                                </label>
+                                <select id="ch3-coupling" class="text-xs border rounded px-2 py-1">
+                                    <option value="ac">AC</option>
+                                    <option value="dc">DC</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="measurements-tab" class="tab-content">
+                <div class="data-card">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-bold text-gray-700 flex items-center">
+                            <i class="fas fa-ruler text-blue-500 mr-2"></i> Pengukuran
+                        </h3>
+                        <button id="clear-measurements" class="text-sm bg-red-100 text-red-600 px-3 py-1 rounded-lg">
+                            <i class="fas fa-trash mr-1"></i>Reset
+                        </button>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Parameter</th>
+                                    <th>Channel 1</th>
+                                    <th>Channel 2</th>
+                                    <th>Channel 3</th>
+                                    <th>Waktu</th>
+                                </tr>
+                            </thead>
+                            <tbody id="measurements-table">
+                                <tr>
+                                    <td colspan="5" class="text-center py-4 text-gray-500">
+                                        Tidak ada pengukuran. Mulai osiloskop untuk pengukuran.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="data-card">
+                    <h3 class="font-bold text-gray-700 mb-3 flex items-center">
+                        <i class="fas fa-waveform-path text-purple-500 mr-2"></i> Analisis FFT
+                    </h3>
+                    <div class="relative">
+                        <canvas id="fft-canvas"></canvas>
+                    </div>
+                    <div class="text-xs text-gray-500 mt-2">
+                        <i class="fas fa-info-circle mr-1"></i>FFT menunjukkan komponen frekuensi sinyal
+                    </div>
+                </div>
+            </div>
+            
+            <div id="settings-tab" class="tab-content">
+                <div class="data-card">
+                    <h3 class="font-bold text-gray-700 mb-3 flex items-center">
+                        <i class="fas fa-cog text-gray-500 mr-2"></i> Pengaturan Osiloskop
+                    </h3>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Mode Sampling</label>
+                            <select id="sampling-mode" class="w-full p-2 border border-gray-300 rounded-lg text-sm">
+                                <option value="real">Real-time</option>
+                                <option value="buffer">Buffer (1000 pts)</option>
+                                <option value="highres">High Resolution</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Warna Grid</label>
+                            <select id="grid-color" class="w-full p-2 border border-gray-300 rounded-lg text-sm">
+                                <option value="#00ff00">Hijau</option>
+                                <option value="#ffffff">Putih</option>
+                                <option value="#ffff00">Kuning</option>
+                                <option value="#00ffff">Cyan</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Intensitas Grid</label>
+                            <input type="range" id="grid-intensity" min="1" max="10" value="5" class="w-full">
+                            <div class="text-xs text-gray-500 mt-1" id="grid-intensity-value">Sedang</div>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Persistence</label>
+                            <select id="persistence-mode" class="w-full p-2 border border-gray-300 rounded-lg text-sm">
+                                <option value="none">None</option>
+                                <option value="short">Short (500ms)</option>
+                                <option value="medium">Medium (2s)</option>
+                                <option value="long">Long (5s)</option>
+                                <option value="infinite">Infinite</option>
+                            </select>
+                        </div>
+                        
+                        <div class="flex items-center">
+                            <input type="checkbox" id="show-cursors" class="mr-2">
+                            <label for="show-cursors" class="text-sm text-gray-700">Tampilkan kursor pengukuran</label>
+                        </div>
+                        
+                        <div class="flex items-center">
+                            <input type="checkbox" id="show-measurements" class="mr-2" checked>
+                            <label for="show-measurements" class="text-sm text-gray-700">Tampilkan pengukuran otomatis</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="data-card">
+                    <h3 class="font-bold text-gray-700 mb-3 flex items-center">
+                        <i class="fas fa-download text-green-500 mr-2"></i> Ekspor Data
+                    </h3>
+                    
+                    <div class="download-section">
+                        <button id="export-waveform" class="download-btn">
+                            <i class="fas fa-file-waveform text-blue-500"></i>
+                            <span>Ekspor Waveform (CSV)</span>
+                        </button>
+                        
+                        <button id="export-screenshot" class="download-btn">
+                            <i class="fas fa-camera text-green-500"></i>
+                            <span>Screenshot Osiloskop</span>
+                        </button>
+                        
+                        <button id="export-settings" class="download-btn">
+                            <i class="fas fa-cogs text-yellow-500"></i>
+                            <span>Ekspor Pengaturan</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <div class="notification" id="notification"></div>
+        
+        <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+      <a href="../../dashboard siswa.html" class="nav-item">
+        <i class="fas fa-home nav-icon"></i>
+        <span>Beranda</span>
+      </a>
+      <a href="../../soal harian/dashboard soal.html" class="nav-item">
+        <i class="fas fa-flask nav-icon"></i>
+        <span>Soal Harian</span>
+      </a>
+      <a href="../../ai/nayra.html" class="nav-item">
+        <i class="fas fa-robot nav-icon"></i>
+        <span>Nayra AI</span>
+      </a>
+      <a href="../../materi harian/kategori materi.html" class="nav-item">
+        <i class="fas fa-chalkboard-teacher nav-icon"></i>
+        <span>Materi Harian</span>
+      </a>
+      <a href="../../profil/profil.html" class="nav-item">
+        <i class="fas fa-user nav-icon"></i>
+        <span>Profil</span>
+      </a>
+    </nav>
+    </div>
+
+    <script>
+        // State aplikasi osiloskop
+        let isActive = false;
+        let startTime = null;
+        let dataPoints = [];
+        let sampleRate = 0;
+        let sampleCount = 0;
+        let lastSampleTime = 0;
+        
+        // Konfigurasi osiloskop
+        let config = {
+            timePerDiv: 100, // ms per divisi
+            voltsPerDiv: 2,  // volt per divisi
+            triggerLevel: 0,
+            triggerMode: 'auto',
+            triggerState: 'waiting',
+            gridColor: '#00ff00',
+            gridIntensity: 5,
+            persistence: 'none',
+            channels: {
+                ch1: { enabled: true, coupling: 'ac', color: '#3b82f6', data: [] },
+                ch2: { enabled: true, coupling: 'ac', color: '#10b981', data: [] },
+                ch3: { enabled: true, coupling: 'ac', color: '#8b5cf6', data: [] }
+            },
+            measurements: []
+        };
+        
+        // DOM Elements
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const statusIndicator = document.getElementById('status-indicator');
+        const statusText = document.getElementById('status-text');
+        const startBtn = document.getElementById('start-btn');
+        const stopBtn = document.getElementById('stop-btn');
+        const singleBtn = document.getElementById('single-btn');
+        const autoscaleBtn = document.getElementById('autoscale-btn');
+        const oscilloscopeCanvas = document.getElementById('oscilloscope-canvas');
+        const fftCanvas = document.getElementById('fft-canvas');
+        const ctx = oscilloscopeCanvas.getContext('2d');
+        const fftCtx = fftCanvas.getContext('2d');
+        
+        // Inisialisasi aplikasi
+        function initApp() {
+            setupCanvas();
+            setupEventListeners();
+            updateDisplay();
+            checkSensorSupport();
+            drawGrid();
+        }
+        
+        // Setup canvas
+        function setupCanvas() {
+            oscilloscopeCanvas.width = oscilloscopeCanvas.offsetWidth;
+            oscilloscopeCanvas.height = 200;
+            
+            fftCanvas.width = fftCanvas.offsetWidth;
+            fftCanvas.height = 150;
+        }
+        
+        // Setup event listeners
+        function setupEventListeners() {
+            // Tab switching
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabName = tab.dataset.tab;
+                    switchTab(tabName);
+                });
+            });
+            
+            // Kontrol osiloskop
+            startBtn.addEventListener('click', startOscilloscope);
+            stopBtn.addEventListener('click', stopOscilloscope);
+            singleBtn.addEventListener('click', singleShot);
+            autoscaleBtn.addEventListener('click', autoScale);
+            
+            // Kontrol range
+            document.getElementById('time-div').addEventListener('input', (e) => {
+                config.timePerDiv = parseInt(e.target.value);
+                document.getElementById('time-div-value').value = config.timePerDiv;
+                updateDisplay();
+            });
+            
+            document.getElementById('time-div-value').addEventListener('change', (e) => {
+                config.timePerDiv = parseInt(e.target.value);
+                document.getElementById('time-div').value = config.timePerDiv;
+                updateDisplay();
+            });
+            
+            document.getElementById('volt-div').addEventListener('input', (e) => {
+                config.voltsPerDiv = parseFloat(e.target.value);
+                document.getElementById('volt-div-value').value = config.voltsPerDiv;
+                updateDisplay();
+            });
+            
+            document.getElementById('volt-div-value').addEventListener('change', (e) => {
+                config.voltsPerDiv = parseFloat(e.target.value);
+                document.getElementById('volt-div').value = config.voltsPerDiv;
+                updateDisplay();
+            });
+            
+            document.getElementById('trigger-level').addEventListener('input', (e) => {
+                config.triggerLevel = parseFloat(e.target.value);
+                document.getElementById('trigger-level-value').value = config.triggerLevel;
+            });
+            
+            document.getElementById('trigger-level-value').addEventListener('change', (e) => {
+                config.triggerLevel = parseFloat(e.target.value);
+                document.getElementById('trigger-level').value = config.triggerLevel;
+            });
+            
+            document.getElementById('trigger-mode').addEventListener('change', (e) => {
+                config.triggerMode = e.target.value;
+                updateTriggerDisplay();
+            });
+            
+            // Kontrol channel
+            document.getElementById('ch1-enabled').addEventListener('change', (e) => {
+                config.channels.ch1.enabled = e.target.checked;
+            });
+            
+            document.getElementById('ch2-enabled').addEventListener('change', (e) => {
+                config.channels.ch2.enabled = e.target.checked;
+            });
+            
+            document.getElementById('ch3-enabled').addEventListener('change', (e) => {
+                config.channels.ch3.enabled = e.target.checked;
+            });
+            
+            document.getElementById('ch1-coupling').addEventListener('change', (e) => {
+                config.channels.ch1.coupling = e.target.value;
+            });
+            
+            document.getElementById('ch2-coupling').addEventListener('change', (e) => {
+                config.channels.ch2.coupling = e.target.value;
+            });
+            
+            document.getElementById('ch3-coupling').addEventListener('change', (e) => {
+                config.channels.ch3.coupling = e.target.value;
+            });
+            
+            // Pengaturan
+            document.getElementById('grid-color').addEventListener('change', (e) => {
+                config.gridColor = e.target.value;
+                drawGrid();
+            });
+            
+            document.getElementById('grid-intensity').addEventListener('input', (e) => {
+                config.gridIntensity = parseInt(e.target.value);
+                const intensityLabels = ['Sangat Redup', 'Redup', 'Sedang', 'Terang', 'Sangat Terang'];
+                document.getElementById('grid-intensity-value').textContent = 
+                    intensityLabels[Math.floor(config.gridIntensity / 2)] || 'Sedang';
+                drawGrid();
+            });
+            
+            // Ekspor
+            document.getElementById('export-waveform').addEventListener('click', exportWaveform);
+            document.getElementById('export-screenshot').addEventListener('click', exportScreenshot);
+            document.getElementById('clear-measurements').addEventListener('click', clearMeasurements);
+            
+            // Handle resize
+            window.addEventListener('resize', () => {
+                setupCanvas();
+                drawGrid();
+            });
+        }
+        
+        // Beralih tab
+        function switchTab(tabName) {
+            tabs.forEach(tab => {
+                if (tab.dataset.tab === tabName) {
+                    tab.classList.add('active');
+                } else {
+                    tab.classList.remove('active');
+                }
+            });
+            
+            tabContents.forEach(content => {
+                if (content.id === `${tabName}-tab`) {
+                    content.classList.add('active');
+                } else {
+                    content.classList.remove('active');
+                }
+            });
+        }
+        
+        // Mulai osiloskop
+        async function startOscilloscope() {
+            try {
+                // Permisi akses sensor
+                if (typeof DeviceMotionEvent.requestPermission === 'function') {
+                    const permission = await DeviceMotionEvent.requestPermission();
+                    if (permission !== 'granted') {
+                        showNotification('Izin akses sensor ditolak', 'error');
+                        return;
+                    }
+                }
+                
+                // Simulasi data osiloskop (dalam aplikasi nyata, ini akan membaca dari sensor)
+                startTime = Date.now();
+                isActive = true;
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+                
+                statusIndicator.className = 'status-indicator status-active';
+                statusText.textContent = 'Aktif';
+                
+                // Reset data
+                config.channels.ch1.data = [];
+                config.channels.ch2.data = [];
+                config.channels.ch3.data = [];
+                
+                showNotification('Osiloskop dimulai', 'success');
+                
+                // Mulai loop pembaruan
+                requestAnimationFrame(updateOscilloscope);
+                
+            } catch (error) {
+                console.error('Error starting oscilloscope:', error);
+                showNotification('Gagal memulai osiloskop', 'error');
+                // Fallback ke data simulasi
+                simulateOscilloscope();
+            }
+        }
+        
+        // Update osiloskop
+        function updateOscilloscope() {
+            if (!isActive) return;
+            
+            const now = Date.now();
+            const elapsed = (now - startTime) / 1000;
+            
+            // Generate data simulasi
+            generateSimulatedData(elapsed);
+            
+            // Update sample rate
+            updateSampleRate();
+            
+            // Gambar osiloskop
+            drawOscilloscope();
+            
+            // Update pengukuran
+            updateMeasurements();
+            
+            // Lanjutkan loop
+            requestAnimationFrame(updateOscilloscope);
+        }
+        
+        // Generate data simulasi
+        function generateSimulatedData(time) {
+            // Channel 1: Sinus dengan noise
+            const freq1 = 1; // Hz
+            const amp1 = 3;  // Volt
+            const noise1 = (Math.random() - 0.5) * 0.5;
+            const value1 = amp1 * Math.sin(2 * Math.PI * freq1 * time) + noise1;
+            
+            // Channel 2: Square wave
+            const freq2 = 2; // Hz
+            const amp2 = 2;  // Volt
+            const value2 = amp2 * (Math.sin(2 * Math.PI * freq2 * time) > 0 ? 1 : -1);
+            
+            // Channel 3: Triangle wave
+            const freq3 = 0.5; // Hz
+            const amp3 = 4;    // Volt
+            const period3 = 1 / freq3;
+            const pos = (time % period3) / period3;
+            const value3 = amp3 * (pos < 0.5 ? 4 * pos - 1 : 3 - 4 * pos);
+            
+            // Apply coupling
+            const applyCoupling = (value, coupling, channel) => {
+                if (coupling === 'ac') {
+                    // Simpan rata-rata untuk AC coupling
+                    if (!channel.average) channel.average = value;
+                    channel.average = channel.average * 0.99 + value * 0.01;
+                    return value - channel.average;
+                }
+                return value; // DC coupling
+            };
+            
+            // Simpan data
+            const dataPoint = {
+                time,
+                ch1: applyCoupling(value1, config.channels.ch1.coupling, config.channels.ch1),
+                ch2: applyCoupling(value2, config.channels.ch2.coupling, config.channels.ch2),
+                ch3: applyCoupling(value3, config.channels.ch3.coupling, config.channels.ch3)
+            };
+            
+            dataPoints.push(dataPoint);
+            
+            // Batasi data
+            const maxPoints = Math.floor(1000 / (config.timePerDiv / 1000)) * 10; // 10 divisi
+            if (dataPoints.length > maxPoints) {
+                dataPoints.shift();
+            }
+            
+            // Update channel data
+            config.channels.ch1.data.push({ time, value: value1 });
+            config.channels.ch2.data.push({ time, value: value2 });
+            config.channels.ch3.data.push({ time, value: value3 });
+            
+            if (config.channels.ch1.data.length > 1000) config.channels.ch1.data.shift();
+            if (config.channels.ch2.data.length > 1000) config.channels.ch2.data.shift();
+            if (config.channels.ch3.data.length > 1000) config.channels.ch3.data.shift();
+            
+            // Update display values
+            document.getElementById('channel1-value').textContent = value1.toFixed(2);
+            document.getElementById('channel2-value').textContent = value2.toFixed(2);
+            document.getElementById('channel3-value').textContent = value3.toFixed(2);
+        }
+        
+        // Gambar grid osiloskop
+        function drawGrid() {
+            const width = oscilloscopeCanvas.width;
+            const height = oscilloscopeCanvas.height;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            // Background
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, width, height);
+            
+            // Grid
+            const divisionsX = 10;
+            const divisionsY = 8;
+            const divWidth = width / divisionsX;
+            const divHeight = height / divisionsY;
+            
+            // Set grid opacity berdasarkan intensitas
+            const opacity = config.gridIntensity / 10;
+            ctx.strokeStyle = config.gridColor;
+            ctx.globalAlpha = opacity * 0.3;
+            ctx.lineWidth = 1;
+            
+            // Garis vertikal (minor)
+            for (let i = 1; i < divisionsX * 5; i++) {
+                ctx.beginPath();
+                ctx.moveTo(i * (divWidth / 5), 0);
+                ctx.lineTo(i * (divWidth / 5), height);
+                ctx.stroke();
+            }
+            
+            // Garis horizontal (minor)
+            for (let i = 1; i < divisionsY * 5; i++) {
+                ctx.beginPath();
+                ctx.moveTo(0, i * (divHeight / 5));
+                ctx.lineTo(width, i * (divHeight / 5));
+                ctx.stroke();
+            }
+            
+            // Garis utama
+            ctx.globalAlpha = opacity;
+            ctx.lineWidth = 2;
+            
+            // Garis vertikal utama
+            for (let i = 1; i < divisionsX; i++) {
+                ctx.beginPath();
+                ctx.moveTo(i * divWidth, 0);
+                ctx.lineTo(i * divWidth, height);
+                ctx.stroke();
+            }
+            
+            // Garis horizontal utama
+            for (let i = 1; i < divisionsY; i++) {
+                ctx.beginPath();
+                ctx.moveTo(0, i * divHeight);
+                ctx.lineTo(width, i * divHeight);
+                ctx.stroke();
+            }
+            
+            // Axis center lines
+            ctx.globalAlpha = opacity * 0.8;
+            ctx.lineWidth = 3;
+            
+            // Garis horizontal tengah
+            ctx.beginPath();
+            ctx.moveTo(0, height / 2);
+            ctx.lineTo(width, height / 2);
+            ctx.stroke();
+            
+            // Garis vertikal tengah
+            ctx.beginPath();
+            ctx.moveTo(width / 2, 0);
+            ctx.lineTo(width / 2, height);
+            ctx.stroke();
+            
+            ctx.globalAlpha = 1;
+        }
+        
+        // Gambar waveform
+        function drawOscilloscope() {
+            drawGrid();
+            
+            const width = oscilloscopeCanvas.width;
+            const height = oscilloscopeCanvas.height;
+            const centerY = height / 2;
+            
+            // Gambar setiap channel
+            ['ch1', 'ch2', 'ch3'].forEach(channelKey => {
+                const channel = config.channels[channelKey];
+                if (!channel.enabled || channel.data.length < 2) return;
+                
+                ctx.beginPath();
+                ctx.strokeStyle = channel.color;
+                ctx.lineWidth = 2;
+                ctx.lineJoin = 'round';
+                
+                // Hitung scaling
+                const timeScale = width / (config.timePerDiv * 10); // 10 divisi horizontal
+                const voltScale = height / (config.voltsPerDiv * 8); // 8 divisi vertikal
+                
+                // Gambar garis
+                for (let i = 0; i < channel.data.length; i++) {
+                    const point = channel.data[i];
+                    const x = (point.time * 1000) % (config.timePerDiv * 10) * timeScale;
+                    const y = centerY - (point.value * voltScale);
+                    
+                    if (i === 0) {
+                        ctx.moveTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                }
+                
+                ctx.stroke();
+            });
+            
+            // Gambar trigger level
+            ctx.beginPath();
+            ctx.strokeStyle = '#f59e0b';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([5, 5]);
+            const triggerY = centerY - (config.triggerLevel * (height / (config.voltsPerDiv * 8)));
+            ctx.moveTo(0, triggerY);
+            ctx.lineTo(width, triggerY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+        
+        // Update sample rate
+        function updateSampleRate() {
+            sampleCount++;
+            const now = Date.now();
+            
+            if (now - lastSampleTime >= 1000) {
+                sampleRate = sampleCount;
+                document.getElementById('sampling-rate').textContent = sampleRate;
+                sampleCount = 0;
+                lastSampleTime = now;
+            }
+        }
+        
+        // Update trigger display
+        function updateTriggerDisplay() {
+            const triggerStatus = document.getElementById('trigger-status');
+            const triggerIndicator = document.getElementById('trigger-indicator');
+            
+            triggerStatus.textContent = `Trigger: ${config.triggerMode}`;
+            
+            if (config.triggerState === 'triggered') {
+                triggerIndicator.className = 'trigger-indicator trigger-active';
+            } else {
+                triggerIndicator.className = 'trigger-indicator';
+            }
+        }
+        
+        // Update measurements
+        function updateMeasurements() {
+            if (dataPoints.length < 2) return;
+            
+            // Analisis channel 1
+            const ch1Data = config.channels.ch1.data.slice(-100); // Ambil 100 poin terakhir
+            if (ch1Data.length > 1) {
+                // Hitung Vpp
+                let min = ch1Data[0].value;
+                let max = ch1Data[0].value;
+                let sum = 0;
+                let sumSquares = 0;
+                
+                ch1Data.forEach(point => {
+                    if (point.value < min) min = point.value;
+                    if (point.value > max) max = point.value;
+                    sum += point.value;
+                    sumSquares += point.value * point.value;
+                });
+                
+                const vpp = max - min;
+                const vavg = sum / ch1Data.length;
+                const vrms = Math.sqrt(sumSquares / ch1Data.length);
+                
+                // Hitung frekuensi (sederhana)
+                let zeroCrossings = 0;
+                for (let i = 1; i < ch1Data.length; i++) {
+                    if (ch1Data[i-1].value * ch1Data[i].value < 0) {
+                        zeroCrossings++;
+                    }
+                }
+                
+                const timeSpan = ch1Data[ch1Data.length-1].time - ch1Data[0].time;
+                const frequency = zeroCrossings / (2 * timeSpan);
+                const period = frequency > 0 ? 1000 / frequency : 0;
+                
+                // Update display
+                document.getElementById('frequency').textContent = `${frequency.toFixed(2)} Hz`;
+                document.getElementById('period').textContent = `${period.toFixed(2)} ms`;
+                document.getElementById('vpp').textContent = `${vpp.toFixed(2)} V`;
+                document.getElementById('vavg').textContent = `${vavg.toFixed(2)} V`;
+                document.getElementById('vrms').textContent = `${vrms.toFixed(2)} V`;
+                document.getElementById('duty').textContent = '50%'; // Simplified
+            }
+        }
+        
+        // Single shot
+        function singleShot() {
+            showNotification('Single shot mode diaktifkan', 'info');
+            // Implementasi single shot
+        }
+        
+        // Auto scale
+        function autoScale() {
+            // Otomatis sesuaikan volt/div dan time/div
+            if (dataPoints.length > 1) {
+                // Cari range voltage
+                let min = dataPoints[0].ch1;
+                let max = dataPoints[0].ch1;
+                
+                dataPoints.forEach(point => {
+                    if (point.ch1 < min) min = point.ch1;
+                    if (point.ch1 > max) max = point.ch1;
+                });
+                
+                const vpp = max - min;
+                const newVoltPerDiv = Math.ceil(vpp / 8 * 2) / 2; // Bulatkan ke 0.5 terdekat
+                
+                if (newVoltPerDiv > 0.1 && newVoltPerDiv <= 10) {
+                    config.voltsPerDiv = newVoltPerDiv;
+                    document.getElementById('volt-div').value = newVoltPerDiv;
+                    document.getElementById('volt-div-value').value = newVoltPerDiv;
+                }
+                
+                showNotification('Auto scale diterapkan', 'success');
+            }
+        }
+        
+        // Berhenti osiloskop
+        function stopOscilloscope() {
+            isActive = false;
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+            
+            statusIndicator.className = 'status-indicator status-inactive';
+            statusText.textContent = 'Nonaktif';
+            
+            showNotification('Osiloskop dihentikan', 'info');
+        }
+        
+        // Simulasi osiloskop (fallback)
+        function simulateOscilloscope() {
+            startTime = Date.now();
+            isActive = true;
+            startBtn.disabled = true;
+            stopBtn.disabled = false;
+            
+            statusIndicator.className = 'status-indicator status-active';
+            statusText.textContent = 'Aktif (Simulasi)';
+            
+            showNotification('Mode simulasi diaktifkan', 'warning');
+            requestAnimationFrame(updateOscilloscope);
+        }
+        
+        // Update display
+        function updateDisplay() {
+            // Implementasi update tampilan lainnya
+        }
+        
+        // Check sensor support
+        function checkSensorSupport() {
+            if ('Accelerometer' in window || 'LinearAccelerationSensor' in window) {
+                showNotification('Sensor didukung', 'success');
+            } else {
+                showNotification('Menggunakan mode simulasi', 'info');
+            }
+        }
+        
+        // Export waveform
+        function exportWaveform() {
+            if (dataPoints.length === 0) {
+                showNotification('Tidak ada data untuk diekspor', 'warning');
+                return;
+            }
+            
+            let csv = 'Time (s),Channel 1 (V),Channel 2 (V),Channel 3 (V)\n';
+            dataPoints.forEach(point => {
+                csv += `${point.time.toFixed(4)},${point.ch1.toFixed(4)},${point.ch2.toFixed(4)},${point.ch3.toFixed(4)}\n`;
+            });
+            
+            downloadFile(csv, 'oscilloscope_data.csv', 'text/csv');
+            showNotification('Waveform diekspor ke CSV', 'success');
+        }
+        
+        // Export screenshot
+        function exportScreenshot() {
+            const link = document.createElement('a');
+            link.download = 'oscilloscope_screenshot.png';
+            link.href = oscilloscopeCanvas.toDataURL('image/png');
+            link.click();
+            showNotification('Screenshot disimpan', 'success');
+        }
+        
+        // Clear measurements
+        function clearMeasurements() {
+            config.measurements = [];
+            const table = document.getElementById('measurements-table');
+            table.innerHTML = `
+                <tr>
+                    <td colspan="5" class="text-center py-4 text-gray-500">
+                        Tidak ada pengukuran. Mulai osiloskop untuk pengukuran.
+                    </td>
+                </tr>
+            `;
+            showNotification('Pengukuran direset', 'success');
+        }
+        
+        // Download file
+        function downloadFile(content, filename, type) {
+            const blob = new Blob([content], { type });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+        
+        // Show notification
+        function showNotification(message, type = 'info') {
+            const colors = {
+                success: '#10b981',
+                error: '#ef4444',
+                warning: '#f59e0b',
+                info: '#3b82f6'
+            };
+            
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.style.backgroundColor = colors[type] || colors.info;
+            notification.style.display = 'block';
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+        
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+  </html>

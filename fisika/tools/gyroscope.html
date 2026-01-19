@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QUANTARA - Gyroscope 2D</title>
+    <title>TETA SAINS - Gyroscope Data</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --primary: #38b2ac;
@@ -29,12 +29,1340 @@
             box-shadow: 0 0 20px rgba(0,0,0,0.1);
         }
         
-        /* NAVBAR */
         .bottom-nav {
             position: fixed;
             bottom: 0;
             width: 100%;
             max-width: 414px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            background: white;
+            z-index: 10;
+            height: 70px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+            text-decoration: none;
+            flex: 1;
+            height: 100%;
+            padding: 0.5rem 0;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item span {
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
+        
+        .nav-item.active {
+            color: var(--primary);
+        }
+        
+        .nav-icon {
+            transition: all 0.3s ease;
+            font-size: 1.25rem;
+        }
+        
+        .nav-icon.active {
+            transform: translateY(-5px);
+            color: var(--primary);
+        }
+        
+        .app-logo {
+            display: flex;
+            align-items: center;
+        }
+        
+        .app-logo-icon {
+            background: #9999ff;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 8px;
+        }
+        
+        .app-name {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: #9999ff;
+        }
+        
+        .data-card {
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            border: 1px solid #e5e7eb;
+        }
+        
+        .value-display {
+            font-size: 24px;
+            font-weight: 700;
+            text-align: center;
+            padding: 10px;
+            border-radius: 10px;
+            margin: 5px 0;
+        }
+        
+        .axis-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: #666;
+            text-transform: uppercase;
+        }
+        
+        .unit {
+            font-size: 12px;
+            color: #6b7280;
+            margin-left: 2px;
+        }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        
+        .status-active {
+            background-color: #10b981;
+            animation: pulse 2s infinite;
+        }
+        
+        .status-inactive {
+            background-color: #ef4444;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .tab-container {
+            display: flex;
+            background: #f1f5f9;
+            border-radius: 10px;
+            padding: 5px;
+            margin-bottom: 15px;
+        }
+        
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 8px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+        
+        .tab.active {
+            background: white;
+            color: #4f46e5;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .control-btn {
+            padding: 12px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2d9c97;
+        }
+        
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+        
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+        
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #0da271;
+        }
+        
+        .btn-warning {
+            background: #f59e0b;
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            background: #d97706;
+        }
+        
+        canvas {
+            max-width: 100%;
+            max-height: 250px;
+        }
+        
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12px;
+        }
+        
+        .data-table th {
+            background: #f3f4f6;
+            padding: 8px;
+            text-align: left;
+            font-weight: 600;
+            color: #374151;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .data-table td {
+            padding: 8px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .data-table tr:hover {
+            background: #f9fafb;
+        }
+        
+        .download-section {
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+        
+        .download-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 15px;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-weight: 600;
+            color: #374151;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        
+        .download-btn:hover {
+            background: #f3f4f6;
+            border-color: #d1d5db;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 80px;
+            right: 10px;
+            background: #10b981;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            z-index: 1000;
+            animation: slideIn 0.3s ease;
+            display: none;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .orientation-indicator {
+            width: 150px;
+            height: 150px;
+            position: relative;
+            margin: 0 auto;
+        }
+        
+        .sphere {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #4f46e5, #3730a3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .axis-line {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.5);
+        }
+        
+        .x-axis {
+            width: 100%;
+            height: 1px;
+            top: 50%;
+            left: 0;
+        }
+        
+        .y-axis {
+            width: 1px;
+            height: 100%;
+            top: 0;
+            left: 50%;
+        }
+        
+        .z-axis {
+            width: 1px;
+            height: 100%;
+            top: 0;
+            left: 50%;
+            transform: rotate(45deg);
+            transform-origin: center;
+        }
+        
+        .rotation-indicator {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: #f59e0b;
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            transition: transform 0.1s linear;
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.7);
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <header class="bg-gradient-to-r from-primary to-secondary p-4 text-white">
+            <div class="flex justify-between items-center">
+                <div class="app-logo">
+                    <div class="app-logo-icon">
+                        <i class="fas fa-sync-alt"></i>
+                    </div>
+                    <h1 class="app-name">QUANTARA</h1>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-bell"></i>
+                    <i class="fas fa-user-circle text-xl"></i>
+                </div>
+            </div>
+        </header>
+        
+        <main class="pb-24 p-4">
+            <div class="mb-4">
+                <h1 class="text-xl font-bold text-gray-800 mb-1">
+                    <i class="fas fa-sync-alt text-teal-500 mr-2"></i> Gyroscope Data
+                </h1>
+                <p class="text-gray-600 text-sm">
+                    Gyroscope perangkat dengan grafik waktu-nyata dan ekspor data rotasi
+                </p>
+            </div>
+            
+            <div class="tab-container">
+                <div class="tab active" data-tab="dashboard">Dashboard</div>
+                <div class="tab" data-tab="data">Data Table</div>
+                <div class="tab" data-tab="export">Export Data</div>
+            </div>
+            
+            <div id="dashboard-tab" class="tab-content active">
+                <div class="data-card">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-bold text-gray-700 flex items-center">
+                            <i class="fas fa-compass text-blue-500 mr-2"></i> Status Sensor
+                        </h3>
+                        <div class="flex items-center">
+                            <span class="status-indicator status-inactive" id="status-indicator"></span>
+                            <span class="text-sm font-medium" id="status-text">Nonaktif</span>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-3 gap-3 mb-4">
+                        <div class="text-center">
+                            <div class="axis-label">Rotasi α (Alpha)</div>
+                            <div class="value-display bg-blue-50 text-blue-600" id="gyro-alpha">0.00</div>
+                            <div class="text-xs text-gray-500">derajat/s</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="axis-label">Rotasi β (Beta)</div>
+                            <div class="value-display bg-green-50 text-green-600" id="gyro-beta">0.00</div>
+                            <div class="text-xs text-gray-500">derajat/s</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="axis-label">Rotasi γ (Gamma)</div>
+                            <div class="value-display bg-purple-50 text-purple-600" id="gyro-gamma">0.00</div>
+                            <div class="text-xs text-gray-500">derajat/s</div>
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-3 mb-4">
+                        <div class="text-center">
+                            <div class="axis-label">Total Rotasi</div>
+                            <div class="value-display bg-orange-50 text-orange-600" id="total-rotation">0.00</div>
+                            <div class="text-xs text-gray-500">derajat/s</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="axis-label">Sampling Rate</div>
+                            <div class="value-display bg-gray-50 text-gray-600" id="sampling-rate">0</div>
+                            <div class="text-xs text-gray-500">Hz</div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-6">
+                        <h3 class="font-bold text-gray-700 mb-3 flex items-center">
+                            <i class="fas fa-globe text-indigo-500 mr-2"></i> Visualisasi Rotasi
+                        </h3>
+                        <div class="orientation-indicator">
+                            <div class="sphere">
+                                <div class="axis-line x-axis"></div>
+                                <div class="axis-line y-axis"></div>
+                                <div class="axis-line z-axis"></div>
+                                <div class="rotation-indicator" id="rotation-indicator"></div>
+                            </div>
+                        </div>
+                        <div class="text-center mt-2 text-sm text-gray-600">
+                            Indikator posisi berdasarkan data gyroscope
+                        </div>
+                    </div>
+                    
+                    <div class="grid grid-cols-2 gap-3">
+                        <button id="start-btn" class="control-btn btn-primary">
+                            <i class="fas fa-play"></i> Mulai
+                        </button>
+                        <button id="stop-btn" class="control-btn btn-danger" disabled>
+                            <i class="fas fa-stop"></i> Berhenti
+                        </button>
+                        <button id="reset-btn" class="control-btn btn-secondary">
+                            <i class="fas fa-redo"></i> Reset Data
+                        </button>
+                        <button id="calibrate-btn" class="control-btn btn-warning">
+                            <i class="fas fa-balance-scale"></i> Kalibrasi
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="data-card">
+                    <h3 class="font-bold text-gray-700 mb-3 flex items-center">
+                        <i class="fas fa-chart-line text-teal-500 mr-2"></i> Grafik Kecepatan Rotasi
+                    </h3>
+                    <div class="relative">
+                        <canvas id="rotation-chart"></canvas>
+                    </div>
+                    <div class="flex justify-between mt-3 text-xs text-gray-500">
+                        <div>Waktu: <span id="time-elapsed">0</span>s</div>
+                        <div>Data Points: <span id="data-points">0</span></div>
+                    </div>
+                </div>
+                
+                <div class="data-card">
+                    <h3 class="font-bold text-gray-700 mb-3 flex items-center">
+                        <i class="fas fa-chart-pie text-purple-500 mr-2"></i> Distribusi Rotasi
+                    </h3>
+                    <div class="relative">
+                        <canvas id="distribution-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="data-tab" class="tab-content">
+                <div class="data-card">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-bold text-gray-700 flex items-center">
+                            <i class="fas fa-table text-blue-500 mr-2"></i> Data Gyroscope
+                        </h3>
+                        <button id="clear-table-btn" class="text-sm bg-red-100 text-red-600 px-3 py-1 rounded-lg">
+                            <i class="fas fa-trash mr-1"></i>Hapus Tabel
+                        </button>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>No</th>
+                                    <th>Waktu (s)</th>
+                                    <th>α (deg/s)</th>
+                                    <th>β (deg/s)</th>
+                                    <th>γ (deg/s)</th>
+                                    <th>Total (deg/s)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="data-table-body">
+                                <tr>
+                                    <td colspan="6" class="text-center py-4 text-gray-500">
+                                        Tidak ada data. Mulai gyroscope untuk mengumpulkan data.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="flex justify-between items-center mt-3 text-sm text-gray-500">
+                        <div>Menampilkan <span id="table-count">0</span> baris</div>
+                        <div class="flex items-center space-x-2">
+                            <button id="prev-page" class="px-3 py-1 bg-gray-100 rounded disabled:opacity-50" disabled>
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <span>Halaman <span id="current-page">1</span></span>
+                            <button id="next-page" class="px-3 py-1 bg-gray-100 rounded disabled:opacity-50" disabled>
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="export-tab" class="tab-content">
+                <div class="data-card">
+                    <h3 class="font-bold text-gray-700 mb-3 flex items-center">
+                        <i class="fas fa-download text-green-500 mr-2"></i> Ekspor Data
+                    </h3>
+                    <p class="text-gray-600 text-sm mb-4">
+                        Ekspor data gyroscope dalam berbagai format untuk analisis lebih lanjut.
+                    </p>
+                    
+                    <div class="download-section">
+                        <div class="text-sm font-medium text-gray-700 mb-3">Format Data:</div>
+                        
+                        <button id="export-csv" class="download-btn">
+                            <i class="fas fa-file-csv text-green-500"></i>
+                            <span>Ekspor CSV</span>
+                        </button>
+                        
+                        <button id="export-json" class="download-btn">
+                            <i class="fas fa-file-code text-yellow-500"></i>
+                            <span>Ekspor JSON</span>
+                        </button>
+                        
+                        <button id="export-png" class="download-btn">
+                            <i class="fas fa-image text-blue-500"></i>
+                            <span>Ekspor Grafik (PNG)</span>
+                        </button>
+                        
+                        <button id="export-pdf" class="download-btn">
+                            <i class="fas fa-file-pdf text-red-500"></i>
+                            <span>Ekspor Laporan (PDF)</span>
+                        </button>
+                    </div>
+                    
+                    <div class="mt-4 p-3 bg-yellow-50 rounded-lg border border-yellow-200">
+                        <div class="flex items-start">
+                            <i class="fas fa-info-circle text-yellow-500 mt-0.5 mr-2"></i>
+                            <div class="text-xs text-yellow-700">
+                                <p class="font-medium mb-1">Catatan Ekspor:</p>
+                                <p>• Data diekspor dalam format UTC timestamp</p>
+                                <p>• CSV dan JSON berisi semua data yang dikumpulkan</p>
+                                <p>• PNG berisi grafik rotasi terbaru</p>
+                                <p>• α (alpha): rotasi sumbu Z, β (beta): rotasi sumbu X, γ (gamma): rotasi sumbu Y</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="data-card">
+                    <h3 class="font-bold text-gray-700 mb-3 flex items-center">
+                        <i class="fas fa-cog text-gray-500 mr-2"></i> Pengaturan Ekspor
+                    </h3>
+                    
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama File:</label>
+                            <input type="text" id="filename" value="gyroscope_data" 
+                                   class="w-full p-2 border border-gray-300 rounded-lg text-sm">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Format Timestamp:</label>
+                            <select id="timestamp-format" class="w-full p-2 border border-gray-300 rounded-lg text-sm">
+                                <option value="iso">ISO 8601 (2024-01-19T10:30:00Z)</option>
+                                <option value="unix">Unix Timestamp (1705653000)</option>
+                                <option value="local">Waktu Lokal (19/01/2024 10:30:00)</option>
+                            </select>
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Presisi Desimal:</label>
+                            <select id="decimal-precision" class="w-full p-2 border border-gray-300 rounded-lg text-sm">
+                                <option value="2">2 angka desimal</option>
+                                <option value="3">3 angka desimal</option>
+                                <option value="4">4 angka desimal</option>
+                                <option value="6">6 angka desimal</option>
+                            </select>
+                        </div>
+                        
+                        <div class="flex items-center">
+                            <input type="checkbox" id="include-timestamp" class="mr-2" checked>
+                            <label for="include-timestamp" class="text-sm text-gray-700">Sertakan timestamp</label>
+                        </div>
+                        
+                        <div class="flex items-center">
+                            <input type="checkbox" id="include-total" class="mr-2" checked>
+                            <label for="include-total" class="text-sm text-gray-700">Sertakan rotasi total</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <div class="notification" id="notification"></div>    
+<!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+      <a href="../../dashboard siswa.html" class="nav-item">
+        <i class="fas fa-home nav-icon"></i>
+        <span>Beranda</span>
+      </a>
+      <a href="../../soal harian/dashboard soal.html" class="nav-item">
+        <i class="fas fa-flask nav-icon"></i>
+        <span>Soal Harian</span>
+      </a>
+      <a href="../../ai/nayra.html" class="nav-item">
+        <i class="fas fa-robot nav-icon"></i>
+        <span>Nayra AI</span>
+      </a>
+      <a href="../../materi harian/kategori materi.html" class="nav-item">
+        <i class="fas fa-chalkboard-teacher nav-icon"></i>
+        <span>Materi Harian</span>
+      </a>
+      <a href="../../profil/profil.html" class="nav-item">
+        <i class="fas fa-user nav-icon"></i>
+        <span>Profil</span>
+      </a>
+    </nav>
+    </div>
+
+    <script>
+        // State aplikasi
+        let gyroscope = null;
+        let isActive = false;
+        let startTime = null;
+        let dataPoints = [];
+        let chartData = {
+            labels: [],
+            datasets: [
+                { label: 'Rotasi α (Alpha)', data: [], borderColor: '#3b82f6', backgroundColor: 'rgba(59, 130, 246, 0.1)' },
+                { label: 'Rotasi β (Beta)', data: [], borderColor: '#10b981', backgroundColor: 'rgba(16, 185, 129, 0.1)' },
+                { label: 'Rotasi γ (Gamma)', data: [], borderColor: '#8b5cf6', backgroundColor: 'rgba(139, 92, 246, 0.1)' }
+            ]
+        };
+        
+        let currentPage = 1;
+        const rowsPerPage = 10;
+        
+        // DOM Elements
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const statusIndicator = document.getElementById('status-indicator');
+        const statusText = document.getElementById('status-text');
+        const startBtn = document.getElementById('start-btn');
+        const stopBtn = document.getElementById('stop-btn');
+        const resetBtn = document.getElementById('reset-btn');
+        const calibrateBtn = document.getElementById('calibrate-btn');
+        const clearTableBtn = document.getElementById('clear-table-btn');
+        const gyroAlpha = document.getElementById('gyro-alpha');
+        const gyroBeta = document.getElementById('gyro-beta');
+        const gyroGamma = document.getElementById('gyro-gamma');
+        const totalRotation = document.getElementById('total-rotation');
+        const samplingRate = document.getElementById('sampling-rate');
+        const timeElapsed = document.getElementById('time-elapsed');
+        const dataPointsEl = document.getElementById('data-points');
+        const dataTableBody = document.getElementById('data-table-body');
+        const tableCount = document.getElementById('table-count');
+        const currentPageEl = document.getElementById('current-page');
+        const prevPageBtn = document.getElementById('prev-page');
+        const nextPageBtn = document.getElementById('next-page');
+        const exportCsvBtn = document.getElementById('export-csv');
+        const exportJsonBtn = document.getElementById('export-json');
+        const exportPngBtn = document.getElementById('export-png');
+        const exportPdfBtn = document.getElementById('export-pdf');
+        const notification = document.getElementById('notification');
+        const rotationIndicator = document.getElementById('rotation-indicator');
+        
+        // Chart instances
+        let rotationChart = null;
+        let distributionChart = null;
+        
+        // Inisialisasi aplikasi
+        function initApp() {
+            initCharts();
+            setupEventListeners();
+            updateTable();
+            checkGyroscopeSupport();
+        }
+        
+        // Cek dukungan gyroscope
+        function checkGyroscopeSupport() {
+            if ('Gyroscope' in window || 'AbsoluteOrientationSensor' in window) {
+                showNotification('Gyroscope didukung', 'success');
+            } else {
+                showNotification('Gyroscope tidak didukung di browser ini', 'error');
+                startBtn.disabled = true;
+                startBtn.innerHTML = '<i class="fas fa-times mr-2"></i>Tidak Didukung';
+            }
+        }
+        
+        // Inisialisasi grafik
+        function initCharts() {
+            const ctx1 = document.getElementById('rotation-chart').getContext('2d');
+            rotationChart = new Chart(ctx1, {
+                type: 'line',
+                data: chartData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            title: { display: true, text: 'Waktu (s)' }
+                        },
+                        y: {
+                            title: { display: true, text: 'Kecepatan Rotasi (derajat/s)' },
+                            min: -360,
+                            max: 360
+                        }
+                    },
+                    plugins: {
+                        legend: { position: 'top' }
+                    },
+                    animation: {
+                        duration: 0
+                    }
+                }
+            });
+            
+            const ctx2 = document.getElementById('distribution-chart').getContext('2d');
+            distributionChart = new Chart(ctx2, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Rotasi α', 'Rotasi β', 'Rotasi γ'],
+                    datasets: [{
+                        data: [0, 0, 0],
+                        backgroundColor: ['#3b82f6', '#10b981', '#8b5cf6']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom' }
+                    }
+                }
+            });
+        }
+        
+        // Setup event listeners
+        function setupEventListeners() {
+            // Tab switching
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabName = tab.dataset.tab;
+                    switchTab(tabName);
+                });
+            });
+            
+            // Kontrol gyroscope
+            startBtn.addEventListener('click', startGyroscope);
+            stopBtn.addEventListener('click', stopGyroscope);
+            resetBtn.addEventListener('click', resetData);
+            calibrateBtn.addEventListener('click', calibrateSensor);
+            clearTableBtn.addEventListener('click', clearTable);
+            
+            // Navigasi tabel
+            prevPageBtn.addEventListener('click', () => {
+                if (currentPage > 1) {
+                    currentPage--;
+                    updateTable();
+                }
+            });
+            
+            nextPageBtn.addEventListener('click', () => {
+                const maxPage = Math.ceil(dataPoints.length / rowsPerPage);
+                if (currentPage < maxPage) {
+                    currentPage++;
+                    updateTable();
+                }
+            });
+            
+            // Ekspor data
+            exportCsvBtn.addEventListener('click', exportToCSV);
+            exportJsonBtn.addEventListener('click', exportToJSON);
+            exportPngBtn.addEventListener('click', exportToPNG);
+            exportPdfBtn.addEventListener('click', exportToPDF);
+            
+            // Handle visibility change
+            document.addEventListener('visibilitychange', () => {
+                if (document.hidden && isActive) {
+                    showNotification('Aplikasi di background, gyroscope masih aktif', 'warning');
+                }
+            });
+        }
+        
+        // Beralih tab
+        function switchTab(tabName) {
+            tabs.forEach(tab => {
+                if (tab.dataset.tab === tabName) {
+                    tab.classList.add('active');
+                } else {
+                    tab.classList.remove('active');
+                }
+            });
+            
+            tabContents.forEach(content => {
+                if (content.id === `${tabName}-tab`) {
+                    content.classList.add('active');
+                } else {
+                    content.classList.remove('active');
+                }
+            });
+        }
+        
+        // Mulai gyroscope
+        async function startGyroscope() {
+            try {
+                // Permisi akses sensor
+                if (typeof DeviceMotionEvent.requestPermission === 'function') {
+                    const permission = await DeviceMotionEvent.requestPermission();
+                    if (permission !== 'granted') {
+                        showNotification('Izin akses sensor ditolak', 'error');
+                        return;
+                    }
+                }
+                
+                // Coba gyroscope baru
+                const SensorClass = 'Gyroscope' in window ? 
+                    Gyroscope : null;
+                
+                if (SensorClass) {
+                    gyroscope = new SensorClass({ 
+                        frequency: 60,
+                        referenceFrame: 'device'
+                    });
+                    
+                    gyroscope.addEventListener('reading', handleGyroscopeReading);
+                    gyroscope.addEventListener('error', handleSensorError);
+                    
+                    gyroscope.start();
+                    
+                    isActive = true;
+                    startTime = Date.now();
+                    startBtn.disabled = true;
+                    stopBtn.disabled = false;
+                    
+                    statusIndicator.className = 'status-indicator status-active';
+                    statusText.textContent = 'Aktif';
+                    
+                    showNotification('Gyroscope dimulai', 'success');
+                    
+                    // Update sampling rate
+                    updateSamplingRate();
+                    
+                } else {
+                    // Fallback ke DeviceOrientation untuk rotasi
+                    fallbackToDeviceOrientation();
+                }
+                
+            } catch (error) {
+                console.error('Error starting gyroscope:', error);
+                showNotification('Gagal memulai gyroscope', 'error');
+                fallbackToDeviceOrientation();
+            }
+        }
+        
+        // Fallback ke DeviceOrientation API
+        function fallbackToDeviceOrientation() {
+            if (window.DeviceOrientationEvent) {
+                window.addEventListener('deviceorientation', handleDeviceOrientation);
+                
+                isActive = true;
+                startTime = Date.now();
+                startBtn.disabled = true;
+                stopBtn.disabled = false;
+                
+                statusIndicator.className = 'status-indicator status-active';
+                statusText.textContent = 'Aktif (Fallback)';
+                
+                showNotification('Menggunakan DeviceOrientation API', 'warning');
+                updateSamplingRate();
+            } else {
+                showNotification('DeviceOrientation tidak didukung', 'error');
+            }
+        }
+        
+        // Handle pembacaan gyroscope
+        function handleGyroscopeReading() {
+            const alpha = gyroscope.x || 0; // Rotasi sumbu Z (yaw)
+            const beta = gyroscope.y || 0;  // Rotasi sumbu X (pitch)
+            const gamma = gyroscope.z || 0; // Rotasi sumbu Y (roll)
+            
+            // Konversi dari radian/s ke derajat/s
+            const alphaDeg = alpha * (180 / Math.PI);
+            const betaDeg = beta * (180 / Math.PI);
+            const gammaDeg = gamma * (180 / Math.PI);
+            
+            processRotationData(alphaDeg, betaDeg, gammaDeg);
+        }
+        
+        // Handle DeviceOrientation
+        function handleDeviceOrientation(event) {
+            const alpha = event.alpha || 0; // Rotasi sumbu Z (0-360 derajat)
+            const beta = event.beta || 0;   // Rotasi sumbu X (-180 hingga 180 derajat)
+            const gamma = event.gamma || 0; // Rotasi sumbu Y (-90 hingga 90 derajat)
+            
+            // Untuk gyroscope, kita butuh kecepatan rotasi, bukan posisi
+            // Karena DeviceOrientation memberikan posisi, kita hitung kecepatan dari perubahan
+            processRotationData(alpha, beta, gamma);
+        }
+        
+        // Proses data rotasi
+        function processRotationData(alpha, beta, gamma) {
+            const timestamp = Date.now();
+            const elapsed = startTime ? (timestamp - startTime) / 1000 : 0;
+            
+            // Hitung kecepatan rotasi total (magnitudo vektor kecepatan sudut)
+            const total = Math.sqrt(alpha*alpha + beta*beta + gamma*gamma);
+            
+            // Update tampilan
+            gyroAlpha.textContent = alpha.toFixed(2);
+            gyroBeta.textContent = beta.toFixed(2);
+            gyroGamma.textContent = gamma.toFixed(2);
+            totalRotation.textContent = total.toFixed(2);
+            timeElapsed.textContent = elapsed.toFixed(1);
+            
+            // Update indikator rotasi visual
+            updateRotationIndicator(alpha, beta, gamma);
+            
+            // Simpan data
+            const dataPoint = {
+                timestamp,
+                elapsed,
+                alpha,
+                beta,
+                gamma,
+                total
+            };
+            
+            dataPoints.push(dataPoint);
+            dataPointsEl.textContent = dataPoints.length;
+            
+            // Update grafik (batasi data untuk performa)
+            if (chartData.labels.length > 100) {
+                chartData.labels.shift();
+                chartData.datasets.forEach(dataset => dataset.data.shift());
+            }
+            
+            chartData.labels.push(elapsed.toFixed(1));
+            chartData.datasets[0].data.push(alpha);
+            chartData.datasets[1].data.push(beta);
+            chartData.datasets[2].data.push(gamma);
+            
+            rotationChart.update();
+            
+            // Update distribusi
+            const absAlpha = Math.abs(alpha);
+            const absBeta = Math.abs(beta);
+            const absGamma = Math.abs(gamma);
+            const sum = absAlpha + absBeta + absGamma;
+            
+            if (sum > 0) {
+                distributionChart.data.datasets[0].data = [
+                    (absAlpha / sum * 100).toFixed(1),
+                    (absBeta / sum * 100).toFixed(1),
+                    (absGamma / sum * 100).toFixed(1)
+                ];
+                distributionChart.update();
+            }
+            
+            // Update tabel jika di halaman yang tepat
+            if (document.getElementById('data-tab').classList.contains('active')) {
+                updateTable();
+            }
+        }
+        
+        // Update indikator rotasi visual
+        function updateRotationIndicator(alpha, beta, gamma) {
+            // Normalisasi nilai untuk posisi indikator
+            // Batasi pergerakan dalam lingkaran
+            const maxRotation = 180; // derajat
+            
+            // Hitung posisi X dan Y berdasarkan alpha dan beta
+            const posX = (gamma / maxRotation) * 75; // gamma mengontrol posisi X
+            const posY = (beta / maxRotation) * 75;  // beta mengontrol posisi Y
+            
+            // Batasi posisi dalam lingkaran
+            const distance = Math.sqrt(posX*posX + posY*posY);
+            let finalX = posX;
+            let finalY = posY;
+            
+            if (distance > 75) {
+                // Jika di luar lingkaran, tarik ke tepi
+                finalX = (posX / distance) * 75;
+                finalY = (posY / distance) * 75;
+            }
+            
+            // Update posisi indikator
+            rotationIndicator.style.transform = `translate(${finalX}px, ${finalY}px)`;
+            
+            // Update warna berdasarkan intensitas rotasi
+            const intensity = Math.min(totalRotation.textContent / 180, 1);
+            const red = Math.floor(245 * intensity);
+            const green = Math.floor(158 * (1 - intensity));
+            const blue = 11;
+            rotationIndicator.style.backgroundColor = `rgb(${red}, ${green}, ${blue})`;
+        }
+        
+        // Update rate sampling
+        let lastSampleTime = 0;
+        let sampleCount = 0;
+        
+        function updateSamplingRate() {
+            if (!isActive) return;
+            
+            sampleCount++;
+            const now = Date.now();
+            
+            if (now - lastSampleTime >= 1000) {
+                const rate = sampleCount;
+                samplingRate.textContent = rate;
+                sampleCount = 0;
+                lastSampleTime = now;
+            }
+            
+            setTimeout(updateSamplingRate, 1000);
+        }
+        
+        // Berhenti gyroscope
+        function stopGyroscope() {
+            if (gyroscope) {
+                gyroscope.stop();
+                gyroscope.removeEventListener('reading', handleGyroscopeReading);
+                gyroscope.removeEventListener('error', handleSensorError);
+                gyroscope = null;
+            }
+            
+            if (window.DeviceOrientationEvent) {
+                window.removeEventListener('deviceorientation', handleDeviceOrientation);
+            }
+            
+            isActive = false;
+            startBtn.disabled = false;
+            stopBtn.disabled = true;
+            
+            statusIndicator.className = 'status-indicator status-inactive';
+            statusText.textContent = 'Nonaktif';
+            
+            showNotification('Gyroscope dihentikan', 'info');
+        }
+        
+        // Reset data
+        function resetData() {
+            if (isActive) {
+                if (!confirm('Gyroscope masih aktif. Hentikan dan reset data?')) {
+                    return;
+                }
+                stopGyroscope();
+            }
+            
+            dataPoints = [];
+            chartData.labels = [];
+            chartData.datasets.forEach(dataset => dataset.data = []);
+            
+            rotationChart.update();
+            distributionChart.update();
+            
+            gyroAlpha.textContent = '0.00';
+            gyroBeta.textContent = '0.00';
+            gyroGamma.textContent = '0.00';
+            totalRotation.textContent = '0.00';
+            timeElapsed.textContent = '0';
+            dataPointsEl.textContent = '0';
+            samplingRate.textContent = '0';
+            
+            // Reset indikator rotasi
+            rotationIndicator.style.transform = 'translate(-50%, -50%)';
+            rotationIndicator.style.backgroundColor = '#f59e0b';
+            
+            updateTable();
+            showNotification('Data telah direset', 'success');
+        }
+        
+        // Kalibrasi sensor
+        function calibrateSensor() {
+            if (!isActive) {
+                showNotification('Mulai gyroscope terlebih dahulu', 'warning');
+                return;
+            }
+            
+            // Simpan offset kalibrasi
+            const calibration = {
+                alpha: parseFloat(gyroAlpha.textContent),
+                beta: parseFloat(gyroBeta.textContent),
+                gamma: parseFloat(gyroGamma.textContent)
+            };
+            
+            localStorage.setItem('gyroscope_calibration', JSON.stringify(calibration));
+            showNotification('Kalibrasi berhasil', 'success');
+        }
+        
+        // Handle error sensor
+        function handleSensorError(event) {
+            console.error('Sensor error:', event.error);
+            showNotification('Error sensor: ' + event.error.message, 'error');
+            stopGyroscope();
+        }
+        
+        // Update tabel data
+        function updateTable() {
+            const startIndex = (currentPage - 1) * rowsPerPage;
+            const endIndex = startIndex + rowsPerPage;
+            const pageData = dataPoints.slice(startIndex, endIndex);
+            
+            if (pageData.length === 0 && currentPage > 1) {
+                currentPage--;
+                updateTable();
+                return;
+            }
+            
+            let html = '';
+            
+            if (pageData.length === 0) {
+                html = `
+                    <tr>
+                        <td colspan="6" class="text-center py-4 text-gray-500">
+                            Tidak ada data. Mulai gyroscope untuk mengumpulkan data.
+                        </td>
+                    </tr>
+                `;
+            } else {
+                pageData.forEach((point, index) => {
+                    const globalIndex = startIndex + index + 1;
+                    html += `
+                        <tr>
+                            <td>${globalIndex}</td>
+                            <td>${point.elapsed.toFixed(2)}</td>
+                            <td>${point.alpha.toFixed(2)}</td>
+                            <td>${point.beta.toFixed(2)}</td>
+                            <td>${point.gamma.toFixed(2)}</td>
+                            <td>${point.total.toFixed(2)}</td>
+                        </tr>
+                    `;
+                });
+            }
+            
+            dataTableBody.innerHTML = html;
+            tableCount.textContent = dataPoints.length;
+            currentPageEl.textContent = currentPage;
+            
+            // Update tombol navigasi
+            const maxPage = Math.ceil(dataPoints.length / rowsPerPage);
+            prevPageBtn.disabled = currentPage <= 1;
+            nextPageBtn.disabled = currentPage >= maxPage;
+        }
+        
+        // Hapus tabel
+        function clearTable() {
+            if (dataPoints.length === 0) return;
+            
+            if (confirm('Hapus semua data dari tabel?')) {
+                dataPoints = [];
+                updateTable();
+                showNotification('Tabel data dihapus', 'success');
+            }
+        }
+        
+        // Ekspor ke CSV
+        function exportToCSV() {
+            if (dataPoints.length === 0) {
+                showNotification('Tidak ada data untuk diekspor', 'warning');
+                return;
+            }
+            
+            const precision = parseInt(document.getElementById('decimal-precision').value);
+            const includeTimestamp = document.getElementById('include-timestamp').checked;
+            const includeTotal = document.getElementById('include-total').checked;
+            
+            let csv = 'No,Waktu (s),α (deg/s),β (deg/s),γ (deg/s)';
+            if (includeTotal) csv += ',Total (deg/s)';
+            if (includeTimestamp) csv += ',Timestamp';
+            csv += '\n';
+            
+            dataPoints.forEach((point, index) => {
+                const row = [
+                    index + 1,
+                    point.elapsed.toFixed(2),
+                    point.alpha.toFixed(precision),
+                    point.beta.toFixed(precision),
+                    point.gamma.toFixed(precision)
+                ];
+                
+                if (includeTotal) row.push(point.total.toFixed(precision));
+                if (includeTimestamp) row.push(new Date(point.timestamp).toISOString());
+                
+                csv += row.join(',') + '\n';
+            });
+            
+            const filename = document.getElementById('filename').value + '.csv';
+            downloadFile(csv, filename, 'text/csv');
+            showNotification('Data diekspor ke CSV', 'success');
+        }
+        
+        // Ekspor ke JSON
+        function exportToJSON() {
+            if (dataPoints.length === 0) {
+                showNotification('Tidak ada data untuk diekspor', 'warning');
+                return;
+            }
+            
+            const precision = parseInt(document.getElementById('decimal-precision').value);
+            const timestampFormat = document.getElementById('timestamp-format').value;
+            
+            const exportData = dataPoints.map(point => {
+                const data = {
+                    elapsed: parseFloat(point.elapsed.toFixed(2)),
+                    alpha: parseFloat(point.alpha.toFixed(precision)),
+                    beta: parseFloat(point.beta.toFixed(precision)),
+                    gamma: parseFloat(point.gamma.toFixed(precision)),
+                    total: parseFloat(point.total.toFixed(precision))
+                };
+                
+                // Tambahkan timestamp berdasarkan format
+                if (timestampFormat === 'iso') {
+                    data.timestamp = new Date(point.timestamp).toISOString();
+                } else if (timestampFormat === 'unix') {
+                    data.timestamp = Math.floor(point.timestamp / 1000);
+                } else {
+                    data.timestamp = new Date(point.timestamp).toLocaleString();
+                }
+                
+                return data;
+            });
+            
+            const json = JSON.stringify(exportData, null, 2);
+            const filename = document.getElementById('filename').value + '.json';
+            downloadFile(json, filename, 'application/json');
+            showNotification('Data diekspor ke JSON', 'success');
+        }
+        
+        // Ekspor grafik ke PNG
+        function exportToPNG() {
+            if (dataPoints.length === 0) {
+                showNotification('Tidak ada data untuk diekspor', 'warning');
+                return;
+            }
+            
+            const canvas = document.getElementById('rotation-chart');
+            const link = document.createElement('a');
+            const filename = document.getElementById('filename').value + '_chart.png';
+            link.download = filename;
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+            
+            showNotification('Grafik diekspor ke PNG', 'success');
+        }
+        
+        // Ekspor ke PDF
+        function exportToPDF() {
+            if (dataPoints.length === 0) {
+                showNotification('Tidak ada data untuk diekspor', 'warning');
+                return;
+            }
+            
+            // Simulasikan ekspor PDF (gunakan library seperti jsPDF di implementasi nyata)
+            showNotification('Fitur PDF memerlukan library tambahan', 'info');
+            
+            // Di implementasi nyata, Anda akan menggunakan:
+            // import jsPDF from 'jspdf';
+            // import 'jspdf-autotable';
+            // const doc = new jsPDF();
+            // ... tambahkan konten ...
+            // doc.save('gyroscope_report.pdf');
+        }
+        
+        // Download file
+        function downloadFile(content, filename, type) {
+            const blob = new Blob([content], { type });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        }
+        
+        // Tampilkan notifikasi
+        function showNotification(message, type = 'info') {
+            const colors = {
+                success: '#10b981',
+                error: '#ef4444',
+                warning: '#f59e0b',
+                info: '#3b82f6'
+            };
+            
+            notification.textContent = message;
+            notification.style.backgroundColor = colors[type] || colors.info;
+            notification.style.display = 'block';
+            
+            setTimeout(() => {
+                notification.style.display = 'none';
+            }, 3000);
+        }
+        
+        // Inisialisasi saat halaman dimuat
+        document.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>            max-width: 414px;
             box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
             background: white;
             z-index: 10;

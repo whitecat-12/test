@@ -39,7 +39,7 @@
             box-shadow: 0 0 20px rgba(0,0,0,0.1);
         }
         
-         /* NAVBAR YANG SUDAH DIPERBAIKI - SAMA DENGAN FILE CHAT */
+        /* NAVBAR YANG KONSISTEN DENGAN FILE ATAS */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -53,50 +53,38 @@
             align-items: center;
         }
         
-        /* PERBAIKAN NAVBAR - BUAT SAMA DENGAN FILE SEBELUMNYA */
-.nav-item {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    color: #6b7280;
-    text-decoration: none;
-    flex: 1;
-    height: 100%;
-    padding: 0.5rem 0;
-    transition: all 0.3s ease;
-}
-
-.nav-item span {
-    font-size: 0.75rem;
-    margin-top: 0.25rem;
-}
-
-/* INI YANG PERLU DITAMBAHKAN */
-.nav-item.active {
-    color: #38b2ac; /* Warna primary yang sama */
-}
-
-.nav-icon {
-    transition: all 0.3s ease;
-    font-size: 1.25rem;
-}
-
-/* INI YANG PERLU DITAMBAHKAN */
-.nav-icon.active {
-    transform: translateY(-5px); /* Efek yang sama */
-    color: #38b2ac; /* Warna primary yang sama */
-}
-
-/* Efek hover untuk konsistensi */
-.nav-item:hover .nav-icon {
-    transform: translateY(-2px);
-}
-
-.nav-item.active:hover .nav-icon {
-    transform: translateY(-5px); /* Tetap di posisi atas saat aktif */
-}
+        /* STYLE UNTUK NAV ITEM - KONSISTEN DENGAN FILE ATAS */
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+            text-decoration: none;
+            flex: 1;
+            height: 100%;
+            padding: 0.5rem 0;
+            transition: all 0.3s ease;
+        }
         
+        .nav-item span {
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
+        
+        .nav-item.active {
+            color: var(--primary);
+        }
+        
+        .nav-icon {
+            transition: all 0.3s ease;
+            font-size: 1.25rem; /* UKURAN KONSISTEN */
+        }
+        
+        .nav-icon.active {
+            transform: translateY(-5px); /* EFEK YANG SAMA */
+            color: var(--primary);
+        }
         
         .app-logo {
             display: flex;
@@ -259,6 +247,17 @@
         .control-btn:hover {
             background: #e5e7eb;
         }
+        
+        /* Style untuk mobile consistency */
+        @media (max-width: 414px) {
+            .bottom-nav {
+                height: 65px;
+            }
+            
+            .nav-icon {
+                font-size: 1.1rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -382,28 +381,28 @@
             </div>
         </main>
         
-         <!-- Bottom Navigation -->
+        <!-- BOTTOM NAVIGATION YANG SAMA PERSIS DENGAN FILE ATAS -->
         <nav class="bottom-nav">
-          <a href="../dashboard siswa.html" class="nav-item">
-            <i class="fas fa-home nav-icon"></i>
-            <span>Beranda</span>
-          </a>
-          <a href="../soal harian/dashboard soal.html" class="nav-item">
-            <i class="fas fa-flask nav-icon"></i>
-            <span>Soal Harian</span>
-          </a>
-          <a href="../ai/nayra.html" class="nav-item">
-            <i class="fas fa-robot nav-icon"></i>
-            <span>Nayra AI</span>
-          </a>
-          <a href="../materi harian/kategori materi.html" class="nav-item">
-            <i class="fas fa-chalkboard-teacher nav-icon"></i>
-            <span>Materi Harian</span>
-          </a>
-          <a href="../profil/profil.html" class="nav-item">
-            <i class="fas fa-user nav-icon"></i>
-            <span>Profil</span>
-          </a>
+            <a href="../dashboard siswa.html" class="nav-item">
+                <i class="fas fa-home nav-icon"></i>
+                <span>Beranda</span>
+            </a>
+            <a href="../soal harian/dashboard soal.html" class="nav-item">
+                <i class="fas fa-flask nav-icon"></i>
+                <span>Soal Harian</span>
+            </a>
+            <a href="../ai/nayra.html" class="nav-item">
+                <i class="fas fa-robot nav-icon"></i>
+                <span>Nayra AI</span>
+            </a>
+            <a href="../materi harian/kategori materi.html" class="nav-item">
+                <i class="fas fa-chalkboard-teacher nav-icon"></i>
+                <span>Materi Harian</span>
+            </a>
+            <a href="../profil/profil.html" class="nav-item">
+                <i class="fas fa-user nav-icon"></i>
+                <span>Profil</span>
+            </a>
         </nav>
     </div>
 
@@ -526,6 +525,9 @@
                     MathJax.typesetPromise(['#latex-preview']);
                 }
             });
+            
+            // NAVBAR ACTIVE STATE MANAGEMENT
+            setupNavbar();
         });
         
         function addGridBackground() {
@@ -1207,20 +1209,30 @@
             }
         }
         
-        // Script untuk navbar active state
-        const navItems = document.querySelectorAll('.nav-item');
-        
-        navItems.forEach(item => {
-            item.addEventListener('click', function() {
-                navItems.forEach(nav => {
-                    nav.classList.remove('active');
-                    nav.querySelector('.nav-icon').classList.remove('active');
-                });
+        function setupNavbar() {
+            const navItems = document.querySelectorAll('.nav-item');
+            
+            // Auto-detect current page untuk active state
+            const currentPage = window.location.pathname.split('/').pop() || 'dashboard siswa.html';
+            
+            navItems.forEach(item => {
+                const href = item.getAttribute('href');
+                if (href && href.includes(currentPage)) {
+                    item.classList.add('active');
+                    item.querySelector('.nav-icon').classList.add('active');
+                }
                 
-                this.classList.add('active');
-                this.querySelector('.nav-icon').classList.add('active');
+                item.addEventListener('click', function() {
+                    navItems.forEach(nav => {
+                        nav.classList.remove('active');
+                        nav.querySelector('.nav-icon').classList.remove('active');
+                    });
+                    
+                    this.classList.add('active');
+                    this.querySelector('.nav-icon').classList.add('active');
+                });
             });
-        });
+        }
     </script>
 </body>
 </html>

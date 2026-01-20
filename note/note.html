@@ -53,38 +53,49 @@
             align-items: center;
         }
         
-        /* STYLE UNTUK NAV ITEM - SAMA DENGAN FILE CHAT */
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: #6b7280;
-            text-decoration: none;
-            flex: 1;
-            height: 100%;
-            padding: 0.5rem 0;
-            transition: all 0.3s ease;
-        }
-        
-        .nav-item span {
-            font-size: 0.75rem;
-            margin-top: 0.25rem;
-        }
-        
-        .nav-item.active {
-            color: var(--primary);
-        }
-        
-        .nav-icon {
-            transition: all 0.3s ease;
-            font-size: 1.25rem; /* UKURAN KONSISTEN */
-        }
-        
-        .nav-icon.active {
-            transform: translateY(-5px); /* EFEK YANG SAMA */
-            color: var(--primary);
-        }
+        /* PERBAIKAN NAVBAR - BUAT SAMA DENGAN FILE SEBELUMNYA */
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #6b7280;
+    text-decoration: none;
+    flex: 1;
+    height: 100%;
+    padding: 0.5rem 0;
+    transition: all 0.3s ease;
+}
+
+.nav-item span {
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+}
+
+/* INI YANG PERLU DITAMBAHKAN */
+.nav-item.active {
+    color: #38b2ac; /* Warna primary yang sama */
+}
+
+.nav-icon {
+    transition: all 0.3s ease;
+    font-size: 1.25rem;
+}
+
+/* INI YANG PERLU DITAMBAHKAN */
+.nav-icon.active {
+    transform: translateY(-5px); /* Efek yang sama */
+    color: #38b2ac; /* Warna primary yang sama */
+}
+
+/* Efek hover untuk konsistensi */
+.nav-item:hover .nav-icon {
+    transform: translateY(-2px);
+}
+
+.nav-item.active:hover .nav-icon {
+    transform: translateY(-5px); /* Tetap di posisi atas saat aktif */
+}
         
         
         .app-logo {

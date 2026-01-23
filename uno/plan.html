@@ -1,0 +1,1510 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARDUINO IDE - Koleksi Proyek & Komponen</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #38b2ac;
+            --secondary: #0e7490;
+            --accent: #f59e0b;
+        }
+        
+        body {
+            font-family: 'Baloo 2', cursive;
+            background-color: #f8fafc;
+        }
+        
+        .app-container {
+            max-width: 414px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        /* NAVBAR - TIDAK DIRUBAH */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            max-width: 414px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            background: white;
+            z-index: 10;
+            height: 70px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+            text-decoration: none;
+            flex: 1;
+            height: 100%;
+            padding: 0.5rem 0;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item span {
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
+        
+        .nav-item.active {
+            color: var(--primary);
+        }
+        
+        .nav-icon {
+            transition: all 0.3s ease;
+            font-size: 1.25rem;
+        }
+        
+        .nav-icon.active {
+            transform: translateY(-5px);
+            color: var(--primary);
+        }
+        
+        /* TABLE STYLES - Diubah menjadi komponen Arduino */
+        .components-table {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 8px;
+            padding: 10px;
+            overflow-x: auto;
+        }
+        
+        .component-cell {
+            min-width: 55px;
+            height: 55px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border: 1px solid #e5e7eb;
+        }
+        
+        .component-cell:hover {
+            transform: scale(1.05);
+            z-index: 2;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .component-cell.selected {
+            border: 2px solid #f59e0b;
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
+            70% { box-shadow: 0 0 0 5px rgba(245, 158, 11, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+        }
+        
+        .component-number {
+            position: absolute;
+            top: 3px;
+            left: 4px;
+            font-size: 8px;
+            font-weight: bold;
+        }
+        
+        .component-symbol {
+            font-size: 14px;
+            font-weight: 800;
+            line-height: 1;
+        }
+        
+        .component-name {
+            font-size: 6px;
+            margin-top: 2px;
+            text-align: center;
+            display: none;
+        }
+        
+        .component-cell:hover .component-name {
+            display: block;
+        }
+        
+        /* Legend styles */
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+            margin-right: 8px;
+            flex-shrink: 0;
+        }
+        
+        /* COMPONENT CATEGORY COLORS */
+        .microcontroller { background-color: #ff6b6b; color: white; }
+        .sensor { background-color: #ffa726; color: white; }
+        .actuator { background-color: #42a5f5; color: white; }
+        .display { background-color: #66bb6a; color: white; }
+        .communication { background-color: #ab47bc; color: white; }
+        .power { background-color: #26c6da; color: white; }
+        .input { background-color: #ffca28; color: #000; }
+        .module { background-color: #ec407a; color: white; }
+        .basic { background-color: #7e57c2; color: white; }
+        .shield { background-color: #5c6bc0; color: white; }
+        
+        /* Modal styles */
+        .component-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            padding: 20px;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            max-width: 350px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+        
+        .app-logo {
+            display: flex;
+            align-items: center;
+        }
+        
+        .app-logo-icon {
+            background: #9999ff;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 8px;
+        }
+        
+        .app-name {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: #9999ff;
+        }
+        
+        /* Component detail styles */
+        .component-detail-card {
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 10px;
+        }
+        
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .detail-label {
+            font-weight: 600;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .detail-value {
+            font-weight: 700;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        /* Scrollbar styling */
+        .components-table::-webkit-scrollbar {
+            height: 6px;
+        }
+        
+        .components-table::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+        
+        .components-table::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+        
+        /* Group labels - diubah menjadi kategori */
+        .category-label {
+            font-size: 10px;
+            text-align: center;
+            color: #666;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        
+        /* Layout grid untuk tabel dengan label */
+        .table-container {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .table-header {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        
+        /* Combine System Styles - diubah menjadi Build System */
+        .build-panel {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+        }
+        
+        .selected-components {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+            min-height: 40px;
+        }
+        
+        .selected-component-badge {
+            background: white;
+            color: #333;
+            padding: 5px 10px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .selected-component-badge .remove-btn {
+            background: none;
+            border: none;
+            color: #ff6b6b;
+            margin-left: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        .build-result {
+            background: white;
+            color: #333;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .project-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .project-diagram {
+            font-size: 24px;
+            font-weight: 800;
+            color: #4f46e5;
+            margin-bottom: 10px;
+        }
+        
+        .project-description {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .project-properties {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            font-size: 12px;
+        }
+        
+        .project-prop {
+            background: #f8fafc;
+            padding: 8px;
+            border-radius: 6px;
+        }
+        
+        .build-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .build-btn {
+            flex: 1;
+            background: #f59e0b;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .build-btn:hover {
+            background: #d97706;
+        }
+        
+        .build-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .clear-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .clear-btn:hover {
+            background: #dc2626;
+        }
+        
+        .status-message {
+            text-align: center;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 5px;
+            min-height: 16px;
+        }
+        
+        /* Tab Styles */
+        .tab-container {
+            display: flex;
+            background: #f1f5f9;
+            border-radius: 10px;
+            padding: 5px;
+            margin-bottom: 15px;
+        }
+        
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 8px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+        
+        .tab.active {
+            background: white;
+            color: #4f46e5;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile App Container -->
+    <div class="app-container">
+        <!-- App Header -->
+        <header class="bg-gradient-to-r from-primary to-secondary p-4 text-white">
+            <div class="flex justify-between items-center">
+                <div class="app-logo">
+                    <div class="app-logo-icon">
+                        <i class="fas fa-microchip"></i>
+                    </div>
+                    <h1 class="app-name">ARDUINO IDE</h1>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-search"></i>
+                    <i class="fas fa-user-circle text-xl"></i>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Main Content -->
+        <main class="pb-24 p-4">
+            <!-- Page Title -->
+            <div class="mb-4">
+                <h1 class="text-xl font-bold text-gray-800 mb-1">
+                    <i class="fas fa-code text-teal-500 mr-2"></i> Koleksi Komponen
+                </h1>
+                <p class="text-gray-600 text-sm">
+                    Komponen Arduino lengkap untuk proyek elektronik
+                </p>
+            </div>
+            
+            <!-- Tabs -->
+            <div class="tab-container">
+                <div class="tab active" data-tab="table">Daftar Komponen</div>
+                <div class="tab" data-tab="build">Bangun Proyek</div>
+            </div>
+            
+            <!-- Tab Content: Table -->
+            <div id="table-tab" class="tab-content active">
+                <!-- Search Bar -->
+                <div class="mb-4">
+                    <div class="relative">
+                        <input type="text" id="search-component" placeholder="Cari komponen..." 
+                               class="w-full p-3 pl-10 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm">
+                        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    </div>
+                </div>
+                
+                <!-- Tabel Komponen -->
+                <div class="mb-6">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="font-bold text-gray-700 text-sm flex items-center">
+                            <i class="fas fa-microchip text-blue-500 mr-2 text-xs"></i> Komponen Arduino
+                        </h3>
+                        <div class="text-xs text-gray-500">
+                            <span id="total-components">48</span> komponen
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white border border-gray-200 rounded-xl p-3">
+                        <div class="table-container">
+                            <!-- Header untuk kategori -->
+                            <div class="table-header">
+                                <div class="category-label">Mikrokontroler</div>
+                                <div class="category-label">Sensor</div>
+                                <div class="category-label">Aktuator</div>
+                                <div class="category-label">Display</div>
+                                <div class="category-label">Komunikasi</div>
+                                <div class="category-label">Power</div>
+                            </div>
+                            
+                            <!-- Tabel komponen utama -->
+                            <div id="components-table" class="components-table">
+                                <!-- Components will be generated by JavaScript -->
+                            </div>
+                        </div>
+                        
+                        <!-- Note untuk module dan shield -->
+                        <div class="mt-4 text-center">
+                            <div class="text-xs text-gray-500 mb-2">
+                                * Module dan Shield tambahan tersedia
+                            </div>
+                            <div class="flex justify-center space-x-4">
+                                <button id="show-modules" class="text-xs bg-purple-100 text-purple-700 px-3 py-1 rounded-full">
+                                    Lihat Module
+                                </button>
+                                <button id="show-shields" class="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full">
+                                    Lihat Shield
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Legend - Dipindah ke bawah tabel -->
+                <div class="mb-6 p-3 bg-gray-50 rounded-xl">
+                    <h3 class="font-bold text-gray-700 mb-2 text-sm">Kategori Warna:</h3>
+                    <div class="grid grid-cols-2 gap-1">
+                        <div class="legend-item">
+                            <div class="legend-color microcontroller"></div>
+                            <span class="text-xs">Mikrokontroler</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color sensor"></div>
+                            <span class="text-xs">Sensor</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color actuator"></div>
+                            <span class="text-xs">Aktuator</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color display"></div>
+                            <span class="text-xs">Display</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color communication"></div>
+                            <span class="text-xs">Komunikasi</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color power"></div>
+                            <span class="text-xs">Power</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color input"></div>
+                            <span class="text-xs">Input Device</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color module"></div>
+                            <span class="text-xs">Module</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tab Content: Build Project -->
+            <div id="build-tab" class="tab-content">
+                <div class="build-panel">
+                    <h3 class="font-bold text-lg mb-3">
+                        <i class="fas fa-tools mr-2"></i>Bangun Proyek
+                    </h3>
+                    <p class="text-sm mb-4">
+                        Pilih 2-4 komponen untuk membangun proyek Arduino.
+                        Klik pada komponen di tabel untuk memilih.
+                    </p>
+                    
+                    <div class="selected-components" id="selected-components">
+                        <div class="text-sm text-center w-full py-2" id="empty-selection">
+                            Belum ada komponen dipilih
+                        </div>
+                    </div>
+                    
+                    <div class="build-actions">
+                        <button id="build-btn" class="build-btn" disabled>
+                            <i class="fas fa-cogs mr-2"></i>Bangun Proyek
+                        </button>
+                        <button id="clear-build-btn" class="clear-btn">
+                            <i class="fas fa-trash mr-2"></i>Hapus
+                        </button>
+                    </div>
+                    
+                    <div class="status-message" id="status-message">
+                        Pilih 2 hingga 4 komponen untuk membangun proyek
+                    </div>
+                </div>
+                
+                <div id="build-result" class="build-result">
+                    <!-- Results will be displayed here -->
+                </div>
+                
+                <div class="bg-white border border-gray-200 rounded-xl p-3 mt-4">
+                    <h3 class="font-bold text-gray-700 mb-3 text-sm flex items-center">
+                        <i class="fas fa-microchip text-blue-500 mr-2 text-xs"></i> Komponen yang Tersedia
+                    </h3>
+                    <div class="table-container">
+                        <div id="build-components-table" class="components-table">
+                            <!-- Components for build mode will be generated -->
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-3 text-center">
+                        Klik pada komponen untuk memilih/dipilih ulang
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Quick Tips -->
+            <div class="mb-6 p-3 bg-teal-50 rounded-xl">
+                <h3 class="font-bold text-gray-700 mb-2 text-sm flex items-center">
+                    <i class="fas fa-lightbulb text-teal-500 mr-2 text-xs"></i> Tips Pemrograman
+                </h3>
+                <div class="text-xs text-gray-700 space-y-1">
+                    <p>• Selalu tambahkan resistor pada LED untuk mencegah kerusakan</p>
+                    <p>• Gunakan pin PWM (~) untuk mengatur kecerahan LED atau motor</p>
+                    <p>• Pastikan voltage dan current sesuai dengan spesifikasi komponen</p>
+                    <p>• Gunakan library yang sesuai untuk sensor yang digunakan</p>
+                </div>
+            </div>
+        </main>
+        
+        <!-- Component Detail Modal -->
+        <div id="component-modal" class="component-modal hidden">
+            <div class="modal-content">
+                <button id="close-modal" class="close-modal">&times;</button>
+                <div id="modal-body"></div>
+            </div>
+        </div>
+        
+        <!-- Modal untuk Module/Shield -->
+        <div id="special-modal" class="component-modal hidden">
+            <div class="modal-content">
+                <button id="close-special-modal" class="close-modal">&times;</button>
+                <div id="special-modal-body"></div>
+            </div>
+        </div>
+        
+        <!-- BOTTOM NAVIGATION - TIDAK DIRUBAH -->
+        <nav class="bottom-nav">
+            <a href="dashboad siswa.html" class="nav-item">
+                <i class="fas fa-home nav-icon"></i>
+                <span>Beranda</span>
+            </a>
+            <a href="soal harian/dashboard soal.html" class="nav-item">
+                <i class="fas fa-flask nav-icon"></i>
+                <span>Soal Harian</span>
+            </a>
+            <a href="ai/nayra.html" class="nav-item">
+                <i class="fas fa-robot nav-icon"></i>
+                <span>Nayra AI</span>
+            </a>
+            <a href="materi harian/kategori materi.html" class="nav-item">
+                <i class="fas fa-chalkboard-teacher nav-icon"></i>
+                <span>Materi Harian</span>
+            </a>
+            <a href="profil/profil.html" class="nav-item">
+                <i class="fas fa-user nav-icon"></i>
+                <span>Profil</span>
+            </a>
+        </nav>
+    </div>
+
+    <script>
+        // Data Komponen Arduino Lengkap
+        const arduinoComponents = [
+            // Mikrokontroler
+            { symbol: "UNO", name: "Arduino UNO", number: 1, voltage: "5V", category: "microcontroller", colorClass: "microcontroller", pins: 14, analog: 6 },
+            { symbol: "NANO", name: "Arduino Nano", number: 2, voltage: "5V", category: "microcontroller", colorClass: "microcontroller", pins: 14, analog: 8 },
+            { symbol: "MEGA", name: "Arduino Mega", number: 3, voltage: "5V", category: "microcontroller", colorClass: "microcontroller", pins: 54, analog: 16 },
+            { symbol: "DUE", name: "Arduino Due", number: 4, voltage: "3.3V", category: "microcontroller", colorClass: "microcontroller", pins: 54, analog: 12 },
+            
+            // Sensor
+            { symbol: "DHT11", name: "Sensor Suhu", number: 5, voltage: "3-5V", category: "sensor", colorClass: "sensor", type: "Digital", measure: "Suhu & Kelembaban" },
+            { symbol: "HC-SR04", name: "Ultrasonic", number: 6, voltage: "5V", category: "sensor", colorClass: "sensor", type: "Digital", measure: "Jarak" },
+            { symbol: "PIR", name: "Sensor Gerak", number: 7, voltage: "5V", category: "sensor", colorClass: "sensor", type: "Digital", measure: "Gerakan" },
+            { symbol: "MQ2", name: "Sensor Gas", number: 8, voltage: "5V", category: "sensor", colorClass: "sensor", type: "Analog", measure: "Gas & Asap" },
+            { symbol: "LDR", name: "Sensor Cahaya", number: 9, voltage: "5V", category: "sensor", colorClass: "sensor", type: "Analog", measure: "Intensitas Cahaya" },
+            { symbol: "SOIL", name: "Sensor Tanah", number: 10, voltage: "3.3-5V", category: "sensor", colorClass: "sensor", type: "Analog", measure: "Kelembaban Tanah" },
+            
+            // Aktuator
+            { symbol: "SERVO", name: "Servo Motor", number: 11, voltage: "5V", category: "actuator", colorClass: "actuator", type: "Motor", angle: "180°" },
+            { symbol: "DC", name: "DC Motor", number: 12, voltage: "5-12V", category: "actuator", colorClass: "actuator", type: "Motor", speed: "Variable" },
+            { symbol: "STEP", name: "Stepper Motor", number: 13, voltage: "5-12V", category: "actuator", colorClass: "actuator", type: "Motor", precision: "High" },
+            { symbol: "RELAY", name: "Relay Module", number: 14, voltage: "5V", category: "actuator", colorClass: "actuator", type: "Switch", current: "10A" },
+            
+            // Display
+            { symbol: "LCD16x2", name: "LCD 16x2", number: 15, voltage: "5V", category: "display", colorClass: "display", type: "Character", size: "16x2" },
+            { symbol: "OLED", name: "OLED Display", number: 16, voltage: "3.3-5V", category: "display", colorClass: "display", type: "Graphic", size: "128x64" },
+            { symbol: "7SEG", name: "7 Segment", number: 17, voltage: "5V", category: "display", colorClass: "display", type: "Numeric", digits: "4" },
+            { symbol: "LEDMTX", name: "LED Matrix", number: 18, voltage: "5V", category: "display", colorClass: "display", type: "Graphic", size: "8x8" },
+            
+            // Komunikasi
+            { symbol: "BT", name: "Bluetooth", number: 19, voltage: "3.3-5V", category: "communication", colorClass: "communication", protocol: "Serial", range: "10m" },
+            { symbol: "WIFI", name: "WiFi Module", number: 20, voltage: "3.3V", category: "communication", colorClass: "communication", protocol: "TCP/IP", freq: "2.4GHz" },
+            { symbol: "RFID", name: "RFID Reader", number: 21, voltage: "3.3V", category: "communication", colorClass: "communication", protocol: "SPI", range: "5cm" },
+            { symbol: "LORA", name: "LoRa Module", number: 22, voltage: "3.3V", category: "communication", colorClass: "communication", protocol: "LoRa", range: "5km" },
+            
+            // Power
+            { symbol: "BAT", name: "Battery", number: 23, voltage: "3.7-9V", category: "power", colorClass: "power", type: "Power Source", capacity: "Variable" },
+            { symbol: "SOLAR", name: "Solar Panel", number: 24, voltage: "5-12V", category: "power", colorClass: "power", type: "Power Source", output: "Variable" },
+            { symbol: "BUCK", name: "Buck Converter", number: 25, voltage: "5-12V", category: "power", colorClass: "power", type: "Converter", efficiency: ">90%" },
+            { symbol: "REG", name: "Voltage Regulator", number: 26, voltage: "5V/3.3V", category: "power", colorClass: "power", type: "Regulator", current: "1A" },
+            
+            // Input Device
+            { symbol: "BTN", name: "Push Button", number: 27, voltage: "5V", category: "input", colorClass: "input", type: "Digital", contacts: "NO/NC" },
+            { symbol: "POT", name: "Potentiometer", number: 28, voltage: "5V", category: "input", colorClass: "input", type: "Analog", resistance: "10KΩ" },
+            { symbol: "JOY", name: "Joystick", number: 29, voltage: "5V", category: "input", colorClass: "input", type: "Analog/Digital", axes: "2" },
+            { symbol: "KEY", name: "Keypad", number: 30, voltage: "5V", category: "input", colorClass: "input", type: "Matrix", keys: "4x4" },
+            
+            // Module
+            { symbol: "RTC", name: "Real Time Clock", number: 31, voltage: "3.3-5V", category: "module", colorClass: "module", function: "Time Keeping", accuracy: "±2ppm" },
+            { symbol: "SD", name: "SD Card Module", number: 32, voltage: "5V", category: "module", colorClass: "module", function: "Data Storage", capacity: "Up to 32GB" },
+            { symbol: "GPS", name: "GPS Module", number: 33, voltage: "3.3-5V", category: "module", colorClass: "module", function: "Location", accuracy: "2.5m" },
+            { symbol: "GSM", name: "GSM Module", number: 34, voltage: "5V", category: "module", colorClass: "module", function: "Cellular", bands: "Quad" },
+            
+            // Shield
+            { symbol: "ETH", name: "Ethernet Shield", number: 35, voltage: "5V", category: "shield", colorClass: "shield", interface: "W5500", speed: "10/100Mbps" },
+            { symbol: "MOTOR", name: "Motor Shield", number: 36, voltage: "5-12V", category: "shield", colorClass: "shield", drivers: "L293D", motors: "4 DC / 2 Stepper" },
+            { symbol: "PROTO", name: "Proto Shield", number: 37, voltage: "5V", category: "shield", colorClass: "shield", purpose: "Prototyping", size: "UNO Compatible" },
+            { symbol: "LCD", name: "LCD Shield", number: 38, voltage: "5V", category: "shield", colorClass: "shield", display: "16x2", buttons: "5" }
+        ];
+
+        // Data Proyek Arduino yang Diketahui
+        const knownProjects = [
+            // Sistem Monitoring Suhu
+            { components: ["UNO", "DHT11", "LCD16x2"], name: "Sistem Monitoring Suhu", type: "monitoring",
+              description: "Monitor suhu dan kelembaban ruangan dengan tampilan LCD.",
+              diagram: "UNO → DHT11 → LCD16x2",
+              properties: ["Sensor: DHT11", "Display: LCD 16x2", "Update: 2 detik", "Akurasi: ±1°C"] },
+            
+            // Parkir Otomatis
+            { components: ["UNO", "HC-SR04", "SERVO"], name: "Sistem Parkir Otomatis", type: "automation",
+              description: "Deteksi jarak dan kontrol gate parkir dengan servo motor.",
+              diagram: "HC-SR04 → UNO → SERVO",
+              properties: ["Jarak min: 2cm", "Jarak max: 400cm", "Sudut servo: 0-180°", "Response: <100ms"] },
+            
+            // Smart Home
+            { components: ["UNO", "PIR", "RELAY", "BT"], name: "Smart Home System", type: "automation",
+              description: "Kontrol lampu otomatis berdasarkan deteksi gerakan.",
+              diagram: "PIR → UNO → RELAY ← BT",
+              properties: ["Jangkauan PIR: 7m", "Relay: 10A/250V", "Kontrol: Bluetooth", "Mode: Auto/Manual"] },
+            
+            // Weather Station
+            { components: ["MEGA", "DHT11", "MQ2", "OLED"], name: "Stasiun Cuaca Mini", type: "monitoring",
+              description: "Monitor kondisi lingkungan (suhu, kelembaban, kualitas udara).",
+              diagram: "DHT11 + MQ2 → MEGA → OLED",
+              properties: ["Parameter: 3", "Display: OLED 128x64", "Logging: Serial", "Power: 5V USB"] },
+            
+            // Robot Line Follower
+            { components: ["NANO", "LDR", "DC", "BAT"], name: "Line Follower Robot", type: "robotics",
+              description: "Robot yang dapat mengikuti garis menggunakan sensor cahaya.",
+              diagram: "LDR ×2 → NANO → DC ×2 ← BAT",
+              properties: ["Sensor: 2x LDR", "Motor: 2x DC", "Kecepatan: Adjustable", "Baterai: 9V"] },
+            
+            // Smart Irrigation
+            { components: ["UNO", "SOIL", "RELAY", "SOLAR"], name: "Smart Irrigation System", type: "agriculture",
+              description: "Sistem penyiraman tanaman otomatis berdasarkan kelembaban tanah.",
+              diagram: "SOLAR → UNO ← SOIL → RELAY",
+              properties: ["Sensor: Soil Moisture", "Kontrol: Relay", "Power: Solar", "Threshold: Adjustable"] },
+            
+            // Security System
+            { components: ["UNO", "PIR", "BT", "LEDMTX"], name: "Security Alarm System", type: "security",
+              description: "Sistem keamanan dengan alarm visual pada LED matrix.",
+              diagram: "PIR → UNO → LEDMTX + BT",
+              properties: ["Deteksi: Gerakan", "Alert: LED Matrix", "Notifikasi: Bluetooth", "Zona: 120°"] },
+            
+            // Data Logger
+            { components: ["UNO", "DHT11", "SD", "RTC"], name: "Data Logger", type: "logging",
+              description: "Alat pencatat data suhu dengan timestamp ke SD card.",
+              diagram: "DHT11 + RTC → UNO → SD",
+              properties: ["Sensor: DHT11", "Storage: SD Card", "Clock: RTC", "Format: CSV"] }
+        ];
+
+        // DOM Elements
+        const componentsTableContainer = document.getElementById('components-table');
+        const buildComponentsTableContainer = document.getElementById('build-components-table');
+        const componentModal = document.getElementById('component-modal');
+        const specialModal = document.getElementById('special-modal');
+        const closeModalBtn = document.getElementById('close-modal');
+        const closeSpecialModalBtn = document.getElementById('close-special-modal');
+        const modalBody = document.getElementById('modal-body');
+        const specialModalBody = document.getElementById('special-modal-body');
+        const searchInput = document.getElementById('search-component');
+        const totalComponentsSpan = document.getElementById('total-components');
+        const showModulesBtn = document.getElementById('show-modules');
+        const showShieldsBtn = document.getElementById('show-shields');
+        const selectedComponentsContainer = document.getElementById('selected-components');
+        const emptySelectionMsg = document.getElementById('empty-selection');
+        const buildBtn = document.getElementById('build-btn');
+        const clearBuildBtn = document.getElementById('clear-build-btn');
+        const buildResult = document.getElementById('build-result');
+        const statusMessage = document.getElementById('status-message');
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        // State untuk sistem pembangunan proyek
+        let selectedComponents = [];
+        let currentTab = 'table';
+
+        // Inisialisasi Tabel Komponen
+        function initComponentsTable() {
+            // Kosongkan kontainer
+            componentsTableContainer.innerHTML = '';
+            
+            // Tampilkan semua komponen dalam grid 6 kolom
+            arduinoComponents.forEach((component, index) => {
+                const componentDiv = document.createElement('div');
+                componentDiv.className = `component-cell ${component.colorClass}`;
+                componentDiv.dataset.symbol = component.symbol;
+                componentDiv.dataset.number = component.number;
+                
+                componentDiv.innerHTML = `
+                    <div class="component-number">${component.number}</div>
+                    <div class="component-symbol">${component.symbol}</div>
+                    <div class="component-name">${component.name}</div>
+                `;
+                
+                componentDiv.addEventListener('click', () => showComponentDetails(component));
+                componentsTableContainer.appendChild(componentDiv);
+            });
+            
+            // Inisialisasi tabel untuk mode build
+            initBuildComponentsTable();
+            
+            // Hitung total komponen
+            totalComponentsSpan.textContent = arduinoComponents.length;
+            
+            // Setup event listeners
+            setupEventListeners();
+        }
+
+        // Inisialisasi tabel untuk mode build
+        function initBuildComponentsTable() {
+            buildComponentsTableContainer.innerHTML = '';
+            
+            // Tampilkan komponen dalam grid 6 kolom untuk mode build
+            arduinoComponents.slice(0, 30).forEach(component => {
+                const componentDiv = document.createElement('div');
+                componentDiv.className = `component-cell ${component.colorClass}`;
+                componentDiv.dataset.symbol = component.symbol;
+                componentDiv.dataset.number = component.number;
+                
+                componentDiv.innerHTML = `
+                    <div class="component-number">${component.number}</div>
+                    <div class="component-symbol">${component.symbol}</div>
+                `;
+                
+                componentDiv.addEventListener('click', () => selectComponentForBuilding(component));
+                buildComponentsTableContainer.appendChild(componentDiv);
+            });
+            
+            // Set grid template
+            buildComponentsTableContainer.style.gridTemplateColumns = 'repeat(6, 1fr)';
+        }
+
+        // Pilih komponen untuk pembangunan proyek
+        function selectComponentForBuilding(component) {
+            // Cek apakah komponen sudah dipilih
+            const existingIndex = selectedComponents.findIndex(c => c.symbol === component.symbol);
+            
+            if (existingIndex !== -1) {
+                // Hapus komponen jika sudah dipilih
+                selectedComponents.splice(existingIndex, 1);
+            } else {
+                // Tambahkan komponen jika belum dipilih (maksimal 4)
+                if (selectedComponents.length < 4) {
+                    selectedComponents.push(component);
+                } else {
+                    showStatusMessage("Maksimal 4 komponen yang dapat dipilih", "error");
+                    return;
+                }
+            }
+            
+            // Perbarui tampilan komponen yang dipilih
+            updateSelectedComponentsDisplay();
+            
+            // Perbarui status tombol build
+            updateBuildButton();
+            
+            // Perbarui status message
+            updateStatusMessage();
+            
+            // Highlight komponen di tabel
+            highlightSelectedComponents();
+        }
+
+        // Perbarui tampilan komponen yang dipilih
+        function updateSelectedComponentsDisplay() {
+            selectedComponentsContainer.innerHTML = '';
+            
+            if (selectedComponents.length === 0) {
+                emptySelectionMsg.style.display = 'block';
+                return;
+            }
+            
+            emptySelectionMsg.style.display = 'none';
+            
+            selectedComponents.forEach((component, index) => {
+                const badge = document.createElement('div');
+                badge.className = 'selected-component-badge';
+                badge.innerHTML = `
+                    ${component.symbol} - ${component.name}
+                    <button class="remove-btn" data-index="${index}">&times;</button>
+                `;
+                
+                badge.querySelector('.remove-btn').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    selectedComponents.splice(index, 1);
+                    updateSelectedComponentsDisplay();
+                    updateBuildButton();
+                    updateStatusMessage();
+                    highlightSelectedComponents();
+                });
+                
+                selectedComponentsContainer.appendChild(badge);
+            });
+        }
+
+        // Highlight komponen yang dipilih di tabel
+        function highlightSelectedComponents() {
+            // Reset semua komponen di tabel build
+            document.querySelectorAll('#build-components-table .component-cell').forEach(cell => {
+                cell.classList.remove('selected');
+            });
+            
+            // Highlight komponen yang dipilih
+            selectedComponents.forEach(component => {
+                const cells = document.querySelectorAll(`#build-components-table [data-symbol="${component.symbol}"]`);
+                cells.forEach(cell => {
+                    cell.classList.add('selected');
+                });
+            });
+        }
+
+        // Perbarui status tombol build
+        function updateBuildButton() {
+            if (selectedComponents.length >= 2) {
+                buildBtn.disabled = false;
+                buildBtn.innerHTML = `<i class="fas fa-cogs mr-2"></i>Bangun (${selectedComponents.length})`;
+            } else {
+                buildBtn.disabled = true;
+                buildBtn.innerHTML = `<i class="fas fa-cogs mr-2"></i>Bangun`;
+            }
+        }
+
+        // Perbarui status message
+        function updateStatusMessage() {
+            if (selectedComponents.length === 0) {
+                statusMessage.textContent = "Pilih 2 hingga 4 komponen untuk membangun proyek";
+            } else if (selectedComponents.length === 1) {
+                statusMessage.textContent = "Pilih 1 komponen lagi untuk mulai membangun";
+            } else if (selectedComponents.length === 2) {
+                statusMessage.textContent = "Klik 'Bangun' untuk membuat proyek dari 2 komponen";
+            } else if (selectedComponents.length === 3) {
+                statusMessage.textContent = "Klik 'Bangun' untuk membuat proyek dari 3 komponen";
+            } else if (selectedComponents.length === 4) {
+                statusMessage.textContent = "Klik 'Bangun' untuk membuat proyek dari 4 komponen";
+            }
+        }
+
+        // Tampilkan pesan status sementara
+        function showStatusMessage(message, type = "info") {
+            const originalMessage = statusMessage.textContent;
+            statusMessage.textContent = message;
+            statusMessage.style.color = type === "error" ? "#fecaca" : "rgba(255, 255, 255, 0.8)";
+            
+            setTimeout(() => {
+                statusMessage.textContent = originalMessage;
+                statusMessage.style.color = "rgba(255, 255, 255, 0.8)";
+            }, 3000);
+        }
+
+        // Bangun proyek dari komponen yang dipilih
+        function buildProject() {
+            if (selectedComponents.length < 2) return;
+            
+            // Urutkan komponen berdasarkan nomor
+            const sortedComponents = [...selectedComponents].sort((a, b) => a.number - b.number);
+            const componentSymbols = sortedComponents.map(c => c.symbol);
+            
+            // Cari proyek yang diketahui
+            let foundProject = null;
+            
+            for (const project of knownProjects) {
+                const projectComponents = [...project.components].sort();
+                const selectedComponentSymbols = [...componentSymbols].sort();
+                
+                if (JSON.stringify(projectComponents) === JSON.stringify(selectedComponentSymbols)) {
+                    foundProject = project;
+                    break;
+                }
+            }
+            
+            // Jika tidak ditemukan, buat proyek generik
+            if (!foundProject) {
+                foundProject = generateGenericProject(sortedComponents);
+            }
+            
+            // Tampilkan hasil
+            displayBuildResult(foundProject, sortedComponents);
+        }
+
+        // Hasilkan proyek generik berdasarkan komponen
+        function generateGenericProject(components) {
+            const componentCount = components.length;
+            let name = "";
+            let type = "";
+            let description = "";
+            let diagram = "";
+            let properties = [];
+            
+            // Deteksi jenis proyek berdasarkan komponen
+            const hasSensor = components.some(c => c.category === "sensor");
+            const hasActuator = components.some(c => c.category === "actuator");
+            const hasDisplay = components.some(c => c.category === "display");
+            const hasMicrocontroller = components.some(c => c.category === "microcontroller");
+            
+            if (hasSensor && hasActuator) {
+                type = "automation";
+                name = "Sistem Otomasi";
+                description = "Sistem kontrol otomatis berdasarkan input sensor.";
+            } else if (hasSensor && hasDisplay) {
+                type = "monitoring";
+                name = "Sistem Monitoring";
+                description = "Sistem pemantauan dengan tampilan visual.";
+            } else if (hasActuator && hasMicrocontroller) {
+                type = "control";
+                name = "Sistem Kontrol";
+                description = "Sistem kendali perangkat elektronik.";
+            } else {
+                type = "general";
+                name = "Proyek Arduino";
+                description = "Proyek elektronik menggunakan Arduino.";
+            }
+            
+            // Buat diagram koneksi sederhana
+            diagram = components.map(c => c.symbol).join(" → ");
+            
+            // Properties
+            properties = components.map(component => 
+                `${component.symbol}: ${component.name} (${component.category})`
+            );
+            
+            properties.push(`Total Komponen: ${componentCount}`);
+            properties.push(`Tipe Proyek: ${type}`);
+            
+            return {
+                components: components.map(c => c.symbol),
+                name: `${name} ${components[0].symbol}`,
+                type,
+                description,
+                diagram,
+                properties
+            };
+        }
+
+        // Tampilkan hasil pembangunan
+        function displayBuildResult(project, components) {
+            buildResult.style.display = 'block';
+            buildResult.innerHTML = `
+                <div class="mb-4">
+                    <h3 class="project-name">${project.name}</h3>
+                    <div class="project-diagram">${project.diagram}</div>
+                    <p class="project-description">${project.description}</p>
+                    <div class="text-xs text-gray-500 mb-3">
+                        <i class="fas fa-project-diagram mr-1"></i> Tipe: ${project.type.toUpperCase()}
+                    </div>
+                </div>
+                
+                <div class="project-properties">
+                    ${project.properties.map(prop => `
+                        <div class="project-prop">
+                            <i class="fas fa-check text-green-500 mr-1"></i> ${prop}
+                        </div>
+                    `).join('')}
+                </div>
+                
+                <div class="mt-4 text-xs text-gray-600">
+                    <p><i class="fas fa-code text-blue-500 mr-1"></i> 
+                    ${getProjectCodeTip(project, components)}</p>
+                </div>
+                
+                <button id="new-project" class="w-full mt-4 bg-teal-500 text-white py-2 rounded-lg font-bold">
+                    <i class="fas fa-redo mr-2"></i>Proyek Baru
+                </button>
+            `;
+            
+            // Scroll ke hasil
+            buildResult.scrollIntoView({ behavior: 'smooth' });
+            
+            // Event listener untuk tombol proyek baru
+            document.getElementById('new-project').addEventListener('click', () => {
+                selectedComponents = [];
+                updateSelectedComponentsDisplay();
+                updateBuildButton();
+                updateStatusMessage();
+                highlightSelectedComponents();
+                buildResult.style.display = 'none';
+            });
+        }
+
+        // Dapatkan tips kode untuk proyek
+        function getProjectCodeTip(project, components) {
+            const tips = [
+                "Gunakan pinMode() di setup() untuk konfigurasi pin.",
+                "Selalu gunakan delay() secukupnya untuk menghindari bouncing.",
+                "Gunakan Serial.begin(9600) untuk debugging.",
+                "Pastikan library yang diperlukan sudah terinstall.",
+                "Ganti baud rate sesuai kebutuhan komunikasi serial."
+            ];
+            
+            // Tips khusus berdasarkan jenis proyek
+            if (project.type === "automation") {
+                return "Gunakan millis() untuk timing yang lebih akurat daripada delay().";
+            } else if (project.type === "monitoring") {
+                return "Gunakan smoothing algoritma untuk membaca sensor yang berfluktuasi.";
+            } else if (project.name.includes("Monitoring Suhu")) {
+                return "DHT11 memerlukan delay 2 detik antara pembacaan.";
+            } else if (project.name.includes("Parkir Otomatis")) {
+                return "HC-SR04 memerlukan trigger pulse minimal 10µs.";
+            }
+            
+            return tips[Math.floor(Math.random() * tips.length)];
+        }
+
+        // Tampilkan detail komponen dalam modal
+        function showComponentDetails(component) {
+            const categoryNames = {
+                "microcontroller": "Mikrokontroler",
+                "sensor": "Sensor",
+                "actuator": "Aktuator",
+                "display": "Display",
+                "communication": "Komunikasi",
+                "power": "Power",
+                "input": "Input Device",
+                "module": "Module",
+                "shield": "Shield",
+                "basic": "Komponen Dasar"
+            };
+            
+            modalBody.innerHTML = `
+                <div class="component-detail-card" style="border-left-color: ${getCategoryColor(component.category)}; background-color: ${getCategoryColor(component.category, 0.1)}">
+                    <div class="flex items-center mb-4">
+                        <div class="component-cell ${component.colorClass} w-16 h-16 mr-4">
+                            <div class="component-number">${component.number}</div>
+                            <div class="component-symbol text-xl">${component.symbol}</div>
+                            <div class="component-name">${component.name}</div>
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-bold text-gray-800">${component.name}</h2>
+                            <p class="text-gray-600 text-sm">${component.symbol} • ${categoryNames[component.category] || component.category}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <div class="detail-row">
+                            <span class="detail-label">Tegangan:</span>
+                            <span class="detail-value">${component.voltage || "N/A"}</span>
+                        </div>
+                        ${component.pins ? `
+                        <div class="detail-row">
+                            <span class="detail-label">Digital Pins:</span>
+                            <span class="detail-value">${component.pins}</span>
+                        </div>
+                        ` : ''}
+                        ${component.analog ? `
+                        <div class="detail-row">
+                            <span class="detail-label">Analog Pins:</span>
+                            <span class="detail-value">${component.analog}</span>
+                        </div>
+                        ` : ''}
+                        ${component.type ? `
+                        <div class="detail-row">
+                            <span class="detail-label">Tipe:</span>
+                            <span class="detail-value">${component.type}</span>
+                        </div>
+                        ` : ''}
+                        ${component.measure ? `
+                        <div class="detail-row">
+                            <span class="detail-label">Pengukuran:</span>
+                            <span class="detail-value">${component.measure}</span>
+                        </div>
+                        ` : ''}
+                        ${component.range ? `
+                        <div class="detail-row">
+                            <span class="detail-label">Jangkauan:</span>
+                            <span class="detail-value">${component.range}</span>
+                        </div>
+                        ` : ''}
+                    </div>
+                    
+                    <div class="mt-4 p-3 bg-gray-50 rounded-lg">
+                        <h4 class="font-bold text-gray-700 mb-1 text-sm">Penggunaan:</h4>
+                        <p class="text-xs text-gray-600">${getComponentUsage(component)}</p>
+                    </div>
+                    
+                    ${currentTab === 'build' ? `
+                    <button id="select-for-build" class="w-full mt-4 bg-teal-500 text-white py-2 rounded-lg font-bold">
+                        <i class="fas fa-plus mr-2"></i>Pilih untuk Proyek
+                    </button>
+                    ` : ''}
+                </div>
+            `;
+            
+            // Tambahkan event listener untuk tombol pilih jika di mode build
+            if (currentTab === 'build') {
+                const selectBtn = document.getElementById('select-for-build');
+                selectBtn.addEventListener('click', () => {
+                    selectComponentForBuilding(component);
+                    componentModal.classList.add('hidden');
+                    
+                    // Switch ke tab build jika belum
+                    if (currentTab !== 'build') {
+                        switchTab('build');
+                    }
+                });
+            }
+            
+            componentModal.classList.remove('hidden');
+        }
+
+        // Tampilkan module
+        function showModules() {
+            const modules = arduinoComponents.filter(c => c.category === 'module');
+            showSpecialComponents(modules, "Module Arduino");
+        }
+
+        // Tampilkan shield
+        function showShields() {
+            const shields = arduinoComponents.filter(c => c.category === 'shield');
+            showSpecialComponents(shields, "Shield Arduino");
+        }
+
+        // Tampilkan komponen khusus (module/shield)
+        function showSpecialComponents(components, title) {
+            specialModalBody.innerHTML = `
+                <div class="mb-4">
+                    <h2 class="text-xl font-bold text-gray-800 mb-2">${title}</h2>
+                    <p class="text-gray-600 text-sm mb-4">${components.length} komponen tersedia</p>
+                </div>
+                <div class="grid grid-cols-3 gap-3 mb-4">
+                    ${components.map(component => `
+                        <div class="component-cell ${component.colorClass} w-full" onclick="showComponentDetailsFromModal('${component.symbol}')">
+                            <div class="component-number">${component.number}</div>
+                            <div class="component-symbol">${component.symbol}</div>
+                            <div class="component-name">${component.name}</div>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="text-xs text-gray-500">
+                    <p>• Compatible dengan board Arduino standar</p>
+                    <p>• Mudah dihubungkan melalui pin header</p>
+                    <p>• Sering memerlukan library tambahan</p>
+                </div>
+            `;
+            
+            specialModal.classList.remove('hidden');
+        }
+
+        // Helper untuk showComponentDetails dari modal khusus
+        window.showComponentDetailsFromModal = function(symbol) {
+            const component = arduinoComponents.find(c => c.symbol === symbol);
+            if (component) {
+                specialModal.classList.add('hidden');
+                showComponentDetails(component);
+            }
+        };
+
+        // Fungsi untuk berpindah tab
+        function switchTab(tabName) {
+            // Update tab aktif
+            tabs.forEach(tab => {
+                if (tab.dataset.tab === tabName) {
+                    tab.classList.add('active');
+                } else {
+                    tab.classList.remove('active');
+                }
+            });
+            
+            // Update konten tab aktif
+            tabContents.forEach(content => {
+                if (content.id === `${tabName}-tab`) {
+                    content.classList.add('active');
+                } else {
+                    content.classList.remove('active');
+                }
+            });
+            
+            currentTab = tabName;
+            
+            // Scroll ke atas
+            window.scrollTo(0, 0);
+        }
+
+        // Dapatkan warna berdasarkan kategori
+        function getCategoryColor(category, opacity = 1) {
+            const colors = {
+                "microcontroller": "#ff6b6b",
+                "sensor": "#ffa726",
+                "actuator": "#42a5f5",
+                "display": "#66bb6a",
+                "communication": "#ab47bc",
+                "power": "#26c6da",
+                "input": "#ffca28",
+                "module": "#ec407a",
+                "shield": "#5c6bc0",
+                "basic": "#7e57c2"
+            };
+            
+            const color = colors[category] || "#cccccc";
+            if (opacity < 1) {
+                const r = parseInt(color.slice(1, 3), 16);
+                const g = parseInt(color.slice(3, 5), 16);
+                const b = parseInt(color.slice(5, 7), 16);
+                return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+            }
+            return color;
+        }
+
+        // Dapatkan informasi penggunaan komponen
+        function getComponentUsage(component) {
+            const usages = {
+                "UNO": "Board pengembangan paling populer, ideal untuk pemula dan proyek sederhana.",
+                "NANO": "Versi mini UNO, cocok untuk proyek dengan ruang terbatas.",
+                "DHT11": "Sensor suhu dan kelembaban digital, akurat untuk aplikasi ruangan.",
+                "HC-SR04": "Sensor jarak ultrasonik, akurat dari 2cm hingga 400cm.",
+                "SERVO": "Motor dengan kontrol posisi presisi, cocok untuk robotika.",
+                "LCD16x2": "Display teks 16 karakter x 2 baris, menggunakan interface parallel.",
+                "BT": "Module Bluetooth HC-05/06, untuk komunikasi wireless dengan smartphone.",
+                "PIR": "Sensor gerakan passive infrared, mendeteksi pergerakan manusia.",
+                "RELAY": "Saklar elektromekanis, untuk mengontrol perangkat high voltage.",
+                "OLED": "Display organic LED, kontras tinggi dan konsumsi daya rendah."
+            };
+            
+            return usages[component.symbol] || `Komponen ${component.category} untuk proyek Arduino.`;
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Tutup modal
+            closeModalBtn.addEventListener('click', () => {
+                componentModal.classList.add('hidden');
+            });
+            
+            closeSpecialModalBtn.addEventListener('click', () => {
+                specialModal.classList.add('hidden');
+            });
+            
+            // Tutup modal dengan klik di luar konten
+            componentModal.addEventListener('click', (e) => {
+                if (e.target === componentModal) {
+                    componentModal.classList.add('hidden');
+                }
+            });
+            
+            specialModal.addEventListener('click', (e) => {
+                if (e.target === specialModal) {
+                    specialModal.classList.add('hidden');
+                }
+            });
+            
+            // Tutup modal dengan tombol ESC
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    if (!componentModal.classList.contains('hidden')) {
+                        componentModal.classList.add('hidden');
+                    }
+                    if (!specialModal.classList.contains('hidden')) {
+                        specialModal.classList.add('hidden');
+                    }
+                }
+            });
+            
+            // Pencarian komponen
+            searchInput.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase().trim();
+                
+                // Sembunyikan semua komponen dulu
+                document.querySelectorAll('.component-cell').forEach(cell => {
+                    if (cell.dataset.symbol) {
+                        cell.style.opacity = '0.3';
+                        cell.style.transform = 'scale(0.95)';
+                    }
+                });
+                
+                // Jika kosong, tampilkan semua
+                if (!searchTerm) {
+                    document.querySelectorAll('.component-cell').forEach(cell => {
+                        if (cell.dataset.symbol) {
+                            cell.style.opacity = '1';
+                            cell.style.transform = 'scale(1)';
+                        }
+                    });
+                    return;
+                }
+                
+                // Tampilkan komponen yang cocok
+                let found = false;
+                arduinoComponents.forEach(component => {
+                    if (component.symbol.toLowerCase().includes(searchTerm) || 
+                        component.name.toLowerCase().includes(searchTerm) ||
+                        component.number.toString().includes(searchTerm) ||
+                        component.category.toLowerCase().includes(searchTerm)) {
+                        
+                        const cells = document.querySelectorAll(`[data-symbol="${component.symbol}"]`);
+                        cells.forEach(cell => {
+                            cell.style.opacity = '1';
+                            cell.style.transform = 'scale(1.05)';
+                            cell.style.zIndex = '10';
+                            cell.style.boxShadow = '0 0 8px rgba(0,0,0,0.2)';
+                        });
+                        found = true;
+                    }
+                });
+                
+                // Jika tidak ditemukan, reset semua
+                if (!found) {
+                    document.querySelectorAll('.component-cell').forEach(cell => {
+                        if (cell.dataset.symbol) {
+                            cell.style.opacity = '1';
+                            cell.style.transform = 'scale(1)';
+                            cell.style.zIndex = '1';
+                            cell.style.boxShadow = '';
+                        }
+                    });
+                }
+            });
+            
+            // Fokus pada input pencarian dengan shortcut Ctrl+F
+            document.addEventListener('keydown', (e) => {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+                    e.preventDefault();
+                    searchInput.focus();
+                }
+            });
+            
+            // Tombol untuk module dan shield
+            showModulesBtn.addEventListener('click', showModules);
+            showShieldsBtn.addEventListener('click', showShields);
+            
+            // Tombol untuk sistem pembangunan
+            buildBtn.addEventListener('click', buildProject);
+            
+            clearBuildBtn.addEventListener('click', () => {
+                selectedComponents = [];
+                updateSelectedComponentsDisplay();
+                updateBuildButton();
+                updateStatusMessage();
+                highlightSelectedComponents();
+                buildResult.style.display = 'none';
+                showStatusMessage("Semua komponen telah dihapus", "info");
+            });
+            
+            // Tab switching
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    switchTab(tab.dataset.tab);
+                });
+            });
+        }
+
+        // Inisialisasi ketika halaman dimuat
+        document.addEventListener('DOMContentLoaded', initComponentsTable);
+    </script>
+</body>
+</html>

@@ -1,0 +1,1671 @@
+Ubah isinya jadi tentang tempat coding ide arduino jangan ubah termasuk susunan layout<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TETA SAINS - Tabel Periodik Unsur</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #38b2ac;
+            --secondary: #0e7490;
+            --accent: #f59e0b;
+        }
+        
+        body {
+            font-family: 'Baloo 2', cursive;
+            background-color: #f8fafc;
+        }
+        
+        .app-container {
+            max-width: 414px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        /* NAVBAR - TIDAK DIRUBAH */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            max-width: 414px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            background: white;
+            z-index: 10;
+            height: 70px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+            text-decoration: none;
+            flex: 1;
+            height: 100%;
+            padding: 0.5rem 0;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item span {
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
+        
+        .nav-item.active {
+            color: var(--primary);
+        }
+        
+        .nav-icon {
+            transition: all 0.3s ease;
+            font-size: 1.25rem;
+        }
+        
+        .nav-icon.active {
+            transform: translateY(-5px);
+            color: var(--primary);
+        }
+        
+        /* TABLE STYLES */
+        .periodic-table {
+            display: grid;
+            grid-template-columns: repeat(18, 1fr);
+            gap: 2px;
+            padding: 5px;
+            overflow-x: auto;
+        }
+        
+        .element-cell {
+            min-width: 35px;
+            height: 35px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+        
+        .element-cell:hover {
+            transform: scale(1.05);
+            z-index: 2;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+        }
+        
+        .element-cell.selected {
+            border: 2px solid #f59e0b;
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2);
+            animation: pulse 1.5s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4); }
+            70% { box-shadow: 0 0 0 5px rgba(245, 158, 11, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+        }
+        
+        .element-number {
+            position: absolute;
+            top: 2px;
+            left: 3px;
+            font-size: 7px;
+            font-weight: bold;
+        }
+        
+        .element-symbol {
+            font-size: 12px;
+            font-weight: 800;
+            line-height: 1;
+        }
+        
+        .element-name {
+            font-size: 5px;
+            margin-top: 1px;
+            text-align: center;
+            display: none;
+        }
+        
+        .element-cell:hover .element-name {
+            display: block;
+        }
+        
+        /* Legend styles */
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+            margin-right: 8px;
+            flex-shrink: 0;
+        }
+        
+        /* ELEMENT CATEGORY COLORS */
+        .alkali-metal { background-color: #ff6b6b; color: white; }
+        .alkaline-earth { background-color: #ffa726; color: white; }
+        .transition-metal { background-color: #42a5f5; color: white; }
+        .basic-metal { background-color: #66bb6a; color: white; }
+        .semimetal { background-color: #ab47bc; color: white; }
+        .nonmetal { background-color: #26c6da; color: white; }
+        .halogen { background-color: #ffca28; color: #000; }
+        .noble-gas { background-color: #ec407a; color: white; }
+        .lanthanide { background-color: #7e57c2; color: white; }
+        .actinide { background-color: #5c6bc0; color: white; }
+        
+        /* Modal styles */
+        .element-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            padding: 20px;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            max-width: 350px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+        
+        .app-logo {
+            display: flex;
+            align-items: center;
+        }
+        
+        .app-logo-icon {
+            background: #9999ff;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 8px;
+        }
+        
+        .app-name {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: #9999ff;
+        }
+        
+        /* Element detail styles */
+        .element-detail-card {
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 10px;
+        }
+        
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .detail-label {
+            font-weight: 600;
+            color: #666;
+            font-size: 14px;
+        }
+        
+        .detail-value {
+            font-weight: 700;
+            color: #333;
+            font-size: 14px;
+        }
+        
+        /* Scrollbar styling */
+        .periodic-table::-webkit-scrollbar {
+            height: 6px;
+        }
+        
+        .periodic-table::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+        
+        .periodic-table::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+        
+        /* Group labels */
+        .group-label {
+            font-size: 10px;
+            text-align: center;
+            color: #666;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        
+        /* Period labels */
+        .period-label {
+            font-size: 10px;
+            text-align: right;
+            color: #666;
+            font-weight: 600;
+            padding-right: 5px;
+            width: 20px;
+        }
+        
+        /* Layout grid untuk tabel dengan label */
+        .table-container {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .table-header {
+            display: grid;
+            grid-template-columns: 20px repeat(18, 1fr);
+            gap: 2px;
+            margin-bottom: 5px;
+        }
+        
+        .table-body {
+            display: flex;
+        }
+        
+        .period-labels {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            margin-right: 5px;
+        }
+        
+        .period-row {
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Combine System Styles */
+        .combine-panel {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+        }
+        
+        .selected-elements {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+            min-height: 40px;
+        }
+        
+        .selected-element-badge {
+            background: white;
+            color: #333;
+            padding: 5px 10px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .selected-element-badge .remove-btn {
+            background: none;
+            border: none;
+            color: #ff6b6b;
+            margin-left: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        .combine-result {
+            background: white;
+            color: #333;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 15px;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .compound-name {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 5px;
+        }
+        
+        .compound-formula {
+            font-size: 24px;
+            font-weight: 800;
+            color: #4f46e5;
+            margin-bottom: 10px;
+        }
+        
+        .compound-description {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+        }
+        
+        .compound-properties {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            font-size: 12px;
+        }
+        
+        .compound-prop {
+            background: #f8fafc;
+            padding: 8px;
+            border-radius: 6px;
+        }
+        
+        .combine-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .combine-btn {
+            flex: 1;
+            background: #f59e0b;
+            color: white;
+            border: none;
+            padding: 10px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .combine-btn:hover {
+            background: #d97706;
+        }
+        
+        .combine-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .clear-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .clear-btn:hover {
+            background: #dc2626;
+        }
+        
+        .status-message {
+            text-align: center;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-top: 5px;
+            min-height: 16px;
+        }
+        
+        /* Tab Styles */
+        .tab-container {
+            display: flex;
+            background: #f1f5f9;
+            border-radius: 10px;
+            padding: 5px;
+            margin-bottom: 15px;
+        }
+        
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 8px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+        
+        .tab.active {
+            background: white;
+            color: #4f46e5;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile App Container -->
+    <div class="app-container">
+        <!-- App Header -->
+        <header class="bg-gradient-to-r from-primary to-secondary p-4 text-white">
+            <div class="flex justify-between items-center">
+                <div class="app-logo">
+                    <div class="app-logo-icon">
+                        <i class="fas fa-atom"></i>
+                    </div>
+                    <h1 class="app-name">QUANTARA</h1>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-search"></i>
+                    <i class="fas fa-user-circle text-xl"></i>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Main Content -->
+        <main class="pb-24 p-4">
+            <!-- Page Title -->
+            <div class="mb-4">
+                <h1 class="text-xl font-bold text-gray-800 mb-1">
+                    <i class="fas fa-table text-teal-500 mr-2"></i> Tabel Periodik
+                </h1>
+                <p class="text-gray-600 text-sm">
+                    Tabel periodik unsur kimia lengkap
+                </p>
+            </div>
+            
+            <!-- Tabs -->
+            <div class="tab-container">
+                <div class="tab active" data-tab="table">Tabel Unsur</div>
+                <div class="tab" data-tab="combine">Gabungkan Unsur</div>
+            </div>
+            
+            <!-- Tab Content: Table -->
+            <div id="table-tab" class="tab-content active">
+                <!-- Search Bar -->
+                <div class="mb-4">
+                    <div class="relative">
+                        <input type="text" id="search-element" placeholder="Cari unsur..." 
+                               class="w-full p-3 pl-10 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm">
+                        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    </div>
+                </div>
+                
+                <!-- Tabel Periodik -->
+                <div class="mb-6">
+                    <div class="flex justify-between items-center mb-3">
+                        <h3 class="font-bold text-gray-700 text-sm flex items-center">
+                            <i class="fas fa-atom text-blue-500 mr-2 text-xs"></i> Unsur Kimia
+                        </h3>
+                        <div class="text-xs text-gray-500">
+                            <span id="total-elements">56</span> unsur
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white border border-gray-200 rounded-xl p-3">
+                        <div class="table-container">
+                            <!-- Header untuk golongan -->
+                            <div class="table-header">
+                                <div></div> <!-- Kolom kosong untuk label periode -->
+                                <div class="group-label">1</div>
+                                <div class="group-label">2</div>
+                                <div class="group-label">3</div>
+                                <div class="group-label">4</div>
+                                <div class="group-label">5</div>
+                                <div class="group-label">6</div>
+                                <div class="group-label">7</div>
+                                <div class="group-label">8</div>
+                                <div class="group-label">9</div>
+                                <div class="group-label">10</div>
+                                <div class="group-label">11</div>
+                                <div class="group-label">12</div>
+                                <div class="group-label">13</div>
+                                <div class="group-label">14</div>
+                                <div class="group-label">15</div>
+                                <div class="group-label">16</div>
+                                <div class="group-label">17</div>
+                                <div class="group-label">18</div>
+                            </div>
+                            
+                            <div class="table-body">
+                                <!-- Label periode -->
+                                <div class="period-labels">
+                                    <div class="period-row"></div> <!-- Baris kosong untuk header -->
+                                    <div class="period-row">1</div>
+                                    <div class="period-row">2</div>
+                                    <div class="period-row">3</div>
+                                    <div class="period-row">4</div>
+                                    <div class="period-row">5</div>
+                                    <div class="period-row">6</div>
+                                    <div class="period-row">7</div>
+                                </div>
+                                
+                                <!-- Tabel periodik utama -->
+                                <div id="periodic-table" class="periodic-table">
+                                    <!-- Elements will be generated by JavaScript -->
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Note untuk lantanida dan aktinida -->
+                        <div class="mt-4 text-center">
+                            <div class="text-xs text-gray-500 mb-2">
+                                * Lantanida dan Aktinida ditampilkan terpisah
+                            </div>
+                            <div class="flex justify-center space-x-4">
+                                <button id="show-lanthanides" class="text-xs bg-purple-100 text-purple-700 px-3 py-1 rounded-full">
+                                    Lihat Lantanida
+                                </button>
+                                <button id="show-actinides" class="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full">
+                                    Lihat Aktinida
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Legend - Dipindah ke bawah tabel -->
+                <div class="mb-6 p-3 bg-gray-50 rounded-xl">
+                    <h3 class="font-bold text-gray-700 mb-2 text-sm">Kategori Warna:</h3>
+                    <div class="grid grid-cols-2 gap-1">
+                        <div class="legend-item">
+                            <div class="legend-color alkali-metal"></div>
+                            <span class="text-xs">Logam Alkali</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color alkaline-earth"></div>
+                            <span class="text-xs">Logam Alkali Tanah</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color transition-metal"></div>
+                            <span class="text-xs">Logam Transisi</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color basic-metal"></div>
+                            <span class="text-xs">Logam Dasar</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color semimetal"></div>
+                            <span class="text-xs">Metaloid</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color nonmetal"></div>
+                            <span class="text-xs">Nonlogam</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color halogen"></div>
+                            <span class="text-xs">Halogen</span>
+                        </div>
+                        <div class="legend-item">
+                            <div class="legend-color noble-gas"></div>
+                            <span class="text-xs">Gas Mulia</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tab Content: Combine Elements -->
+            <div id="combine-tab" class="tab-content">
+                <div class="combine-panel">
+                    <h3 class="font-bold text-lg mb-3">
+                        <i class="fas fa-flask mr-2"></i>Gabungkan Unsur
+                    </h3>
+                    <p class="text-sm mb-4">
+                        Pilih 2-3 unsur untuk menggabungkannya menjadi senyawa kimia.
+                        Klik pada unsur di tabel untuk memilih.
+                    </p>
+                    
+                    <div class="selected-elements" id="selected-elements">
+                        <div class="text-sm text-center w-full py-2" id="empty-selection">
+                            Belum ada unsur dipilih
+                        </div>
+                    </div>
+                    
+                    <div class="combine-actions">
+                        <button id="combine-btn" class="combine-btn" disabled>
+                            <i class="fas fa-bolt mr-2"></i>Gabungkan
+                        </button>
+                        <button id="clear-btn" class="clear-btn">
+                            <i class="fas fa-trash mr-2"></i>Hapus
+                        </button>
+                    </div>
+                    
+                    <div class="status-message" id="status-message">
+                        Pilih 2 atau 3 unsur untuk menggabungkan
+                    </div>
+                </div>
+                
+                <div id="combine-result" class="combine-result">
+                    <!-- Results will be displayed here -->
+                </div>
+                
+                <div class="bg-white border border-gray-200 rounded-xl p-3 mt-4">
+                    <h3 class="font-bold text-gray-700 mb-3 text-sm flex items-center">
+                        <i class="fas fa-atom text-blue-500 mr-2 text-xs"></i> Unsur yang Tersedia
+                    </h3>
+                    <div class="table-container">
+                        <div id="combine-periodic-table" class="periodic-table">
+                            <!-- Elements for combine mode will be generated -->
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-3 text-center">
+                        Klik pada unsur untuk memilih/dipilih ulang
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Quick Facts -->
+            <div class="mb-6 p-3 bg-teal-50 rounded-xl">
+                <h3 class="font-bold text-gray-700 mb-2 text-sm flex items-center">
+                    <i class="fas fa-lightbulb text-teal-500 mr-2 text-xs"></i> Fakta Singkat
+                </h3>
+                <div class="text-xs text-gray-700 space-y-1">
+                    <p>• Disusun berdasarkan kenaikan nomor atom</p>
+                    <p>• Ada 118 unsur yang dikonfirmasi</p>
+                    <p>• Dmitri Mendeleev adalah pencipta tabel periodik modern</p>
+                    <p>• Golongan menunjukkan kemiripan sifat kimia</p>
+                </div>
+            </div>
+        </main>
+        
+        <!-- Element Detail Modal -->
+        <div id="element-modal" class="element-modal hidden">
+            <div class="modal-content">
+                <button id="close-modal" class="close-modal">&times;</button>
+                <div id="modal-body"></div>
+            </div>
+        </div>
+        
+        <!-- Modal untuk Lantanida/Aktinida -->
+        <div id="special-modal" class="element-modal hidden">
+            <div class="modal-content">
+                <button id="close-special-modal" class="close-modal">&times;</button>
+                <div id="special-modal-body"></div>
+            </div>
+        </div>
+        
+        <!-- BOTTOM NAVIGATION - TIDAK DIRUBAH -->
+        <nav class="bottom-nav">
+            <a href="dashboad siswa.html" class="nav-item">
+                <i class="fas fa-home nav-icon"></i>
+                <span>Beranda</span>
+            </a>
+            <a href="soal harian/dashboard soal.html" class="nav-item">
+                <i class="fas fa-flask nav-icon"></i>
+                <span>Soal Harian</span>
+            </a>
+            <a href="ai/nayra.html" class="nav-item">
+                <i class="fas fa-robot nav-icon"></i>
+                <span>Nayra AI</span>
+            </a>
+            <a href="materi harian/kategori materi.html" class="nav-item">
+                <i class="fas fa-chalkboard-teacher nav-icon"></i>
+                <span>Materi Harian</span>
+            </a>
+            <a href="profil/profil.html" class="nav-item">
+                <i class="fas fa-user nav-icon"></i>
+                <span>Profil</span>
+            </a>
+        </nav>
+    </div>
+
+    <script>
+        // Data Tabel Periodik Lengkap
+        const periodicElements = [
+            // Periode 1
+            { symbol: "H", name: "Hidrogen", number: 1, mass: 1.008, category: "nonmetal", colorClass: "nonmetal", period: 1, group: 1, electronConfig: "1s¹", valence: 1 },
+            { symbol: "He", name: "Helium", number: 2, mass: 4.0026, category: "noble-gas", colorClass: "noble-gas", period: 1, group: 18, electronConfig: "1s²", valence: 0 },
+            
+            // Periode 2
+            { symbol: "Li", name: "Litium", number: 3, mass: 6.94, category: "alkali-metal", colorClass: "alkali-metal", period: 2, group: 1, electronConfig: "[He] 2s¹", valence: 1 },
+            { symbol: "Be", name: "Berilium", number: 4, mass: 9.0122, category: "alkaline-earth", colorClass: "alkaline-earth", period: 2, group: 2, electronConfig: "[He] 2s²", valence: 2 },
+            { symbol: "B", name: "Boron", number: 5, mass: 10.81, category: "semimetal", colorClass: "semimetal", period: 2, group: 13, electronConfig: "[He] 2s² 2p¹", valence: 3 },
+            { symbol: "C", name: "Karbon", number: 6, mass: 12.011, category: "nonmetal", colorClass: "nonmetal", period: 2, group: 14, electronConfig: "[He] 2s² 2p²", valence: 4 },
+            { symbol: "N", name: "Nitrogen", number: 7, mass: 14.007, category: "nonmetal", colorClass: "nonmetal", period: 2, group: 15, electronConfig: "[He] 2s² 2p³", valence: 3 },
+            { symbol: "O", name: "Oksigen", number: 8, mass: 15.999, category: "nonmetal", colorClass: "nonmetal", period: 2, group: 16, electronConfig: "[He] 2s² 2p⁴", valence: 2 },
+            { symbol: "F", name: "Fluor", number: 9, mass: 18.998, category: "halogen", colorClass: "halogen", period: 2, group: 17, electronConfig: "[He] 2s² 2p⁵", valence: 1 },
+            { symbol: "Ne", name: "Neon", number: 10, mass: 20.180, category: "noble-gas", colorClass: "noble-gas", period: 2, group: 18, electronConfig: "[He] 2s² 2p⁶", valence: 0 },
+            
+            // Periode 3
+            { symbol: "Na", name: "Natrium", number: 11, mass: 22.990, category: "alkali-metal", colorClass: "alkali-metal", period: 3, group: 1, electronConfig: "[Ne] 3s¹", valence: 1 },
+            { symbol: "Mg", name: "Magnesium", number: 12, mass: 24.305, category: "alkaline-earth", colorClass: "alkaline-earth", period: 3, group: 2, electronConfig: "[Ne] 3s²", valence: 2 },
+            { symbol: "Al", name: "Aluminium", number: 13, mass: 26.982, category: "basic-metal", colorClass: "basic-metal", period: 3, group: 13, electronConfig: "[Ne] 3s² 3p¹", valence: 3 },
+            { symbol: "Si", name: "Silikon", number: 14, mass: 28.085, category: "semimetal", colorClass: "semimetal", period: 3, group: 14, electronConfig: "[Ne] 3s² 3p²", valence: 4 },
+            { symbol: "P", name: "Fosfor", number: 15, mass: 30.974, category: "nonmetal", colorClass: "nonmetal", period: 3, group: 15, electronConfig: "[Ne] 3s² 3p³", valence: 3 },
+            { symbol: "S", name: "Belerang", number: 16, mass: 32.06, category: "nonmetal", colorClass: "nonmetal", period: 3, group: 16, electronConfig: "[Ne] 3s² 3p⁴", valence: 2 },
+            { symbol: "Cl", name: "Klorin", number: 17, mass: 35.45, category: "halogen", colorClass: "halogen", period: 3, group: 17, electronConfig: "[Ne] 3s² 3p⁵", valence: 1 },
+            { symbol: "Ar", name: "Argon", number: 18, mass: 39.948, category: "noble-gas", colorClass: "noble-gas", period: 3, group: 18, electronConfig: "[Ne] 3s² 3p⁶", valence: 0 },
+            
+            // Periode 4
+            { symbol: "K", name: "Kalium", number: 19, mass: 39.098, category: "alkali-metal", colorClass: "alkali-metal", period: 4, group: 1, electronConfig: "[Ar] 4s¹", valence: 1 },
+            { symbol: "Ca", name: "Kalsium", number: 20, mass: 40.078, category: "alkaline-earth", colorClass: "alkaline-earth", period: 4, group: 2, electronConfig: "[Ar] 4s²", valence: 2 },
+            { symbol: "Sc", name: "Skandium", number: 21, mass: 44.956, category: "transition-metal", colorClass: "transition-metal", period: 4, group: 3, electronConfig: "[Ar] 3d¹ 4s²", valence: 3 },
+            { symbol: "Ti", name: "Titanium", number: 22, mass: 47.867, category: "transition-metal", colorClass: "transition-metal", period: 4, group: 4, electronConfig: "[Ar] 3d² 4s²", valence: 4 },
+            { symbol: "V", name: "Vanadium", number: 23, mass: 50.942, category: "transition-metal", colorClass: "transition-metal", period: 4, group: 5, electronConfig: "[Ar] 3d³ 4s²", valence: 5 },
+            { symbol: "Cr", name: "Kromium", number: 24, mass: 51.996, category: "transition-metal", colorClass: "transition-metal", period: 4, group: 6, electronConfig: "[Ar] 3d⁵ 4s¹", valence: 2 },
+            { symbol: "Mn", name: "Mangan", number: 25, mass: 54.938, category: "transition-metal", colorClass: "transition-metal", period: 4, group: 7, electronConfig: "[Ar] 3d⁵ 4s²", valence: 2 },
+            { symbol: "Fe", name: "Besi", number: 26, mass: 55.845, category: "transition-metal", colorClass: "transition-metal", period: 4, group: 8, electronConfig: "[Ar] 3d⁶ 4s²", valence: 2 },
+            { symbol: "Co", name: "Kobalt", number: 27, mass: 58.933, category: "transition-metal", colorClass: "transition-metal", period: 4, group: 9, electronConfig: "[Ar] 3d⁷ 4s²", valence: 2 },
+            { symbol: "Ni", name: "Nikel", number: 28, mass: 58.693, category: "transition-metal", colorClass: "transition-metal", period: 4, group: 10, electronConfig: "[Ar] 3d⁸ 4s²", valence: 2 },
+            { symbol: "Cu", name: "Tembaga", number: 29, mass: 63.546, category: "transition-metal", colorClass: "transition-metal", period: 4, group: 11, electronConfig: "[Ar] 3d¹⁰ 4s¹", valence: 1 },
+            { symbol: "Zn", name: "Seng", number: 30, mass: 65.38, category: "transition-metal", colorClass: "transition-metal", period: 4, group: 12, electronConfig: "[Ar] 3d¹⁰ 4s²", valence: 2 },
+            { symbol: "Ga", name: "Galium", number: 31, mass: 69.723, category: "basic-metal", colorClass: "basic-metal", period: 4, group: 13, electronConfig: "[Ar] 3d¹⁰ 4s² 4p¹", valence: 3 },
+            { symbol: "Ge", name: "Germanium", number: 32, mass: 72.63, category: "semimetal", colorClass: "semimetal", period: 4, group: 14, electronConfig: "[Ar] 3d¹⁰ 4s² 4p²", valence: 4 },
+            { symbol: "As", name: "Arsen", number: 33, mass: 74.922, category: "semimetal", colorClass: "semimetal", period: 4, group: 15, electronConfig: "[Ar] 3d¹⁰ 4s² 4p³", valence: 3 },
+            { symbol: "Se", name: "Selenium", number: 34, mass: 78.971, category: "nonmetal", colorClass: "nonmetal", period: 4, group: 16, electronConfig: "[Ar] 3d¹⁰ 4s² 4p⁴", valence: 2 },
+            { symbol: "Br", name: "Brom", number: 35, mass: 79.904, category: "halogen", colorClass: "halogen", period: 4, group: 17, electronConfig: "[Ar] 3d¹⁰ 4s² 4p⁵", valence: 1 },
+            { symbol: "Kr", name: "Kripton", number: 36, mass: 83.798, category: "noble-gas", colorClass: "noble-gas", period: 4, group: 18, electronConfig: "[Ar] 3d¹⁰ 4s² 4p⁶", valence: 0 },
+            
+            // Periode 5
+            { symbol: "Rb", name: "Rubidium", number: 37, mass: 85.468, category: "alkali-metal", colorClass: "alkali-metal", period: 5, group: 1, electronConfig: "[Kr] 5s¹", valence: 1 },
+            { symbol: "Sr", name: "Strontium", number: 38, mass: 87.62, category: "alkaline-earth", colorClass: "alkaline-earth", period: 5, group: 2, electronConfig: "[Kr] 5s²", valence: 2 },
+            { symbol: "Y", name: "Yttrium", number: 39, mass: 88.906, category: "transition-metal", colorClass: "transition-metal", period: 5, group: 3, electronConfig: "[Kr] 4d¹ 5s²", valence: 3 },
+            { symbol: "Zr", name: "Zirkonium", number: 40, mass: 91.224, category: "transition-metal", colorClass: "transition-metal", period: 5, group: 4, electronConfig: "[Kr] 4d² 5s²", valence: 4 },
+            { symbol: "Nb", name: "Niobium", number: 41, mass: 92.906, category: "transition-metal", colorClass: "transition-metal", period: 5, group: 5, electronConfig: "[Kr] 4d⁴ 5s¹", valence: 5 },
+            { symbol: "Mo", name: "Molibdenum", number: 42, mass: 95.95, category: "transition-metal", colorClass: "transition-metal", period: 5, group: 6, electronConfig: "[Kr] 4d⁵ 5s¹", valence: 6 },
+            { symbol: "Tc", name: "Teknesium", number: 43, mass: 98, category: "transition-metal", colorClass: "transition-metal", period: 5, group: 7, electronConfig: "[Kr] 4d⁵ 5s²", valence: 2 },
+            { symbol: "Ru", name: "Rutenium", number: 44, mass: 101.07, category: "transition-metal", colorClass: "transition-metal", period: 5, group: 8, electronConfig: "[Kr] 4d⁷ 5s¹", valence: 3 },
+            { symbol: "Rh", name: "Rodium", number: 45, mass: 102.91, category: "transition-metal", colorClass: "transition-metal", period: 5, group: 9, electronConfig: "[Kr] 4d⁸ 5s¹", valence: 3 },
+            { symbol: "Pd", name: "Paladium", number: 46, mass: 106.42, category: "transition-metal", colorClass: "transition-metal", period: 5, group: 10, electronConfig: "[Kr] 4d¹⁰", valence: 2 },
+            { symbol: "Ag", name: "Perak", number: 47, mass: 107.87, category: "transition-metal", colorClass: "transition-metal", period: 5, group: 11, electronConfig: "[Kr] 4d¹⁰ 5s¹", valence: 1 },
+            { symbol: "Cd", name: "Kadmium", number: 48, mass: 112.41, category: "transition-metal", colorClass: "transition-metal", period: 5, group: 12, electronConfig: "[Kr] 4d¹⁰ 5s²", valence: 2 },
+            { symbol: "In", name: "Indium", number: 49, mass: 114.82, category: "basic-metal", colorClass: "basic-metal", period: 5, group: 13, electronConfig: "[Kr] 4d¹⁰ 5s² 5p¹", valence: 3 },
+            { symbol: "Sn", name: "Timah", number: 50, mass: 118.71, category: "basic-metal", colorClass: "basic-metal", period: 5, group: 14, electronConfig: "[Kr] 4d¹⁰ 5s² 5p²", valence: 4 },
+            { symbol: "Sb", name: "Antimon", number: 51, mass: 121.76, category: "semimetal", colorClass: "semimetal", period: 5, group: 15, electronConfig: "[Kr] 4d¹⁰ 5s² 5p³", valence: 3 },
+            { symbol: "Te", name: "Telurium", number: 52, mass: 127.60, category: "semimetal", colorClass: "semimetal", period: 5, group: 16, electronConfig: "[Kr] 4d¹⁰ 5s² 5p⁴", valence: 2 },
+            { symbol: "I", name: "Iodium", number: 53, mass: 126.90, category: "halogen", colorClass: "halogen", period: 5, group: 17, electronConfig: "[Kr] 4d¹⁰ 5s² 5p⁵", valence: 1 },
+            { symbol: "Xe", name: "Xenon", number: 54, mass: 131.29, category: "noble-gas", colorClass: "noble-gas", period: 5, group: 18, electronConfig: "[Kr] 4d¹⁰ 5s² 5p⁶", valence: 0 }
+        ];
+
+        // Data Senyawa Kimia yang Diketahui
+        const knownCompounds = [
+            // Air
+            { elements: ["H", "O"], formula: "H₂O", name: "Air", type: "covalent", 
+              description: "Molekul penting untuk kehidupan, cairan pada suhu ruang.",
+              properties: ["Titik didih: 100°C", "Titik beku: 0°C", "Densitas: 1 g/cm³", "Polar"] },
+            
+            // Garam dapur
+            { elements: ["Na", "Cl"], formula: "NaCl", name: "Natrium Klorida", type: "ionic",
+              description: "Garam dapur, senyawa ionik yang larut dalam air.",
+              properties: ["Titik lebur: 801°C", "Larut dalam air", "Konduktor lelehan", "Rasa asin"] },
+            
+            // Karbon dioksida
+            { elements: ["C", "O"], formula: "CO₂", name: "Karbon Dioksida", type: "covalent",
+              description: "Gas rumah kaca, dihasilkan dari respirasi dan pembakaran.",
+              properties: ["Gas tak berwarna", "Tidak terbakar", "Asam lemah", "Padat: es kering"] },
+            
+            // Metana
+            { elements: ["C", "H"], formula: "CH₄", name: "Metana", type: "covalent",
+              description: "Komponen utama gas alam, gas rumah kaca yang kuat.",
+              properties: ["Gas mudah terbakar", "Tidak berwarna", "Lebih ringan dari udara", "Rumus paling sederhana"] },
+            
+            // Amonia
+            { elements: ["N", "H"], formula: "NH₃", name: "Amonia", type: "covalent",
+              description: "Gas dengan bau tajam, digunakan dalam pupuk dan pembersih.",
+              properties: ["Basa kuat", "Larut dalam air", "Titik didih: -33°C", "Bentuk piramida"] },
+            
+            // Asam sulfat
+            { elements: ["H", "S", "O"], formula: "H₂SO₄", name: "Asam Sulfat", type: "acid",
+              description: "Asam kuat yang penting dalam industri kimia.",
+              properties: ["Korosif", "Densitas: 1.84 g/cm³", "Dehidrator kuat", "Dihasilkan dari belerang"] },
+            
+            // Kalsium karbonat
+            { elements: ["Ca", "C", "O"], formula: "CaCO₃", name: "Kalsium Karbonat", type: "ionic",
+              description: "Komponen utama batu kapur, marmer, dan cangkang organisme.",
+              properties: ["Padatan putih", "Tidak larut dalam air", "Bereaksi dengan asam", "Struktur kristal"] },
+            
+            // Glukosa
+            { elements: ["C", "H", "O"], formula: "C₆H₁₂O₆", name: "Glukosa", type: "organic",
+              description: "Gula sederhana, sumber energi utama untuk sel hidup.",
+              properties: ["Padatan kristal", "Larut dalam air", "Rasa manis", "Isomer: dekstrosa"] },
+            
+            // Magnesium oksida
+            { elements: ["Mg", "O"], formula: "MgO", name: "Magnesium Oksida", type: "ionic",
+              description: "Bubuk putih dengan titik leleh tinggi, digunakan dalam refraktori.",
+              properties: ["Titik leleh: 2852°C", "Basa", "Tidak larut dalam air", "Konduktor panas"] },
+            
+            // Besi oksida
+            { elements: ["Fe", "O"], formula: "Fe₂O₃", name: "Besi(III) Oksida", type: "ionic",
+              description: "Bijih besi utama, dikenal sebagai hematit atau karat.",
+              properties: ["Padatan merah-coklat", "Feromagnetik", "Tidak larut dalam air", "Pigmen alam"] },
+            
+            // Aluminium oksida
+            { elements: ["Al", "O"], formula: "Al₂O₃", name: "Aluminium Oksida", type: "ionic",
+              description: "Komponen utama korundum dan batu permata seperti ruby dan safir.",
+              properties: ["Sangat keras", "Tahan panas", "Ampoterik", "Titik leleh: 2072°C"] },
+            
+            // Silikon dioksida
+            { elements: ["Si", "O"], formula: "SiO₂", name: "Silikon Dioksida", type: "covalent",
+              description: "Komponen utama pasir dan kuarsa, digunakan dalam kaca.",
+              properties: ["Padatan kristal", "Titik leleh tinggi", "Tidak larut dalam air", "Berbagai bentuk"] },
+            
+            // Asam klorida
+            { elements: ["H", "Cl"], formula: "HCl", name: "Asam Klorida", type: "acid",
+              description: "Asam kuat yang ditemukan dalam lambung, digunakan dalam industri.",
+              properties: ["Gas larut dalam air", "Korosif", "Asam kuat", "Menghasilkan ion H⁺"] },
+            
+            // Natrium hidroksida
+            { elements: ["Na", "O", "H"], formula: "NaOH", name: "Natrium Hidroksida", type: "base",
+              description: "Basa kuat, dikenal sebagai soda kaustik, digunakan dalam sabun.",
+              properties: ["Basa kuat", "Higroskopis", "Larut dalam air", "Reaksi eksotermik"] },
+            
+            // Karbon monoksida
+            { elements: ["C", "O"], formula: "CO", name: "Karbon Monoksida", type: "covalent",
+              description: "Gas beracun tak berwarna dan tak berbau, hasil pembakaran tak sempurna.",
+              properties: ["Beracun", "Tidak berwarna", "Mudah terbakar", "Afinitas tinggi dengan hemoglobin"] },
+            
+            // Nitrogen dioksida
+            { elements: ["N", "O"], formula: "NO₂", name: "Nitrogen Dioksida", type: "covalent",
+              description: "Gas berwarna coklat, polutan udara, bagian dari smog fotokimia.",
+              properties: ["Gas coklat", "Beracun", "Oksidator kuat", "Bereaksi dengan air"] },
+            
+            // Kalium nitrat
+            { elements: ["K", "N", "O"], formula: "KNO₃", name: "Kalium Nitrat", type: "ionic",
+              description: "Dikenal sebagai saltpeter, digunakan dalam pupuk dan kembang api.",
+              properties: ["Padatan putih", "Larut dalam air", "Oksidator", "Rasa dingin di lidah"] },
+            
+            // Kalsium hidroksida
+            { elements: ["Ca", "O", "H"], formula: "Ca(OH)₂", name: "Kalsium Hidroksida", type: "base",
+              description: "Dikenal sebagai air kapur, digunakan dalam konstruksi dan pengolahan air.",
+              properties: ["Basa sedang", "Sedikit larut dalam air", "Suspensi: susu kapur", "Reaksi dengan CO₂"] }
+        ];
+
+        // DOM Elements
+        const periodicTableContainer = document.getElementById('periodic-table');
+        const combinePeriodicTableContainer = document.getElementById('combine-periodic-table');
+        const elementModal = document.getElementById('element-modal');
+        const specialModal = document.getElementById('special-modal');
+        const closeModalBtn = document.getElementById('close-modal');
+        const closeSpecialModalBtn = document.getElementById('close-special-modal');
+        const modalBody = document.getElementById('modal-body');
+        const specialModalBody = document.getElementById('special-modal-body');
+        const searchInput = document.getElementById('search-element');
+        const totalElementsSpan = document.getElementById('total-elements');
+        const showLanthanidesBtn = document.getElementById('show-lanthanides');
+        const showActinidesBtn = document.getElementById('show-actinides');
+        const selectedElementsContainer = document.getElementById('selected-elements');
+        const emptySelectionMsg = document.getElementById('empty-selection');
+        const combineBtn = document.getElementById('combine-btn');
+        const clearBtn = document.getElementById('clear-btn');
+        const combineResult = document.getElementById('combine-result');
+        const statusMessage = document.getElementById('status-message');
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        // State untuk sistem penggabungan
+        let selectedElements = [];
+        let currentTab = 'table';
+
+        // Inisialisasi Tabel Periodik
+        function initPeriodicTable() {
+            // Kosongkan kontainer
+            periodicTableContainer.innerHTML = '';
+            
+            // Buat 7 baris (periode) x 18 kolom (golongan)
+            for (let period = 1; period <= 7; period++) {
+                for (let group = 1; group <= 18; group++) {
+                    const element = findElementByPosition(period, group);
+                    
+                    const elementDiv = document.createElement('div');
+                    elementDiv.className = `element-cell ${element ? element.colorClass : 'bg-transparent'}`;
+                    
+                    if (element) {
+                        elementDiv.dataset.symbol = element.symbol;
+                        elementDiv.dataset.number = element.number;
+                        elementDiv.dataset.period = period;
+                        elementDiv.dataset.group = group;
+                        
+                        elementDiv.innerHTML = `
+                            <div class="element-number">${element.number}</div>
+                            <div class="element-symbol">${element.symbol}</div>
+                            <div class="element-name">${element.name}</div>
+                        `;
+                        
+                        elementDiv.addEventListener('click', () => showElementDetails(element));
+                    } else {
+                        // Kosong, tapi bisa berisi placeholder untuk posisi khusus
+                        if (period === 6 && group === 3) {
+                            elementDiv.innerHTML = `<div class="text-xs text-gray-400">57-71</div>`;
+                            elementDiv.classList.add('bg-gray-100');
+                            elementDiv.addEventListener('click', showLanthanides);
+                        } else if (period === 7 && group === 3) {
+                            elementDiv.innerHTML = `<div class="text-xs text-gray-400">89-103</div>`;
+                            elementDiv.classList.add('bg-gray-100');
+                            elementDiv.addEventListener('click', showActinides);
+                        } else {
+                            elementDiv.style.visibility = 'hidden';
+                        }
+                    }
+                    
+                    periodicTableContainer.appendChild(elementDiv);
+                }
+            }
+            
+            // Inisialisasi tabel untuk mode gabungkan
+            initCombinePeriodicTable();
+            
+            // Hitung total unsur yang ditampilkan
+            const visibleElements = periodicElements.filter(e => 
+                !['lanthanide', 'actinide'].includes(e.category) || 
+                (e.symbol === 'La' || e.symbol === 'Ac' || e.symbol === 'Lu' || e.symbol === 'Lr')
+            ).length;
+            
+            totalElementsSpan.textContent = visibleElements;
+            
+            // Setup event listeners
+            setupEventListeners();
+        }
+
+        // Inisialisasi tabel untuk mode gabungkan
+        function initCombinePeriodicTable() {
+            combinePeriodicTableContainer.innerHTML = '';
+            
+            // Buat grid 8x18 untuk mode gabungkan (lebih sederhana)
+            const elementsForCombine = periodicElements.filter(e => 
+                !['lanthanide', 'actinide'].includes(e.category) &&
+                e.number <= 54 // Hanya sampai Xenon untuk kesederhanaan
+            );
+            
+            // Buat grid 6x10 untuk tampilan yang lebih rapi
+            for (let i = 0; i < 60; i++) {
+                const elementDiv = document.createElement('div');
+                
+                if (i < elementsForCombine.length) {
+                    const element = elementsForCombine[i];
+                    elementDiv.className = `element-cell ${element.colorClass}`;
+                    elementDiv.dataset.symbol = element.symbol;
+                    elementDiv.dataset.number = element.number;
+                    
+                    elementDiv.innerHTML = `
+                        <div class="element-number">${element.number}</div>
+                        <div class="element-symbol">${element.symbol}</div>
+                    `;
+                    
+                    elementDiv.addEventListener('click', () => selectElementForCombination(element));
+                } else {
+                    elementDiv.style.visibility = 'hidden';
+                }
+                
+                combinePeriodicTableContainer.appendChild(elementDiv);
+            }
+            
+            // Set grid template untuk tampilan yang lebih baik
+            combinePeriodicTableContainer.style.gridTemplateColumns = 'repeat(10, 1fr)';
+        }
+
+        // Cari elemen berdasarkan posisi (periode dan golongan)
+        function findElementByPosition(period, group) {
+            return periodicElements.find(element => 
+                element.period === period && 
+                element.group === group &&
+                !['lanthanide', 'actinide'].includes(element.category)
+            );
+        }
+
+        // Pilih elemen untuk kombinasi
+        function selectElementForCombination(element) {
+            // Cek apakah elemen sudah dipilih
+            const existingIndex = selectedElements.findIndex(e => e.symbol === element.symbol);
+            
+            if (existingIndex !== -1) {
+                // Hapus elemen jika sudah dipilih
+                selectedElements.splice(existingIndex, 1);
+            } else {
+                // Tambahkan elemen jika belum dipilih (maksimal 3)
+                if (selectedElements.length < 3) {
+                    selectedElements.push(element);
+                } else {
+                    showStatusMessage("Maksimal 3 unsur yang dapat digabungkan", "error");
+                    return;
+                }
+            }
+            
+            // Perbarui tampilan elemen yang dipilih
+            updateSelectedElementsDisplay();
+            
+            // Perbarui status tombol gabungkan
+            updateCombineButton();
+            
+            // Perbarui status message
+            updateStatusMessage();
+            
+            // Highlight elemen di tabel
+            highlightSelectedElements();
+        }
+
+        // Perbarui tampilan elemen yang dipilih
+        function updateSelectedElementsDisplay() {
+            selectedElementsContainer.innerHTML = '';
+            
+            if (selectedElements.length === 0) {
+                emptySelectionMsg.style.display = 'block';
+                return;
+            }
+            
+            emptySelectionMsg.style.display = 'none';
+            
+            selectedElements.forEach((element, index) => {
+                const badge = document.createElement('div');
+                badge.className = 'selected-element-badge';
+                badge.innerHTML = `
+                    ${element.symbol} - ${element.name}
+                    <button class="remove-btn" data-index="${index}">&times;</button>
+                `;
+                
+                badge.querySelector('.remove-btn').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    selectedElements.splice(index, 1);
+                    updateSelectedElementsDisplay();
+                    updateCombineButton();
+                    updateStatusMessage();
+                    highlightSelectedElements();
+                });
+                
+                selectedElementsContainer.appendChild(badge);
+            });
+        }
+
+        // Highlight elemen yang dipilih di tabel
+        function highlightSelectedElements() {
+            // Reset semua elemen di tabel gabungkan
+            document.querySelectorAll('#combine-periodic-table .element-cell').forEach(cell => {
+                cell.classList.remove('selected');
+            });
+            
+            // Highlight elemen yang dipilih
+            selectedElements.forEach(element => {
+                const cells = document.querySelectorAll(`#combine-periodic-table [data-symbol="${element.symbol}"]`);
+                cells.forEach(cell => {
+                    cell.classList.add('selected');
+                });
+            });
+        }
+
+        // Perbarui status tombol gabungkan
+        function updateCombineButton() {
+            if (selectedElements.length >= 2) {
+                combineBtn.disabled = false;
+                combineBtn.innerHTML = `<i class="fas fa-bolt mr-2"></i>Gabungkan (${selectedElements.length})`;
+            } else {
+                combineBtn.disabled = true;
+                combineBtn.innerHTML = `<i class="fas fa-bolt mr-2"></i>Gabungkan`;
+            }
+        }
+
+        // Perbarui status message
+        function updateStatusMessage() {
+            if (selectedElements.length === 0) {
+                statusMessage.textContent = "Pilih 2 atau 3 unsur untuk menggabungkan";
+            } else if (selectedElements.length === 1) {
+                statusMessage.textContent = "Pilih 1 unsur lagi untuk menggabungkan";
+            } else if (selectedElements.length === 2) {
+                statusMessage.textContent = "Klik 'Gabungkan' untuk membuat senyawa dari 2 unsur";
+            } else if (selectedElements.length === 3) {
+                statusMessage.textContent = "Klik 'Gabungkan' untuk membuat senyawa dari 3 unsur";
+            }
+        }
+
+        // Tampilkan pesan status sementara
+        function showStatusMessage(message, type = "info") {
+            const originalMessage = statusMessage.textContent;
+            statusMessage.textContent = message;
+            statusMessage.style.color = type === "error" ? "#fecaca" : "rgba(255, 255, 255, 0.8)";
+            
+            setTimeout(() => {
+                statusMessage.textContent = originalMessage;
+                statusMessage.style.color = "rgba(255, 255, 255, 0.8)";
+            }, 3000);
+        }
+
+        // Gabungkan elemen yang dipilih
+        function combineElements() {
+            if (selectedElements.length < 2) return;
+            
+            // Urutkan elemen berdasarkan nomor atom
+            const sortedElements = [...selectedElements].sort((a, b) => a.number - b.number);
+            const elementSymbols = sortedElements.map(e => e.symbol);
+            
+            // Cari senyawa yang diketahui
+            let foundCompound = null;
+            
+            for (const compound of knownCompounds) {
+                const compoundElements = [...compound.elements].sort();
+                const selectedElementSymbols = [...elementSymbols].sort();
+                
+                if (JSON.stringify(compoundElements) === JSON.stringify(selectedElementSymbols)) {
+                    foundCompound = compound;
+                    break;
+                }
+            }
+            
+            // Jika tidak ditemukan, buat senyawa generik
+            if (!foundCompound) {
+                foundCompound = generateGenericCompound(sortedElements);
+            }
+            
+            // Tampilkan hasil
+            displayCombineResult(foundCompound, sortedElements);
+        }
+
+        // Hasilkan senyawa generik berdasarkan unsur
+        function generateGenericCompound(elements) {
+            const elementCount = elements.length;
+            let formula = "";
+            let name = "";
+            let type = "";
+            let description = "";
+            let properties = [];
+            
+            // Buat formula berdasarkan jumlah unsur
+            if (elementCount === 2) {
+                const [el1, el2] = elements;
+                formula = `${el1.symbol}${getSubscript(1)}${el2.symbol}${getSubscript(1)}`;
+                name = `${el1.name} ${el2.name}ida`;
+                type = isMetal(el1) && isNonMetal(el2) ? "ionik" : "kovalen";
+                description = `Senyawa biner antara ${el1.name} dan ${el2.name}.`;
+                properties = [
+                    `Unsur 1: ${el1.symbol} (${el1.name})`,
+                    `Unsur 2: ${el2.symbol} (${el2.name})`,
+                    `Jenis: Senyawa ${type}`,
+                    `Massa molar: ${(el1.mass + el2.mass).toFixed(2)} g/mol`
+                ];
+            } else if (elementCount === 3) {
+                const [el1, el2, el3] = elements;
+                formula = `${el1.symbol}${getSubscript(1)}${el2.symbol}${getSubscript(1)}${el3.symbol}${getSubscript(2)}`;
+                name = `${el1.name} ${el2.name}at`;
+                type = "kovalen";
+                description = `Senyawa ternari yang terdiri dari ${el1.name}, ${el2.name}, dan ${el3.name}.`;
+                properties = [
+                    `Unsur 1: ${el1.symbol} (${el1.name})`,
+                    `Unsur 2: ${el2.symbol} (${el2.name})`,
+                    `Unsur 3: ${el3.symbol} (${el3.name})`,
+                    `Massa molar: ${(el1.mass + el2.mass + (el3.mass * 2)).toFixed(2)} g/mol`
+                ];
+            }
+            
+            return {
+                elements: elements.map(e => e.symbol),
+                formula,
+                name,
+                type,
+                description,
+                properties
+            };
+        }
+
+        // Helper functions
+        function getSubscript(num) {
+            const subscripts = ["₀", "₁", "₂", "₃", "₄", "₅", "₆", "₇", "₈", "₉"];
+            return num.toString().split('').map(d => subscripts[parseInt(d)]).join('');
+        }
+
+        function isMetal(element) {
+            const metalCategories = ["alkali-metal", "alkaline-earth", "transition-metal", "basic-metal"];
+            return metalCategories.includes(element.category);
+        }
+
+        function isNonMetal(element) {
+            const nonMetalCategories = ["nonmetal", "halogen"];
+            return nonMetalCategories.includes(element.category);
+        }
+
+        // Tampilkan hasil kombinasi
+        function displayCombineResult(compound, elements) {
+            const reactionSound = document.getElementById('reaction-sound');
+            if (reactionSound) {
+                reactionSound.currentTime = 0;
+                reactionSound.play();
+            }
+            
+            combineResult.style.display = 'block';
+            combineResult.innerHTML = `
+                <div class="mb-4">
+                    <h3 class="compound-name">${compound.name}</h3>
+                    <div class="compound-formula">${compound.formula}</div>
+                    <p class="compound-description">${compound.description}</p>
+                    <div class="text-xs text-gray-500 mb-3">
+                        <i class="fas fa-flask mr-1"></i> Jenis: ${compound.type.toUpperCase()}
+                    </div>
+                </div>
+                
+                <div class="compound-properties">
+                    ${compound.properties.map(prop => `
+                        <div class="compound-prop">
+                            <i class="fas fa-check text-green-500 mr-1"></i> ${prop}
+                        </div>
+                    `).join('')}
+                </div>
+                
+                <div class="mt-4 text-xs text-gray-600">
+                    <p><i class="fas fa-lightbulb text-yellow-500 mr-1"></i> 
+                    ${getCompoundTip(compound, elements)}</p>
+                </div>
+                
+                <button id="new-experiment" class="w-full mt-4 bg-teal-500 text-white py-2 rounded-lg font-bold">
+                    <i class="fas fa-redo mr-2"></i>Eksperimen Baru
+                </button>
+            `;
+            
+            // Scroll ke hasil
+            combineResult.scrollIntoView({ behavior: 'smooth' });
+            
+            // Event listener untuk tombol eksperimen baru
+            document.getElementById('new-experiment').addEventListener('click', () => {
+                selectedElements = [];
+                updateSelectedElementsDisplay();
+                updateCombineButton();
+                updateStatusMessage();
+                highlightSelectedElements();
+                combineResult.style.display = 'none';
+            });
+        }
+
+        // Dapatkan tips tentang senyawa
+        function getCompoundTip(compound, elements) {
+            const tips = [
+                "Senyawa ini stabil pada kondisi ruang.",
+                "Gunakan alat pelindung diri saat menangani senyawa kimia.",
+                "Senyawa ini dapat bereaksi dengan asam atau basa.",
+                "Simpan dalam wadah tertutup rapat.",
+                "Hindari kontak dengan mata dan kulit."
+            ];
+            
+            // Tips khusus berdasarkan jenis senyawa
+            if (compound.type.includes("asam")) {
+                return "Senyawa bersifat asam, hati-hati karena dapat menyebabkan luka bakar.";
+            } else if (compound.type.includes("basa")) {
+                return "Senyawa bersifat basa, dapat menyebabkan iritasi pada kulit.";
+            } else if (compound.name.includes("Air")) {
+                return "Air sangat penting untuk kehidupan, menutupi 71% permukaan bumi.";
+            } else if (compound.name.includes("Natrium Klorida")) {
+                return "Garam dapur, konsumsi berlebihan dapat meningkatkan tekanan darah.";
+            }
+            
+            return tips[Math.floor(Math.random() * tips.length)];
+        }
+
+        // Tampilkan detail elemen dalam modal
+        function showElementDetails(element) {
+            const categoryNames = {
+                "alkali-metal": "Logam Alkali",
+                "alkaline-earth": "Logam Alkali Tanah",
+                "transition-metal": "Logam Transisi",
+                "basic-metal": "Logam Dasar",
+                "semimetal": "Metaloid",
+                "nonmetal": "Nonlogam",
+                "halogen": "Halogen",
+                "noble-gas": "Gas Mulia",
+                "lanthanide": "Lantanida",
+                "actinide": "Aktinida"
+            };
+            
+            modalBody.innerHTML = `
+                <div class="element-detail-card" style="border-left-color: ${getCategoryColor(element.category)}; background-color: ${getCategoryColor(element.category, 0.1)}">
+                    <div class="flex items-center mb-4">
+                        <div class="element-cell ${element.colorClass} w-16 h-16 mr-4">
+                            <div class="element-number">${element.number}</div>
+                            <div class="element-symbol text-xl">${element.symbol}</div>
+                            <div class="element-name">${element.name}</div>
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-bold text-gray-800">${element.name}</h2>
+                            <p class="text-gray-600 text-sm">${element.symbol} • ${categoryNames[element.category] || element.category}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="space-y-2">
+                        <div class="detail-row">
+                            <span class="detail-label">Nomor Atom:</span>
+                            <span class="detail-value">${element.number}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Massa Atom:</span>
+                            <span class="detail-value">${element.mass} u</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Periode:</span>
+                            <span class="detail-value">${element.period}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Golongan:</span>
+                            <span class="detail-value">${element.group || 'Lantanida/Aktinida'}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Konfigurasi Elektron:</span>
+                            <span class="detail-value text-xs">${element.electronConfig}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Valensi:</span>
+                            <span class="detail-value">${element.valence}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4 p-3 bg-gray-50 rounded-lg">
+                        <h4 class="font-bold text-gray-700 mb-1 text-sm">Fakta Menarik:</h4>
+                        <p class="text-xs text-gray-600">${getElementFact(element)}</p>
+                    </div>
+                    
+                    ${currentTab === 'combine' ? `
+                    <button id="select-for-combine" class="w-full mt-4 bg-teal-500 text-white py-2 rounded-lg font-bold">
+                        <i class="fas fa-plus mr-2"></i>Pilih untuk Digabungkan
+                    </button>
+                    ` : ''}
+                </div>
+            `;
+            
+            // Tambahkan event listener untuk tombol pilih jika di mode combine
+            if (currentTab === 'combine') {
+                const selectBtn = document.getElementById('select-for-combine');
+                selectBtn.addEventListener('click', () => {
+                    selectElementForCombination(element);
+                    elementModal.classList.add('hidden');
+                    
+                    // Switch ke tab combine jika belum
+                    if (currentTab !== 'combine') {
+                        switchTab('combine');
+                    }
+                });
+            }
+            
+            elementModal.classList.remove('hidden');
+        }
+
+        // Tampilkan lantanida
+        function showLanthanides() {
+            const lanthanides = periodicElements.filter(e => e.category === 'lanthanide');
+            showSpecialElements(lanthanides, "Lantanida (Unsur 57-71)");
+        }
+
+        // Tampilkan aktinida
+        function showActinides() {
+            const actinides = periodicElements.filter(e => e.category === 'actinide');
+            showSpecialElements(actinides, "Aktinida (Unsur 89-103)");
+        }
+
+        // Tampilkan elemen khusus (lantanida/aktinida)
+        function showSpecialElements(elements, title) {
+            specialModalBody.innerHTML = `
+                <div class="mb-4">
+                    <h2 class="text-xl font-bold text-gray-800 mb-2">${title}</h2>
+                    <p class="text-gray-600 text-sm mb-4">Deret unsur yang ditempatkan terpisah di tabel periodik</p>
+                </div>
+                <div class="grid grid-cols-5 gap-2 mb-4">
+                    ${elements.map(element => `
+                        <div class="element-cell ${element.colorClass} w-full" onclick="showElementDetailsFromModal(${element.number})">
+                            <div class="element-number">${element.number}</div>
+                            <div class="element-symbol">${element.symbol}</div>
+                            <div class="element-name">${element.name}</div>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="text-xs text-gray-500">
+                    <p>• Unsur-unsur ini memiliki sifat kimia yang mirip</p>
+                    <p>• Biasanya ditempatkan di baris terpisah di bawah tabel utama</p>
+                    <p>• Termasuk dalam periode 6 dan 7</p>
+                </div>
+            `;
+            
+            specialModal.classList.remove('hidden');
+        }
+
+        // Helper untuk showElementDetails dari modal khusus
+        window.showElementDetailsFromModal = function(number) {
+            const element = periodicElements.find(e => e.number === number);
+            if (element) {
+                specialModal.classList.add('hidden');
+                showElementDetails(element);
+            }
+        };
+
+        // Fungsi untuk berpindah tab
+        function switchTab(tabName) {
+            // Update tab aktif
+            tabs.forEach(tab => {
+                if (tab.dataset.tab === tabName) {
+                    tab.classList.add('active');
+                } else {
+                    tab.classList.remove('active');
+                }
+            });
+            
+            // Update konten tab aktif
+            tabContents.forEach(content => {
+                if (content.id === `${tabName}-tab`) {
+                    content.classList.add('active');
+                } else {
+                    content.classList.remove('active');
+                }
+            });
+            
+            currentTab = tabName;
+            
+            // Scroll ke atas
+            window.scrollTo(0, 0);
+        }
+
+        // Dapatkan warna berdasarkan kategori
+        function getCategoryColor(category, opacity = 1) {
+            const colors = {
+                "alkali-metal": "#ff6b6b",
+                "alkaline-earth": "#ffa726",
+                "transition-metal": "#42a5f5",
+                "basic-metal": "#66bb6a",
+                "semimetal": "#ab47bc",
+                "nonmetal": "#26c6da",
+                "halogen": "#ffca28",
+                "noble-gas": "#ec407a",
+                "lanthanide": "#7e57c2",
+                "actinide": "#5c6bc0"
+            };
+            
+            const color = colors[category] || "#cccccc";
+            if (opacity < 1) {
+                const r = parseInt(color.slice(1, 3), 16);
+                const g = parseInt(color.slice(3, 5), 16);
+                const b = parseInt(color.slice(5, 7), 16);
+                return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+            }
+            return color;
+        }
+
+        // Dapatkan fakta menarik tentang elemen
+        function getElementFact(element) {
+            const facts = {
+                "H": "Unsur paling melimpah di alam semesta (≈75% massa).",
+                "He": "Unsur kedua teringan dan tidak mudah bereaksi.",
+                "Li": "Logam paling ringan, digunakan dalam baterai lithium.",
+                "C": "Dasar kehidupan di Bumi, memiliki alotrop seperti berlian dan grafit.",
+                "O": "Menyusun 21% atmosfer Bumi dan penting untuk pernapasan.",
+                "Na": "Logam reaktif yang bereaksi keras dengan air.",
+                "Cl": "Gas beracun berwarna hijau kekuningan, digunakan sebagai disinfektan.",
+                "Fe": "Logam paling melimpah di inti Bumi, utama dalam pembuatan baja.",
+                "Au": "Logam mulia yang tahan korosi, digunakan dalam perhiasan.",
+                "U": "Unsur terberat yang ditemukan secara alami, digunakan dalam tenaga nuklir."
+            };
+            
+            return facts[element.symbol] || `Unsur ${element.category} yang ditemukan di alam.`;
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Tutup modal
+            closeModalBtn.addEventListener('click', () => {
+                elementModal.classList.add('hidden');
+            });
+            
+            closeSpecialModalBtn.addEventListener('click', () => {
+                specialModal.classList.add('hidden');
+            });
+            
+            // Tutup modal dengan klik di luar konten
+            elementModal.addEventListener('click', (e) => {
+                if (e.target === elementModal) {
+                    elementModal.classList.add('hidden');
+                }
+            });
+            
+            specialModal.addEventListener('click', (e) => {
+                if (e.target === specialModal) {
+                    specialModal.classList.add('hidden');
+                }
+            });
+            
+            // Tutup modal dengan tombol ESC
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    if (!elementModal.classList.contains('hidden')) {
+                        elementModal.classList.add('hidden');
+                    }
+                    if (!specialModal.classList.contains('hidden')) {
+                        specialModal.classList.add('hidden');
+                    }
+                }
+            });
+            
+            // Pencarian elemen
+            searchInput.addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase().trim();
+                
+                // Sembunyikan semua elemen dulu
+                document.querySelectorAll('.element-cell').forEach(cell => {
+                    if (cell.dataset.symbol) {
+                        cell.style.opacity = '0.3';
+                        cell.style.transform = 'scale(0.95)';
+                    }
+                });
+                
+                // Jika kosong, tampilkan semua
+                if (!searchTerm) {
+                    document.querySelectorAll('.element-cell').forEach(cell => {
+                        if (cell.dataset.symbol) {
+                            cell.style.opacity = '1';
+                            cell.style.transform = 'scale(1)';
+                        }
+                    });
+                    return;
+                }
+                
+                // Tampilkan elemen yang cocok
+                let found = false;
+                periodicElements.forEach(element => {
+                    if (element.symbol.toLowerCase().includes(searchTerm) || 
+                        element.name.toLowerCase().includes(searchTerm) ||
+                        element.number.toString().includes(searchTerm)) {
+                        
+                        const cells = document.querySelectorAll(`[data-symbol="${element.symbol}"]`);
+                        cells.forEach(cell => {
+                            cell.style.opacity = '1';
+                            cell.style.transform = 'scale(1.05)';
+                            cell.style.zIndex = '10';
+                            cell.style.boxShadow = '0 0 8px rgba(0,0,0,0.2)';
+                        });
+                        found = true;
+                    }
+                });
+                
+                // Jika tidak ditemukan, reset semua
+                if (!found) {
+                    document.querySelectorAll('.element-cell').forEach(cell => {
+                        if (cell.dataset.symbol) {
+                            cell.style.opacity = '1';
+                            cell.style.transform = 'scale(1)';
+                            cell.style.zIndex = '1';
+                            cell.style.boxShadow = '';
+                        }
+                    });
+                }
+            });
+            
+            // Fokus pada input pencarian dengan shortcut Ctrl+F
+            document.addEventListener('keydown', (e) => {
+                if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+                    e.preventDefault();
+                    searchInput.focus();
+                }
+            });
+            
+            // Tombol untuk lantanida dan aktinida
+            showLanthanidesBtn.addEventListener('click', showLanthanides);
+            showActinidesBtn.addEventListener('click', showActinides);
+            
+            // Tombol untuk sistem penggabungan
+            combineBtn.addEventListener('click', combineElements);
+            
+            clearBtn.addEventListener('click', () => {
+                selectedElements = [];
+                updateSelectedElementsDisplay();
+                updateCombineButton();
+                updateStatusMessage();
+                highlightSelectedElements();
+                combineResult.style.display = 'none';
+                showStatusMessage("Semua unsur telah dihapus", "info");
+            });
+            
+            // Tab switching
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    switchTab(tab.dataset.tab);
+                });
+            });
+            
+            // Tambahkan audio untuk efek suara reaksi
+            const audio = document.createElement('audio');
+            audio.id = 'reaction-sound';
+            audio.src = 'data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEAQB8AAEAfAAABAAgAZGF0YQ';
+            document.body.appenChild(audio);
+        }
+
+        // Inisialisasi ketika halaman dimuat
+        document.addEventListener('DOMContentLoaded', initPeriodicTable);
+    </script>
+</body>
+</html>

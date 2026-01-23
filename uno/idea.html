@@ -1,0 +1,1532 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARDUINO IDE Online - Simpan & Compile Kode</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@300;400;500;600;700&family=Baloo+2:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #38b2ac;
+            --secondary: #0e7490;
+            --accent: #f59e0b;
+            --code-bg: #1e1e1e;
+        }
+        
+        body {
+            font-family: 'Baloo 2', cursive;
+            background-color: #f8fafc;
+        }
+        
+        .code-editor {
+            font-family: 'Roboto Mono', monospace;
+        }
+        
+        .app-container {
+            max-width: 414px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        /* NAVBAR */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            max-width: 414px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            background: white;
+            z-index: 10;
+            height: 70px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+            text-decoration: none;
+            flex: 1;
+            height: 100%;
+            padding: 0.5rem 0;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item span {
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
+        
+        .nav-item.active {
+            color: var(--primary);
+        }
+        
+        .nav-icon {
+            transition: all 0.3s ease;
+            font-size: 1.25rem;
+        }
+        
+        .nav-icon.active {
+            transform: translateY(-5px);
+            color: var(--primary);
+        }
+        
+        /* EDITOR STYLES */
+        .editor-container {
+            height: 400px;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #e5e7eb;
+        }
+        
+        .editor-header {
+            background: #2d2d2d;
+            color: #fff;
+            padding: 10px 15px;
+            font-size: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .editor-body {
+            height: calc(100% - 40px);
+            background: var(--code-bg);
+        }
+        
+        #code-editor {
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            color: #d4d4d4;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            padding: 15px;
+            border: none;
+            outline: none;
+            resize: none;
+            white-space: pre;
+            overflow-wrap: normal;
+            overflow-x: auto;
+            tab-size: 4;
+        }
+        
+        /* BUTTON STYLES */
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2c9c96;
+        }
+        
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+        
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #0da271;
+        }
+        
+        .btn-warning {
+            background: #f59e0b;
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            background: #d97706;
+        }
+        
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+        
+        /* PROJECT LIST */
+        .project-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .project-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            border-color: var(--primary);
+        }
+        
+        .project-name {
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 5px;
+            font-size: 16px;
+        }
+        
+        .project-date {
+            font-size: 12px;
+            color: #6b7280;
+        }
+        
+        .project-preview {
+            font-family: 'Roboto Mono', monospace;
+            font-size: 12px;
+            color: #666;
+            background: #f9fafb;
+            padding: 8px;
+            border-radius: 5px;
+            margin-top: 8px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        /* COMPONENT TABLE */
+        .components-table {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            padding: 10px;
+            overflow-x: auto;
+        }
+        
+        .component-cell {
+            min-width: 70px;
+            height: 70px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border: 1px solid #e5e7eb;
+        }
+        
+        .component-cell:hover {
+            transform: scale(1.05);
+            z-index: 2;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .component-symbol {
+            font-size: 16px;
+            font-weight: 800;
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+        
+        .component-name {
+            font-size: 8px;
+            text-align: center;
+        }
+        
+        .component-category {
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            font-size: 7px;
+            font-weight: bold;
+            background: rgba(0,0,0,0.2);
+            padding: 1px 4px;
+            border-radius: 3px;
+            color: white;
+        }
+        
+        /* CATEGORY COLORS */
+        .microcontroller { background-color: #ff6b6b; color: white; }
+        .sensor { background-color: #ffa726; color: white; }
+        .actuator { background-color: #42a5f5; color: white; }
+        .display { background-color: #66bb6a; color: white; }
+        .communication { background-color: #ab47bc; color: white; }
+        .power { background-color: #26c6da; color: white; }
+        
+        /* OUTPUT CONSOLE */
+        .console-output {
+            background: #1a1a1a;
+            color: #00ff00;
+            font-family: 'Roboto Mono', monospace;
+            font-size: 12px;
+            padding: 15px;
+            border-radius: 8px;
+            min-height: 100px;
+            max-height: 200px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            margin-top: 15px;
+            border: 1px solid #333;
+        }
+        
+        .console-error {
+            color: #ff6b6b;
+        }
+        
+        .console-success {
+            color: #00ff00;
+        }
+        
+        .console-warning {
+            color: #ffa726;
+        }
+        
+        /* MODAL STYLES */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            padding: 20px;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            max-width: 350px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+        
+        /* TAB STYLES */
+        .tab-container {
+            display: flex;
+            background: #f1f5f9;
+            border-radius: 10px;
+            padding: 5px;
+            margin-bottom: 15px;
+        }
+        
+        .tab {
+            flex: 1;
+            text-align: center;
+            padding: 8px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+        
+        .tab.active {
+            background: white;
+            color: var(--primary);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        /* FILE ACTIONS */
+        .file-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+        
+        .file-action-btn {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        /* STATUS BAR */
+        .status-bar {
+            background: #2d2d2d;
+            color: #fff;
+            padding: 5px 10px;
+            font-size: 11px;
+            font-family: 'Roboto Mono', monospace;
+            display: flex;
+            justify-content: space-between;
+            border-radius: 0 0 10px 10px;
+        }
+        
+        /* LIBRARY MANAGER */
+        .library-item {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .library-name {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .library-version {
+            font-size: 12px;
+            color: #6b7280;
+        }
+        
+        /* SYNTAX HIGHLIGHTING (Basic) */
+        .arduino-keyword { color: #569cd6; }
+        .arduino-type { color: #4ec9b0; }
+        .arduino-number { color: #b5cea8; }
+        .arduino-string { color: #ce9178; }
+        .arduino-comment { color: #6a9955; }
+        .arduino-function { color: #dcdcaa; }
+        
+        /* APP LOGO */
+        .app-logo {
+            display: flex;
+            align-items: center;
+        }
+        
+        .app-logo-icon {
+            background: var(--primary);
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 8px;
+        }
+        
+        .app-name {
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: var(--primary);
+        }
+        
+        /* BOARD SELECTOR */
+        .board-selector {
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #e5e7eb;
+            font-size: 14px;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile App Container -->
+    <div class="app-container">
+        <!-- App Header -->
+        <header class="bg-gradient-to-r from-primary to-secondary p-4 text-white">
+            <div class="flex justify-between items-center">
+                <div class="app-logo">
+                    <div class="app-logo-icon">
+                        <i class="fas fa-microchip"></i>
+                    </div>
+                    <h1 class="app-name">ARDUINO IDE</h1>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-code text-xl"></i>
+                </div>
+            </div>
+            <div class="text-xs mt-2 opacity-90">
+                Online IDE - Simpan & Compile Kode Arduino
+            </div>
+        </header>
+        
+        <!-- Main Content -->
+        <main class="pb-24 p-4">
+            <!-- Tabs -->
+            <div class="tab-container">
+                <div class="tab active" data-tab="editor">Editor</div>
+                <div class="tab" data-tab="projects">Proyek Saya</div>
+                <div class="tab" data-tab="components">Komponen</div>
+                <div class="tab" data-tab="libraries">Library</div>
+            </div>
+            
+            <!-- Tab Content: Editor -->
+            <div id="editor-tab" class="tab-content active">
+                <!-- File Actions -->
+                <div class="file-actions">
+                    <button id="new-file" class="btn btn-secondary file-action-btn">
+                        <i class="fas fa-file"></i> Baru
+                    </button>
+                    <button id="save-file" class="btn btn-primary file-action-btn">
+                        <i class="fas fa-save"></i> Simpan
+                    </button>
+                    <button id="load-file" class="btn btn-secondary file-action-btn">
+                        <i class="fas fa-folder-open"></i> Buka
+                    </button>
+                    <button id="download-file" class="btn btn-success file-action-btn">
+                        <i class="fas fa-download"></i> Unduh
+                    </button>
+                    <button id="compile-code" class="btn btn-warning file-action-btn">
+                        <i class="fas fa-play"></i> Verify
+                    </button>
+                    <button id="upload-code" class="btn btn-success file-action-btn">
+                        <i class="fas fa-upload"></i> Upload
+                    </button>
+                </div>
+                
+                <!-- Board Selector -->
+                <select id="board-selector" class="board-selector">
+                    <option value="uno">Arduino Uno</option>
+                    <option value="nano">Arduino Nano</option>
+                    <option value="mega">Arduino Mega</option>
+                    <option value="leonardo">Arduino Leonardo</option>
+                    <option value="micro">Arduino Micro</option>
+                </select>
+                
+                <!-- Editor Container -->
+                <div class="editor-container">
+                    <div class="editor-header">
+                        <div>
+                            <i class="fas fa-code mr-2"></i>
+                            <span id="current-filename">sketch.ino</span>
+                        </div>
+                        <div class="text-xs">
+                            <span id="char-count">0</span> karakter
+                        </div>
+                    </div>
+                    <div class="editor-body">
+                        <textarea id="code-editor" spellcheck="false" placeholder="// Ketik kode Arduino Anda di sini...">void setup() {
+  // Inisialisasi
+  Serial.begin(9600);
+  pinMode(LED_BUILTIN, OUTPUT);
+}
+
+void loop() {
+  // Program utama
+  digitalWrite(LED_BUILTIN, HIGH);
+  delay(1000);
+  digitalWrite(LED_BUILTIN, LOW);
+  delay(1000);
+}</textarea>
+                    </div>
+                    <div class="status-bar">
+                        <div>Ln 1, Col 1</div>
+                        <div>Arduino</div>
+                    </div>
+                </div>
+                
+                <!-- Output Console -->
+                <div class="console-output" id="output-console">
+                    <div class="console-success">>>> Arduino IDE Online siap digunakan</div>
+                    <div class="console-success">>>> Pilih board dan port untuk memulai</div>
+                </div>
+                
+                <!-- Quick Templates -->
+                <div class="mt-4">
+                    <h3 class="font-bold text-gray-700 mb-2 text-sm">
+                        <i class="fas fa-bolt text-yellow-500 mr-2"></i>Template Cepat
+                    </h3>
+                    <div class="flex flex-wrap gap-2">
+                        <button class="template-btn btn btn-secondary file-action-btn" data-template="blink">
+                            LED Blink
+                        </button>
+                        <button class="template-btn btn btn-secondary file-action-btn" data-template="sensor">
+                            Baca Sensor
+                        </button>
+                        <button class="template-btn btn btn-secondary file-action-btn" data-template="servo">
+                            Servo Motor
+                        </button>
+                        <button class="template-btn btn btn-secondary file-action-btn" data-template="lcd">
+                            LCD Display
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tab Content: Projects -->
+            <div id="projects-tab" class="tab-content">
+                <div class="mb-4">
+                    <h2 class="text-lg font-bold text-gray-800 mb-2">
+                        <i class="fas fa-folder-open text-blue-500 mr-2"></i>Proyek Tersimpan
+                    </h2>
+                    <p class="text-sm text-gray-600 mb-4">
+                        Klik pada proyek untuk membuka kembali kode.
+                    </p>
+                </div>
+                
+                <div id="projects-list">
+                    <!-- Projects will be loaded here -->
+                    <div class="text-center text-gray-500 py-8" id="empty-projects">
+                        <i class="fas fa-folder-open text-4xl mb-3"></i>
+                        <p>Belum ada proyek yang disimpan</p>
+                        <p class="text-sm mt-2">Buat proyek baru di tab Editor</p>
+                    </div>
+                </div>
+                
+                <div class="mt-4 p-3 bg-blue-50 rounded-xl">
+                    <h3 class="font-bold text-gray-700 mb-2 text-sm">
+                        <i class="fas fa-info-circle text-blue-500 mr-2"></i> Tips Penyimpanan
+                    </h3>
+                    <div class="text-xs text-gray-700 space-y-1">
+                        <p>• Proyek disimpan di browser Anda (localStorage)</p>
+                        <p>• Untuk backup, gunakan tombol "Unduh"</p>
+                        <p>• Anda dapat mengimpor kembali file .ino</p>
+                        <p>• Maksimal 20 proyek dapat disimpan</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tab Content: Components -->
+            <div id="components-tab" class="tab-content">
+                <div class="mb-4">
+                    <h2 class="text-lg font-bold text-gray-800 mb-2">
+                        <i class="fas fa-microchip text-green-500 mr-2"></i>Komponen Arduino
+                    </h2>
+                    <div class="text-sm text-gray-600 mb-4">
+                        Klik untuk menambahkan kode contoh ke editor.
+                    </div>
+                    
+                    <!-- Search Components -->
+                    <div class="relative mb-3">
+                        <input type="text" id="search-component" placeholder="Cari komponen..." 
+                               class="w-full p-3 pl-10 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-teal-500 text-sm">
+                        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    </div>
+                </div>
+                
+                <!-- Components Grid -->
+                <div class="components-table" id="components-grid">
+                    <!-- Components will be generated by JavaScript -->
+                </div>
+                
+                <!-- Component Categories -->
+                <div class="mt-6">
+                    <h3 class="font-bold text-gray-700 mb-3 text-sm">Kategori:</h3>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button class="category-filter btn btn-secondary file-action-btn" data-category="all">
+                            Semua
+                        </button>
+                        <button class="category-filter btn btn-secondary file-action-btn" data-category="microcontroller">
+                            Board
+                        </button>
+                        <button class="category-filter btn btn-secondary file-action-btn" data-category="sensor">
+                            Sensor
+                        </button>
+                        <button class="category-filter btn btn-secondary file-action-btn" data-category="actuator">
+                            Aktuator
+                        </button>
+                        <button class="category-filter btn btn-secondary file-action-btn" data-category="display">
+                            Display
+                        </button>
+                        <button class="category-filter btn btn-secondary file-action-btn" data-category="communication">
+                            Komunikasi
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tab Content: Libraries -->
+            <div id="libraries-tab" class="tab-content">
+                <div class="mb-4">
+                    <h2 class="text-lg font-bold text-gray-800 mb-2">
+                        <i class="fas fa-book text-purple-500 mr-2"></i>Library Manager
+                    </h2>
+                    <p class="text-sm text-gray-600 mb-4">
+                        Tambahkan library untuk memperluas fungsionalitas Arduino.
+                    </p>
+                    
+                    <!-- Search Libraries -->
+                    <div class="relative mb-3">
+                        <input type="text" id="search-library" placeholder="Cari library..." 
+                               class="w-full p-3 pl-10 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm">
+                        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    </div>
+                </div>
+                
+                <!-- Installed Libraries -->
+                <div class="mb-6">
+                    <h3 class="font-bold text-gray-700 mb-3 text-sm">Library Terinstall:</h3>
+                    <div id="installed-libraries">
+                        <!-- Libraries will be generated by JavaScript -->
+                    </div>
+                </div>
+                
+                <!-- Available Libraries -->
+                <div>
+                    <h3 class="font-bold text-gray-700 mb-3 text-sm">Library Tersedia:</h3>
+                    <div id="available-libraries">
+                        <!-- Available libraries will be generated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <!-- Modal for Save/Name -->
+        <div id="save-modal" class="modal hidden">
+            <div class="modal-content">
+                <h2 class="text-lg font-bold text-gray-800 mb-4">
+                    <i class="fas fa-save text-teal-500 mr-2"></i>Simpan Proyek
+                </h2>
+                <input type="text" id="project-name" placeholder="Nama proyek" 
+                       class="w-full p-3 border border-gray-300 rounded-lg mb-3">
+                <textarea id="project-description" placeholder="Deskripsi (opsional)" 
+                          class="w-full p-3 border border-gray-300 rounded-lg mb-4" rows="3"></textarea>
+                <div class="flex justify-end gap-2">
+                    <button id="cancel-save" class="btn btn-secondary">Batal</button>
+                    <button id="confirm-save" class="btn btn-primary">Simpan</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Modal for Load -->
+        <div id="load-modal" class="modal hidden">
+            <div class="modal-content">
+                <h2 class="text-lg font-bold text-gray-800 mb-4">
+                    <i class="fas fa-folder-open text-blue-500 mr-2"></i>Pilih Proyek
+                </h2>
+                <div id="load-projects-list">
+                    <!-- Projects list for loading -->
+                </div>
+                <div class="flex justify-end mt-4">
+                    <button id="cancel-load" class="btn btn-secondary">Tutup</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- BOTTOM NAVIGATION -->
+        <nav class="bottom-nav">
+            <a href="dashboad siswa.html" class="nav-item">
+                <i class="fas fa-home nav-icon"></i>
+                <span>Beranda</span>
+            </a>
+            <a href="soal harian/dashboard soal.html" class="nav-item">
+                <i class="fas fa-flask nav-icon"></i>
+                <span>Soal Harian</span>
+            </a>
+            <a href="ai/nayra.html" class="nav-item">
+                <i class="fas fa-robot nav-icon"></i>
+                <span>Nayra AI</span>
+            </a>
+            <a href="materi harian/kategori materi.html" class="nav-item">
+                <i class="fas fa-chalkboard-teacher nav-icon"></i>
+                <span>Materi Harian</span>
+            </a>
+            <a href="profil/profil.html" class="nav-item">
+                <i class="fas fa-user nav-icon"></i>
+                <span>Profil</span>
+            </a>
+        </nav>
+    </div>
+
+    <script>
+        // Data Komponen Arduino
+        const arduinoComponents = [
+            { symbol: "UNO", name: "Arduino Uno", category: "microcontroller", code: "// Board Arduino Uno\n// Pilihan default untuk proyek Arduino" },
+            { symbol: "NANO", name: "Arduino Nano", category: "microcontroller", code: "// Board Arduino Nano\n// Ukuran kecil, cocok untuk proyek portable" },
+            { symbol: "MEGA", name: "Arduino Mega", category: "microcontroller", code: "// Board Arduino Mega 2560\n// 54 pin digital, 16 analog" },
+            { symbol: "LED", name: "LED", category: "basic", code: "pinMode(LED_PIN, OUTPUT);\ndigitalWrite(LED_PIN, HIGH);" },
+            { symbol: "BTN", name: "Push Button", category: "input", code: "pinMode(BUTTON_PIN, INPUT_PULLUP);\nint state = digitalRead(BUTTON_PIN);" },
+            { symbol: "POT", name: "Potentiometer", category: "input", code: "int value = analogRead(POT_PIN);\nint mapped = map(value, 0, 1023, 0, 255);" },
+            { symbol: "DHT11", name: "Sensor Suhu", category: "sensor", code: "#include <DHT.h>\nDHT dht(DHT_PIN, DHT11);\nfloat temp = dht.readTemperature();" },
+            { symbol: "HC-SR04", name: "Ultrasonic", category: "sensor", code: "digitalWrite(TRIG_PIN, LOW);\ndelayMicroseconds(2);\ndigitalWrite(TRIG_PIN, HIGH);" },
+            { symbol: "LDR", name: "Sensor Cahaya", category: "sensor", code: "int light = analogRead(LDR_PIN);\n// Nilai lebih tinggi = lebih gelap" },
+            { symbol: "SERVO", name: "Servo Motor", category: "actuator", code: "#include <Servo.h>\nServo myservo;\nmyservo.write(90); // Posisi tengah" },
+            { symbol: "DC", name: "DC Motor", category: "actuator", code: "analogWrite(MOTOR_PIN, speed); // 0-255\n// Gunakan L293D untuk kontrol" },
+            { symbol: "RELAY", name: "Relay Module", category: "actuator", code: "pinMode(RELAY_PIN, OUTPUT);\ndigitalWrite(RELAY_PIN, HIGH); // ON" },
+            { symbol: "LCD16x2", name: "LCD 16x2", category: "display", code: "#include <LiquidCrystal.h>\nLiquidCrystal lcd(12, 11, 5, 4, 3, 2);\nlcd.print(\"Hello World!\");" },
+            { symbol: "OLED", name: "OLED Display", category: "display", code: "#include <Adafruit_SSD1306.h>\ndisplay.clearDisplay();\ndisplay.setTextSize(1);" },
+            { symbol: "BT", name: "Bluetooth", category: "communication", code: "#include <SoftwareSerial.h>\nSoftwareSerial BTSerial(10, 11); // RX, TX" },
+            { symbol: "WIFI", name: "WiFi Module", category: "communication", code: "#include <ESP8266WiFi.h>\nWiFi.begin(ssid, password);\nwhile (WiFi.status() != WL_CONNECTED);" },
+            { symbol: "BUZZ", name: "Buzzer", category: "output", code: "tone(BUZZER_PIN, frequency);\n// noTone(BUZZER_PIN); untuk berhenti" },
+            { symbol: "RGB", name: "RGB LED", category: "output", code: "analogWrite(RED_PIN, red);\nanalogWrite(GREEN_PIN, green);\nanalogWrite(BLUE_PIN, blue);" }
+        ];
+
+        // Data Library
+        const arduinoLibraries = [
+            { name: "Servo", version: "1.1.8", installed: true, description: "Kontrol servo motor" },
+            { name: "LiquidCrystal", version: "1.0.7", installed: true, description: "Kontrol LCD character" },
+            { name: "DHT", version: "1.4.4", installed: false, description: "Sensor suhu DHT11/DHT22" },
+            { name: "Adafruit SSD1306", version: "2.5.7", installed: false, description: "OLED display driver" },
+            { name: "ESP8266WiFi", version: "1.0.0", installed: false, description: "WiFi untuk ESP8266" },
+            { name: "SoftwareSerial", version: "1.0.0", installed: true, description: "Serial komunikasi software" },
+            { name: "Wire", version: "1.0.0", installed: true, description: "Komunikasi I2C" },
+            { name: "SPI", version: "1.0.0", installed: true, description: "Komunikasi SPI" },
+            { name: "Ethernet", version: "2.0.0", installed: false, description: "Ethernet shield" },
+            { name: "SD", version: "1.2.4", installed: false, description: "SD card module" },
+            { name: "RTClib", version: "2.0.0", installed: false, description: "Real Time Clock" },
+            { name: "Adafruit Sensor", version: "1.1.4", installed: false, description: "Base library untuk sensor" }
+        ];
+
+        // Data Template Kode
+        const codeTemplates = {
+            blink: `void setup() {
+  pinMode(LED_BUILTIN, OUTPUT);
+}
+
+void loop() {
+  digitalWrite(LED_BUILTIN, HIGH);
+  delay(1000);
+  digitalWrite(LED_BUILTIN, LOW);
+  delay(1000);
+}`,
+            sensor: `const int sensorPin = A0;
+
+void setup() {
+  Serial.begin(9600);
+}
+
+void loop() {
+  int sensorValue = analogRead(sensorPin);
+  Serial.print("Sensor value: ");
+  Serial.println(sensorValue);
+  delay(500);
+}`,
+            servo: `#include <Servo.h>
+
+Servo myservo;
+int pos = 0;
+
+void setup() {
+  myservo.attach(9);
+}
+
+void loop() {
+  for (pos = 0; pos <= 180; pos += 1) {
+    myservo.write(pos);
+    delay(15);
+  }
+  for (pos = 180; pos >= 0; pos -= 1) {
+    myservo.write(pos);
+    delay(15);
+  }
+}`,
+            lcd: `#include <LiquidCrystal.h>
+
+LiquidCrystal lcd(12, 11, 5, 4, 3, 2);
+
+void setup() {
+  lcd.begin(16, 2);
+  lcd.print("Hello, World!");
+}
+
+void loop() {
+  lcd.setCursor(0, 1);
+  lcd.print(millis() / 1000);
+  delay(100);
+}`
+        };
+
+        // DOM Elements
+        const codeEditor = document.getElementById('code-editor');
+        const outputConsole = document.getElementById('output-console');
+        const currentFilename = document.getElementById('current-filename');
+        const charCount = document.getElementById('char-count');
+        const tabs = document.querySelectorAll('.tab');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const componentsGrid = document.getElementById('components-grid');
+        const projectsList = document.getElementById('projects-list');
+        const emptyProjects = document.getElementById('empty-projects');
+        const installedLibrariesDiv = document.getElementById('installed-libraries');
+        const availableLibrariesDiv = document.getElementById('available-libraries');
+        
+        // Modal Elements
+        const saveModal = document.getElementById('save-modal');
+        const loadModal = document.getElementById('load-modal');
+        const projectNameInput = document.getElementById('project-name');
+        const projectDescInput = document.getElementById('project-description');
+        const loadProjectsList = document.getElementById('load-projects-list');
+        
+        // Button Elements
+        const newFileBtn = document.getElementById('new-file');
+        const saveFileBtn = document.getElementById('save-file');
+        const loadFileBtn = document.getElementById('load-file');
+        const downloadFileBtn = document.getElementById('download-file');
+        const compileCodeBtn = document.getElementById('compile-code');
+        const uploadCodeBtn = document.getElementById('upload-code');
+        const confirmSaveBtn = document.getElementById('confirm-save');
+        const cancelSaveBtn = document.getElementById('cancel-save');
+        const cancelLoadBtn = document.getElementById('cancel-load');
+        const templateBtns = document.querySelectorAll('.template-btn');
+        const categoryFilters = document.querySelectorAll('.category-filter');
+        
+        // State
+        let currentProject = {
+            name: 'sketch.ino',
+            code: '',
+            description: '',
+            date: new Date().toISOString(),
+            board: 'uno'
+        };
+        let savedProjects = [];
+        let currentTab = 'editor';
+        let editorHistory = [];
+        let historyIndex = -1;
+
+        // Initialize
+        function init() {
+            loadSavedProjects();
+            initComponentsGrid();
+            initLibraries();
+            updateProjectsList();
+            setupEventListeners();
+            updateCharCount();
+            
+            // Set initial code
+            currentProject.code = codeEditor.value;
+            editorHistory.push(currentProject.code);
+            historyIndex = 0;
+            
+            // Auto-save every 30 seconds
+            setInterval(autoSave, 30000);
+        }
+
+        // Load saved projects from localStorage
+        function loadSavedProjects() {
+            const projects = localStorage.getItem('arduinoProjects');
+            if (projects) {
+                savedProjects = JSON.parse(projects);
+            } else {
+                savedProjects = [];
+            }
+        }
+
+        // Save projects to localStorage
+        function saveProjects() {
+            // Keep only last 20 projects
+            if (savedProjects.length > 20) {
+                savedProjects = savedProjects.slice(-20);
+            }
+            localStorage.setItem('arduinoProjects', JSON.stringify(savedProjects));
+        }
+
+        // Initialize components grid
+        function initComponentsGrid() {
+            componentsGrid.innerHTML = '';
+            arduinoComponents.forEach(component => {
+                const componentDiv = document.createElement('div');
+                componentDiv.className = `component-cell ${component.category}`;
+                componentDiv.dataset.category = component.category;
+                componentDiv.dataset.symbol = component.symbol;
+                
+                componentDiv.innerHTML = `
+                    <div class="component-category">${component.category.charAt(0).toUpperCase()}</div>
+                    <div class="component-symbol">${component.symbol}</div>
+                    <div class="component-name">${component.name}</div>
+                `;
+                
+                componentDiv.addEventListener('click', () => addComponentCode(component));
+                componentsGrid.appendChild(componentDiv);
+            });
+        }
+
+        // Initialize libraries
+        function initLibraries() {
+            // Installed libraries
+            installedLibrariesDiv.innerHTML = '';
+            const installedLibs = arduinoLibraries.filter(lib => lib.installed);
+            installedLibs.forEach(lib => {
+                const libItem = document.createElement('div');
+                libItem.className = 'library-item';
+                libItem.innerHTML = `
+                    <div>
+                        <div class="library-name">${lib.name}</div>
+                        <div class="library-version">v${lib.version} - ${lib.description}</div>
+                    </div>
+                    <div>
+                        <button class="btn btn-success file-action-btn install-library" data-name="${lib.name}" data-action="remove">
+                            <i class="fas fa-check"></i>
+                        </button>
+                    </div>
+                `;
+                installedLibrariesDiv.appendChild(libItem);
+            });
+            
+            // Available libraries
+            availableLibrariesDiv.innerHTML = '';
+            const availableLibs = arduinoLibraries.filter(lib => !lib.installed);
+            availableLibs.forEach(lib => {
+                const libItem = document.createElement('div');
+                libItem.className = 'library-item';
+                libItem.innerHTML = `
+                    <div>
+                        <div class="library-name">${lib.name}</div>
+                        <div class="library-version">v${lib.version} - ${lib.description}</div>
+                    </div>
+                    <div>
+                        <button class="btn btn-secondary file-action-btn install-library" data-name="${lib.name}" data-action="install">
+                            <i class="fas fa-plus"></i> Install
+                        </button>
+                    </div>
+                `;
+                availableLibrariesDiv.appendChild(libItem);
+            });
+            
+            // Add event listeners to library buttons
+            document.querySelectorAll('.install-library').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const libraryName = e.target.closest('button').dataset.name;
+                    const action = e.target.closest('button').dataset.action;
+                    toggleLibrary(libraryName, action);
+                });
+            });
+        }
+
+        // Add component code to editor
+        function addComponentCode(component) {
+            const cursorPos = codeEditor.selectionStart;
+            const currentCode = codeEditor.value;
+            const newCode = currentCode.substring(0, cursorPos) + 
+                          '\n\n// Kode untuk ' + component.name + '\n' + 
+                          component.code + 
+                          '\n' + 
+                          currentCode.substring(cursorPos);
+            
+            codeEditor.value = newCode;
+            currentProject.code = newCode;
+            updateCharCount();
+            addToHistory(newCode);
+            
+            // Switch to editor tab
+            switchTab('editor');
+            
+            // Show success message
+            showConsoleMessage(`Kode ${component.name} ditambahkan ke editor`, 'success');
+        }
+
+        // Add code to history
+        function addToHistory(code) {
+            editorHistory.push(code);
+            historyIndex++;
+            
+            // Keep history limited to 50 states
+            if (editorHistory.length > 50) {
+                editorHistory.shift();
+                historyIndex--;
+            }
+        }
+
+        // Update character count
+        function updateCharCount() {
+            const count = codeEditor.value.length;
+            charCount.textContent = count;
+            currentProject.code = codeEditor.value;
+        }
+
+        // Update projects list
+        function updateProjectsList() {
+            projectsList.innerHTML = '';
+            
+            if (savedProjects.length === 0) {
+                emptyProjects.style.display = 'block';
+                return;
+            }
+            
+            emptyProjects.style.display = 'none';
+            
+            // Sort by date (newest first)
+            const sortedProjects = [...savedProjects].sort((a, b) => 
+                new Date(b.date) - new Date(a.date)
+            );
+            
+            sortedProjects.forEach((project, index) => {
+                const projectCard = document.createElement('div');
+                projectCard.className = 'project-card';
+                projectCard.dataset.index = index;
+                
+                // Truncate preview
+                const preview = project.code.substring(0, 100) + (project.code.length > 100 ? '...' : '');
+                
+                projectCard.innerHTML = `
+                    <div class="project-name">
+                        <i class="fas fa-file-code text-teal-500 mr-2"></i>${project.name}
+                    </div>
+                    <div class="project-date">
+                        <i class="far fa-calendar mr-1"></i>${formatDate(project.date)}
+                    </div>
+                    ${project.description ? `<div class="text-xs text-gray-600 mt-2">${project.description}</div>` : ''}
+                    <div class="project-preview">${preview}</div>
+                `;
+                
+                projectCard.addEventListener('click', () => loadProject(index));
+                projectsList.appendChild(projectCard);
+            });
+        }
+
+        // Load project
+        function loadProject(index) {
+            if (index >= 0 && index < savedProjects.length) {
+                const project = savedProjects[index];
+                codeEditor.value = project.code;
+                currentProject = { ...project };
+                currentFilename.textContent = project.name;
+                updateCharCount();
+                addToHistory(project.code);
+                showConsoleMessage(`Proyek "${project.name}" dimuat`, 'success');
+                loadModal.classList.add('hidden');
+                switchTab('editor');
+            }
+        }
+
+        // Save project
+        function saveProject() {
+            const name = projectNameInput.value.trim() || 'sketch.ino';
+            const description = projectDescInput.value.trim();
+            
+            // Check if project with same name exists
+            const existingIndex = savedProjects.findIndex(p => p.name === name);
+            
+            currentProject.name = name;
+            currentProject.description = description;
+            currentProject.date = new Date().toISOString();
+            currentProject.code = codeEditor.value;
+            currentProject.board = document.getElementById('board-selector').value;
+            
+            if (existingIndex !== -1) {
+                // Replace existing project
+                savedProjects[existingIndex] = { ...currentProject };
+                showConsoleMessage(`Proyek "${name}" diperbarui`, 'success');
+            } else {
+                // Add new project
+                savedProjects.push({ ...currentProject });
+                showConsoleMessage(`Proyek "${name}" disimpan`, 'success');
+            }
+            
+            saveProjects();
+            updateProjectsList();
+            saveModal.classList.add('hidden');
+            currentFilename.textContent = name;
+            
+            // Clear form
+            projectNameInput.value = '';
+            projectDescInput.value = '';
+        }
+
+        // Auto-save current project
+        function autoSave() {
+            if (currentProject.code && currentProject.code !== '') {
+                const autoSaveProject = {
+                    ...currentProject,
+                    name: 'autosave_' + new Date().getTime(),
+                    code: codeEditor.value,
+                    date: new Date().toISOString()
+                };
+                
+                // Save to localStorage with autosave prefix
+                const autoSaves = JSON.parse(localStorage.getItem('arduinoAutosaves') || '[]');
+                autoSaves.push(autoSaveProject);
+                
+                // Keep only last 5 autosaves
+                if (autoSaves.length > 5) {
+                    autoSaves.shift();
+                }
+                
+                localStorage.setItem('arduinoAutosaves', JSON.stringify(autoSaves));
+            }
+        }
+
+        // Download code as .ino file
+        function downloadCode() {
+            const code = codeEditor.value;
+            const filename = currentFilename.textContent;
+            const blob = new Blob([code], { type: 'text/plain' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename.endsWith('.ino') ? filename : filename + '.ino';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            showConsoleMessage(`File "${a.download}" diunduh`, 'success');
+        }
+
+        // Compile/Verify code
+        function compileCode() {
+            const code = codeEditor.value;
+            const board = document.getElementById('board-selector').value;
+            
+            showConsoleMessage('Memverifikasi kode...', 'warning');
+            
+            // Simulate compilation
+            setTimeout(() => {
+                // Check for common errors
+                if (!code.includes('void setup()')) {
+                    showConsoleMessage('Error: Fungsi setup() tidak ditemukan', 'error');
+                    return;
+                }
+                
+                if (!code.includes('void loop()')) {
+                    showConsoleMessage('Error: Fungsi loop() tidak ditemukan', 'error');
+                    return;
+                }
+                
+                // Count lines and characters
+                const lines = code.split('\n').length;
+                const chars = code.length;
+                
+                showConsoleMessage(`Kode terverifikasi untuk Arduino ${board.toUpperCase()}`, 'success');
+                showConsoleMessage(`Ukuran: ${lines} baris, ${chars} karakter`, 'info');
+                showConsoleMessage('Kode siap di-upload ke board', 'success');
+            }, 1000);
+        }
+
+        // Simulate upload
+        function uploadCode() {
+            showConsoleMessage('Mengupload ke board...', 'warning');
+            
+            setTimeout(() => {
+                showConsoleMessage('Upload berhasil!', 'success');
+                showConsoleMessage('Program sedang berjalan di board', 'info');
+            }, 2000);
+        }
+
+        // Show console message
+        function showConsoleMessage(message, type = 'info') {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `console-${type}`;
+            messageDiv.innerHTML = `>>> ${message}`;
+            outputConsole.appendChild(messageDiv);
+            
+            // Auto scroll to bottom
+            outputConsole.scrollTop = outputConsole.scrollHeight;
+            
+            // Limit messages to 20
+            const messages = outputConsole.querySelectorAll('div');
+            if (messages.length > 20) {
+                messages[0].remove();
+            }
+        }
+
+        // Format date
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('id-ID', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        // Toggle library installation
+        function toggleLibrary(libraryName, action) {
+            const library = arduinoLibraries.find(lib => lib.name === libraryName);
+            if (library) {
+                library.installed = action === 'install';
+                initLibraries();
+                
+                if (action === 'install') {
+                    showConsoleMessage(`Library "${libraryName}" diinstall`, 'success');
+                    // Add include statement to code
+                    if (!codeEditor.value.includes(`#include <${libraryName}`)) {
+                        const newCode = `#include <${libraryName}.h>\n\n${codeEditor.value}`;
+                        codeEditor.value = newCode;
+                        currentProject.code = newCode;
+                        updateCharCount();
+                    }
+                } else {
+                    showConsoleMessage(`Library "${libraryName}" dihapus`, 'warning');
+                }
+            }
+        }
+
+        // Switch tabs
+        function switchTab(tabName) {
+            // Update tab active state
+            tabs.forEach(tab => {
+                if (tab.dataset.tab === tabName) {
+                    tab.classList.add('active');
+                } else {
+                    tab.classList.remove('active');
+                }
+            });
+            
+            // Update tab content
+            tabContents.forEach(content => {
+                if (content.id === `${tabName}-tab`) {
+                    content.classList.add('active');
+                } else {
+                    content.classList.remove('active');
+                }
+            });
+            
+            currentTab = tabName;
+            
+            // Scroll to top
+            window.scrollTo(0, 0);
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Editor events
+            codeEditor.addEventListener('input', updateCharCount);
+            codeEditor.addEventListener('keydown', (e) => {
+                // Auto-indent on enter
+                if (e.key === 'Enter') {
+                    setTimeout(() => {
+                        const cursorPos = codeEditor.selectionStart;
+                        const textBeforeCursor = codeEditor.value.substring(0, cursorPos);
+                        const lines = textBeforeCursor.split('\n');
+                        const currentLine = lines[lines.length - 2] || '';
+                        
+                        // Count spaces at beginning of previous line
+                        const indent = currentLine.match(/^\s*/)[0];
+                        const newText = codeEditor.value.substring(0, cursorPos) + indent + codeEditor.value.substring(cursorPos);
+                        codeEditor.value = newText;
+                        codeEditor.selectionStart = codeEditor.selectionEnd = cursorPos + indent.length;
+                    }, 0);
+                }
+                
+                // Save to history on certain keys
+                if (e.key === 'Enter' || (e.key === ' ' && e.ctrlKey)) {
+                    setTimeout(() => addToHistory(codeEditor.value), 10);
+                }
+            });
+            
+            // Tab switching
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    switchTab(tab.dataset.tab);
+                });
+            });
+            
+            // File actions
+            newFileBtn.addEventListener('click', () => {
+                if (codeEditor.value.trim() !== '' && !confirm('Kode yang belum disimpan akan hilang. Lanjutkan?')) {
+                    return;
+                }
+                codeEditor.value = 'void setup() {\n  // Setup code here\n}\n\nvoid loop() {\n  // Main code here\n}';
+                currentFilename.textContent = 'sketch.ino';
+                currentProject.name = 'sketch.ino';
+                currentProject.description = '';
+                updateCharCount();
+                addToHistory(codeEditor.value);
+                showConsoleMessage('File baru dibuat', 'success');
+            });
+            
+            saveFileBtn.addEventListener('click', () => {
+                projectNameInput.value = currentProject.name;
+                projectDescInput.value = currentProject.description;
+                saveModal.classList.remove('hidden');
+                projectNameInput.focus();
+            });
+            
+            loadFileBtn.addEventListener('click', () => {
+                loadModal.classList.remove('hidden');
+                updateLoadModalProjects();
+            });
+            
+            downloadFileBtn.addEventListener('click', downloadCode);
+            compileCodeBtn.addEventListener('click', compileCode);
+            uploadCodeBtn.addEventListener('click', uploadCode);
+            
+            // Modal buttons
+            confirmSaveBtn.addEventListener('click', saveProject);
+            cancelSaveBtn.addEventListener('click', () => {
+                saveModal.classList.add('hidden');
+            });
+            cancelLoadBtn.addEventListener('click', () => {
+                loadModal.classList.add('hidden');
+            });
+            
+            // Template buttons
+            templateBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const template = btn.dataset.template;
+                    if (codeTemplates[template]) {
+                        codeEditor.value = codeTemplates[template];
+                        currentProject.code = codeEditor.value;
+                        updateCharCount();
+                        addToHistory(codeEditor.value);
+                        showConsoleMessage(`Template "${template}" dimuat`, 'success');
+                    }
+                });
+            });
+            
+            // Category filters
+            categoryFilters.forEach(filter => {
+                filter.addEventListener('click', () => {
+                    const category = filter.dataset.category;
+                    document.querySelectorAll('.component-cell').forEach(cell => {
+                        if (category === 'all' || cell.dataset.category === category) {
+                            cell.style.display = 'flex';
+                        } else {
+                            cell.style.display = 'none';
+                        }
+                    });
+                });
+            });
+            
+            // Search components
+            document.getElementById('search-component').addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                document.querySelectorAll('.component-cell').forEach(cell => {
+                    const symbol = cell.dataset.symbol.toLowerCase();
+                    const name = cell.querySelector('.component-name').textContent.toLowerCase();
+                    if (symbol.includes(searchTerm) || name.includes(searchTerm)) {
+                        cell.style.display = 'flex';
+                    } else {
+                        cell.style.display = 'none';
+                    }
+                });
+            });
+            
+            // Search libraries
+            document.getElementById('search-library').addEventListener('input', (e) => {
+                const searchTerm = e.target.value.toLowerCase();
+                document.querySelectorAll('.library-item').forEach(item => {
+                    const text = item.textContent.toLowerCase();
+                    if (text.includes(searchTerm)) {
+                        item.style.display = 'flex';
+                    } else {
+                        item.style.display = 'none';
+                    }
+                });
+            });
+            
+            // Board selector
+            document.getElementById('board-selector').addEventListener('change', (e) => {
+                currentProject.board = e.target.value;
+                showConsoleMessage(`Board diubah ke Arduino ${e.target.value.toUpperCase()}`, 'info');
+            });
+            
+            // Close modals on outside click
+            [saveModal, loadModal].forEach(modal => {
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        modal.classList.add('hidden');
+                    }
+                });
+            });
+            
+            // Keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                // Ctrl+S to save
+                if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                    e.preventDefault();
+                    saveFileBtn.click();
+                }
+                
+                // Ctrl+O to open
+                if ((e.ctrlKey || e.metaKey) && e.key === 'o') {
+                    e.preventDefault();
+                    loadFileBtn.click();
+                }
+                
+                // Ctrl+R to verify
+                if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
+                    e.preventDefault();
+                    compileCodeBtn.click();
+                }
+                
+                // Ctrl+U to upload
+                if ((e.ctrlKey || e.metaKey) && e.key === 'u') {
+                    e.preventDefault();
+                    uploadCodeBtn.click();
+                }
+            });
+        }
+        
+        // Update load modal projects list
+        function updateLoadModalProjects() {
+            loadProjectsList.innerHTML = '';
+            
+            if (savedProjects.length === 0) {
+                loadProjectsList.innerHTML = '<div class="text-center text-gray-500 py-4">Tidak ada proyek tersimpan</div>';
+                return;
+            }
+            
+            savedProjects.forEach((project, index) => {
+                const projectItem = document.createElement('div');
+                projectItem.className = 'project-card';
+                projectItem.innerHTML = `
+                    <div class="project-name">${project.name}</div>
+                    <div class="project-date">${formatDate(project.date)}</div>
+                    <div class="text-xs text-gray-600 mt-2">${project.description || 'Tidak ada deskripsi'}</div>
+                    <button class="load-project-btn btn btn-primary file-action-btn w-full mt-3" data-index="${index}">
+                        <i class="fas fa-folder-open mr-2"></i> Buka
+                    </button>
+                `;
+                
+                loadProjectsList.appendChild(projectItem);
+            });
+            
+            // Add event listeners to load buttons
+            document.querySelectorAll('.load-project-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const index = parseInt(e.target.closest('button').dataset.index);
+                    loadProject(index);
+                });
+            });
+        }
+        
+        // Initialize the application
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

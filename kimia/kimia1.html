@@ -286,36 +286,19 @@
             border-radius: 3px;
         }
         
-        /* Group labels - DIHAPUS */
-        .group-label {
-            display: none;
-        }
-        
-        /* Period labels - DIHAPUS */
-        .period-label {
-            display: none;
-        }
-        
-        /* Layout grid untuk tabel dengan label */
-        .table-container {
-            display: flex;
-            flex-direction: column;
-        }
-        
-        .table-header {
-            display: none; /* DISEMBUNYIKAN */
-        }
-        
-        .table-body {
-            display: flex;
-        }
-        
+        /* Sembunyikan label golongan dan periode */
+        .table-header,
         .period-labels {
-            display: none; /* DISEMBUNYIKAN */
+            display: none !important;
         }
         
-        .period-row {
-            display: none; /* DISEMBUNYIKAN */
+        /* Sesuaikan tabel periodik */
+        .table-body {
+            flex-direction: row;
+        }
+        
+        .periodic-table {
+            margin-left: 0;
         }
         
         /* Combine System Styles */
@@ -534,10 +517,6 @@
                 width: 32px;
                 height: 32px;
             }
-            
-            .period-row {
-                height: 32px;
-            }
         }
         
         /* Info Box */
@@ -574,42 +553,6 @@
             font-size: 11px;
             color: #666;
             margin-top: 2px;
-        }
-        
-        /* Atomic Radius Visualization */
-        .atomic-radius {
-            width: 100%;
-            height: 20px;
-            background: #e2e8f0;
-            border-radius: 10px;
-            margin: 10px 0;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .radius-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
-            border-radius: 10px;
-            transition: width 0.5s ease;
-        }
-        
-        /* Electron Shells */
-        .electron-shells {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 80px;
-            margin: 15px 0;
-        }
-        
-        .shell {
-            position: absolute;
-            border: 1px dashed #cbd5e1;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
         }
     </style>
 </head>
@@ -683,48 +626,9 @@
                     </div>
                     
                     <div class="bg-white border border-gray-200 rounded-xl p-3">
-                        <div class="table-container">
-                            <!-- Header untuk golongan - DISEMBUNYIKAN -->
-                            <div class="table-header">
-                                <div></div> <!-- Kolom kosong untuk label periode -->
-                                <div class="group-label">1</div>
-                                <div class="group-label">2</div>
-                                <div class="group-label">3</div>
-                                <div class="group-label">4</div>
-                                <div class="group-label">5</div>
-                                <div class="group-label">6</div>
-                                <div class="group-label">7</div>
-                                <div class="group-label">8</div>
-                                <div class="group-label">9</div>
-                                <div class="group-label">10</div>
-                                <div class="group-label">11</div>
-                                <div class="group-label">12</div>
-                                <div class="group-label">13</div>
-                                <div class="group-label">14</div>
-                                <div class="group-label">15</div>
-                                <div class="group-label">16</div>
-                                <div class="group-label">17</div>
-                                <div class="group-label">18</div>
-                            </div>
-                            
-                            <div class="table-body">
-                                <!-- Label periode - DISEMBUNYIKAN -->
-                                <div class="period-labels">
-                                    <div class="period-row"></div> <!-- Baris kosong untuk header -->
-                                    <div class="period-row">1</div>
-                                    <div class="period-row">2</div>
-                                    <div class="period-row">3</div>
-                                    <div class="period-row">4</div>
-                                    <div class="period-row">5</div>
-                                    <div class="period-row">6</div>
-                                    <div class="period-row">7</div>
-                                </div>
-                                
-                                <!-- Tabel periodik utama -->
-                                <div id="periodic-table" class="periodic-table">
-                                    <!-- Elements will be generated by JavaScript -->
-                                </div>
-                            </div>
+                        <!-- Tabel periodik utama tanpa label -->
+                        <div id="periodic-table" class="periodic-table">
+                            <!-- Elements will be generated by JavaScript -->
                         </div>
                         
                         <!-- Lantanida dan Aktinida -->
@@ -826,10 +730,8 @@
                     <h3 class="font-bold text-gray-700 mb-3 text-sm flex items-center">
                         <i class="fas fa-atom text-blue-500 mr-2 text-xs"></i> Pilih Unsur untuk Digabungkan
                     </h3>
-                    <div class="table-container">
-                        <div id="combine-periodic-table" class="periodic-table">
-                            <!-- Elements for combine mode will be generated -->
-                        </div>
+                    <div id="combine-periodic-table" class="periodic-table">
+                        <!-- Elements for combine mode will be generated -->
                     </div>
                     <p class="text-xs text-gray-500 mt-3 text-center">
                         <i class="fas fa-lightbulb text-yellow-500 mr-1"></i>
@@ -1060,7 +962,7 @@
             
             { elements: ["Si", "O"], formula: "SiO₂", name: "Silikon Dioksida", type: "kovalen",
               description: "Komponen utama pasir, kuarsa, dan kaca.",
-              properties: ["Titik leleh: 1713°C", "Tidak larut dalam water", "Berbagai bentuk kristal"] },
+              properties: ["Titik leleh: 1713°C", "Tidak larut dalam air", "Berbagai bentuk kristal"] },
             
             { elements: ["Fe", "O"], formula: "Fe₂O₃", name: "Besi(III) Oksida", type: "ionik",
               description: "Bijih besi utama, dikenal sebagai hematit atau karat.",
@@ -1128,29 +1030,44 @@
             // Reset container
             periodicTableContainer.innerHTML = '';
             
-            // Buat peta posisi untuk unsur utama
-            const positionMap = new Map();
+            // Buat struktur tabel periodik yang benar
+            // Setiap baris (periode) memiliki 18 kolom (golongan)
+            // Periode 1: 2 unsur (H dan He) di golongan 1 dan 18
+            // Periode 2: 8 unsur (Li sampai Ne) di golongan 1-2 dan 13-18
+            // Periode 3: 8 unsur (Na sampai Ar) di golongan 1-2 dan 13-18
+            // Periode 4: 18 unsur (K sampai Kr) di semua golongan 1-18
+            // Periode 5: 18 unsur (Rb sampai Xe) di semua golongan 1-18
+            // Periode 6: 32 unsur (Cs sampai Rn) dengan lantanida di baris terpisah
+            // Periode 7: 32 unsur (Fr sampai Og) dengan aktinida di baris terpisah
             
-            // Isi peta dengan semua unsur utama
-            allElements.forEach(element => {
+            // Buat array 2D untuk posisi unsur
+            const tableGrid = Array(7).fill().map(() => Array(18).fill(null));
+            
+            // Tempatkan unsur-unsur utama pada posisi yang benar
+            periodicElements.forEach(element => {
                 if (element.period && element.group) {
-                    const key = `${element.period}-${element.group}`;
-                    positionMap.set(key, element);
+                    const periodIndex = element.period - 1;
+                    const groupIndex = element.group - 1;
+                    
+                    // Pastikan indeks dalam batas
+                    if (periodIndex >= 0 && periodIndex < 7 && groupIndex >= 0 && groupIndex < 18) {
+                        tableGrid[periodIndex][groupIndex] = element;
+                    }
                 }
             });
             
-            // Render 7 periode x 18 golongan
-            for (let period = 1; period <= 7; period++) {
-                for (let group = 1; group <= 18; group++) {
+            // Render tabel
+            for (let period = 0; period < 7; period++) {
+                for (let group = 0; group < 18; group++) {
                     const elementDiv = document.createElement('div');
-                    const element = positionMap.get(`${period}-${group}`);
+                    const element = tableGrid[period][group];
                     
                     if (element) {
                         elementDiv.className = `element-cell ${element.colorClass}`;
                         elementDiv.dataset.symbol = element.symbol;
                         elementDiv.dataset.number = element.number;
-                        elementDiv.dataset.period = period;
-                        elementDiv.dataset.group = group;
+                        elementDiv.dataset.period = period + 1;
+                        elementDiv.dataset.group = group + 1;
                         
                         elementDiv.innerHTML = `
                             <div class="element-number">${element.number}</div>
@@ -1164,15 +1081,22 @@
                         elementDiv.className = 'element-cell bg-gray-100';
                         
                         // Placeholder untuk lantanida dan aktinida
-                        if (period === 6 && group === 3) {
+                        if (period === 5 && group === 2) { // Periode 6, golongan 3
                             elementDiv.innerHTML = `<div class="text-xs text-gray-400">57-71</div>`;
                             elementDiv.title = "Lantanida";
                             elementDiv.addEventListener('click', () => showLanthanideDetails());
-                        } else if (period === 7 && group === 3) {
+                        } else if (period === 6 && group === 2) { // Periode 7, golongan 3
                             elementDiv.innerHTML = `<div class="text-xs text-gray-400">89-103</div>`;
                             elementDiv.title = "Aktinida";
                             elementDiv.addEventListener('click', () => showActinideDetails());
+                        } else if (period === 2 && group > 1 && group < 12) {
+                            // Periode 3, golongan 3-12 kosong
+                            elementDiv.style.visibility = 'hidden';
+                        } else if (period === 3 && group > 1 && group < 12) {
+                            // Periode 4, golongan 3-12 kosong
+                            elementDiv.style.visibility = 'hidden';
                         } else {
+                            // Sel kosong lainnya
                             elementDiv.style.visibility = 'hidden';
                         }
                     }
@@ -1819,7 +1743,7 @@
                 "Li": "Logam paling ringan. Digunakan dalam baterai lithium-ion yang menyalakan perangkat elektronik modern.",
                 "C": "Dasar kehidupan di bumi. Memiliki alotrop seperti berlian (terkeras) dan grafit (lunak).",
                 "O": "Menyusun 21% atmosfer bumi dan 65% tubuh manusia. Oksigen cair berwarna biru pucat.",
-                "Na": "Logam reaktif yang meledak saat kontak dengan air. Natrium penting untuk fungsi saraf.",
+                "Na": "Logam reaktif yang meledak saat kontak dengan water. Natrium penting untuk fungsi saraf.",
                 "Cl": "Gas beracun berwarna hijau kekuningan. Digunakan sebagai disinfektan dalam air minum.",
                 "Fe": "Logam paling melimpah di inti bumi. Darah berwarna merah karena hemoglobin mengandung zat besi.",
                 "Au": "Logam mulia yang tahan korosi. Satu gram emas dapat ditempa menjadi lembaran seluas 1 meter persegi.",
@@ -2001,4 +1925,4 @@
         document.addEventListener('DOMContentLoaded', initPeriodicTable);
     </script>
 </body>
-    </html>
+</html>

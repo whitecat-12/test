@@ -32,7 +32,7 @@
             box-shadow: 0 0 20px rgba(0,0,0,0.1);
         }
         
-        /* NAVBAR */
+        /* NAVBAR YANG SUDAH DIPERBAIKI - SAMA DENGAN FILE PERTAMA */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -41,11 +41,12 @@
             box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
             background: white;
             z-index: 10;
-            height: 70px;
+            height: 70px; /* TINGGI KONSISTEN */
             display: flex;
             align-items: center;
         }
         
+        /* STYLE UNTUK NAV ITEM - SAMA DENGAN FILE PERTAMA */
         .nav-item {
             display: flex;
             flex-direction: column;
@@ -70,11 +71,11 @@
         
         .nav-icon {
             transition: all 0.3s ease;
-            font-size: 1.25rem;
+            font-size: 1.25rem; /* UKURAN KONSISTEN */
         }
         
         .nav-icon.active {
-            transform: translateY(-5px);
+            transform: translateY(-5px); /* EFEK YANG SAMA */
             color: var(--primary);
         }
         
@@ -459,14 +460,16 @@
             .data-table td {
                 padding: 8px 10px !important;
             }
-            /* Style untuk mobile consistency */
+        }
+        
+        /* Style untuk mobile consistency - SAMA DENGAN FILE PERTAMA */
         @media (max-width: 414px) {
             .bottom-nav {
-                height: 65px;
+                height: 65px; /* SAMA DENGAN FILE PERTAMA */
             }
             
             .nav-icon {
-                font-size: 1.1rem;
+                font-size: 1.1rem; /* SAMA DENGAN FILE PERTAMA */
             }
         }
         
@@ -1051,29 +1054,29 @@
             </div>
         </main>
         
-        <!-- Bottom Navigation -->
-    <nav class="bottom-nav">
-      <a href="../../dashboard siswa.html" class="nav-item">
-        <i class="fas fa-home nav-icon"></i>
-        <span>Beranda</span>
-      </a>
-      <a href="../../soal harian/dashboard soal.html" class="nav-item">
-        <i class="fas fa-flask nav-icon"></i>
-        <span>Soal Harian</span>
-      </a>
-      <a href="../../ai/nayra.html" class="nav-item">
-        <i class="fas fa-robot nav-icon"></i>
-        <span>Nayra AI</span>
-      </a>
-      <a href="../../materi harian/kategori materi.html" class="nav-item">
-        <i class="fas fa-chalkboard-teacher nav-icon"></i>
-        <span>Materi Harian</span>
-      </a>
-      <a href="../../profil/profil.html" class="nav-item">
-        <i class="fas fa-user nav-icon"></i>
-        <span>Profil</span>
-      </a>
-    </nav>
+        <!-- BOTTOM NAVIGATION YANG SUDAH DIPERBAIKI - SAMA DENGAN FILE PERTAMA -->
+        <nav class="bottom-nav">
+            <a href="dashboard siswa.html" class="nav-item">
+                <i class="fas fa-home nav-icon"></i>
+                <span>Beranda</span>
+            </a>
+            <a href="soal harian/dashboard soal.html" class="nav-item">
+                <i class="fas fa-flask nav-icon"></i>
+                <span>Soal Harian</span>
+            </a>
+            <a href="ai/nayra.html" class="nav-item">
+                <i class="fas fa-robot nav-icon"></i>
+                <span>Nayra AI</span>
+            </a>
+            <a href="materi harian/kategori materi.html" class="nav-item">
+                <i class="fas fa-chalkboard-teacher nav-icon"></i>
+                <span>Materi Harian</span>
+            </a>
+            <a href="profil/profil.html" class="nav-item">
+                <i class="fas fa-user nav-icon"></i>
+                <span>Profil</span>
+            </a>
+        </nav>
     </div>
 
     <!-- Chart.js Library -->
@@ -2989,11 +2992,43 @@
             }
         }
         
-        // Initialize
+        // Bottom Nav Interaction Script - SAMA DENGAN FILE PERTAMA
         document.addEventListener('DOMContentLoaded', () => {
             methodFeature.click();
             btnGLB.click(); // Set default to GLB
             initChart();
+            
+            // Bottom Nav Interaction
+            const navItems = document.querySelectorAll('.nav-item');
+            const currentPage = window.location.pathname.split('/').pop();
+            
+            navItems.forEach(item => {
+                const href = item.getAttribute('href');
+                // Untuk demo, set halaman saat ini sebagai aktif
+                if (href && currentPage.includes('tracker') || currentPage.includes('analisis')) {
+                    // Halaman analisis gerak ini, set profil sebagai aktif karena kita di tracker.html
+                    if (href.includes('profil.html')) {
+                        item.classList.add('active');
+                        item.querySelector('.nav-icon').classList.add('active');
+                    }
+                }
+                
+                item.addEventListener('click', function(e) {
+                    // Untuk demo, jika ingin efek visual saat diklik
+                    navItems.forEach(nav => {
+                        nav.classList.remove('active');
+                        nav.querySelector('.nav-icon').classList.remove('active');
+                    });
+                    
+                    this.classList.add('active');
+                    this.querySelector('.nav-icon').classList.add('active');
+                    
+                    // Simulasi navigasi (untuk demo)
+                    // setTimeout(() => {
+                    //     window.location.href = this.getAttribute('href');
+                    // }, 300);
+                });
+            });
             
             window.addEventListener('resize', () => {
                 setupCanvasDimensions();

@@ -597,16 +597,16 @@
                         </div>
                     </div>
                     
-                    <!-- Camera Controls -->
+                    <!-- Camera Controls - DIUBAH: Hapus flash, perbaiki tombol ganti kamera -->
                     <div class="camera-controls">
                         <button id="btn-capture" class="camera-btn bg-blue-500 text-white hover:bg-blue-600">
                             <i class="fas fa-camera mr-1"></i> Ambil Foto
                         </button>
-                        <button id="btn-flash" class="camera-btn bg-gray-200 text-gray-700 hover:bg-gray-300">
-                            <i class="fas fa-bolt mr-1"></i> Flash
-                        </button>
-                        <button id="btn-switch-camera" class="camera-btn bg-gray-200 text-gray-700 hover:bg-gray-300">
+                        <button id="btn-switch-camera" class="camera-btn bg-teal-500 text-white hover:bg-teal-600">
                             <i class="fas fa-sync-alt mr-1"></i> Ganti Kamera
+                        </button>
+                        <button id="btn-camera-info" class="camera-btn bg-gray-200 text-gray-700 hover:bg-gray-300">
+                            <i class="fas fa-info-circle mr-1"></i> Info Kamera
                         </button>
                     </div>
                     
@@ -618,6 +618,9 @@
                         </div>
                         <div>
                             <span id="frame-rate">0</span> FPS
+                        </div>
+                        <div id="current-camera-type">
+                            <i class="fas fa-camera"></i> Belakang
                         </div>
                     </div>
                 </div>
@@ -1006,14 +1009,15 @@
         const errorMessage = document.getElementById('error-message');
         const errorTitle = document.getElementById('error-title');
         const errorDetail = document.getElementById('error-detail');
+        const currentCameraType = document.getElementById('current-camera-type');
         
         // Control Elements
         const btnStart = document.getElementById('btn-start');
         const btnStop = document.getElementById('btn-stop');
         const btnLog = document.getElementById('btn-log');
         const btnCapture = document.getElementById('btn-capture');
-        const btnFlash = document.getElementById('btn-flash');
         const btnSwitchCamera = document.getElementById('btn-switch-camera');
+        const btnCameraInfo = document.getElementById('btn-camera-info');
         
         // Display Elements
         const currentLux = document.getElementById('current-lux');
@@ -1087,8 +1091,11 @@
         let currentLightType = 'natural';
         let calibration = 1.0;
         let exposureCompensation = 0;
-        let flashEnabled = false;
-        let currentCamera = 'environment'; // 'environment' or 'user'
+        
+        // Untuk fitur ganti kamera
+        let currentCamera = 'environment'; // 'environment' atau 'user'
+        let availableCameras = [];
+        let currentCameraIndex = 0;
         
         // Data storage
         let luxHistory = [];
@@ -1143,16 +1150,11 @@
         // Initialize
         async function init() {
             try {
-                // Request camera access
-                stream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { 
-                        facingMode: 'environment',
-                        width: { ideal: 1920 },
-                        height: { ideal: 1080 }
-                    } 
-                });
+                // Get available cameras first
+                await getAvailableCameras();
                 
-                videoPreview.srcObject = stream;
+                // Request camera access
+                await startCamera();
                 
                 // Wait for video to be ready
                 videoPreview.onloadedmetadata = () => {
@@ -1161,7 +1163,7 @@
                     createSampleGrid();
                     initChart();
                     updateRecommendations(0);
-                    setupNavbar(); // Setup navbar interactions
+                    setupNavbar();
                 };
                 
             } catch (err) {
@@ -1170,13 +1172,112 @@
                     <div class="text-center">
                         <i class="fas fa-video-slash text-red-500 text-3xl mb-4"></i>
                         <p class="text-gray-700 font-medium">Akses Kamera Ditolak</p>
-                        <p class="text-gray-500 text-sm mt-2">Izinkan akses kamera untuk menggunakan luxmeter</p>
+                        <p class="text-gray-500 text-sm mt-2">${err.message || 'Izinkan akses kamera untuk menggunakan luxmeter'}</p>
                         <button onclick="location.reload()" class="mt-4 px-4 py-2 bg-teal-500 text-white rounded-lg text-sm">
                             Coba Lagi
                         </button>
                     </div>
                 `;
             }
+        }
+        
+        // Get available cameras
+        async function getAvailableCameras() {
+            try {
+                const devices = await navigator.mediaDevices.enumerateDevices();
+                const videoDevices = devices.filter(device => device.kind === 'videoinput');
+                availableCameras = videoDevices;
+                
+                console.log('Available cameras:', availableCameras);
+                return videoDevices;
+            } catch (err) {
+                console.error('Error enumerating devices:', err);
+                return [];
+            }
+        }
+        
+        // Start camera
+        async function startCamera() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+            
+            const constraints = {
+                video: {
+                    deviceId: availableCameras[currentCameraIndex]?.deviceId ? 
+                        { exact: availableCameras[currentCameraIndex].deviceId } : undefined,
+                    facingMode: availableCameras.length > 0 ? undefined : currentCamera,
+                    width: { ideal: 1920 },
+                    height: { ideal: 1080 }
+                }
+            };
+            
+            stream = await navigator.mediaDevices.getUserMedia(constraints);
+            videoPreview.srcObject = stream;
+            
+            // Update camera info
+            updateCameraInfo();
+        }
+        
+        // Switch to next camera
+        async function switchCamera() {
+            if (availableCameras.length <= 1) {
+                showError('Ganti Kamera', 'Hanya ada 1 kamera yang tersedia');
+                return;
+            }
+            
+            stopMeasurement();
+            
+            // Increment camera index
+            currentCameraIndex = (currentCameraIndex + 1) % availableCameras.length;
+            
+            try {
+                await startCamera();
+                
+                // Update UI
+                const cameraLabel = availableCameras[currentCameraIndex].label || 
+                    (currentCameraIndex === 0 ? 'Kamera Belakang' : 'Kamera Depan');
+                currentCameraType.innerHTML = `<i class="fas fa-camera"></i> ${cameraLabel}`;
+                
+                showError('Kamera Diganti', `Berhasil beralih ke ${cameraLabel}`);
+                
+                // Restart measurement if it was running
+                if (isMeasuring) {
+                    setTimeout(() => {
+                        startMeasurement();
+                    }, 500);
+                }
+                
+            } catch (err) {
+                console.error('Error switching camera:', err);
+                showError('Ganti Kamera Gagal', 'Tidak dapat mengakses kamera lain');
+            }
+        }
+        
+        // Update camera information
+        function updateCameraInfo() {
+            const currentCameraInfo = availableCameras[currentCameraIndex];
+            if (currentCameraInfo) {
+                const label = currentCameraInfo.label || 
+                    (currentCameraIndex === 0 ? 'Kamera Belakang' : 'Kamera Depan');
+                currentCameraType.innerHTML = `<i class="fas fa-camera"></i> ${label}`;
+            }
+        }
+        
+        // Show camera information
+        function showCameraInfo() {
+            if (availableCameras.length === 0) {
+                showError('Info Kamera', 'Tidak ada informasi kamera yang tersedia');
+                return;
+            }
+            
+            let info = `Jumlah Kamera: ${availableCameras.length}\n\n`;
+            availableCameras.forEach((cam, index) => {
+                const isActive = index === currentCameraIndex ? '✓ ' : '';
+                info += `${isActive}${index + 1}. ${cam.label || `Kamera ${index + 1}`}\n`;
+            });
+            
+            showError('Info Kamera', info);
         }
         
         // Setup navbar interaksi
@@ -1468,7 +1569,6 @@
             const avgLuminance = totalLuminance / sampleCount;
             
             // Convert luminance (0-255) to lux approximation
-            // This is a simplified conversion - real calibration would be more complex
             const baseLux = Math.pow(avgLuminance / 255, 2.2) * 10000;
             
             // Apply exposure compensation
@@ -1744,34 +1844,6 @@
             showError('Foto Tersimpan', 'Foto dengan data lux telah diunduh');
         }
         
-        // Switch camera
-        async function switchCamera() {
-            stopMeasurement();
-            
-            if (stream) {
-                stream.getTracks().forEach(track => track.stop());
-            }
-            
-            try {
-                currentCamera = currentCamera === 'environment' ? 'user' : 'environment';
-                
-                stream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { 
-                        facingMode: currentCamera,
-                        width: { ideal: 1920 },
-                        height: { ideal: 1080 }
-                    } 
-                });
-                
-                videoPreview.srcObject = stream;
-                setupCamera();
-                
-            } catch (err) {
-                console.error('Error switching camera:', err);
-                showError('Gagal Ganti Kamera', 'Tidak dapat mengakses kamera lain');
-            }
-        }
-        
         // Apply preset
         function applyPreset() {
             const presetValue = referencePreset.value;
@@ -1816,15 +1888,8 @@
         btnStop.addEventListener('click', stopMeasurement);
         btnLog.addEventListener('click', logMeasurement);
         btnCapture.addEventListener('click', capturePhoto);
-        btnFlash.addEventListener('click', () => {
-            flashEnabled = !flashEnabled;
-            btnFlash.innerHTML = flashEnabled ? 
-                '<i class="fas fa-bolt mr-1"></i> Flash ON' : 
-                '<i class="fas fa-bolt mr-1"></i> Flash';
-            btnFlash.classList.toggle('bg-yellow-500', flashEnabled);
-            btnFlash.classList.toggle('text-white', flashEnabled);
-        });
         btnSwitchCamera.addEventListener('click', switchCamera);
+        btnCameraInfo.addEventListener('click', showCameraInfo);
         
         btnApplyPreset.addEventListener('click', applyPreset);
         btnCalibrate.addEventListener('click', calibrate);
@@ -1860,7 +1925,6 @@
             btnChartRealtime.classList.add('active');
             btnChartHistory.classList.remove('active');
             btnChartDistribution.classList.remove('active');
-            // Update chart type if needed
         });
         
         btnChartHistory.addEventListener('click', () => {
@@ -1868,7 +1932,6 @@
             btnChartRealtime.classList.remove('active');
             btnChartHistory.classList.add('active');
             btnChartDistribution.classList.remove('active');
-            // Update chart type if needed
         });
         
         btnChartDistribution.addEventListener('click', () => {
@@ -1876,7 +1939,6 @@
             btnChartRealtime.classList.remove('active');
             btnChartHistory.classList.remove('active');
             btnChartDistribution.classList.add('active');
-            // Update chart type if needed
         });
         
         tableToggle.addEventListener('click', () => {

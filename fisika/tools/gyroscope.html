@@ -382,16 +382,6 @@
             transition: transform 0.1s linear;
             box-shadow: 0 0 10px rgba(245, 158, 11, 0.7);
         }
-        /* Improved mobile styles untuk konsistensi */
-        @media (max-width: 414px) {
-            .bottom-nav {
-                height: 65px; /* SAMA DENGAN FILE CHAT */
-            }
-            
-            .nav-icon {
-                font-size: 1.1rem; /* SAMA DENGAN FILE CHAT */
-            }
-        }
     </style>
 </head>
 <body>
@@ -667,31 +657,29 @@
         </main>
         
         <div class="notification" id="notification"></div>
-        
-            <!-- Bottom Navigation -->
-            <nav class="bottom-nav">
-              <a href="../../dashboard siswa.html" class="nav-item">
-                <i class="fas fa-home nav-icon"></i>
-                <span>Beranda</span>
-              </a>
-              <a href="../../soal harian/dashboard soal.html" class="nav-item">
-                <i class="fas fa-flask nav-icon"></i>
-                <span>Soal Harian</span>
-              </a>
-              <a href="../../ai/nayra.html" class="nav-item">
-                <i class="fas fa-robot nav-icon"></i>
-                <span>Nayra AI</span>
-              </a>
-              <a href="../../materi harian/kategori materi.html" class="nav-item">
-                <i class="fas fa-chalkboard-teacher nav-icon"></i>
-                <span>Materi Harian</span>
-              </a>
-              <a href="../../profil/profil.html" class="nav-item">
-                <i class="fas fa-user nav-icon"></i>
-                <span>Profil</span>
-              </a>
-            </nav>
-    </div>
+<!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+      <a href="../../dashboard siswa.html" class="nav-item">
+        <i class="fas fa-home nav-icon"></i>
+        <span>Beranda</span>
+      </a>
+      <a href="../../soal harian/dashboard soal.html" class="nav-item">
+        <i class="fas fa-flask nav-icon"></i>
+        <span>Soal Harian</span>
+      </a>
+      <a href="../../ai/nayra.html" class="nav-item">
+        <i class="fas fa-robot nav-icon"></i>
+        <span>Nayra AI</span>
+      </a>
+      <a href="../../materi harian/kategori materi.html" class="nav-item">
+        <i class="fas fa-chalkboard-teacher nav-icon"></i>
+        <span>Materi Harian</span>
+      </a>
+      <a href="../../profil/profil.html" class="nav-item">
+        <i class="fas fa-user nav-icon"></i>
+        <span>Profil</span>
+      </a>
+    </nav>
 
     <script>
         // State aplikasi
@@ -750,55 +738,6 @@
             setupEventListeners();
             updateTable();
             checkGyroscopeSupport();
-            setupNavbar();
-        }
-        
-        // Setup navbar interaksi
-        function setupNavbar() {
-            const navItems = document.querySelectorAll('.nav-item');
-            
-            navItems.forEach(item => {
-                item.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    
-                    // Hapus active class dari semua item
-                    navItems.forEach(navItem => {
-                        navItem.classList.remove('active');
-                        navItem.querySelector('.nav-icon').classList.remove('active');
-                    });
-                    
-                    // Tambahkan active class ke item yang diklik
-                    this.classList.add('active');
-                    this.querySelector('.nav-icon').classList.add('active');
-                    
-                    // Simulasi navigasi (dalam aplikasi nyata ini akan redirect)
-                    const pageName = this.querySelector('span').textContent;
-                    showNotification(`Navigasi ke: ${pageName}`, 'info');
-                    
-                    // Tambahkan efek visual
-                    const icon = this.querySelector('.nav-icon');
-                    icon.style.transform = 'translateY(-5px)';
-                    
-                    setTimeout(() => {
-                        if (this.classList.contains('active')) {
-                            icon.style.transform = 'translateY(-5px)';
-                        }
-                    }, 300);
-                });
-                
-                // Efek hover
-                item.addEventListener('mouseenter', function() {
-                    if (!this.classList.contains('active')) {
-                        this.querySelector('.nav-icon').style.transform = 'translateY(-3px)';
-                    }
-                });
-                
-                item.addEventListener('mouseleave', function() {
-                    if (!this.classList.contains('active')) {
-                        this.querySelector('.nav-icon').style.transform = 'translateY(0)';
-                    }
-                });
-            });
         }
         
         // Cek dukungan gyroscope

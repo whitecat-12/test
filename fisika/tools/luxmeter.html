@@ -514,6 +514,30 @@
             box-shadow: 0 0 5px rgba(0,0,0,0.3);
         }
         
+        /* Flash Animation */
+        .flash-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: white;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 5;
+            border-radius: 12px;
+        }
+        
+        .flash-animation {
+            animation: flash 0.5s ease;
+        }
+        
+        @keyframes flash {
+            0% { opacity: 0; }
+            50% { opacity: 0.9; }
+            100% { opacity: 0; }
+        }
+        
         @media (max-width: 380px) {
             .chart-container {
                 height: 250px;
@@ -526,16 +550,6 @@
             .data-table th,
             .data-table td {
                 padding: 8px 10px;
-            }
-        }
-        /* Improved mobile styles untuk konsistensi */
-        @media (max-width: 414px) {
-            .bottom-nav {
-                height: 65px; /* SAMA DENGAN FILE CHAT */
-            }
-            
-            .nav-icon {
-                font-size: 1.1rem; /* SAMA DENGAN FILE CHAT */
             }
         }
     </style>
@@ -588,25 +602,29 @@
                 <!-- Camera Preview -->
                 <div id="camera-preview-container" class="mt-4">
                     <div class="video-container">
+                        <!-- Flash Overlay -->
+                        <div id="flash-overlay" class="flash-overlay"></div>
+                        
                         <video id="video-preview" class="w-full rounded-xl" playsinline autoplay></video>
                         <canvas id="video-canvas" class="analysis-canvas w-full rounded-xl"></canvas>
                         <canvas id="lux-canvas" class="hidden"></canvas>
+                        
                         <!-- Sample Grid Overlay -->
                         <div id="sample-grid" class="sample-grid">
                             <!-- Grid cells will be generated here -->
                         </div>
                     </div>
                     
-                    <!-- Camera Controls - DIUBAH: Hapus flash, perbaiki tombol ganti kamera -->
+                    <!-- Camera Controls -->
                     <div class="camera-controls">
                         <button id="btn-capture" class="camera-btn bg-blue-500 text-white hover:bg-blue-600">
                             <i class="fas fa-camera mr-1"></i> Ambil Foto
                         </button>
-                        <button id="btn-switch-camera" class="camera-btn bg-teal-500 text-white hover:bg-teal-600">
-                            <i class="fas fa-sync-alt mr-1"></i> Ganti Kamera
+                        <button id="btn-flash" class="camera-btn bg-gray-200 text-gray-700 hover:bg-gray-300">
+                            <i class="fas fa-bolt mr-1"></i> Flash
                         </button>
-                        <button id="btn-camera-info" class="camera-btn bg-gray-200 text-gray-700 hover:bg-gray-300">
-                            <i class="fas fa-info-circle mr-1"></i> Info Kamera
+                        <button id="btn-switch-camera" class="camera-btn bg-gray-200 text-gray-700 hover:bg-gray-300">
+                            <i class="fas fa-sync-alt mr-1"></i> Ganti Kamera
                         </button>
                     </div>
                     
@@ -619,8 +637,9 @@
                         <div>
                             <span id="frame-rate">0</span> FPS
                         </div>
-                        <div id="current-camera-type">
-                            <i class="fas fa-camera"></i> Belakang
+                        <div id="camera-facing" class="hidden">
+                            <i class="fas fa-mobile-alt mr-1"></i>
+                            <span>Belakang</span>
                         </div>
                     </div>
                 </div>
@@ -966,28 +985,28 @@
         </main>
         
         <!-- Bottom Navigation -->
-        <nav class="bottom-nav">
-            <a href="../../dashboard siswa.html" class="nav-item">
-                <i class="fas fa-home nav-icon"></i>
-                <span>Beranda</span>
-            </a>
-            <a href="../../soal harian/dashboard soal.html" class="nav-item">
-                <i class="fas fa-flask nav-icon"></i>
-                <span>Soal Harian</span>
-            </a>
-            <a href="../../ai/nayra.html" class="nav-item">
-                <i class="fas fa-robot nav-icon"></i>
-                <span>Nayra AI</span>
-            </a>
-            <a href="../../materi harian/kategori materi.html" class="nav-item">
-                <i class="fas fa-chalkboard-teacher nav-icon"></i>
-                <span>Materi Harian</span>
-            </a>
-            <a href="../../profil/profil.html" class="nav-item">
-                <i class="fas fa-user nav-icon"></i>
-                <span>Profil</span>
-            </a>
-        </nav>
+    <nav class="bottom-nav">
+      <a href="../../dashboard siswa.html" class="nav-item">
+        <i class="fas fa-home nav-icon"></i>
+        <span>Beranda</span>
+      </a>
+      <a href="../../soal harian/dashboard soal.html" class="nav-item">
+        <i class="fas fa-flask nav-icon"></i>
+        <span>Soal Harian</span>
+      </a>
+      <a href="../../ai/nayra.html" class="nav-item">
+        <i class="fas fa-robot nav-icon"></i>
+        <span>Nayra AI</span>
+      </a>
+      <a href="../../materi harian/kategori materi.html" class="nav-item">
+        <i class="fas fa-chalkboard-teacher nav-icon"></i>
+        <span>Materi Harian</span>
+      </a>
+      <a href="../../profil/profil.html" class="nav-item">
+        <i class="fas fa-user nav-icon"></i>
+        <span>Profil</span>
+      </a>
+    </nav>
     </div>
 
     <!-- Chart.js Library -->
@@ -1009,15 +1028,16 @@
         const errorMessage = document.getElementById('error-message');
         const errorTitle = document.getElementById('error-title');
         const errorDetail = document.getElementById('error-detail');
-        const currentCameraType = document.getElementById('current-camera-type');
+        const flashOverlay = document.getElementById('flash-overlay');
+        const cameraFacing = document.getElementById('camera-facing');
         
         // Control Elements
         const btnStart = document.getElementById('btn-start');
         const btnStop = document.getElementById('btn-stop');
         const btnLog = document.getElementById('btn-log');
         const btnCapture = document.getElementById('btn-capture');
+        const btnFlash = document.getElementById('btn-flash');
         const btnSwitchCamera = document.getElementById('btn-switch-camera');
-        const btnCameraInfo = document.getElementById('btn-camera-info');
         
         // Display Elements
         const currentLux = document.getElementById('current-lux');
@@ -1091,11 +1111,10 @@
         let currentLightType = 'natural';
         let calibration = 1.0;
         let exposureCompensation = 0;
-        
-        // Untuk fitur ganti kamera
+        let flashEnabled = false;
         let currentCamera = 'environment'; // 'environment' atau 'user'
-        let availableCameras = [];
-        let currentCameraIndex = 0;
+        let devices = [];
+        let currentDeviceIndex = 0;
         
         // Data storage
         let luxHistory = [];
@@ -1150,11 +1169,24 @@
         // Initialize
         async function init() {
             try {
-                // Get available cameras first
-                await getAvailableCameras();
+                // Get available devices
+                devices = await navigator.mediaDevices.enumerateDevices();
+                const videoDevices = devices.filter(device => device.kind === 'videoinput');
+                
+                if (videoDevices.length === 0) {
+                    throw new Error('Tidak ada kamera yang ditemukan');
+                }
                 
                 // Request camera access
-                await startCamera();
+                stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { 
+                        facingMode: 'environment',
+                        width: { ideal: 1920 },
+                        height: { ideal: 1080 }
+                    } 
+                });
+                
+                videoPreview.srcObject = stream;
                 
                 // Wait for video to be ready
                 videoPreview.onloadedmetadata = () => {
@@ -1163,7 +1195,6 @@
                     createSampleGrid();
                     initChart();
                     updateRecommendations(0);
-                    setupNavbar();
                 };
                 
             } catch (err) {
@@ -1172,160 +1203,13 @@
                     <div class="text-center">
                         <i class="fas fa-video-slash text-red-500 text-3xl mb-4"></i>
                         <p class="text-gray-700 font-medium">Akses Kamera Ditolak</p>
-                        <p class="text-gray-500 text-sm mt-2">${err.message || 'Izinkan akses kamera untuk menggunakan luxmeter'}</p>
+                        <p class="text-gray-500 text-sm mt-2">Izinkan akses kamera untuk menggunakan luxmeter</p>
                         <button onclick="location.reload()" class="mt-4 px-4 py-2 bg-teal-500 text-white rounded-lg text-sm">
                             Coba Lagi
                         </button>
                     </div>
                 `;
             }
-        }
-        
-        // Get available cameras
-        async function getAvailableCameras() {
-            try {
-                const devices = await navigator.mediaDevices.enumerateDevices();
-                const videoDevices = devices.filter(device => device.kind === 'videoinput');
-                availableCameras = videoDevices;
-                
-                console.log('Available cameras:', availableCameras);
-                return videoDevices;
-            } catch (err) {
-                console.error('Error enumerating devices:', err);
-                return [];
-            }
-        }
-        
-        // Start camera
-        async function startCamera() {
-            if (stream) {
-                stream.getTracks().forEach(track => track.stop());
-            }
-            
-            const constraints = {
-                video: {
-                    deviceId: availableCameras[currentCameraIndex]?.deviceId ? 
-                        { exact: availableCameras[currentCameraIndex].deviceId } : undefined,
-                    facingMode: availableCameras.length > 0 ? undefined : currentCamera,
-                    width: { ideal: 1920 },
-                    height: { ideal: 1080 }
-                }
-            };
-            
-            stream = await navigator.mediaDevices.getUserMedia(constraints);
-            videoPreview.srcObject = stream;
-            
-            // Update camera info
-            updateCameraInfo();
-        }
-        
-        // Switch to next camera
-        async function switchCamera() {
-            if (availableCameras.length <= 1) {
-                showError('Ganti Kamera', 'Hanya ada 1 kamera yang tersedia');
-                return;
-            }
-            
-            stopMeasurement();
-            
-            // Increment camera index
-            currentCameraIndex = (currentCameraIndex + 1) % availableCameras.length;
-            
-            try {
-                await startCamera();
-                
-                // Update UI
-                const cameraLabel = availableCameras[currentCameraIndex].label || 
-                    (currentCameraIndex === 0 ? 'Kamera Belakang' : 'Kamera Depan');
-                currentCameraType.innerHTML = `<i class="fas fa-camera"></i> ${cameraLabel}`;
-                
-                showError('Kamera Diganti', `Berhasil beralih ke ${cameraLabel}`);
-                
-                // Restart measurement if it was running
-                if (isMeasuring) {
-                    setTimeout(() => {
-                        startMeasurement();
-                    }, 500);
-                }
-                
-            } catch (err) {
-                console.error('Error switching camera:', err);
-                showError('Ganti Kamera Gagal', 'Tidak dapat mengakses kamera lain');
-            }
-        }
-        
-        // Update camera information
-        function updateCameraInfo() {
-            const currentCameraInfo = availableCameras[currentCameraIndex];
-            if (currentCameraInfo) {
-                const label = currentCameraInfo.label || 
-                    (currentCameraIndex === 0 ? 'Kamera Belakang' : 'Kamera Depan');
-                currentCameraType.innerHTML = `<i class="fas fa-camera"></i> ${label}`;
-            }
-        }
-        
-        // Show camera information
-        function showCameraInfo() {
-            if (availableCameras.length === 0) {
-                showError('Info Kamera', 'Tidak ada informasi kamera yang tersedia');
-                return;
-            }
-            
-            let info = `Jumlah Kamera: ${availableCameras.length}\n\n`;
-            availableCameras.forEach((cam, index) => {
-                const isActive = index === currentCameraIndex ? '✓ ' : '';
-                info += `${isActive}${index + 1}. ${cam.label || `Kamera ${index + 1}`}\n`;
-            });
-            
-            showError('Info Kamera', info);
-        }
-        
-        // Setup navbar interaksi
-        function setupNavbar() {
-            const navItems = document.querySelectorAll('.nav-item');
-            
-            navItems.forEach(item => {
-                item.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    
-                    // Hapus active class dari semua item
-                    navItems.forEach(navItem => {
-                        navItem.classList.remove('active');
-                        navItem.querySelector('.nav-icon').classList.remove('active');
-                    });
-                    
-                    // Tambahkan active class ke item yang diklik
-                    this.classList.add('active');
-                    this.querySelector('.nav-icon').classList.add('active');
-                    
-                    // Simulasi navigasi (dalam aplikasi nyata ini akan redirect)
-                    const pageName = this.querySelector('span').textContent;
-                    showError(`Navigasi ke: ${pageName}`, 'info');
-                    
-                    // Tambahkan efek visual
-                    const icon = this.querySelector('.nav-icon');
-                    icon.style.transform = 'translateY(-5px)';
-                    
-                    setTimeout(() => {
-                        if (this.classList.contains('active')) {
-                            icon.style.transform = 'translateY(-5px)';
-                        }
-                    }, 300);
-                });
-                
-                // Efek hover
-                item.addEventListener('mouseenter', function() {
-                    if (!this.classList.contains('active')) {
-                        this.querySelector('.nav-icon').style.transform = 'translateY(-3px)';
-                    }
-                });
-                
-                item.addEventListener('mouseleave', function() {
-                    if (!this.classList.contains('active')) {
-                        this.querySelector('.nav-icon').style.transform = 'translateY(0)';
-                    }
-                });
-            });
         }
         
         function setupCamera() {
@@ -1340,6 +1224,9 @@
             
             cameraResolution.textContent = `${width}×${height}`;
             
+            // Update camera facing info
+            updateCameraFacingInfo();
+            
             // Start FPS counter
             setInterval(() => {
                 frameRate.textContent = fps;
@@ -1348,6 +1235,12 @@
             
             // Start measurement
             btnStart.click();
+        }
+        
+        function updateCameraFacingInfo() {
+            const facingMode = currentCamera === 'environment' ? 'Belakang' : 'Depan';
+            cameraFacing.innerHTML = `<i class="fas fa-mobile-alt mr-1"></i><span>${facingMode}</span>`;
+            cameraFacing.classList.remove('hidden');
         }
         
         function createSampleGrid() {
@@ -1569,13 +1462,17 @@
             const avgLuminance = totalLuminance / sampleCount;
             
             // Convert luminance (0-255) to lux approximation
+            // This is a simplified conversion - real calibration would be more complex
             const baseLux = Math.pow(avgLuminance / 255, 2.2) * 10000;
             
             // Apply exposure compensation
             const compensatedLux = baseLux * Math.pow(2, exposureCompensation);
             
+            // Apply flash effect if enabled
+            const finalLux = flashEnabled ? compensatedLux * 1.5 : compensatedLux;
+            
             return {
-                average: compensatedLux,
+                average: finalLux,
                 max: maxLuminance,
                 min: minLuminance,
                 grid: gridValues
@@ -1811,6 +1708,14 @@
         
         // Capture photo
         function capturePhoto() {
+            // Trigger flash animation
+            if (flashEnabled) {
+                flashOverlay.classList.add('flash-animation');
+                setTimeout(() => {
+                    flashOverlay.classList.remove('flash-animation');
+                }, 500);
+            }
+            
             const canvas = document.createElement('canvas');
             canvas.width = videoCanvas.width;
             canvas.height = videoCanvas.height;
@@ -1842,6 +1747,74 @@
             link.click();
             
             showError('Foto Tersimpan', 'Foto dengan data lux telah diunduh');
+        }
+        
+        // Switch camera
+        async function switchCamera() {
+            stopMeasurement();
+            
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+            }
+            
+            try {
+                // Toggle between front and back camera
+                currentCamera = currentCamera === 'environment' ? 'user' : 'environment';
+                
+                const constraints = {
+                    video: {
+                        facingMode: currentCamera,
+                        width: { ideal: 1920 },
+                        height: { ideal: 1080 }
+                    }
+                };
+                
+                stream = await navigator.mediaDevices.getUserMedia(constraints);
+                
+                videoPreview.srcObject = stream;
+                
+                // Wait for video to be ready
+                await new Promise(resolve => {
+                    videoPreview.onloadedmetadata = () => resolve();
+                });
+                
+                setupCamera();
+                updateCameraFacingInfo();
+                
+                showError('Kamera Diganti', `Kamera ${currentCamera === 'environment' ? 'Belakang' : 'Depan'} aktif`);
+                
+            } catch (err) {
+                console.error('Error switching camera:', err);
+                showError('Gagal Ganti Kamera', 'Tidak dapat mengakses kamera lain');
+                
+                // Fallback to previous camera
+                try {
+                    currentCamera = currentCamera === 'environment' ? 'user' : 'environment';
+                    const constraints = { video: { facingMode: currentCamera } };
+                    stream = await navigator.mediaDevices.getUserMedia(constraints);
+                    videoPreview.srcObject = stream;
+                    setupCamera();
+                } catch (fallbackErr) {
+                    console.error('Fallback camera error:', fallbackErr);
+                }
+            }
+        }
+        
+        // Toggle flash
+        function toggleFlash() {
+            flashEnabled = !flashEnabled;
+            
+            if (flashEnabled) {
+                btnFlash.innerHTML = '<i class="fas fa-bolt mr-1"></i> Flash ON';
+                btnFlash.classList.remove('bg-gray-200', 'text-gray-700');
+                btnFlash.classList.add('bg-yellow-500', 'text-white');
+                showError('Flash ON', 'Flash diaktifkan untuk pengukuran');
+            } else {
+                btnFlash.innerHTML = '<i class="fas fa-bolt mr-1"></i> Flash';
+                btnFlash.classList.remove('bg-yellow-500', 'text-white');
+                btnFlash.classList.add('bg-gray-200', 'text-gray-700');
+                showError('Flash OFF', 'Flash dimatikan');
+            }
         }
         
         // Apply preset
@@ -1888,8 +1861,8 @@
         btnStop.addEventListener('click', stopMeasurement);
         btnLog.addEventListener('click', logMeasurement);
         btnCapture.addEventListener('click', capturePhoto);
+        btnFlash.addEventListener('click', toggleFlash);
         btnSwitchCamera.addEventListener('click', switchCamera);
-        btnCameraInfo.addEventListener('click', showCameraInfo);
         
         btnApplyPreset.addEventListener('click', applyPreset);
         btnCalibrate.addEventListener('click', calibrate);
@@ -1925,6 +1898,7 @@
             btnChartRealtime.classList.add('active');
             btnChartHistory.classList.remove('active');
             btnChartDistribution.classList.remove('active');
+            // Update chart type if needed
         });
         
         btnChartHistory.addEventListener('click', () => {
@@ -1932,6 +1906,7 @@
             btnChartRealtime.classList.remove('active');
             btnChartHistory.classList.add('active');
             btnChartDistribution.classList.remove('active');
+            // Update chart type if needed
         });
         
         btnChartDistribution.addEventListener('click', () => {
@@ -1939,6 +1914,7 @@
             btnChartRealtime.classList.remove('active');
             btnChartHistory.classList.remove('active');
             btnChartDistribution.classList.add('active');
+            // Update chart type if needed
         });
         
         tableToggle.addEventListener('click', () => {

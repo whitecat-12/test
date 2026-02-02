@@ -1,0 +1,2250 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QUANTARA - Simulasi Medan Magnet</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #38b2ac;
+            --secondary: #0e7490;
+            --accent: #f59e0b;
+        }
+        
+        body {
+            font-family: 'Baloo 2', cursive;
+            background-color: #f8fafc;
+        }
+        
+        .app-container {
+            max-width: 414px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        /* NAVBAR */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            max-width: 414px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            background: white;
+            z-index: 10;
+            height: 70px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+            text-decoration: none;
+            flex: 1;
+            height: 100%;
+            padding: 0.5rem 0;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item span {
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
+        
+        .nav-item.active {
+            color: var(--primary);
+        }
+        
+        .nav-icon {
+            transition: all 0.3s ease;
+            font-size: 1.25rem;
+        }
+        
+        .nav-icon.active {
+            transform: translateY(-5px);
+            color: var(--primary);
+        }
+        
+        /* Magnet Container */
+        .magnet-container {
+            position: relative;
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            height: 300px;
+            background: linear-gradient(to bottom, #0f172a, #1e293b);
+        }
+        
+        #magnet-canvas {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+        
+        /* Canvas untuk analisis */
+        .analysis-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100% !important;
+            height: 100% !important;
+            pointer-events: none;
+        }
+        
+        /* Chart Container */
+        .chart-container {
+            height: 280px;
+            position: relative;
+            background: white;
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .field-chart-container {
+            height: 300px;
+            position: relative;
+            background: white;
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        /* Empty Chart State */
+        .empty-chart {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #9ca3af;
+            text-align: center;
+        }
+        
+        .empty-chart-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+            opacity: 0.5;
+        }
+        
+        .empty-chart-text {
+            font-size: 12px;
+            max-width: 200px;
+        }
+        
+        /* Chart Controls */
+        .chart-controls {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .chart-btn {
+            padding: 4px 10px;
+            font-size: 11px;
+            border-radius: 6px;
+            background: #f3f4f6;
+            border: 1px solid #d1d5db;
+            color: #374151;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .chart-btn:hover {
+            background: #e5e7eb;
+        }
+        
+        .chart-btn.active {
+            background: #38b2ac;
+            color: white;
+            border-color: #38b2ac;
+        }
+        
+        /* Custom Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+        
+        /* Loading Spinner */
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #38b2ac;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Error Message */
+        .error-message {
+            background-color: #fee2e2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+            display: none;
+        }
+        
+        /* Table Styles */
+        .data-table {
+            width: 100%;
+            font-size: 12px;
+            border-collapse: collapse;
+            background: white;
+        }
+        
+        .data-table th {
+            background-color: #38b2ac;
+            color: white;
+            padding: 10px 12px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid #2c9c96;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .data-table td {
+            padding: 8px 12px;
+            border-bottom: 1px solid #f1f5f9;
+            color: #475569;
+        }
+        
+        .data-table tr:hover {
+            background-color: #f8fafc;
+        }
+        
+        .data-table tr:nth-child(even) {
+            background-color: #f9fafb;
+        }
+        
+        .data-table tr:nth-child(even):hover {
+            background-color: #f3f4f6;
+        }
+        
+        /* Export Buttons */
+        .export-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .export-btn {
+            flex: 1;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            transition: all 0.2s;
+        }
+        
+        .export-btn-chart {
+            background-color: #38b2ac;
+            color: white;
+        }
+        
+        .export-btn-chart:hover {
+            background-color: #319795;
+        }
+        
+        .export-btn-data {
+            background-color: #8b5cf6;
+            color: white;
+        }
+        
+        .export-btn-data:hover {
+            background-color: #7c3aed;
+        }
+        
+        /* Scrollable Table Container */
+        .table-container {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            margin-top: 10px;
+            background: white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+        }
+        
+        /* Section header */
+        .section-header {
+            font-size: 13px;
+            font-weight: 600;
+        }
+        
+        /* Field Controls */
+        .field-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .control-group {
+            background: #f8fafc;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .control-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 600;
+            color: #4b5563;
+            margin-bottom: 8px;
+        }
+        
+        .control-input {
+            width: 100%;
+            padding: 6px 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 12px;
+            background: white;
+        }
+        
+        .control-slider {
+            width: 100%;
+            height: 6px;
+            background: #e5e7eb;
+            border-radius: 3px;
+            outline: none;
+            margin-top: 5px;
+        }
+        
+        .control-value {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 5px;
+            text-align: center;
+        }
+        
+        .simulation-btn {
+            background: linear-gradient(to right, #8b5cf6, #7c3aed);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .simulation-btn:hover {
+            background: linear-gradient(to right, #7c3aed, #6d28d9);
+            transform: translateY(-2px);
+        }
+        
+        .simulation-btn:active {
+            transform: translateY(0);
+        }
+        
+        .field-info {
+            background: linear-gradient(to right, #dbeafe, #e0f2fe);
+            border: 1px solid #bae6fd;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 15px;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+            font-size: 12px;
+        }
+        
+        .info-label {
+            color: #475569;
+            font-weight: 500;
+        }
+        
+        .info-value {
+            color: #1e40af;
+            font-weight: 600;
+        }
+        
+        /* Tab Navigation */
+        .tab-navigation {
+            display: flex;
+            background: #f3f4f6;
+            border-radius: 10px;
+            padding: 4px;
+            margin-bottom: 15px;
+        }
+        
+        .tab-btn {
+            flex: 1;
+            padding: 8px 12px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 500;
+            color: #6b7280;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        
+        .tab-btn.active {
+            background: white;
+            color: #38b2ac;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        /* Magnet styles */
+        .magnet {
+            position: absolute;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: white;
+            user-select: none;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            transition: transform 0.2s;
+        }
+        
+        .magnet.north {
+            background: linear-gradient(to bottom, #dc2626, #991b1b);
+        }
+        
+        .magnet.south {
+            background: linear-gradient(to bottom, #2563eb, #1d4ed8);
+        }
+        
+        .magnet-label {
+            position: absolute;
+            font-size: 10px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+        }
+        
+        .field-line {
+            position: absolute;
+            pointer-events: none;
+        }
+        
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            pointer-events: none;
+            box-shadow: 0 0 5px rgba(255,255,255,0.7);
+        }
+        
+        .particle.positive {
+            background: radial-gradient(circle, #fbbf24, #f59e0b);
+        }
+        
+        .particle.negative {
+            background: radial-gradient(circle, #60a5fa, #3b82f6);
+        }
+        
+        @media (max-width: 380px) {
+            .chart-container, .field-chart-container {
+                height: 250px;
+            }
+            
+            .data-table {
+                font-size: 11px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile App Container -->
+    <div class="app-container">
+        
+        <!-- Loading Indicator -->
+        <div id="loading" class="fixed inset-0 bg-white bg-opacity-90 flex flex-col items-center justify-center z-50">
+            <div class="loading-spinner mb-4"></div>
+            <p class="text-gray-700 font-medium">Menyiapkan Simulasi Medan Magnet...</p>
+            <p class="text-gray-500 text-sm mt-2">Memuat komponen simulasi</p>
+        </div>
+        
+        <!-- Error Message -->
+        <div id="error-message" class="error-message m-4 hidden">
+            <div class="flex items-center">
+                <i class="fas fa-exclamation-triangle mr-3"></i>
+                <div>
+                    <p class="font-medium" id="error-title">Terjadi Kesalahan</p>
+                    <p class="text-sm" id="error-detail"></p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <main class="pb-24 p-4 custom-scrollbar" style="max-height: calc(100vh - 70px); overflow-y: auto;">
+            <!-- Page Title -->
+            <div class="mb-4">
+                <h1 class="text-lg font-bold text-gray-800 mb-1">
+                    <i class="fas fa-magnet text-red-500 mr-2"></i> Simulasi Medan Magnet
+                </h1>
+                <p class="text-gray-600 text-xs">
+                    Simulasi medan magnet dengan partikel bermuatan yang dapat diinteraksi
+                </p>
+            </div>
+            
+            <!-- Tab Navigation -->
+            <div class="tab-navigation">
+                <button class="tab-btn active" id="tab-simulasi">
+                    <i class="fas fa-magnet mr-1"></i> Simulasi
+                </button>
+                <button class="tab-btn" id="tab-data">
+                    <i class="fas fa-table mr-1"></i> Data
+                </button>
+                <button class="tab-btn" id="tab-ekspor">
+                    <i class="fas fa-download mr-1"></i> Ekspor
+                </button>
+            </div>
+            
+            <!-- Simulation Tab Content -->
+            <div id="simulasi-content">
+                <!-- Simulation Controls -->
+                <div class="mb-6 p-4 bg-white border border-gray-200 rounded-xl shadow-sm">
+                    <h3 class="section-header text-gray-700 flex items-center mb-4">
+                        <i class="fas fa-sliders-h text-purple-500 mr-2 text-xs"></i> Kontrol Medan Magnet
+                    </h3>
+                    
+                    <div class="field-controls">
+                        <!-- Kekuatan Medan -->
+                        <div class="control-group">
+                            <label class="control-label">
+                                <i class="fas fa-bolt mr-1"></i> Kekuatan Medan (B)
+                            </label>
+                            <input type="range" min="1" max="100" value="50" class="control-slider" id="field-strength-slider">
+                            <div class="control-value" id="field-strength-value">50 μT</div>
+                        </div>
+                        
+                        <!-- Arah Medan -->
+                        <div class="control-group">
+                            <label class="control-label">
+                                <i class="fas fa-compass mr-1"></i> Arah Medan (θ)
+                            </label>
+                            <input type="range" min="0" max="360" value="90" class="control-slider" id="field-direction-slider">
+                            <div class="control-value" id="field-direction-value">90°</div>
+                        </div>
+                        
+                        <!-- Muatan Partikel -->
+                        <div class="control-group">
+                            <label class="control-label">
+                                <i class="fas fa-atom mr-1"></i> Muatan (q)
+                            </label>
+                            <input type="range" min="-100" max="100" value="10" step="1" class="control-slider" id="charge-slider">
+                            <div class="control-value" id="charge-value">+10 e</div>
+                        </div>
+                        
+                        <!-- Kecepatan Partikel -->
+                        <div class="control-group">
+                            <label class="control-label">
+                                <i class="fas fa-running mr-1"></i> Kecepatan (v)
+                            </label>
+                            <input type="range" min="1" max="100" value="30" class="control-slider" id="velocity-slider">
+                            <div class="control-value" id="velocity-value">30 m/s</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Simulation Buttons -->
+                    <div class="grid grid-cols-2 gap-3 mt-4">
+                        <button id="btn-start-simulation" class="simulation-btn">
+                            <i class="fas fa-play"></i> Mulai Simulasi
+                        </button>
+                        <button id="btn-reset-simulation" class="simulation-btn" style="background: linear-gradient(to right, #6b7280, #4b5563);">
+                            <i class="fas fa-redo"></i> Reset
+                        </button>
+                        <button id="btn-add-particle" class="simulation-btn" style="background: linear-gradient(to right, #10b981, #059669);">
+                            <i class="fas fa-plus"></i> Tambah Partikel
+                        </button>
+                        <button id="btn-clear-particles" class="simulation-btn" style="background: linear-gradient(to right, #ef4444, #dc2626);">
+                            <i class="fas fa-trash"></i> Hapus Partikel
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Magnet Visualization -->
+                <div class="mb-6 p-4 bg-white border border-gray-200 rounded-xl shadow-sm">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="section-header text-gray-700 flex items-center">
+                            <i class="fas fa-project-diagram text-blue-500 mr-2 text-xs"></i> Visualisasi Medan Magnet
+                        </h3>
+                        <div class="text-xs text-gray-500">
+                            <span id="simulation-time">0.0</span> s
+                        </div>
+                    </div>
+                    
+                    <div class="magnet-container relative">
+                        <!-- Canvas untuk medan magnet -->
+                        <canvas id="magnet-canvas"></canvas>
+                        
+                        <!-- Magnets will be added here dynamically -->
+                        <div id="magnet-north" class="magnet north" style="width: 80px; height: 40px; top: 130px; left: 80px;">
+                            <div class="magnet-label">N</div>
+                        </div>
+                        <div id="magnet-south" class="magnet south" style="width: 80px; height: 40px; top: 130px; left: 240px;">
+                            <div class="magnet-label">S</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Simulation Info -->
+                    <div class="field-info">
+                        <div class="info-row">
+                            <span class="info-label">Gaya Lorentz (F):</span>
+                            <span class="info-value" id="info-lorentz-force">- N</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Jari-jari Lintasan (r):</span>
+                            <span class="info-value" id="info-radius">- m</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Frekuensi Siklotron (f):</span>
+                            <span class="info-value" id="info-frequency">- Hz</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Jumlah Partikel:</span>
+                            <span class="info-value" id="info-particle-count">0</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Real-time Data Visualization -->
+                <div class="mb-6 p-4 bg-white border border-gray-200 rounded-xl shadow-sm">
+                    <h3 class="section-header text-gray-700 flex items-center mb-4">
+                        <i class="fas fa-chart-bar text-green-500 mr-2 text-xs"></i> Visualisasi Data Real-time
+                    </h3>
+                    
+                    <div class="grid grid-cols-2 gap-3 mb-4">
+                        <div class="bg-blue-50 p-3 rounded-lg">
+                            <p class="text-xs text-blue-700">Posisi X</p>
+                            <p id="current-x" class="text-lg font-bold text-blue-800">- m</p>
+                        </div>
+                        <div class="bg-green-50 p-3 rounded-lg">
+                            <p class="text-xs text-green-700">Posisi Y</p>
+                            <p id="current-y" class="text-lg font-bold text-green-800">- m</p>
+                        </div>
+                        <div class="bg-purple-50 p-3 rounded-lg">
+                            <p class="text-xs text-purple-700">Kecepatan X</p>
+                            <p id="current-vx" class="text-lg font-bold text-purple-800">- m/s</p>
+                        </div>
+                        <div class="bg-red-50 p-3 rounded-lg">
+                            <p class="text-xs text-red-700">Kecepatan Y</p>
+                            <p id="current-vy" class="text-lg font-bold text-red-800">- m/s</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Real-time Charts -->
+                    <div class="chart-container mb-3">
+                        <!-- Empty State for Velocity Chart -->
+                        <div id="velocity-empty-state" class="empty-chart">
+                            <i class="fas fa-tachometer-alt empty-chart-icon"></i>
+                            <p class="empty-chart-text">
+                                Grafik kecepatan akan muncul saat simulasi berjalan
+                            </p>
+                        </div>
+                        <canvas id="velocity-chart"></canvas>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <!-- Empty State for Position Chart -->
+                        <div id="position-empty-state" class="empty-chart">
+                            <i class="fas fa-map-marker-alt empty-chart-icon"></i>
+                            <p class="empty-chart-text">
+                                Grafik posisi akan muncul saat simulasi berjalan
+                            </p>
+                        </div>
+                        <canvas id="position-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Data Tab Content (Hidden by default) -->
+            <div id="data-content" class="hidden">
+                <div class="mb-6 p-4 bg-white border border-gray-200 rounded-xl shadow-sm">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="section-header text-gray-700 flex items-center">
+                            <i class="fas fa-database text-purple-500 mr-2 text-xs"></i> Data Tabel Simulasi Real-time
+                        </h3>
+                        <button id="btn-clear-data" class="text-xs px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200">
+                            <i class="fas fa-trash mr-1"></i> Hapus Data
+                        </button>
+                    </div>
+                    
+                    <div class="table-container">
+                        <table class="data-table" id="magnet-table">
+                            <thead>
+                                <tr>
+                                    <th>Waktu (s)</th>
+                                    <th>Posisi X (m)</th>
+                                    <th>Posisi Y (m)</th>
+                                    <th>Vx (m/s)</th>
+                                    <th>Vy (m/s)</th>
+                                    <th>Gaya (N)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="magnet-table-body">
+                                <!-- Data rows will be inserted here -->
+                                <tr>
+                                    <td colspan="6" class="text-center py-6 text-gray-500">
+                                        <i class="fas fa-database text-2xl mb-2 block text-gray-300"></i>
+                                        <p class="text-sm">Belum ada data simulasi</p>
+                                        <p class="text-xs mt-1">Klik "Mulai Simulasi" untuk memulai</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="mt-4 grid grid-cols-3 gap-3">
+                        <div class="bg-gray-50 p-3 rounded-lg">
+                            <p class="text-xs text-gray-600">Data Points</p>
+                            <p id="data-count" class="text-lg font-bold text-gray-800">0</p>
+                        </div>
+                        <div class="bg-gray-50 p-3 rounded-lg">
+                            <p class="text-xs text-gray-600">Interval</p>
+                            <p id="data-interval" class="text-lg font-bold text-gray-800">0.1 s</p>
+                        </div>
+                        <div class="bg-gray-50 p-3 rounded-lg">
+                            <p class="text-xs text-gray-600">Status</p>
+                            <p id="data-status" class="text-lg font-bold text-green-600">Siap</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Export Tab Content (Hidden by default) -->
+            <div id="ekspor-content" class="hidden">
+                <div class="mb-6 p-4 bg-white border border-gray-200 rounded-xl shadow-sm">
+                    <h3 class="section-header text-gray-700 flex items-center mb-4">
+                        <i class="fas fa-file-export text-green-500 mr-2 text-xs"></i> Ekspor Data Simulasi
+                    </h3>
+                    
+                    <div class="space-y-4">
+                        <!-- Export Options -->
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <h4 class="text-sm font-semibold text-blue-800 mb-3">
+                                <i class="fas fa-cog mr-2"></i> Pengaturan Ekspor
+                            </h4>
+                            
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700 mb-1">Format Data</label>
+                                    <select id="export-format" class="w-full p-2 border border-gray-300 rounded text-xs">
+                                        <option value="csv">CSV (Excel)</option>
+                                        <option value="json">JSON</option>
+                                        <option value="txt">Teks</option>
+                                    </select>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700 mb-1">Presisi Data</label>
+                                    <select id="export-precision" class="w-full p-2 border border-gray-300 rounded text-xs">
+                                        <option value="2">2 Desimal</option>
+                                        <option value="3">3 Desimal</option>
+                                        <option value="4">4 Desimal</option>
+                                        <option value="6">6 Desimal</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-3">
+                                <label class="block text-xs font-medium text-gray-700 mb-1">Rentang Data</label>
+                                <div class="flex gap-2">
+                                    <input type="number" id="export-start" value="0" min="0" step="0.1" class="flex-1 p-2 border border-gray-300 rounded text-xs" placeholder="Mulai (s)">
+                                    <input type="number" id="export-end" value="10" min="0" step="0.1" class="flex-1 p-2 border border-gray-300 rounded text-xs" placeholder="Selesai (s)">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Export Buttons -->
+                        <div class="grid grid-cols-2 gap-3">
+                            <button id="btn-export-csv" class="export-btn export-btn-data">
+                                <i class="fas fa-file-csv"></i> Download CSV
+                            </button>
+                            <button id="btn-export-chart" class="export-btn export-btn-chart">
+                                <i class="fas fa-chart-line"></i> Download Grafik
+                            </button>
+                            <button id="btn-export-all" class="export-btn col-span-2" style="background: linear-gradient(to right, #10b981, #059669); color: white;">
+                                <i class="fas fa-file-archive"></i> Download Semua Data
+                            </button>
+                        </div>
+                        
+                        <!-- Export Preview -->
+                        <div class="mt-4">
+                            <label class="block text-xs font-medium text-gray-700 mb-2">
+                                <i class="fas fa-eye mr-1"></i> Pratinjau Data
+                            </label>
+                            <div class="bg-gray-50 p-3 rounded-lg max-h-40 overflow-y-auto">
+                                <pre id="export-preview" class="text-xs text-gray-600">Belum ada data simulasi. Jalankan simulasi terlebih dahulu.</pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Information Panel -->
+            <div class="mb-6 p-4 bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-xl">
+                <h3 class="section-header text-gray-700 mb-3 flex items-center">
+                    <i class="fas fa-info-circle text-purple-500 mr-2 text-xs"></i> Informasi Medan Magnet
+                </h3>
+                
+                <div class="space-y-3">
+                    <div class="text-xs text-gray-700">
+                        <p class="mb-2"><span class="font-bold">Rumus Gaya Lorentz:</span></p>
+                        <div class="bg-white p-2 rounded-lg mb-2">
+                            <p class="mb-1">F = q(v × B)</p>
+                            <p>q = muatan partikel, v = kecepatan, B = medan magnet</p>
+                        </div>
+                        
+                        <p class="mb-2"><span class="font-bold">Gerak Partikel Bermuatan:</span></p>
+                        <div class="bg-white p-2 rounded-lg mb-2">
+                            <p class="mb-1">Jari-jari lintasan: r = mv/(|q|B)</p>
+                            <p class="mb-1">Frekuensi siklotron: f = |q|B/(2πm)</p>
+                            <p>Periode: T = 2πm/(|q|B)</p>
+                        </div>
+                        
+                        <p class="mb-2"><span class="font-bold">Parameter yang Dapat Diubah:</span></p>
+                        <ul class="list-disc pl-4 space-y-1">
+                            <li>Kekuatan medan (B): 1 - 100 μT</li>
+                            <li>Arah medan (θ): 0° - 360°</li>
+                            <li>Muatan partikel (q): -100e sampai +100e</li>
+                            <li>Kecepatan partikel (v): 1 - 100 m/s</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Quick Tips -->
+                    <div class="mt-4 pt-3 border-t border-purple-100">
+                        <p class="text-xs font-medium text-gray-700 mb-2">Tips Simulasi:</p>
+                        <div class="text-xs text-gray-600 space-y-1">
+                            <div class="flex items-start">
+                                <i class="fas fa-lightbulb text-yellow-500 mt-0.5 mr-2"></i>
+                                <span>Partikel positif bergerak berlawanan jarum jam</span>
+                            </div>
+                            <div class="flex items-start">
+                                <i class="fas fa-lightbulb text-yellow-500 mt-0.5 mr-2"></i>
+                                <span>Partikel negatif bergerak searah jarum jam</span>
+                            </div>
+                            <div class="flex items-start">
+                                <i class="fas fa-lightbulb text-yellow-500 mt-0.5 mr-2"></i>
+                                <span>Gaya Lorentz selalu tegak lurus kecepatan</span>
+                            </div>
+                            <div class="flex items-start">
+                                <i class="fas fa-lightbulb text-yellow-500 mt-0.5 mr-2"></i>
+                                <span>Klik "Tambah Partikel" untuk banyak partikel</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+          <a href="../../dashboard siswa.html" class="nav-item">
+            <i class="fas fa-home nav-icon"></i>
+            <span>Beranda</span>
+          </a>
+          <a href="../../soal harian/dashboard soal.html" class="nav-item">
+            <i class="fas fa-flask nav-icon"></i>
+            <span>Soal Harian</span>
+          </a>
+          <a href="../../ai/nayra.html" class="nav-item">
+            <i class="fas fa-robot nav-icon"></i>
+            <span>Nayra AI</span>
+          </a>
+          <a href="../../materi harian/kategori materi.html" class="nav-item">
+            <i class="fas fa-chalkboard-teacher nav-icon"></i>
+            <span>Materi Harian</span>
+          </a>
+          <a href="../../profil/profil.html" class="nav-item">
+            <i class="fas fa-user nav-icon"></i>
+            <span>Profil</span>
+          </a>
+        </nav>
+    </div>
+
+    <!-- Chart.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script>
+        // DOM Elements
+        const loading = document.getElementById('loading');
+        const errorMessage = document.getElementById('error-message');
+        const errorTitle = document.getElementById('error-title');
+        const errorDetail = document.getElementById('error-detail');
+        
+        // Tab Elements
+        const tabSimulasi = document.getElementById('tab-simulasi');
+        const tabData = document.getElementById('tab-data');
+        const tabEkspor = document.getElementById('tab-ekspor');
+        const simulasiContent = document.getElementById('simulasi-content');
+        const dataContent = document.getElementById('data-content');
+        const eksporContent = document.getElementById('ekspor-content');
+        
+        // Control Elements
+        const fieldStrengthSlider = document.getElementById('field-strength-slider');
+        const fieldDirectionSlider = document.getElementById('field-direction-slider');
+        const chargeSlider = document.getElementById('charge-slider');
+        const velocitySlider = document.getElementById('velocity-slider');
+        
+        const fieldStrengthValue = document.getElementById('field-strength-value');
+        const fieldDirectionValue = document.getElementById('field-direction-value');
+        const chargeValue = document.getElementById('charge-value');
+        const velocityValue = document.getElementById('velocity-value');
+        
+        const btnStartSimulation = document.getElementById('btn-start-simulation');
+        const btnResetSimulation = document.getElementById('btn-reset-simulation');
+        const btnAddParticle = document.getElementById('btn-add-particle');
+        const btnClearParticles = document.getElementById('btn-clear-particles');
+        
+        // Display Elements
+        const simulationTime = document.getElementById('simulation-time');
+        const currentX = document.getElementById('current-x');
+        const currentY = document.getElementById('current-y');
+        const currentVx = document.getElementById('current-vx');
+        const currentVy = document.getElementById('current-vy');
+        
+        // Info Elements
+        const infoLorentzForce = document.getElementById('info-lorentz-force');
+        const infoRadius = document.getElementById('info-radius');
+        const infoFrequency = document.getElementById('info-frequency');
+        const infoParticleCount = document.getElementById('info-particle-count');
+        
+        // Empty State Elements
+        const velocityEmptyState = document.getElementById('velocity-empty-state');
+        const positionEmptyState = document.getElementById('position-empty-state');
+        
+        // Data Elements
+        const magnetTableBody = document.getElementById('magnet-table-body');
+        const btnClearData = document.getElementById('btn-clear-data');
+        const dataCount = document.getElementById('data-count');
+        const dataInterval = document.getElementById('data-interval');
+        const dataStatus = document.getElementById('data-status');
+        
+        // Export Elements
+        const exportFormat = document.getElementById('export-format');
+        const exportPrecision = document.getElementById('export-precision');
+        const exportStart = document.getElementById('export-start');
+        const exportEnd = document.getElementById('export-end');
+        const exportPreview = document.getElementById('export-preview');
+        const btnExportCSV = document.getElementById('btn-export-csv');
+        const btnExportChart = document.getElementById('btn-export-chart');
+        const btnExportAll = document.getElementById('btn-export-all');
+        
+        // Canvas Elements
+        const magnetCanvas = document.getElementById('magnet-canvas');
+        
+        // Chart Elements
+        const velocityChartCanvas = document.getElementById('velocity-chart');
+        const positionChartCanvas = document.getElementById('position-chart');
+        
+        // Variables
+        let velocityChart = null;
+        let positionChart = null;
+        let canvasContext = null;
+        
+        let simulationRunning = false;
+        let simulationPaused = false;
+        let simulationTimeValue = 0;
+        let simulationInterval = null;
+        let simulationData = [];
+        let particles = [];
+        
+        // Simulation Parameters
+        let params = {
+            B: 50,         // Magnetic field strength (μT)
+            angle: 90,     // Field direction (degrees)
+            q: 10,         // Charge (elementary charge units)
+            v: 30,         // Velocity (m/s)
+            dt: 0.1        // Time step (s)
+        };
+        
+        // Constants
+        const ELECTRON_CHARGE = 1.602e-19; // Coulomb
+        const PROTON_MASS = 1.673e-27; // kg
+        
+        // Initialize
+        function init() {
+            try {
+                // Initialize canvas
+                initMagnetCanvas();
+                
+                // Initialize charts (empty)
+                initVelocityChart();
+                initPositionChart();
+                
+                // Hide charts initially, show empty states
+                velocityChartCanvas.style.display = 'none';
+                positionChartCanvas.style.display = 'none';
+                
+                // Set up control listeners
+                setupControls();
+                
+                // Create initial particles
+                createInitialParticles();
+                
+                // Hide loading
+                setTimeout(() => {
+                    loading.classList.add('hidden');
+                }, 1000);
+                
+            } catch (err) {
+                console.error('Error initializing simulation:', err);
+                showError('Inisialisasi Gagal', 'Gagal memuat komponen simulasi');
+            }
+        }
+        
+        // Initialize magnet canvas
+        function initMagnetCanvas() {
+            canvasContext = magnetCanvas.getContext('2d');
+            magnetCanvas.width = magnetCanvas.offsetWidth;
+            magnetCanvas.height = magnetCanvas.offsetHeight;
+            
+            // Draw initial state
+            drawMagneticField();
+        }
+        
+        // Initialize velocity chart (empty)
+        function initVelocityChart() {
+            const ctx = velocityChartCanvas.getContext('2d');
+            
+            velocityChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Kecepatan X (Vx)',
+                        data: [],
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }, {
+                        label: 'Kecepatan Y (Vy)',
+                        data: [],
+                        borderColor: '#ef4444',
+                        backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                font: {
+                                    size: 11,
+                                    family: "'Baloo 2', cursive"
+                                }
+                            }
+                        },
+                        title: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Waktu (s)',
+                                font: {
+                                    size: 11,
+                                    family: "'Baloo 2', cursive"
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            },
+                            suggestedMax: 10
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Kecepatan (m/s)',
+                                font: {
+                                    size: 11,
+                                    family: "'Baloo 2', cursive"
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            },
+                            suggestedMin: -50,
+                            suggestedMax: 50
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Initialize position chart (empty)
+        function initPositionChart() {
+            const ctx = positionChartCanvas.getContext('2d');
+            
+            positionChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Posisi X',
+                        data: [],
+                        borderColor: '#10b981',
+                        backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }, {
+                        label: 'Posisi Y',
+                        data: [],
+                        borderColor: '#8b5cf6',
+                        backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                        borderWidth: 2,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                font: {
+                                    size: 11,
+                                    family: "'Baloo 2', cursive"
+                                }
+                            }
+                        },
+                        title: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Waktu (s)',
+                                font: {
+                                    size: 11,
+                                    family: "'Baloo 2', cursive"
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            },
+                            suggestedMax: 10
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Posisi (m)',
+                                font: {
+                                    size: 11,
+                                    family: "'Baloo 2', cursive"
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            },
+                            suggestedMin: -50,
+                            suggestedMax: 50
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Set up control listeners
+        function setupControls() {
+            // Update parameter values
+            fieldStrengthSlider.addEventListener('input', (e) => {
+                params.B = parseFloat(e.target.value);
+                fieldStrengthValue.textContent = `${params.B} μT`;
+                drawMagneticField();
+            });
+            
+            fieldDirectionSlider.addEventListener('input', (e) => {
+                params.angle = parseFloat(e.target.value);
+                fieldDirectionValue.textContent = `${params.angle}°`;
+                drawMagneticField();
+            });
+            
+            chargeSlider.addEventListener('input', (e) => {
+                params.q = parseFloat(e.target.value);
+                chargeValue.textContent = `${params.q > 0 ? '+' : ''}${params.q} e`;
+            });
+            
+            velocitySlider.addEventListener('input', (e) => {
+                params.v = parseFloat(e.target.value);
+                velocityValue.textContent = `${params.v} m/s`;
+            });
+            
+            // Simulation controls
+            btnStartSimulation.addEventListener('click', startSimulation);
+            btnResetSimulation.addEventListener('click', resetSimulation);
+            btnAddParticle.addEventListener('click', addParticle);
+            btnClearParticles.addEventListener('click', clearParticles);
+            
+            // Tab navigation
+            tabSimulasi.addEventListener('click', () => switchTab('simulasi'));
+            tabData.addEventListener('click', () => switchTab('data'));
+            tabEkspor.addEventListener('click', () => switchTab('ekspor'));
+            
+            // Data controls
+            btnClearData.addEventListener('click', clearData);
+            
+            // Export controls
+            btnExportCSV.addEventListener('click', exportCSV);
+            btnExportChart.addEventListener('click', exportChart);
+            btnExportAll.addEventListener('click', exportAll);
+            
+            exportFormat.addEventListener('change', updateExportPreview);
+            exportPrecision.addEventListener('change', updateExportPreview);
+            exportStart.addEventListener('change', updateExportPreview);
+            exportEnd.addEventListener('change', updateExportPreview);
+            
+            // Canvas click to add particle
+            magnetCanvas.addEventListener('click', (e) => {
+                if (!simulationRunning) {
+                    const rect = magnetCanvas.getBoundingClientRect();
+                    const x = e.clientX - rect.left;
+                    const y = e.clientY - rect.top;
+                    
+                    // Add particle at click position
+                    addParticleAtPosition(x, y);
+                }
+            });
+        }
+        
+        // Draw magnetic field lines
+        function drawMagneticField() {
+            const width = magnetCanvas.width;
+            const height = magnetCanvas.height;
+            
+            // Clear canvas
+            canvasContext.clearRect(0, 0, width, height);
+            
+            // Draw background gradient
+            const gradient = canvasContext.createLinearGradient(0, 0, width, height);
+            gradient.addColorStop(0, '#0f172a');
+            gradient.addColorStop(1, '#1e293b');
+            canvasContext.fillStyle = gradient;
+            canvasContext.fillRect(0, 0, width, height);
+            
+            // Draw magnetic field lines
+            canvasContext.strokeStyle = 'rgba(59, 130, 246, 0.3)';
+            canvasContext.lineWidth = 1;
+            
+            const angleRad = params.angle * Math.PI / 180;
+            const lineSpacing = 20;
+            const lineLength = 100;
+            
+            // Draw field lines
+            for (let y = 20; y < height; y += lineSpacing) {
+                for (let x = 20; x < width; x += lineSpacing) {
+                    // Calculate line direction
+                    const dx = Math.cos(angleRad) * lineLength;
+                    const dy = Math.sin(angleRad) * lineLength;
+                    
+                    // Draw arrow line
+                    canvasContext.beginPath();
+                    canvasContext.moveTo(x - dx/2, y - dy/2);
+                    canvasContext.lineTo(x + dx/2, y + dy/2);
+                    canvasContext.stroke();
+                    
+                    // Draw arrow head
+                    drawArrowHead(x + dx/2, y + dy/2, angleRad);
+                }
+            }
+            
+            // Draw magnets
+            drawMagnets();
+            
+            // Draw particles
+            drawParticles();
+        }
+        
+        // Draw arrow head for field lines
+        function drawArrowHead(x, y, angle) {
+            canvasContext.save();
+            canvasContext.translate(x, y);
+            canvasContext.rotate(angle);
+            
+            canvasContext.fillStyle = 'rgba(59, 130, 246, 0.7)';
+            canvasContext.beginPath();
+            canvasContext.moveTo(0, 0);
+            canvasContext.lineTo(-8, -4);
+            canvasContext.lineTo(-8, 4);
+            canvasContext.closePath();
+            canvasContext.fill();
+            
+            canvasContext.restore();
+        }
+        
+        // Draw magnets
+        function drawMagnets() {
+            const width = magnetCanvas.width;
+            const height = magnetCanvas.height;
+            
+            // Draw north magnet (left)
+            const magnetWidth = 80;
+            const magnetHeight = 40;
+            const magnetX = width/4 - magnetWidth/2;
+            const magnetY = height/2 - magnetHeight/2;
+            
+            // North magnet (red)
+            const northGradient = canvasContext.createLinearGradient(magnetX, magnetY, magnetX, magnetY + magnetHeight);
+            northGradient.addColorStop(0, '#dc2626');
+            northGradient.addColorStop(1, '#991b1b');
+            
+            canvasContext.fillStyle = northGradient;
+            canvasContext.fillRect(magnetX, magnetY, magnetWidth, magnetHeight);
+            
+            // Magnet border
+            canvasContext.strokeStyle = '#ffffff';
+            canvasContext.lineWidth = 2;
+            canvasContext.strokeRect(magnetX, magnetY, magnetWidth, magnetHeight);
+            
+            // N label
+            canvasContext.fillStyle = 'white';
+            canvasContext.font = 'bold 20px Arial';
+            canvasContext.textAlign = 'center';
+            canvasContext.textBaseline = 'middle';
+            canvasContext.fillText('N', magnetX + magnetWidth/2, magnetY + magnetHeight/2);
+            
+            // Draw south magnet (right)
+            const southX = 3*width/4 - magnetWidth/2;
+            
+            // South magnet (blue)
+            const southGradient = canvasContext.createLinearGradient(southX, magnetY, southX, magnetY + magnetHeight);
+            southGradient.addColorStop(0, '#2563eb');
+            southGradient.addColorStop(1, '#1d4ed8');
+            
+            canvasContext.fillStyle = southGradient;
+            canvasContext.fillRect(southX, magnetY, magnetWidth, magnetHeight);
+            
+            // Magnet border
+            canvasContext.strokeStyle = '#ffffff';
+            canvasContext.lineWidth = 2;
+            canvasContext.strokeRect(southX, magnetY, magnetWidth, magnetHeight);
+            
+            // S label
+            canvasContext.fillStyle = 'white';
+            canvasContext.font = 'bold 20px Arial';
+            canvasContext.textAlign = 'center';
+            canvasContext.textBaseline = 'middle';
+            canvasContext.fillText('S', southX + magnetWidth/2, magnetY + magnetHeight/2);
+        }
+        
+        // Create initial particles
+        function createInitialParticles() {
+            particles = [];
+            
+            // Add initial particle at center
+            addParticleAtPosition(magnetCanvas.width/2, magnetCanvas.height/2);
+        }
+        
+        // Add particle at specific position
+        function addParticleAtPosition(x, y) {
+            const particle = {
+                id: Date.now() + Math.random(),
+                x: x,
+                y: y,
+                vx: params.v * Math.cos(Math.PI/4), // Initial velocity at 45 degrees
+                vy: params.v * Math.sin(Math.PI/4),
+                charge: params.q,
+                radius: 5,
+                color: params.q > 0 ? '#f59e0b' : '#3b82f6',
+                trail: []
+            };
+            
+            particles.push(particle);
+            updateParticleCount();
+            drawParticles();
+        }
+        
+        // Add random particle
+        function addParticle() {
+            const x = 50 + Math.random() * (magnetCanvas.width - 100);
+            const y = 50 + Math.random() * (magnetCanvas.height - 100);
+            
+            // Random charge (positive or negative)
+            const charge = Math.random() > 0.5 ? 10 : -10;
+            
+            // Random velocity direction
+            const angle = Math.random() * 2 * Math.PI;
+            
+            const particle = {
+                id: Date.now() + Math.random(),
+                x: x,
+                y: y,
+                vx: params.v * Math.cos(angle),
+                vy: params.v * Math.sin(angle),
+                charge: charge,
+                radius: 5,
+                color: charge > 0 ? '#f59e0b' : '#3b82f6',
+                trail: []
+            };
+            
+            particles.push(particle);
+            updateParticleCount();
+            drawParticles();
+            
+            showError('Partikel Ditambahkan', `Partikel ${charge > 0 ? 'positif' : 'negatif'} ditambahkan`);
+        }
+        
+        // Clear all particles
+        function clearParticles() {
+            if (particles.length > 0 && confirm('Hapus semua partikel?')) {
+                particles = [];
+                updateParticleCount();
+                drawMagneticField();
+                showError('Partikel Dihapus', 'Semua partikel telah dihapus');
+            }
+        }
+        
+        // Draw particles
+        function drawParticles() {
+            drawMagneticField(); // Redraw everything
+            
+            // Draw particle trails first
+            particles.forEach(particle => {
+                if (particle.trail.length > 1) {
+                    canvasContext.strokeStyle = particle.color + '80'; // 50% opacity
+                    canvasContext.lineWidth = 1;
+                    canvasContext.beginPath();
+                    canvasContext.moveTo(particle.trail[0].x, particle.trail[0].y);
+                    
+                    for (let i = 1; i < particle.trail.length; i++) {
+                        canvasContext.lineTo(particle.trail[i].x, particle.trail[i].y);
+                    }
+                    canvasContext.stroke();
+                }
+            });
+            
+            // Draw particles
+            particles.forEach(particle => {
+                // Particle glow
+                const gradient = canvasContext.createRadialGradient(
+                    particle.x, particle.y, 0,
+                    particle.x, particle.y, particle.radius * 2
+                );
+                gradient.addColorStop(0, particle.color);
+                gradient.addColorStop(1, particle.color + '00');
+                
+                canvasContext.fillStyle = gradient;
+                canvasContext.beginPath();
+                canvasContext.arc(particle.x, particle.y, particle.radius * 2, 0, Math.PI * 2);
+                canvasContext.fill();
+                
+                // Particle core
+                canvasContext.fillStyle = particle.color;
+                canvasContext.beginPath();
+                canvasContext.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
+                canvasContext.fill();
+                
+                // Charge indicator
+                canvasContext.fillStyle = 'white';
+                canvasContext.font = 'bold 10px Arial';
+                canvasContext.textAlign = 'center';
+                canvasContext.textBaseline = 'middle';
+                canvasContext.fillText(particle.charge > 0 ? '+' : '-', particle.x, particle.y);
+            });
+        }
+        
+        // Calculate magnetic field values
+        function calculateFieldValues() {
+            // Convert μT to Tesla
+            const B_tesla = params.B * 1e-6;
+            
+            // Calculate charge in Coulombs
+            const q_coulomb = params.q * ELECTRON_CHARGE;
+            
+            // Calculate Lorentz force (F = q(v × B))
+            // For simplicity, assume velocity perpendicular to B
+            const force = Math.abs(q_coulomb) * params.v * B_tesla;
+            
+            // Calculate radius of circular motion (r = mv/(|q|B))
+            const mass = PROTON_MASS; // Use proton mass as reference
+            const radius = (mass * params.v) / (Math.abs(q_coulomb) * B_tesla);
+            
+            // Calculate cyclotron frequency (f = |q|B/(2πm))
+            const frequency = (Math.abs(q_coulomb) * B_tesla) / (2 * Math.PI * mass);
+            
+            return {
+                force,
+                radius,
+                frequency
+            };
+        }
+        
+        // Start simulation
+        function startSimulation() {
+            if (simulationRunning) return;
+            
+            // Calculate initial values
+            const calculatedValues = calculateFieldValues();
+            
+            simulationRunning = true;
+            simulationPaused = false;
+            simulationTimeValue = 0;
+            simulationData = [];
+            
+            btnStartSimulation.disabled = true;
+            btnStartSimulation.innerHTML = '<i class="fas fa-sync-alt spin"></i> Simulasi Berjalan';
+            
+            dataStatus.textContent = 'Merekam';
+            dataStatus.className = 'text-lg font-bold text-yellow-600';
+            
+            // Hide empty states and show charts
+            velocityEmptyState.style.display = 'none';
+            positionEmptyState.style.display = 'none';
+            
+            velocityChartCanvas.style.display = 'block';
+            positionChartCanvas.style.display = 'block';
+            
+            // Clear previous data from charts
+            clearCharts();
+            
+            // Update info display
+            infoLorentzForce.textContent = `${calculatedValues.force.toExponential(2)} N`;
+            infoRadius.textContent = `${calculatedValues.radius.toFixed(3)} m`;
+            infoFrequency.textContent = `${calculatedValues.frequency.toFixed(0)} Hz`;
+            
+            // Start simulation loop
+            simulationInterval = setInterval(updateSimulation, 100);
+            
+            showError('Simulasi Dimulai', 'Simulasi medan magnet sedang berjalan');
+        }
+        
+        // Reset simulation
+        function resetSimulation() {
+            stopSimulation();
+            simulationTimeValue = 0;
+            simulationData = [];
+            
+            // Reset particle positions
+            particles.forEach(particle => {
+                particle.x = magnetCanvas.width/2;
+                particle.y = magnetCanvas.height/2;
+                particle.vx = params.v * Math.cos(Math.PI/4);
+                particle.vy = params.v * Math.sin(Math.PI/4);
+                particle.trail = [];
+            });
+            
+            updateDisplay(0, magnetCanvas.width/2, magnetCanvas.height/2, params.v * Math.cos(Math.PI/4), params.v * Math.sin(Math.PI/4));
+            clearCharts();
+            updateDataTable();
+            
+            // Show empty states again
+            velocityEmptyState.style.display = 'flex';
+            positionEmptyState.style.display = 'flex';
+            
+            velocityChartCanvas.style.display = 'none';
+            positionChartCanvas.style.display = 'none';
+            
+            simulationTime.textContent = '0.0';
+            currentX.textContent = '- m';
+            currentY.textContent = '- m';
+            currentVx.textContent = '- m/s';
+            currentVy.textContent = '- m/s';
+            
+            infoLorentzForce.textContent = '- N';
+            infoRadius.textContent = '- m';
+            infoFrequency.textContent = '- Hz';
+            
+            dataStatus.textContent = 'Siap';
+            dataStatus.className = 'text-lg font-bold text-green-600';
+            
+            // Redraw particles at center
+            drawMagneticField();
+            
+            showError('Simulasi Direset', 'Semua data telah direset');
+        }
+        
+        // Stop simulation
+        function stopSimulation() {
+            simulationRunning = false;
+            simulationPaused = false;
+            
+            if (simulationInterval) {
+                clearInterval(simulationInterval);
+                simulationInterval = null;
+            }
+            
+            btnStartSimulation.disabled = false;
+            btnStartSimulation.innerHTML = '<i class="fas fa-play"></i> Mulai Simulasi';
+        }
+        
+        // Update simulation
+        function updateSimulation() {
+            if (!simulationRunning) return;
+            
+            // Convert field direction to radians
+            const angleRad = params.angle * Math.PI / 180;
+            
+            // Calculate magnetic field vector
+            const Bx = Math.cos(angleRad) * params.B * 1e-6; // Convert μT to T
+            const By = Math.sin(angleRad) * params.B * 1e-6;
+            
+            // Update each particle
+            particles.forEach((particle, index) => {
+                // Calculate charge in Coulombs
+                const q_coulomb = particle.charge * ELECTRON_CHARGE;
+                
+                // Calculate Lorentz force (F = q(v × B))
+                // Fx = q * (vy*Bz - vz*By) - simplified for 2D
+                // Fy = q * (vz*Bx - vx*Bz)
+                // In 2D with B perpendicular to plane, we use:
+                const Fx = q_coulomb * (particle.vy * 0 - 0 * By); // Simplified
+                const Fy = q_coulomb * (0 * Bx - particle.vx * 0); // Simplified
+                
+                // For circular motion in magnetic field, we use:
+                // dv/dt = (q/m)(v × B)
+                const mass = PROTON_MASS;
+                const ax = (q_coulomb / mass) * (particle.vy * 0 - 0 * By);
+                const ay = (q_coulomb / mass) * (0 * Bx - particle.vx * 0);
+                
+                // In reality, for uniform B field perpendicular to velocity,
+                // the acceleration is centripetal: a = v²/r
+                // where r = mv/(|q|B)
+                
+                // For simulation purposes, we'll create circular motion
+                const omega = (q_coulomb * params.B * 1e-6) / mass; // Angular frequency
+                
+                // Update velocity based on circular motion
+                const v_mag = Math.sqrt(particle.vx * particle.vx + particle.vy * particle.vy);
+                const theta = Math.atan2(particle.vy, particle.vx);
+                const newTheta = theta + omega * params.dt;
+                
+                // Determine direction based on charge sign
+                const direction = particle.charge > 0 ? 1 : -1;
+                
+                particle.vx = v_mag * Math.cos(newTheta * direction);
+                particle.vy = v_mag * Math.sin(newTheta * direction);
+                
+                // Update position
+                particle.x += particle.vx * params.dt;
+                particle.y += particle.vy * params.dt;
+                
+                // Add to trail (keep last 20 points)
+                particle.trail.push({ x: particle.x, y: particle.y });
+                if (particle.trail.length > 20) {
+                    particle.trail.shift();
+                }
+                
+                // Handle boundary conditions - wrap around
+                if (particle.x < 0) particle.x = magnetCanvas.width;
+                if (particle.x > magnetCanvas.width) particle.x = 0;
+                if (particle.y < 0) particle.y = magnetCanvas.height;
+                if (particle.y > magnetCanvas.height) particle.y = 0;
+                
+                // For display, use first particle
+                if (index === 0) {
+                    // Calculate Lorentz force magnitude for display
+                    const force = Math.abs(q_coulomb) * v_mag * params.B * 1e-6;
+                    
+                    // Update display
+                    updateDisplay(simulationTimeValue, particle.x, particle.y, particle.vx, particle.vy, force);
+                    
+                    // Record data
+                    const dataPoint = {
+                        time: simulationTimeValue,
+                        x: particle.x,
+                        y: particle.y,
+                        vx: particle.vx,
+                        vy: particle.vy,
+                        force: force
+                    };
+                    
+                    simulationData.push(dataPoint);
+                    updateCharts(dataPoint);
+                    updateDataTable();
+                }
+            });
+            
+            // Redraw
+            drawParticles();
+            
+            // Increment time
+            simulationTimeValue += params.dt;
+        }
+        
+        // Update display
+        function updateDisplay(time, x, y, vx, vy, force = 0) {
+            simulationTime.textContent = time.toFixed(1);
+            currentX.textContent = `${x.toFixed(0)} px`;
+            currentY.textContent = `${y.toFixed(0)} px`;
+            currentVx.textContent = `${vx.toFixed(2)} m/s`;
+            currentVy.textContent = `${vy.toFixed(2)} m/s`;
+            
+            // Update force info if provided
+            if (force > 0) {
+                infoLorentzForce.textContent = `${force.toExponential(2)} N`;
+            }
+        }
+        
+        // Update charts
+        function updateCharts(dataPoint) {
+            // Update velocity chart
+            if (velocityChart) {
+                velocityChart.data.labels.push(dataPoint.time.toFixed(1));
+                velocityChart.data.datasets[0].data.push(dataPoint.vx);
+                velocityChart.data.datasets[1].data.push(dataPoint.vy);
+                
+                // Keep only last 50 points
+                if (velocityChart.data.labels.length > 50) {
+                    velocityChart.data.labels.shift();
+                    velocityChart.data.datasets[0].data.shift();
+                    velocityChart.data.datasets[1].data.shift();
+                }
+                
+                velocityChart.update('none');
+            }
+            
+            // Update position chart
+            if (positionChart) {
+                if (positionChart.data.labels.length === 0) {
+                    positionChart.data.labels = velocityChart.data.labels.slice();
+                }
+                
+                positionChart.data.datasets[0].data.push(dataPoint.x);
+                positionChart.data.datasets[1].data.push(dataPoint.y);
+                
+                // Keep only last 50 points
+                if (positionChart.data.datasets[0].data.length > 50) {
+                    positionChart.data.datasets[0].data.shift();
+                    positionChart.data.datasets[1].data.shift();
+                }
+                
+                positionChart.update('none');
+            }
+        }
+        
+        // Clear charts
+        function clearCharts() {
+            if (velocityChart) {
+                velocityChart.data.labels = [];
+                velocityChart.data.datasets[0].data = [];
+                velocityChart.data.datasets[1].data = [];
+                velocityChart.update();
+            }
+            
+            if (positionChart) {
+                positionChart.data.labels = [];
+                positionChart.data.datasets[0].data = [];
+                positionChart.data.datasets[1].data = [];
+                positionChart.update();
+            }
+        }
+        
+        // Update particle count
+        function updateParticleCount() {
+            infoParticleCount.textContent = particles.length;
+        }
+        
+        // Update data table
+        function updateDataTable() {
+            magnetTableBody.innerHTML = '';
+            
+            if (simulationData.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td colspan="6" class="text-center py-6 text-gray-500">
+                        <i class="fas fa-database text-2xl mb-2 block text-gray-300"></i>
+                        <p class="text-sm">Belum ada data simulasi</p>
+                        <p class="text-xs mt-1">Klik "Mulai Simulasi" untuk memulai</p>
+                    </td>
+                `;
+                magnetTableBody.appendChild(row);
+                return;
+            }
+            
+            // Show last 10 data points
+            const startIndex = Math.max(0, simulationData.length - 10);
+            
+            for (let i = startIndex; i < simulationData.length; i++) {
+                const data = simulationData[i];
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td>${data.time.toFixed(2)}</td>
+                    <td>${data.x.toFixed(0)}</td>
+                    <td>${data.y.toFixed(0)}</td>
+                    <td>${data.vx.toFixed(2)}</td>
+                    <td>${data.vy.toFixed(2)}</td>
+                    <td>${data.force ? data.force.toExponential(2) : '0'}</td>
+                `;
+                
+                magnetTableBody.appendChild(row);
+            }
+            
+            // Update data count
+            dataCount.textContent = simulationData.length;
+            dataInterval.textContent = `${params.dt} s`;
+        }
+        
+        // Clear data
+        function clearData() {
+            if (simulationData.length > 0 && confirm('Hapus semua data simulasi?')) {
+                simulationData = [];
+                updateDataTable();
+                showError('Data Dihapus', 'Semua data simulasi telah dihapus');
+            }
+        }
+        
+        // Switch tab
+        function switchTab(tab) {
+            // Update tab buttons
+            tabSimulasi.classList.remove('active');
+            tabData.classList.remove('active');
+            tabEkspor.classList.remove('active');
+            
+            simulasiContent.classList.add('hidden');
+            dataContent.classList.add('hidden');
+            eksporContent.classList.add('hidden');
+            
+            // Show selected tab
+            switch(tab) {
+                case 'simulasi':
+                    tabSimulasi.classList.add('active');
+                    simulasiContent.classList.remove('hidden');
+                    break;
+                case 'data':
+                    tabData.classList.add('active');
+                    dataContent.classList.remove('hidden');
+                    updateDataTable();
+                    break;
+                case 'ekspor':
+                    tabEkspor.classList.add('active');
+                    eksporContent.classList.remove('hidden');
+                    updateExportPreview();
+                    break;
+            }
+        }
+        
+        // Update export preview
+        function updateExportPreview() {
+            if (simulationData.length === 0) {
+                exportPreview.textContent = 'Belum ada data simulasi. Jalankan simulasi terlebih dahulu.';
+                return;
+            }
+            
+            const precision = parseInt(exportPrecision.value);
+            const startTime = parseFloat(exportStart.value);
+            const endTime = parseFloat(exportEnd.value);
+            
+            // Filter data by time range
+            const filteredData = simulationData.filter(d => 
+                d.time >= startTime && d.time <= endTime
+            );
+            
+            if (filteredData.length === 0) {
+                exportPreview.textContent = 'Tidak ada data dalam rentang waktu yang dipilih';
+                return;
+            }
+            
+            const format = exportFormat.value;
+            let preview = '';
+            
+            if (format === 'csv') {
+                preview = 'Waktu (s),Posisi X (px),Posisi Y (px),Kecepatan X (m/s),Kecepatan Y (m/s),Gaya Lorentz (N)\n';
+                filteredData.slice(0, 5).forEach(data => {
+                    preview += `${data.time.toFixed(precision)},${data.x.toFixed(0)},${data.y.toFixed(0)},${data.vx.toFixed(precision)},${data.vy.toFixed(precision)},${data.force ? data.force.toExponential(precision) : '0'}\n`;
+                });
+                if (filteredData.length > 5) {
+                    preview += `... (${filteredData.length - 5} data lainnya)\n`;
+                    preview += `Total: ${filteredData.length} data points`;
+                }
+            } else if (format === 'json') {
+                const previewData = filteredData.slice(0, 3).map(data => ({
+                    time: data.time.toFixed(precision),
+                    x: data.x.toFixed(0),
+                    y: data.y.toFixed(0),
+                    vx: data.vx.toFixed(precision),
+                    vy: data.vy.toFixed(precision),
+                    force: data.force ? data.force.toExponential(precision) : '0'
+                }));
+                preview = JSON.stringify(previewData, null, 2);
+                if (filteredData.length > 3) {
+                    preview += `\n... (${filteredData.length - 3} data lainnya)\n`;
+                    preview += `Total: ${filteredData.length} data points`;
+                }
+            } else {
+                filteredData.slice(0, 5).forEach(data => {
+                    preview += `t=${data.time.toFixed(precision)}s: x=${data.x.toFixed(0)}px, y=${data.y.toFixed(0)}px, vx=${data.vx.toFixed(precision)}m/s, vy=${data.vy.toFixed(precision)}m/s, F=${data.force ? data.force.toExponential(precision) : '0'}N\n`;
+                });
+                if (filteredData.length > 5) {
+                    preview += `... (${filteredData.length - 5} data lainnya)\n`;
+                    preview += `Total: ${filteredData.length} data points`;
+                }
+            }
+            
+            exportPreview.textContent = preview;
+        }
+        
+        // Export CSV
+        function exportCSV() {
+            if (simulationData.length === 0) {
+                showError('Data Tidak Tersedia', 'Tidak ada data untuk diekspor');
+                return;
+            }
+            
+            const precision = parseInt(exportPrecision.value);
+            const startTime = parseFloat(exportStart.value);
+            const endTime = parseFloat(exportEnd.value);
+            
+            // Filter data by time range
+            const filteredData = simulationData.filter(d => 
+                d.time >= startTime && d.time <= endTime
+            );
+            
+            if (filteredData.length === 0) {
+                showError('Data Tidak Ditemukan', 'Tidak ada data dalam rentang waktu yang dipilih');
+                return;
+            }
+            
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Waktu (s),Posisi X (px),Posisi Y (px),Kecepatan X (m/s),Kecepatan Y (m/s),Gaya Lorentz (N)\n";
+            
+            filteredData.forEach(data => {
+                const row = [
+                    data.time.toFixed(precision),
+                    data.x.toFixed(0),
+                    data.y.toFixed(0),
+                    data.vx.toFixed(precision),
+                    data.vy.toFixed(precision),
+                    data.force ? data.force.toExponential(precision) : '0'
+                ].join(',');
+                csvContent += row + "\n";
+            });
+            
+            // Add metadata
+            csvContent += "\n\nMETADATA SIMULASI MEDAN MAGNET\n";
+            csvContent += `Parameter,Tipe,Nilai\n`;
+            csvContent += `Kekuatan Medan,Numerik,${params.B} μT\n`;
+            csvContent += `Arah Medan,Numerik,${params.angle}°\n`;
+            csvContent += `Muatan Partikel,Numerik,${params.q} e\n`;
+            csvContent += `Kecepatan Partikel,Numerik,${params.v} m/s\n`;
+            csvContent += `Interval Waktu,Numerik,${params.dt} s\n`;
+            csvContent += `Jumlah Partikel,Numerik,${particles.length}\n`;
+            csvContent += `Jumlah Data,Numerik,${filteredData.length}\n`;
+            csvContent += `Tanggal Ekspor,Teks,${new Date().toLocaleString('id-ID')}\n`;
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement('a');
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `data-medan-magnet-${new Date().toISOString().slice(0, 10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showError('CSV Tersimpan', `${filteredData.length} data telah diunduh sebagai CSV`);
+        }
+        
+        // Export chart as PNG
+        function exportChart() {
+            if (simulationData.length === 0) {
+                showError('Data Tidak Tersedia', 'Tidak ada data simulasi untuk diekspor');
+                return;
+            }
+            
+            // Create a combined chart for export
+            const canvas = document.createElement('canvas');
+            canvas.width = 1200;
+            canvas.height = 800;
+            const ctx = canvas.getContext('2d');
+            
+            // Background
+            ctx.fillStyle = 'white';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Title
+            ctx.fillStyle = '#1f2937';
+            ctx.font = 'bold 24px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('SIMULASI MEDAN MAGNET', canvas.width / 2, 40);
+            
+            ctx.font = '16px Arial';
+            ctx.fillText(`Parameter: B=${params.B} μT, θ=${params.angle}°, q=${params.q} e, v=${params.v} m/s`, canvas.width / 2, 70);
+            ctx.fillText(`Tanggal: ${new Date().toLocaleString('id-ID')}`, canvas.width / 2, 95);
+            
+            // Draw trajectory of first particle
+            if (particles.length > 0 && particles[0].trail.length > 1) {
+                const padding = 100;
+                const chartWidth = canvas.width - 2 * padding;
+                const chartHeight = 300;
+                
+                // Find bounds of trajectory
+                const trail = particles[0].trail;
+                const minX = Math.min(...trail.map(p => p.x));
+                const maxX = Math.max(...trail.map(p => p.x));
+                const minY = Math.min(...trail.map(p => p.y));
+                const maxY = Math.max(...trail.map(p => p.y));
+                
+                const scaleX = chartWidth / Math.max(maxX - minX, 1);
+                const scaleY = chartHeight / Math.max(maxY - minY, 1);
+                const scale = Math.min(scaleX, scaleY) * 0.8;
+                
+                const offsetX = padding + (chartWidth - (maxX - minX) * scale) / 2;
+                const offsetY = padding + (chartHeight - (maxY - minY) * scale) / 2;
+                
+                // Draw axes
+                ctx.strokeStyle = '#374151';
+                ctx.lineWidth = 2;
+                
+                // X-axis
+                ctx.beginPath();
+                ctx.moveTo(padding, offsetY + chartHeight/2);
+                ctx.lineTo(padding + chartWidth, offsetY + chartHeight/2);
+                ctx.stroke();
+                
+                // Y-axis
+                ctx.beginPath();
+                ctx.moveTo(padding + chartWidth/2, offsetY);
+                ctx.lineTo(padding + chartWidth/2, offsetY + chartHeight);
+                ctx.stroke();
+                
+                // Draw grid
+                ctx.strokeStyle = '#e5e7eb';
+                ctx.lineWidth = 1;
+                
+                // Vertical grid lines
+                for (let i = 1; i < 5; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(padding + (i * chartWidth / 5), offsetY);
+                    ctx.lineTo(padding + (i * chartWidth / 5), offsetY + chartHeight);
+                    ctx.stroke();
+                }
+                
+                // Horizontal grid lines
+                for (let i = 1; i < 5; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(padding, offsetY + (i * chartHeight / 5));
+                    ctx.lineTo(padding + chartWidth, offsetY + (i * chartHeight / 5));
+                    ctx.stroke();
+                }
+                
+                // Draw trajectory
+                ctx.strokeStyle = '#8b5cf6';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                
+                trail.forEach((point, index) => {
+                    const x = offsetX + (point.x - minX) * scale;
+                    const y = offsetY + (point.y - minY) * scale;
+                    
+                    if (index === 0) {
+                        ctx.moveTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                });
+                ctx.stroke();
+                
+                // Draw current position
+                const current = trail[trail.length - 1];
+                const x = offsetX + (current.x - minX) * scale;
+                const y = offsetY + (current.y - minY) * scale;
+                
+                ctx.fillStyle = '#f59e0b';
+                ctx.beginPath();
+                ctx.arc(x, y, 8, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = '#7c2d12';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                
+                // Axis labels
+                ctx.fillStyle = '#4b5563';
+                ctx.font = 'bold 16px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('Posisi X (px)', canvas.width / 2, offsetY + chartHeight + 30);
+                
+                ctx.save();
+                ctx.translate(30, offsetY + chartHeight / 2);
+                ctx.rotate(-Math.PI / 2);
+                ctx.fillText('Posisi Y (px)', 0, 0);
+                ctx.restore();
+                
+                // Chart title
+                ctx.fillStyle = '#1f2937';
+                ctx.font = 'bold 18px Arial';
+                ctx.fillText('Lintasan Partikel Bermuatan', canvas.width / 2, offsetY - 10);
+            }
+            
+            // Add data table
+            ctx.font = '14px Arial';
+            ctx.textAlign = 'left';
+            ctx.fillStyle = '#1f2937';
+            ctx.fillText('DATA SIMULASI', 100, 450);
+            
+            // Draw table headers
+            ctx.fillStyle = '#38b2ac';
+            ctx.fillRect(100, 470, 1000, 30);
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 12px Arial';
+            const headers = ['Waktu (s)', 'Posisi X (px)', 'Posisi Y (px)', 'Vx (m/s)', 'Vy (m/s)', 'Gaya (N)'];
+            const colWidth = 1000 / headers.length;
+            
+            headers.forEach((header, i) => {
+                ctx.fillText(header, 100 + i * colWidth + 10, 490);
+            });
+            
+            // Draw table data (last 10 points)
+            ctx.fillStyle = '#f9fafb';
+            const dataToShow = simulationData.slice(-10);
+            
+            dataToShow.forEach((data, rowIndex) => {
+                const y = 510 + rowIndex * 25;
+                
+                if (rowIndex % 2 === 0) {
+                    ctx.fillStyle = '#f9fafb';
+                } else {
+                    ctx.fillStyle = '#ffffff';
+                }
+                ctx.fillRect(100, y, 1000, 25);
+                
+                ctx.fillStyle = '#374151';
+                ctx.font = '12px Arial';
+                
+                const values = [
+                    data.time.toFixed(2),
+                    data.x.toFixed(0),
+                    data.y.toFixed(0),
+                    data.vx.toFixed(2),
+                    data.vy.toFixed(2),
+                    data.force ? data.force.toExponential(2) : '0'
+                ];
+                
+                values.forEach((value, i) => {
+                    ctx.fillText(value, 100 + i * colWidth + 10, y + 18);
+                });
+            });
+            
+            // Add simulation info
+            ctx.fillStyle = '#1f2937';
+            ctx.font = 'bold 14px Arial';
+            ctx.fillText('INFORMASI SIMULASI', 100, 750);
+            
+            ctx.font = '12px Arial';
+            ctx.fillStyle = '#4b5563';
+            ctx.fillText(`Gaya Lorentz: ${infoLorentzForce.textContent}`, 100, 770);
+            ctx.fillText(`Jari-jari Lintasan: ${infoRadius.textContent}`, 400, 770);
+            ctx.fillText(`Frekuensi Siklotron: ${infoFrequency.textContent}`, 700, 770);
+            ctx.fillText(`Jumlah Partikel: ${particles.length}`, 100, 790);
+            
+            // Convert to data URL and download
+            const dataUrl = canvas.toDataURL('image/png');
+            const link = document.createElement('a');
+            link.download = `grafik-medan-magnet-${new Date().toISOString().slice(0, 10)}.png`;
+            link.href = dataUrl;
+            link.click();
+            
+            showError('Grafik Tersimpan', 'Grafik medan magnet telah diunduh sebagai PNG');
+        }
+        
+        // Export all data
+        function exportAll() {
+            if (simulationData.length === 0) {
+                showError('Data Tidak Tersedia', 'Tidak ada data untuk diekspor');
+                return;
+            }
+            
+            // Export CSV
+            exportCSV();
+            
+            // Wait a moment then export chart
+            setTimeout(() => {
+                exportChart();
+            }, 1000);
+            
+            showError('Ekspor Lengkap', 'Data CSV dan grafik PNG sedang diunduh');
+        }
+        
+        // Error handling
+        function showError(title, message) {
+            errorTitle.textContent = title;
+            errorDetail.textContent = message;
+            errorMessage.classList.remove('hidden');
+            
+            setTimeout(() => {
+                errorMessage.classList.add('hidden');
+            }, 3000);
+        }
+        
+        // Add spin animation
+        const style = document.createElement('style');
+        style.textContent = `
+            .spin {
+                animation: spin 1s linear infinite;
+            }
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            magnetCanvas.width = magnetCanvas.offsetWidth;
+            magnetCanvas.height = magnetCanvas.offsetHeight;
+            drawMagneticField();
+        });
+        
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

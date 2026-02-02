@@ -1,0 +1,2033 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QUANTARA - Simulasi Getaran Gelombang & Analisis Suara</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #38b2ac;
+            --secondary: #0e7490;
+            --accent: #f59e0b;
+        }
+        
+        body {
+            font-family: 'Baloo 2', cursive;
+            background-color: #f8fafc;
+        }
+        
+        .app-container {
+            max-width: 414px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        
+        /* NAVBAR */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            max-width: 414px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            background: white;
+            z-index: 10;
+            height: 70px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+            text-decoration: none;
+            flex: 1;
+            height: 100%;
+            padding: 0.5rem 0;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-item span {
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
+        }
+        
+        .nav-item.active {
+            color: var(--primary);
+        }
+        
+        .nav-icon {
+            transition: all 0.3s ease;
+            font-size: 1.25rem;
+        }
+        
+        .nav-icon.active {
+            transform: translateY(-5px);
+            color: var(--primary);
+        }
+        
+        /* Audio Visualization */
+        .audio-visualizer {
+            position: relative;
+            background: linear-gradient(to bottom, #0f172a, #1e293b);
+            border-radius: 12px;
+            overflow: hidden;
+            height: 200px;
+        }
+        
+        /* Canvas untuk visualisasi */
+        .visualization-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100% !important;
+            height: 100% !important;
+            pointer-events: none;
+        }
+        
+        /* Chart Container */
+        .chart-container {
+            height: 280px;
+            position: relative;
+            background: white;
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        .wave-chart-container {
+            height: 300px;
+            position: relative;
+            background: white;
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        /* Empty Chart State */
+        .empty-chart {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #9ca3af;
+            text-align: center;
+        }
+        
+        .empty-chart-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+            opacity: 0.5;
+        }
+        
+        .empty-chart-text {
+            font-size: 12px;
+            max-width: 200px;
+        }
+        
+        /* Chart Controls */
+        .chart-controls {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .chart-btn {
+            padding: 4px 10px;
+            font-size: 11px;
+            border-radius: 6px;
+            background: #f3f4f6;
+            border: 1px solid #d1d5db;
+            color: #374151;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .chart-btn:hover {
+            background: #e5e7eb;
+        }
+        
+        .chart-btn.active {
+            background: #38b2ac;
+            color: white;
+            border-color: #38b2ac;
+        }
+        
+        /* Custom Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+        
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
+        }
+        
+        /* Loading Spinner */
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #38b2ac;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Error Message */
+        .error-message {
+            background-color: #fee2e2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+            display: none;
+        }
+        
+        /* Table Styles */
+        .data-table {
+            width: 100%;
+            font-size: 12px;
+            border-collapse: collapse;
+            background: white;
+        }
+        
+        .data-table th {
+            background-color: #38b2ac;
+            color: white;
+            padding: 10px 12px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid #2c9c96;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .data-table td {
+            padding: 8px 12px;
+            border-bottom: 1px solid #f1f5f9;
+            color: #475569;
+        }
+        
+        .data-table tr:hover {
+            background-color: #f8fafc;
+        }
+        
+        .data-table tr:nth-child(even) {
+            background-color: #f9fafb;
+        }
+        
+        .data-table tr:nth-child(even):hover {
+            background-color: #f3f4f6;
+        }
+        
+        /* Export Buttons */
+        .export-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .export-btn {
+            flex: 1;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            transition: all 0.2s;
+        }
+        
+        .export-btn-chart {
+            background-color: #38b2ac;
+            color: white;
+        }
+        
+        .export-btn-chart:hover {
+            background-color: #319795;
+        }
+        
+        .export-btn-data {
+            background-color: #8b5cf6;
+            color: white;
+        }
+        
+        .export-btn-data:hover {
+            background-color: #7c3aed;
+        }
+        
+        /* Scrollable Table Container */
+        .table-container {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            margin-top: 10px;
+            background: white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+        }
+        
+        /* Section header */
+        .section-header {
+            font-size: 13px;
+            font-weight: 600;
+        }
+        
+        /* Wave Controls */
+        .wave-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .control-group {
+            background: #f8fafc;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .control-label {
+            display: block;
+            font-size: 11px;
+            font-weight: 600;
+            color: #4b5563;
+            margin-bottom: 8px;
+        }
+        
+        .control-input {
+            width: 100%;
+            padding: 6px 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 12px;
+            background: white;
+        }
+        
+        .control-slider {
+            width: 100%;
+            height: 6px;
+            background: #e5e7eb;
+            border-radius: 3px;
+            outline: none;
+            margin-top: 5px;
+        }
+        
+        .control-value {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 5px;
+            text-align: center;
+        }
+        
+        .simulation-btn {
+            background: linear-gradient(to right, #8b5cf6, #7c3aed);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .simulation-btn:hover {
+            background: linear-gradient(to right, #7c3aed, #6d28d9);
+            transform: translateY(-2px);
+        }
+        
+        .simulation-btn:active {
+            transform: translateY(0);
+        }
+        
+        .wave-info {
+            background: linear-gradient(to right, #dbeafe, #e0f2fe);
+            border: 1px solid #bae6fd;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 15px;
+        }
+        
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+            font-size: 12px;
+        }
+        
+        .info-label {
+            color: #475569;
+            font-weight: 500;
+        }
+        
+        .info-value {
+            color: #1e40af;
+            font-weight: 600;
+        }
+        
+        /* Tab Navigation */
+        .tab-navigation {
+            display: flex;
+            background: #f3f4f6;
+            border-radius: 10px;
+            padding: 4px;
+            margin-bottom: 15px;
+        }
+        
+        .tab-btn {
+            flex: 1;
+            padding: 8px 12px;
+            text-align: center;
+            font-size: 12px;
+            font-weight: 500;
+            color: #6b7280;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        
+        .tab-btn.active {
+            background: white;
+            color: #38b2ac;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        /* Audio Control Buttons */
+        .audio-controls {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .audio-btn {
+            flex: 1;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            transition: all 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+        
+        .audio-btn-record {
+            background: linear-gradient(to right, #ef4444, #dc2626);
+            color: white;
+        }
+        
+        .audio-btn-stop {
+            background: linear-gradient(to right, #6b7280, #4b5563);
+            color: white;
+        }
+        
+        .audio-btn-play {
+            background: linear-gradient(to right, #10b981, #059669);
+            color: white;
+        }
+        
+        .audio-btn-generate {
+            background: linear-gradient(to right, #8b5cf6, #7c3aed);
+            color: white;
+        }
+        
+        .audio-btn:hover {
+            transform: translateY(-2px);
+        }
+        
+        /* Frequency Bands */
+        .frequency-bands {
+            display: flex;
+            height: 80px;
+            align-items: flex-end;
+            gap: 2px;
+            margin-top: 10px;
+            padding: 10px;
+            background: #0f172a;
+            border-radius: 8px;
+        }
+        
+        .frequency-bar {
+            flex: 1;
+            background: linear-gradient(to top, #3b82f6, #60a5fa);
+            border-radius: 2px 2px 0 0;
+            transition: height 0.1s ease;
+        }
+        
+        /* Tone Generator */
+        .tone-generator {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        
+        .tone-control {
+            background: #f8fafc;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        @media (max-width: 380px) {
+            .chart-container, .wave-chart-container {
+                height: 250px;
+            }
+            
+            .data-table {
+                font-size: 11px;
+            }
+        }
+        
+        @media (max-width: 414px) {
+            .bottom-nav {
+                height: 65px;
+            }
+            
+            .nav-icon {
+                font-size: 1.1rem;
+            }
+        }
+        
+        /* Wave Types */
+        .wave-types {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .wave-type-btn {
+            flex: 1;
+            padding: 8px;
+            text-align: center;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
+            border: 1px solid #d1d5db;
+            background: #f9fafb;
+            color: #4b5563;
+        }
+        
+        .wave-type-btn.active {
+            background: #38b2ac;
+            color: white;
+            border-color: #38b2ac;
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile App Container -->
+    <div class="app-container">
+        
+        <!-- Loading Indicator -->
+        <div id="loading" class="fixed inset-0 bg-white bg-opacity-90 flex flex-col items-center justify-center z-50">
+            <div class="loading-spinner mb-4"></div>
+            <p class="text-gray-700 font-medium">Menyiapkan Simulasi Gelombang...</p>
+            <p class="text-gray-500 text-sm mt-2">Memuat komponen analisis suara</p>
+        </div>
+        
+        <!-- Error Message -->
+        <div id="error-message" class="error-message m-4 hidden">
+            <div class="flex items-center">
+                <i class="fas fa-exclamation-triangle mr-3"></i>
+                <div>
+                    <p class="font-medium" id="error-title">Terjadi Kesalahan</p>
+                    <p class="text-sm" id="error-detail"></p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content -->
+        <main class="pb-24 p-4 custom-scrollbar" style="max-height: calc(100vh - 70px); overflow-y: auto;">
+            <!-- Page Title -->
+            <div class="mb-4">
+                <h1 class="text-lg font-bold text-gray-800 mb-1">
+                    <i class="fas fa-wave-square text-purple-500 mr-2"></i> Simulasi Getaran Gelombang
+                </h1>
+                <p class="text-gray-600 text-xs">
+                    Analisis suara dan frekuensi gelombang dengan data real-time
+                </p>
+            </div>
+            
+            <!-- Tab Navigation -->
+            <div class="tab-navigation">
+                <button class="tab-btn active" id="tab-simulasi">
+                    <i class="fas fa-sliders-h mr-1"></i> Simulasi
+                </button>
+                <button class="tab-btn" id="tab-analisis">
+                    <i class="fas fa-chart-bar mr-1"></i> Analisis
+                </button>
+                <button class="tab-btn" id="tab-ekspor">
+                    <i class="fas fa-download mr-1"></i> Ekspor
+                </button>
+            </div>
+            
+            <!-- Simulation Tab Content -->
+            <div id="simulasi-content">
+                <!-- Audio Visualizer -->
+                <div class="mb-6 p-4 bg-white border border-gray-200 rounded-xl shadow-sm">
+                    <h3 class="section-header text-gray-700 flex items-center mb-4">
+                        <i class="fas fa-music text-blue-500 mr-2 text-xs"></i> Visualisasi Gelombang Suara
+                    </h3>
+                    
+                    <div class="audio-visualizer">
+                        <!-- Empty State for Audio Visualizer -->
+                        <div id="audio-empty-state" class="empty-chart" style="color: white;">
+                            <i class="fas fa-volume-up empty-chart-icon"></i>
+                            <p class="empty-chart-text">
+                                Visualizer akan aktif saat<br>analisis suara dimulai
+                            </p>
+                        </div>
+                        <canvas id="audio-canvas" class="visualization-canvas"></canvas>
+                    </div>
+                    
+                    <!-- Audio Controls -->
+                    <div class="audio-controls mt-4">
+                        <button id="btn-record" class="audio-btn audio-btn-record">
+                            <i class="fas fa-microphone"></i> Rekam Suara
+                        </button>
+                        <button id="btn-stop" class="audio-btn audio-btn-stop" disabled>
+                            <i class="fas fa-stop"></i> Stop
+                        </button>
+                        <button id="btn-play" class="audio-btn audio-btn-play">
+                            <i class="fas fa-play"></i> Putar
+                        </button>
+                        <button id="btn-generate" class="audio-btn audio-btn-generate">
+                            <i class="fas fa-wave-square"></i> Generate
+                        </button>
+                    </div>
+                    
+                    <!-- Frequency Bands -->
+                    <div id="frequency-bands" class="frequency-bands hidden">
+                        <!-- Frequency bars will be generated dynamically -->
+                    </div>
+                </div>
+                
+                <!-- Wave Type Selection -->
+                <div class="mb-6 p-4 bg-white border border-gray-200 rounded-xl shadow-sm">
+                    <h3 class="section-header text-gray-700 flex items-center mb-4">
+                        <i class="fas fa-waveform-path text-purple-500 mr-2 text-xs"></i> Jenis Gelombang
+                    </h3>
+                    
+                    <div class="wave-types">
+                        <button class="wave-type-btn active" data-wave="sine">
+                            <i class="fas fa-wave-sine mr-1"></i> Sinus
+                        </button>
+                        <button class="wave-type-btn" data-wave="square">
+                            <i class="fas fa-wave-square mr-1"></i> Persegi
+                        </button>
+                        <button class="wave-type-btn" data-wave="sawtooth">
+                            <i class="fas fa-wave-triangle mr-1"></i> Gigi Gergaji
+                        </button>
+                        <button class="wave-type-btn" data-wave="triangle">
+                            <i class="fas fa-mountain mr-1"></i> Segitiga
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Wave Controls -->
+                <div class="mb-6 p-4 bg-white border border-gray-200 rounded-xl shadow-sm">
+                    <h3 class="section-header text-gray-700 flex items-center mb-4">
+                        <i class="fas fa-sliders-h text-green-500 mr-2 text-xs"></i> Kontrol Gelombang
+                    </h3>
+                    
+                    <div class="wave-controls">
+                        <!-- Frekuensi -->
+                        <div class="control-group">
+                            <label class="control-label">
+                                <i class="fas fa-wave-square mr-1"></i> Frekuensi (Hz)
+                            </label>
+                            <input type="range" min="20" max="2000" value="440" class="control-slider" id="frequency-slider">
+                            <div class="control-value" id="frequency-value">440 Hz</div>
+                        </div>
+                        
+                        <!-- Amplitudo -->
+                        <div class="control-group">
+                            <label class="control-label">
+                                <i class="fas fa-sort-amount-up mr-1"></i> Amplitudo
+                            </label>
+                            <input type="range" min="0.1" max="1" value="0.5" step="0.1" class="control-slider" id="amplitude-slider">
+                            <div class="control-value" id="amplitude-value">0.5</div>
+                        </div>
+                        
+                        <!-- Panjang Gelombang -->
+                        <div class="control-group">
+                            <label class="control-label">
+                                <i class="fas fa-ruler-horizontal mr-1"></i> Panjang Gelombang
+                            </label>
+                            <input type="range" min="0.1" max="5" value="1" step="0.1" class="control-slider" id="wavelength-slider">
+                            <div class="control-value" id="wavelength-value">1 m</div>
+                        </div>
+                        
+                        <!-- Kecepatan -->
+                        <div class="control-group">
+                            <label class="control-label">
+                                <i class="fas fa-tachometer-alt mr-1"></i> Kecepatan Gelombang
+                            </label>
+                            <input type="range" min="100" max="1000" value="340" class="control-slider" id="speed-slider">
+                            <div class="control-value" id="speed-value">340 m/s</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Simulation Buttons -->
+                    <div class="grid grid-cols-2 gap-3 mt-4">
+                        <button id="btn-start-wave" class="simulation-btn">
+                            <i class="fas fa-play"></i> Mulai Gelombang
+                        </button>
+                        <button id="btn-reset-wave" class="simulation-btn" style="background: linear-gradient(to right, #6b7280, #4b5563);">
+                            <i class="fas fa-redo"></i> Reset
+                        </button>
+                        <button id="btn-pause-wave" class="simulation-btn col-span-2" style="background: linear-gradient(to right, #f59e0b, #d97706);">
+                            <i class="fas fa-pause"></i> Jeda / Lanjutkan
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Wave Chart -->
+                <div class="mb-6 p-4 bg-white border border-gray-200 rounded-xl shadow-sm">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="section-header text-gray-700 flex items-center">
+                            <i class="fas fa-project-diagram text-blue-500 mr-2 text-xs"></i> Grafik Gelombang
+                        </h3>
+                        <div class="text-xs text-gray-500">
+                            <span id="wave-time">0.0</span> s
+                        </div>
+                    </div>
+                    
+                    <div class="wave-chart-container">
+                        <!-- Empty State for Wave Chart -->
+                        <div id="wave-empty-state" class="empty-chart">
+                            <i class="fas fa-wave-square empty-chart-icon"></i>
+                            <p class="empty-chart-text">
+                                Grafik gelombang akan muncul<br>saat simulasi dimulai
+                            </p>
+                        </div>
+                        <canvas id="wave-chart"></canvas>
+                    </div>
+                    
+                    <!-- Wave Info -->
+                    <div class="wave-info">
+                        <div class="info-row">
+                            <span class="info-label">Frekuensi (f):</span>
+                            <span class="info-value" id="info-frequency">440 Hz</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Panjang Gelombang (λ):</span>
+                            <span class="info-value" id="info-wavelength">1.0 m</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Periode (T):</span>
+                            <span class="info-value" id="info-period">0.0023 s</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="info-label">Kecepatan (v):</span>
+                            <span class="info-value" id="info-speed">340 m/s</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Analysis Tab Content (Hidden by default) -->
+            <div id="analisis-content" class="hidden">
+                <!-- Frequency Analysis -->
+                <div class="mb-6 p-4 bg-white border border-gray-200 rounded-xl shadow-sm">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="section-header text-gray-700 flex items-center">
+                            <i class="fas fa-chart-line text-purple-500 mr-2 text-xs"></i> Analisis Frekuensi
+                        </h3>
+                        <button id="btn-clear-analysis" class="text-xs px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200">
+                            <i class="fas fa-trash mr-1"></i> Hapus Analisis
+                        </button>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <!-- Empty State for Frequency Chart -->
+                        <div id="frequency-empty-state" class="empty-chart">
+                            <i class="fas fa-chart-bar empty-chart-icon"></i>
+                            <p class="empty-chart-text">
+                                Analisis frekuensi akan muncul<br>saat suara dianalisis
+                            </p>
+                        </div>
+                        <canvas id="frequency-chart"></canvas>
+                    </div>
+                    
+                    <!-- Real-time Data Visualization -->
+                    <div class="grid grid-cols-2 gap-3 mb-4 mt-4">
+                        <div class="bg-blue-50 p-3 rounded-lg">
+                            <p class="text-xs text-blue-700">Frekuensi Dominan</p>
+                            <p id="current-dominant" class="text-lg font-bold text-blue-800">- Hz</p>
+                        </div>
+                        <div class="bg-green-50 p-3 rounded-lg">
+                            <p class="text-xs text-green-700">Amplitudo Max</p>
+                            <p id="current-amplitude" class="text-lg font-bold text-green-800">-</p>
+                        </div>
+                        <div class="bg-purple-50 p-3 rounded-lg">
+                            <p class="text-xs text-purple-700">Decibel (dB)</p>
+                            <p id="current-decibel" class="text-lg font-bold text-purple-800">- dB</p>
+                        </div>
+                        <div class="bg-red-50 p-3 rounded-lg">
+                            <p class="text-xs text-red-700">Harmonik</p>
+                            <p id="current-harmonics" class="text-lg font-bold text-red-800">-</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Audio Data Table -->
+                    <div class="mt-4">
+                        <h4 class="text-sm font-semibold text-gray-700 mb-2">Data Analisis Audio</h4>
+                        <div class="table-container">
+                            <table class="data-table" id="audio-table">
+                                <thead>
+                                    <tr>
+                                        <th>Waktu (s)</th>
+                                        <th>Frekuensi (Hz)</th>
+                                        <th>Amplitudo</th>
+                                        <th>Decibel (dB)</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="audio-table-body">
+                                    <tr>
+                                        <td colspan="4" class="text-center py-6 text-gray-500">
+                                            <i class="fas fa-microphone-alt text-2xl mb-2 block text-gray-300"></i>
+                                            <p class="text-sm">Belum ada data audio</p>
+                                            <p class="text-xs mt-1">Klik "Rekam Suara" untuk memulai</p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tone Generator -->
+                <div class="mb-6 p-4 bg-white border border-gray-200 rounded-xl shadow-sm">
+                    <h3 class="section-header text-gray-700 flex items-center mb-4">
+                        <i class="fas fa-synth text-green-500 mr-2 text-xs"></i> Generator Nada
+                    </h3>
+                    
+                    <div class="tone-generator">
+                        <div class="tone-control">
+                            <label class="control-label">
+                                <i class="fas fa-music mr-1"></i> Frekuensi Nada (Hz)
+                            </label>
+                            <input type="range" min="50" max="1000" value="261.63" step="0.01" class="control-slider" id="tone-frequency-slider">
+                            <div class="control-value" id="tone-frequency-value">261.63 Hz (C4)</div>
+                        </div>
+                        
+                        <div class="tone-control">
+                            <label class="control-label">
+                                <i class="fas fa-clock mr-1"></i> Durasi (detik)
+                            </label>
+                            <input type="range" min="0.5" max="5" value="1" step="0.5" class="control-slider" id="tone-duration-slider">
+                            <div class="control-value" id="tone-duration-value">1 s</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Musical Notes -->
+                    <div class="mt-4">
+                        <label class="control-label mb-2">
+                            <i class="fas fa-guitar mr-1"></i> Nada Musik
+                        </label>
+                        <div class="grid grid-cols-4 gap-2">
+                            <button data-frequency="261.63" class="p-3 bg-blue-100 text-blue-800 rounded text-xs font-medium hover:bg-blue-200">
+                                C4 (Do)
+                            </button>
+                            <button data-frequency="293.66" class="p-3 bg-green-100 text-green-800 rounded text-xs font-medium hover:bg-green-200">
+                                D4 (Re)
+                            </button>
+                            <button data-frequency="329.63" class="p-3 bg-yellow-100 text-yellow-800 rounded text-xs font-medium hover:bg-yellow-200">
+                                E4 (Mi)
+                            </button>
+                            <button data-frequency="349.23" class="p-3 bg-red-100 text-red-800 rounded text-xs font-medium hover:bg-red-200">
+                                F4 (Fa)
+                            </button>
+                            <button data-frequency="392.00" class="p-3 bg-purple-100 text-purple-800 rounded text-xs font-medium hover:bg-purple-200">
+                                G4 (Sol)
+                            </button>
+                            <button data-frequency="440.00" class="p-3 bg-indigo-100 text-indigo-800 rounded text-xs font-medium hover:bg-indigo-200">
+                                A4 (La)
+                            </button>
+                            <button data-frequency="493.88" class="p-3 bg-pink-100 text-pink-800 rounded text-xs font-medium hover:bg-pink-200">
+                                B4 (Si)
+                            </button>
+                            <button data-frequency="523.25" class="p-3 bg-teal-100 text-teal-800 rounded text-xs font-medium hover:bg-teal-200">
+                                C5 (Do)
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Play Tone Button -->
+                    <button id="btn-play-tone" class="w-full mt-4 p-3 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-lg font-medium hover:from-purple-700 hover:to-indigo-700">
+                        <i class="fas fa-play mr-2"></i> Putar Nada
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Export Tab Content (Hidden by default) -->
+            <div id="ekspor-content" class="hidden">
+                <div class="mb-6 p-4 bg-white border border-gray-200 rounded-xl shadow-sm">
+                    <h3 class="section-header text-gray-700 flex items-center mb-4">
+                        <i class="fas fa-file-export text-green-500 mr-2 text-xs"></i> Ekspor Data Analisis
+                    </h3>
+                    
+                    <div class="space-y-4">
+                        <!-- Export Options -->
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <h4 class="text-sm font-semibold text-blue-800 mb-3">
+                                <i class="fas fa-cog mr-2"></i> Pengaturan Ekspor
+                            </h4>
+                            
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700 mb-1">Format Data</label>
+                                    <select id="export-format" class="w-full p-2 border border-gray-300 rounded text-xs">
+                                        <option value="csv">CSV (Excel)</option>
+                                        <option value="json">JSON</option>
+                                        <option value="txt">Teks</option>
+                                    </select>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-700 mb-1">Presisi Data</label>
+                                    <select id="export-precision" class="w-full p-2 border border-gray-300 rounded text-xs">
+                                        <option value="2">2 Desimal</option>
+                                        <option value="3">3 Desimal</option>
+                                        <option value="4">4 Desimal</option>
+                                        <option value="6">6 Desimal</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Export Charts Separately -->
+                        <div class="bg-purple-50 p-4 rounded-lg">
+                            <h4 class="text-sm font-semibold text-purple-800 mb-3">
+                                <i class="fas fa-chart-pie mr-2"></i> Ekspor Grafik
+                            </h4>
+                            
+                            <div class="grid grid-cols-2 gap-3 mb-3">
+                                <button onclick="exportSingleChart('wave')" class="export-btn" style="background: linear-gradient(to right, #8b5cf6, #7c3aed); color: white;">
+                                    <i class="fas fa-wave-square"></i> Grafik Gelombang
+                                </button>
+                                <button onclick="exportSingleChart('frequency')" class="export-btn" style="background: linear-gradient(to right, #3b82f6, #1d4ed8); color: white;">
+                                    <i class="fas fa-chart-bar"></i> Grafik Frekuensi
+                                </button>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-3">
+                                <button id="btn-export-chart" class="export-btn export-btn-chart">
+                                    <i class="fas fa-chart-line"></i> Download Grafik
+                                </button>
+                                <button id="btn-export-csv" class="export-btn export-btn-data">
+                                    <i class="fas fa-file-csv"></i> Download Data
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Export All Button -->
+                        <button id="btn-export-all" class="export-btn w-full" style="background: linear-gradient(to right, #10b981, #059669); color: white;">
+                            <i class="fas fa-file-archive"></i> Download Semua Data
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Information Panel -->
+            <div class="mb-6 p-4 bg-gradient-to-r from-purple-50 to-indigo-50 border border-purple-200 rounded-xl">
+                <h3 class="section-header text-gray-700 mb-3 flex items-center">
+                    <i class="fas fa-info-circle text-purple-500 mr-2 text-xs"></i> Informasi Gelombang Suara
+                </h3>
+                
+                <div class="space-y-3">
+                    <div class="text-xs text-gray-700">
+                        <p class="mb-2"><span class="font-bold">Rumus Gelombang:</span></p>
+                        <div class="bg-white p-2 rounded-lg mb-2">
+                            <p class="mb-1">y(t) = A sin(2πft + φ)</p>
+                            <p class="mb-1">v = f × λ</p>
+                            <p>T = 1/f</p>
+                        </div>
+                        
+                        <p class="mb-2"><span class="font-bold">Parameter Gelombang:</span></p>
+                        <ul class="list-disc pl-4 space-y-1">
+                            <li>Frekuensi (f): 20 - 2000 Hz (pendengaran manusia)</li>
+                            <li>Amplitudo (A): 0.1 - 1 (tinggi rendah suara)</li>
+                            <li>Panjang Gelombang (λ): 0.1 - 5 m</li>
+                            <li>Kecepatan (v): 100 - 1000 m/s</li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Quick Tips -->
+                    <div class="mt-4 pt-3 border-t border-purple-100">
+                        <p class="text-xs font-medium text-gray-700 mb-2">Fitur Simulasi:</p>
+                        <div class="text-xs text-gray-600 space-y-1">
+                            <div class="flex items-start">
+                                <i class="fas fa-microphone text-yellow-500 mt-0.5 mr-2"></i>
+                                <span>Rekam suara langsung untuk analisis frekuensi</span>
+                            </div>
+                            <div class="flex items-start">
+                                <i class="fas fa-wave-square text-yellow-500 mt-0.5 mr-2"></i>
+                                <span>Simulasi berbagai jenis gelombang (sinus, persegi, dll)</span>
+                            </div>
+                            <div class="flex items-start">
+                                <i class="fas fa-music text-yellow-500 mt-0.5 mr-2"></i>
+                                <span>Generator nada untuk eksperimen frekuensi</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <a href="../../dashboard siswa.html" class="nav-item">
+                <i class="fas fa-home nav-icon"></i>
+                <span>Beranda</span>
+            </a>
+            <a href="../../soal harian/dashboard soal.html" class="nav-item">
+                <i class="fas fa-flask nav-icon"></i>
+                <span>Soal Harian</span>
+            </a>
+            <a href="../../ai/nayra.html" class="nav-item">
+                <i class="fas fa-robot nav-icon"></i>
+                <span>Nayra AI</span>
+            </a>
+            <a href="../../materi harian/kategori materi.html" class="nav-item">
+                <i class="fas fa-chalkboard-teacher nav-icon"></i>
+                <span>Materi Harian</span>
+            </a>
+            <a href="../../profil/profil.html" class="nav-item">
+                <i class="fas fa-user nav-icon"></i>
+                <span>Profil</span>
+            </a>
+        </nav>
+    </div>
+
+    <!-- Chart.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script>
+        // DOM Elements
+        const loading = document.getElementById('loading');
+        const errorMessage = document.getElementById('error-message');
+        const errorTitle = document.getElementById('error-title');
+        const errorDetail = document.getElementById('error-detail');
+        
+        // Tab Elements
+        const tabSimulasi = document.getElementById('tab-simulasi');
+        const tabAnalisis = document.getElementById('tab-analisis');
+        const tabEkspor = document.getElementById('tab-ekspor');
+        const simulasiContent = document.getElementById('simulasi-content');
+        const analisisContent = document.getElementById('analisis-content');
+        const eksporContent = document.getElementById('ekspor-content');
+        
+        // Control Elements
+        const frequencySlider = document.getElementById('frequency-slider');
+        const amplitudeSlider = document.getElementById('amplitude-slider');
+        const wavelengthSlider = document.getElementById('wavelength-slider');
+        const speedSlider = document.getElementById('speed-slider');
+        
+        const frequencyValue = document.getElementById('frequency-value');
+        const amplitudeValue = document.getElementById('amplitude-value');
+        const wavelengthValue = document.getElementById('wavelength-value');
+        const speedValue = document.getElementById('speed-value');
+        
+        // Audio Controls
+        const btnRecord = document.getElementById('btn-record');
+        const btnStop = document.getElementById('btn-stop');
+        const btnPlay = document.getElementById('btn-play');
+        const btnGenerate = document.getElementById('btn-generate');
+        
+        // Wave Controls
+        const btnStartWave = document.getElementById('btn-start-wave');
+        const btnResetWave = document.getElementById('btn-reset-wave');
+        const btnPauseWave = document.getElementById('btn-pause-wave');
+        
+        // Tone Generator
+        const toneFrequencySlider = document.getElementById('tone-frequency-slider');
+        const toneDurationSlider = document.getElementById('tone-duration-slider');
+        const toneFrequencyValue = document.getElementById('tone-frequency-value');
+        const toneDurationValue = document.getElementById('tone-duration-value');
+        const btnPlayTone = document.getElementById('btn-play-tone');
+        
+        // Display Elements
+        const waveTime = document.getElementById('wave-time');
+        const currentDominant = document.getElementById('current-dominant');
+        const currentAmplitude = document.getElementById('current-amplitude');
+        const currentDecibel = document.getElementById('current-decibel');
+        const currentHarmonics = document.getElementById('current-harmonics');
+        
+        // Info Elements
+        const infoFrequency = document.getElementById('info-frequency');
+        const infoWavelength = document.getElementById('info-wavelength');
+        const infoPeriod = document.getElementById('info-period');
+        const infoSpeed = document.getElementById('info-speed');
+        
+        // Empty State Elements
+        const audioEmptyState = document.getElementById('audio-empty-state');
+        const waveEmptyState = document.getElementById('wave-empty-state');
+        const frequencyEmptyState = document.getElementById('frequency-empty-state');
+        
+        // Data Elements
+        const audioTableBody = document.getElementById('audio-table-body');
+        const btnClearAnalysis = document.getElementById('btn-clear-analysis');
+        const frequencyBands = document.getElementById('frequency-bands');
+        
+        // Chart Elements
+        const audioCanvas = document.getElementById('audio-canvas');
+        const waveChartCanvas = document.getElementById('wave-chart');
+        const frequencyChartCanvas = document.getElementById('frequency-chart');
+        
+        // Variables
+        let audioContext;
+        let analyser;
+        let microphone;
+        let audioStream;
+        let isRecording = false;
+        let audioData = [];
+        
+        let waveChart = null;
+        let frequencyChart = null;
+        
+        let waveAnimationId = null;
+        let waveRunning = false;
+        let wavePaused = false;
+        let waveTimeValue = 0;
+        
+        // Wave Parameters
+        let waveParams = {
+            frequency: 440,      // Hz
+            amplitude: 0.5,      // 0-1
+            wavelength: 1,       // meters
+            speed: 340,          // m/s
+            waveType: 'sine',    // sine, square, sawtooth, triangle
+            time: 0
+        };
+        
+        // Audio Analysis Data
+        let audioAnalysis = {
+            dominantFrequency: 0,
+            maxAmplitude: 0,
+            decibel: 0,
+            harmonics: 0,
+            dataPoints: []
+        };
+        
+        // Initialize
+        function init() {
+            try {
+                // Initialize charts
+                initWaveChart();
+                initFrequencyChart();
+                
+                // Hide charts initially, show empty states
+                audioCanvas.style.display = 'none';
+                waveChartCanvas.style.display = 'none';
+                frequencyChartCanvas.style.display = 'none';
+                
+                // Initialize audio context
+                initAudioContext();
+                
+                // Set up control listeners
+                setupControls();
+                
+                // Hide loading
+                setTimeout(() => {
+                    loading.classList.add('hidden');
+                }, 1000);
+                
+            } catch (err) {
+                console.error('Error initializing simulation:', err);
+                showError('Inisialisasi Gagal', 'Gagal memuat komponen simulasi');
+            }
+        }
+        
+        // Initialize audio context
+        function initAudioContext() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioContext.createAnalyser();
+                analyser.fftSize = 2048;
+                analyser.smoothingTimeConstant = 0.8;
+                
+                // Create frequency bars
+                createFrequencyBars();
+                
+                console.log('Audio context initialized successfully');
+            } catch (e) {
+                console.warn('Web Audio API tidak didukung di browser ini:', e);
+                showError('Audio Tidak Didukung', 'Browser Anda tidak mendukung Web Audio API');
+            }
+        }
+        
+        // Create frequency bars for visualization
+        function createFrequencyBars() {
+            frequencyBands.innerHTML = '';
+            const barCount = 32;
+            
+            for (let i = 0; i < barCount; i++) {
+                const bar = document.createElement('div');
+                bar.className = 'frequency-bar';
+                bar.style.height = '10%';
+                frequencyBands.appendChild(bar);
+            }
+        }
+        
+        // Initialize wave chart
+        function initWaveChart() {
+            const ctx = waveChartCanvas.getContext('2d');
+            
+            waveChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Gelombang Suara',
+                        data: [],
+                        borderColor: '#8b5cf6',
+                        backgroundColor: 'rgba(139, 92, 246, 0.2)',
+                        borderWidth: 2,
+                        pointRadius: 0,
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                font: {
+                                    size: 11,
+                                    family: "'Baloo 2', cursive"
+                                }
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Simulasi Gelombang',
+                            font: {
+                                size: 13,
+                                weight: 'bold',
+                                family: "'Baloo 2', cursive"
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Waktu (s)',
+                                font: {
+                                    size: 11,
+                                    family: "'Baloo 2', cursive"
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            },
+                            suggestedMin: 0,
+                            suggestedMax: 2
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Amplitudo',
+                                font: {
+                                    size: 11,
+                                    family: "'Baloo 2', cursive"
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            },
+                            suggestedMin: -1,
+                            suggestedMax: 1
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Initialize frequency chart
+        function initFrequencyChart() {
+            const ctx = frequencyChartCanvas.getContext('2d');
+            
+            frequencyChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: [],
+                    datasets: [{
+                        label: 'Amplitudo Frekuensi',
+                        data: [],
+                        backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                        borderColor: 'rgba(59, 130, 246, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                font: {
+                                    size: 11,
+                                    family: "'Baloo 2', cursive"
+                                }
+                            }
+                        },
+                        title: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Frekuensi (Hz)',
+                                font: {
+                                    size: 11,
+                                    family: "'Baloo 2', cursive"
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Amplitudo',
+                                font: {
+                                    size: 11,
+                                    family: "'Baloo 2', cursive"
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            },
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Set up control listeners
+        function setupControls() {
+            // Update wave parameter values
+            frequencySlider.addEventListener('input', (e) => {
+                waveParams.frequency = parseFloat(e.target.value);
+                frequencyValue.textContent = `${waveParams.frequency} Hz`;
+                updateWaveInfo();
+            });
+            
+            amplitudeSlider.addEventListener('input', (e) => {
+                waveParams.amplitude = parseFloat(e.target.value);
+                amplitudeValue.textContent = waveParams.amplitude.toFixed(1);
+            });
+            
+            wavelengthSlider.addEventListener('input', (e) => {
+                waveParams.wavelength = parseFloat(e.target.value);
+                wavelengthValue.textContent = `${waveParams.wavelength} m`;
+                updateWaveInfo();
+            });
+            
+            speedSlider.addEventListener('input', (e) => {
+                waveParams.speed = parseFloat(e.target.value);
+                speedValue.textContent = `${waveParams.speed} m/s`;
+                updateWaveInfo();
+            });
+            
+            // Wave type selection
+            document.querySelectorAll('.wave-type-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    document.querySelectorAll('.wave-type-btn').forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+                    waveParams.waveType = e.target.dataset.wave;
+                    
+                    if (waveRunning) {
+                        updateWaveChart();
+                    }
+                });
+            });
+            
+            // Audio controls
+            btnRecord.addEventListener('click', startRecording);
+            btnStop.addEventListener('click', stopRecording);
+            btnPlay.addEventListener('click', playGeneratedWave);
+            btnGenerate.addEventListener('click', generateWave);
+            
+            // Wave simulation controls
+            btnStartWave.addEventListener('click', startWaveSimulation);
+            btnResetWave.addEventListener('click', resetWaveSimulation);
+            btnPauseWave.addEventListener('click', togglePauseWave);
+            
+            // Tone generator
+            toneFrequencySlider.addEventListener('input', (e) => {
+                const freq = parseFloat(e.target.value);
+                toneFrequencyValue.textContent = `${freq.toFixed(2)} Hz (${getNoteName(freq)})`;
+            });
+            
+            toneDurationSlider.addEventListener('input', (e) => {
+                const duration = parseFloat(e.target.value);
+                toneDurationValue.textContent = `${duration} s`;
+            });
+            
+            btnPlayTone.addEventListener('click', playTone);
+            
+            // Musical notes buttons
+            document.querySelectorAll('[data-frequency]').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const freq = parseFloat(e.target.dataset.frequency);
+                    toneFrequencySlider.value = freq;
+                    toneFrequencyValue.textContent = `${freq.toFixed(2)} Hz (${getNoteName(freq)})`;
+                    playToneAtFrequency(freq);
+                });
+            });
+            
+            // Tab navigation
+            tabSimulasi.addEventListener('click', () => switchTab('simulasi'));
+            tabAnalisis.addEventListener('click', () => switchTab('analisis'));
+            tabEkspor.addEventListener('click', () => switchTab('ekspor'));
+            
+            // Analysis controls
+            btnClearAnalysis.addEventListener('click', clearAnalysis);
+        }
+        
+        // Update wave information display
+        function updateWaveInfo() {
+            const period = 1 / waveParams.frequency;
+            const calculatedSpeed = waveParams.frequency * waveParams.wavelength;
+            
+            infoFrequency.textContent = `${waveParams.frequency.toFixed(1)} Hz`;
+            infoWavelength.textContent = `${waveParams.wavelength.toFixed(2)} m`;
+            infoPeriod.textContent = `${period.toFixed(4)} s`;
+            infoSpeed.textContent = `${calculatedSpeed.toFixed(1)} m/s`;
+            
+            // Update speed slider to match calculated speed
+            waveParams.speed = calculatedSpeed;
+            speedSlider.value = calculatedSpeed;
+            speedValue.textContent = `${calculatedSpeed.toFixed(1)} m/s`;
+        }
+        
+        // Start recording audio
+        async function startRecording() {
+            if (!audioContext) {
+                initAudioContext();
+            }
+            
+            try {
+                audioStream = await navigator.mediaDevices.getUserMedia({ 
+                    audio: {
+                        echoCancellation: false,
+                        noiseSuppression: false,
+                        autoGainControl: false
+                    } 
+                });
+                
+                microphone = audioContext.createMediaStreamSource(audioStream);
+                microphone.connect(analyser);
+                
+                isRecording = true;
+                btnRecord.disabled = true;
+                btnStop.disabled = false;
+                
+                // Show visualization
+                audioEmptyState.style.display = 'none';
+                audioCanvas.style.display = 'block';
+                frequencyBands.classList.remove('hidden');
+                
+                // Start visualization
+                visualizeAudio();
+                
+                showError('Rekaman Dimulai', 'Mikrofon aktif - berbicara sekarang');
+                
+            } catch (err) {
+                console.error('Error accessing microphone:', err);
+                showError('Akses Mikrofon Gagal', 'Izinkan akses mikrofon untuk merekam suara');
+            }
+        }
+        
+        // Stop recording audio
+        function stopRecording() {
+            if (audioStream) {
+                audioStream.getTracks().forEach(track => track.stop());
+            }
+            
+            isRecording = false;
+            btnRecord.disabled = false;
+            btnStop.disabled = true;
+            
+            showError('Rekaman Dihentikan', 'Analisis suara selesai');
+        }
+        
+        // Visualize audio input
+        function visualizeAudio() {
+            if (!isRecording) return;
+            
+            const canvasCtx = audioCanvas.getContext('2d');
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+            const barCount = 32;
+            
+            function draw() {
+                if (!isRecording) return;
+                
+                requestAnimationFrame(draw);
+                
+                canvasCtx.fillStyle = 'rgba(15, 23, 42, 0.1)';
+                canvasCtx.fillRect(0, 0, audioCanvas.width, audioCanvas.height);
+                
+                analyser.getByteFrequencyData(dataArray);
+                
+                // Update frequency bars
+                const bars = frequencyBands.querySelectorAll('.frequency-bar');
+                const step = Math.floor(bufferLength / barCount);
+                
+                for (let i = 0; i < barCount; i++) {
+                    const value = dataArray[i * step] / 255;
+                    bars[i].style.height = `${value * 100}%`;
+                    
+                    // Color gradient based on frequency
+                    const hue = (i / barCount) * 240; // Blue to red
+                    bars[i].style.background = `linear-gradient(to top, hsl(${hue}, 100%, 50%), hsl(${hue}, 100%, 70%))`;
+                }
+                
+                // Draw waveform
+                canvasCtx.lineWidth = 2;
+                canvasCtx.strokeStyle = '#60a5fa';
+                canvasCtx.beginPath();
+                
+                const sliceWidth = audioCanvas.width * 1.0 / bufferLength;
+                let x = 0;
+                
+                for (let i = 0; i < bufferLength; i++) {
+                    const v = dataArray[i] / 128.0;
+                    const y = v * audioCanvas.height / 2;
+                    
+                    if (i === 0) {
+                        canvasCtx.moveTo(x, y);
+                    } else {
+                        canvasCtx.lineTo(x, y);
+                    }
+                    
+                    x += sliceWidth;
+                }
+                
+                canvasCtx.lineTo(audioCanvas.width, audioCanvas.height / 2);
+                canvasCtx.stroke();
+                
+                // Analyze frequency data
+                analyzeFrequency(dataArray);
+            }
+            
+            draw();
+        }
+        
+        // Analyze frequency data
+        function analyzeFrequency(dataArray) {
+            const bufferLength = dataArray.length;
+            const sampleRate = audioContext.sampleRate;
+            
+            // Find dominant frequency
+            let maxAmplitude = 0;
+            let dominantIndex = 0;
+            
+            for (let i = 0; i < bufferLength; i++) {
+                if (dataArray[i] > maxAmplitude) {
+                    maxAmplitude = dataArray[i];
+                    dominantIndex = i;
+                }
+            }
+            
+            // Calculate frequency (Hz)
+            const dominantFrequency = dominantIndex * sampleRate / (2 * bufferLength);
+            
+            // Calculate decibel
+            const decibel = 20 * Math.log10(maxAmplitude / 255);
+            
+            // Count harmonics (peaks above threshold)
+            const threshold = maxAmplitude * 0.3;
+            let harmonics = 0;
+            
+            for (let i = 0; i < bufferLength; i++) {
+                if (dataArray[i] > threshold && i !== dominantIndex) {
+                    harmonics++;
+                }
+            }
+            
+            // Update display
+            audioAnalysis.dominantFrequency = dominantFrequency;
+            audioAnalysis.maxAmplitude = maxAmplitude / 255;
+            audioAnalysis.decibel = decibel;
+            audioAnalysis.harmonics = harmonics;
+            
+            currentDominant.textContent = `${dominantFrequency.toFixed(1)} Hz`;
+            currentAmplitude.textContent = (maxAmplitude / 255).toFixed(3);
+            currentDecibel.textContent = `${decibel.toFixed(1)} dB`;
+            currentHarmonics.textContent = harmonics;
+            
+            // Add data point
+            const dataPoint = {
+                time: Date.now() / 1000,
+                frequency: dominantFrequency,
+                amplitude: maxAmplitude / 255,
+                decibel: decibel
+            };
+            
+            audioAnalysis.dataPoints.push(dataPoint);
+            
+            // Update frequency chart (only if we're on analysis tab)
+            if (!document.getElementById('analisis-content').classList.contains('hidden')) {
+                updateFrequencyChart(dataArray, sampleRate, bufferLength);
+                updateAudioTable();
+            }
+        }
+        
+        // Update frequency chart
+        function updateFrequencyChart(dataArray, sampleRate, bufferLength) {
+            // Show chart, hide empty state
+            frequencyEmptyState.style.display = 'none';
+            frequencyChartCanvas.style.display = 'block';
+            
+            // Prepare frequency labels (every 100 Hz up to 2000 Hz)
+            const maxFreq = 2000;
+            const freqStep = 100;
+            const labels = [];
+            const data = [];
+            
+            for (let freq = 0; freq <= maxFreq; freq += freqStep) {
+                labels.push(freq);
+                
+                // Map frequency to analyzer bin
+                const binIndex = Math.floor(freq * 2 * bufferLength / sampleRate);
+                if (binIndex < bufferLength) {
+                    data.push(dataArray[binIndex] / 255);
+                } else {
+                    data.push(0);
+                }
+            }
+            
+            frequencyChart.data.labels = labels;
+            frequencyChart.data.datasets[0].data = data;
+            frequencyChart.update();
+        }
+        
+        // Update audio data table
+        function updateAudioTable() {
+            audioTableBody.innerHTML = '';
+            
+            if (audioAnalysis.dataPoints.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td colspan="4" class="text-center py-6 text-gray-500">
+                        <i class="fas fa-microphone-alt text-2xl mb-2 block text-gray-300"></i>
+                        <p class="text-sm">Belum ada data audio</p>
+                        <p class="text-xs mt-1">Klik "Rekam Suara" untuk memulai</p>
+                    </td>
+                `;
+                audioTableBody.appendChild(row);
+                return;
+            }
+            
+            // Show last 10 data points
+            const startIndex = Math.max(0, audioAnalysis.dataPoints.length - 10);
+            
+            for (let i = startIndex; i < audioAnalysis.dataPoints.length; i++) {
+                const data = audioAnalysis.dataPoints[i];
+                const row = document.createElement('tr');
+                
+                // Calculate relative time
+                const firstTime = audioAnalysis.dataPoints[0].time;
+                const relativeTime = data.time - firstTime;
+                
+                row.innerHTML = `
+                    <td>${relativeTime.toFixed(2)}</td>
+                    <td>${data.frequency.toFixed(1)}</td>
+                    <td>${data.amplitude.toFixed(3)}</td>
+                    <td>${data.decibel.toFixed(1)}</td>
+                `;
+                
+                audioTableBody.appendChild(row);
+            }
+        }
+        
+        // Clear analysis data
+        function clearAnalysis() {
+            if (audioAnalysis.dataPoints.length > 0 && confirm('Hapus semua data analisis?')) {
+                audioAnalysis.dataPoints = [];
+                audioAnalysis.dominantFrequency = 0;
+                audioAnalysis.maxAmplitude = 0;
+                audioAnalysis.decibel = 0;
+                audioAnalysis.harmonics = 0;
+                
+                updateAudioTable();
+                
+                currentDominant.textContent = '- Hz';
+                currentAmplitude.textContent = '-';
+                currentDecibel.textContent = '- dB';
+                currentHarmonics.textContent = '-';
+                
+                showError('Data Dihapus', 'Semua data analisis telah dihapus');
+            }
+        }
+        
+        // Generate wave function based on wave type
+        function generateWave() {
+            // Show wave chart, hide empty state
+            waveEmptyState.style.display = 'none';
+            waveChartCanvas.style.display = 'block';
+            
+            // Generate wave data
+            const dataPoints = 200;
+            const timeStep = 0.01;
+            const data = [];
+            const labels = [];
+            
+            for (let i = 0; i < dataPoints; i++) {
+                const t = i * timeStep;
+                labels.push(t.toFixed(2));
+                
+                let value;
+                const phase = 2 * Math.PI * waveParams.frequency * t;
+                
+                switch (waveParams.waveType) {
+                    case 'sine':
+                        value = waveParams.amplitude * Math.sin(phase);
+                        break;
+                    case 'square':
+                        value = waveParams.amplitude * (Math.sin(phase) > 0 ? 1 : -1);
+                        break;
+                    case 'sawtooth':
+                        value = waveParams.amplitude * (2 * (t * waveParams.frequency - Math.floor(t * waveParams.frequency + 0.5)));
+                        break;
+                    case 'triangle':
+                        value = waveParams.amplitude * (2 * Math.abs(2 * (t * waveParams.frequency - Math.floor(t * waveParams.frequency + 0.5))) - 1);
+                        break;
+                    default:
+                        value = waveParams.amplitude * Math.sin(phase);
+                }
+                
+                data.push(value);
+            }
+            
+            waveChart.data.labels = labels;
+            waveChart.data.datasets[0].data = data;
+            waveChart.update();
+            
+            showError('Gelombang Dihasilkan', `Gelombang ${waveParams.waveType} telah dibuat`);
+        }
+        
+        // Play generated wave as audio
+        function playGeneratedWave() {
+            if (!audioContext) {
+                initAudioContext();
+            }
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            // Set oscillator type
+            oscillator.type = waveParams.waveType;
+            oscillator.frequency.setValueAtTime(waveParams.frequency, audioContext.currentTime);
+            
+            // Set gain (volume)
+            gainNode.gain.setValueAtTime(waveParams.amplitude * 0.5, audioContext.currentTime);
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.start();
+            
+            // Stop after 2 seconds
+            setTimeout(() => {
+                oscillator.stop();
+            }, 2000);
+            
+            showError('Gelombang Diputar', `Memainkan gelombang ${waveParams.waveType} pada ${waveParams.frequency} Hz`);
+        }
+        
+        // Start wave simulation
+        function startWaveSimulation() {
+            if (waveRunning) return;
+            
+            waveRunning = true;
+            wavePaused = false;
+            waveTimeValue = 0;
+            
+            btnStartWave.disabled = true;
+            btnStartWave.innerHTML = '<i class="fas fa-sync-alt spin"></i> Gelombang Berjalan';
+            btnPauseWave.innerHTML = '<i class="fas fa-pause"></i> Jeda Gelombang';
+            
+            // Show wave chart, hide empty state
+            waveEmptyState.style.display = 'none';
+            waveChartCanvas.style.display = 'block';
+            
+            // Start animation
+            animateWave();
+            
+            showError('Simulasi Dimulai', 'Simulasi gelombang sedang berjalan');
+        }
+        
+        // Reset wave simulation
+        function resetWaveSimulation() {
+            stopWaveSimulation();
+            waveTimeValue = 0;
+            waveTime.textContent = '0.0';
+            
+            // Show empty state
+            waveEmptyState.style.display = 'flex';
+            waveChartCanvas.style.display = 'none';
+            
+            showError('Simulasi Direset', 'Simulasi gelombang telah direset');
+        }
+        
+        // Toggle pause wave simulation
+        function togglePauseWave() {
+            if (!waveRunning) return;
+            
+            wavePaused = !wavePaused;
+            
+            if (wavePaused) {
+                btnPauseWave.innerHTML = '<i class="fas fa-play"></i> Lanjutkan';
+                showError('Simulasi Dijeda', 'Simulasi gelombang dijeda');
+            } else {
+                btnPauseWave.innerHTML = '<i class="fas fa-pause"></i> Jeda Gelombang';
+                animateWave();
+                showError('Simulasi Dilanjutkan', 'Simulasi gelombang dilanjutkan');
+            }
+        }
+        
+        // Stop wave simulation
+        function stopWaveSimulation() {
+            waveRunning = false;
+            wavePaused = false;
+            
+            if (waveAnimationId) {
+                cancelAnimationFrame(waveAnimationId);
+                waveAnimationId = null;
+            }
+            
+            btnStartWave.disabled = false;
+            btnStartWave.innerHTML = '<i class="fas fa-play"></i> Mulai Gelombang';
+        }
+        
+        // Animate wave
+        function animateWave() {
+            if (!waveRunning || wavePaused) return;
+            
+            waveAnimationId = requestAnimationFrame(animateWave);
+            
+            // Update time
+            waveTimeValue += 0.05;
+            waveTime.textContent = waveTimeValue.toFixed(1);
+            
+            // Generate new data point
+            const t = waveTimeValue;
+            let value;
+            const phase = 2 * Math.PI * waveParams.frequency * t;
+            
+            switch (waveParams.waveType) {
+                case 'sine':
+                    value = waveParams.amplitude * Math.sin(phase);
+                    break;
+                case 'square':
+                    value = waveParams.amplitude * (Math.sin(phase) > 0 ? 1 : -1);
+                    break;
+                case 'sawtooth':
+                    value = waveParams.amplitude * (2 * (t * waveParams.frequency - Math.floor(t * waveParams.frequency + 0.5)));
+                    break;
+                case 'triangle':
+                    value = waveParams.amplitude * (2 * Math.abs(2 * (t * waveParams.frequency - Math.floor(t * waveParams.frequency + 0.5))) - 1);
+                    break;
+                default:
+                    value = waveParams.amplitude * Math.sin(phase);
+            }
+            
+            // Update chart
+            updateWaveChartData(t, value);
+        }
+        
+        // Update wave chart data
+        function updateWaveChartData(time, value) {
+            // Add new point
+            waveChart.data.labels.push(time.toFixed(2));
+            waveChart.data.datasets[0].data.push(value);
+            
+            // Keep only last 100 points
+            if (waveChart.data.labels.length > 100) {
+                waveChart.data.labels.shift();
+                waveChart.data.datasets[0].data.shift();
+            }
+            
+            waveChart.update('none');
+        }
+        
+        // Play tone at specific frequency
+        function playTone() {
+            const frequency = parseFloat(toneFrequencySlider.value);
+            const duration = parseFloat(toneDurationSlider.value);
+            
+            playToneAtFrequency(frequency, duration);
+        }
+        
+        // Play tone at given frequency
+        function playToneAtFrequency(frequency, duration = 1) {
+            if (!audioContext) {
+                initAudioContext();
+            }
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.type = 'sine';
+            oscillator.frequency.setValueAtTime(frequency, audioContext.currentTime);
+            
+            // Set gain with fade in/out
+            gainNode.gain.setValueAtTime(0, audioContext.currentTime);
+            gainNode.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + 0.1);
+            gainNode.gain.linearRampToValueAtTime(0.3, audioContext.currentTime + duration - 0.1);
+            gainNode.gain.linearRampToValueAtTime(0, audioContext.currentTime + duration);
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + duration);
+            
+            showError('Nada Diputar', `Memainkan nada pada ${frequency.toFixed(2)} Hz selama ${duration} detik`);
+        }
+        
+        // Get musical note name from frequency
+        function getNoteName(frequency) {
+            const notes = [
+                { freq: 261.63, name: 'C4' },
+                { freq: 293.66, name: 'D4' },
+                { freq: 329.63, name: 'E4' },
+                { freq: 349.23, name: 'F4' },
+                { freq: 392.00, name: 'G4' },
+                { freq: 440.00, name: 'A4' },
+                { freq: 493.88, name: 'B4' },
+                { freq: 523.25, name: 'C5' }
+            ];
+            
+            let closestNote = notes[0];
+            let minDiff = Math.abs(frequency - notes[0].freq);
+            
+            for (const note of notes) {
+                const diff = Math.abs(frequency - note.freq);
+                if (diff < minDiff) {
+                    minDiff = diff;
+                    closestNote = note;
+                }
+            }
+            
+            return closestNote.name;
+        }
+        
+        // Switch tab
+        function switchTab(tab) {
+            // Update tab buttons
+            tabSimulasi.classList.remove('active');
+            tabAnalisis.classList.remove('active');
+            tabEkspor.classList.remove('active');
+            
+            simulasiContent.classList.add('hidden');
+            analisisContent.classList.add('hidden');
+            eksporContent.classList.add('hidden');
+            
+            // Show selected tab
+            switch(tab) {
+                case 'simulasi':
+                    tabSimulasi.classList.add('active');
+                    simulasiContent.classList.remove('hidden');
+                    break;
+                case 'analisis':
+                    tabAnalisis.classList.add('active');
+                    analisisContent.classList.remove('hidden');
+                    updateAudioTable();
+                    break;
+                case 'ekspor':
+                    tabEkspor.classList.add('active');
+                    eksporContent.classList.remove('hidden');
+                    break;
+            }
+        }
+        
+        // Error handling
+        function showError(title, message) {
+            errorTitle.textContent = title;
+            errorDetail.textContent = message;
+            errorMessage.classList.remove('hidden');
+            
+            setTimeout(() => {
+                errorMessage.classList.add('hidden');
+            }, 3000);
+        }
+        
+        // Add spin animation
+        const style = document.createElement('style');
+        style.textContent = `
+            .spin {
+                animation: spin 1s linear infinite;
+            }
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', init);
+        
+        // Update wave info on load
+        setTimeout(updateWaveInfo, 100);
+    </script>
+</body>
+</html>

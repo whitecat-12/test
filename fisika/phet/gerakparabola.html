@@ -737,6 +737,8 @@
                                 <label class="block text-xs font-medium text-gray-700 mb-1">Rentang Data</label>
                                 <div class="flex gap-2">
                                     <input type="number" id="export-start" value="0" min="0" step="0.1" class="flex-1 p-2 border border-gray-300 rounded text-xs" placeholder="Mulai (s)">
+                                </div>
+                                <div class="flex gap-2">
                                     <input type="number" id="export-end" value="10" min="0" step="0.1" class="flex-1 p-2 border border-gray-300 rounded text-xs" placeholder="Selesai (s)">
                                 </div>
                             </div>
@@ -797,7 +799,7 @@
                         <p class="text-xs font-medium text-gray-700 mb-2">Tips Simulasi:</p>
                         <div class="text-xs text-gray-600 space-y-1">
                             <div class="flex items-start">
-                                <i class="fas fa-lightbulb text-yellow-500 mt-0.5 mr-2"></i>
+                                <i class="fas fa-lightbulb text-yellow-500 mt=0.5 mr-2"></i>
                                 <span>Sudut 45° menghasilkan jangkauan maksimum</span>
                             </div>
                             <div class="flex items-start">
@@ -1746,193 +1748,163 @@
             showError('CSV Tersimpan', `${filteredData.length} data telah diunduh sebagai CSV`);
         }
         
-        // Export chart as PNG
+        // Export chart as PNG - FIXED VERSION
         function exportChart() {
             if (!parabolaChart || simulationData.length === 0) {
                 showError('Grafik Tidak Tersedia', 'Tidak ada data simulasi untuk diekspor');
                 return;
             }
             
-            // Create a combined chart for export
-            const canvas = document.createElement('canvas');
-            canvas.width = 1200;
-            canvas.height = 800;
-            const ctx = canvas.getContext('2d');
-            
-            // Background
-            ctx.fillStyle = 'white';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            // Title
-            ctx.fillStyle = '#1f2937';
-            ctx.font = 'bold 24px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText('SIMULASI GERAK PARABOLA', canvas.width / 2, 40);
-            
-            ctx.font = '16px Arial';
-            ctx.fillText(`Parameter: v₀=${params.v0} m/s, θ=${params.angle}°, g=${params.g} m/s², h₀=${params.h0} m`, canvas.width / 2, 70);
-            ctx.fillText(`Tanggal: ${new Date().toLocaleString('id-ID')}`, canvas.width / 2, 95);
-            
-            // Draw trajectory chart
-            const calculatedValues = calculateParabola();
-            const padding = 100;
-            const chartWidth = canvas.width - 2 * padding;
-            const chartHeight = 300;
-            
-            // Use actual simulation data for trajectory
-            const trajectoryData = simulationData;
-            
-            // Find max values for scaling
-            const maxX = Math.max(...trajectoryData.map(d => d.x));
-            const maxY = Math.max(...trajectoryData.map(d => d.y));
-            
-            // Draw axes
-            ctx.strokeStyle = '#374151';
-            ctx.lineWidth = 2;
-            
-            // X-axis
-            ctx.beginPath();
-            ctx.moveTo(padding, canvas.height - padding - chartHeight);
-            ctx.lineTo(padding + chartWidth, canvas.height - padding - chartHeight);
-            ctx.stroke();
-            
-            // Y-axis
-            ctx.beginPath();
-            ctx.moveTo(padding, canvas.height - padding);
-            ctx.lineTo(padding, canvas.height - padding - chartHeight);
-            ctx.stroke();
-            
-            // Draw grid
-            ctx.strokeStyle = '#e5e7eb';
-            ctx.lineWidth = 1;
-            
-            // Vertical grid lines
-            for (let i = 1; i < 5; i++) {
-                ctx.beginPath();
-                ctx.moveTo(padding + (i * chartWidth / 5), canvas.height - padding);
-                ctx.lineTo(padding + (i * chartWidth / 5), canvas.height - padding - chartHeight);
-                ctx.stroke();
-            }
-            
-            // Horizontal grid lines
-            for (let i = 1; i < 5; i++) {
-                ctx.beginPath();
-                ctx.moveTo(padding, canvas.height - padding - (i * chartHeight / 5));
-                ctx.lineTo(padding + chartWidth, canvas.height - padding - (i * chartHeight / 5));
-                ctx.stroke();
-            }
-            
-            // Draw trajectory from simulation data
-            if (trajectoryData.length > 0) {
-                ctx.strokeStyle = '#8b5cf6';
-                ctx.lineWidth = 3;
-                ctx.beginPath();
+            try {
+                // Create a temporary canvas for high-quality export
+                const tempCanvas = document.createElement('canvas');
+                const tempCtx = tempCanvas.getContext('2d');
                 
-                trajectoryData.forEach((point, index) => {
-                    const x = padding + (point.x / maxX) * chartWidth;
-                    const y = canvas.height - padding - (point.y / maxY) * chartHeight;
-                    
-                    if (index === 0) {
-                        ctx.moveTo(x, y);
-                    } else {
-                        ctx.lineTo(x, y);
-                    }
-                });
-                ctx.stroke();
+                // Set dimensions for high-quality export
+                tempCanvas.width = 2000;
+                tempCanvas.height = 1400;
                 
-                // Draw current position
-                const current = simulationData[simulationData.length - 1];
-                const x = padding + (current.x / maxX) * chartWidth;
-                const y = canvas.height - padding - (current.y / maxY) * chartHeight;
+                // White background
+                tempCtx.fillStyle = 'white';
+                tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
                 
-                ctx.fillStyle = '#f59e0b';
-                ctx.beginPath();
-                ctx.arc(x, y, 8, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.strokeStyle = '#7c2d12';
-                ctx.lineWidth = 2;
-                ctx.stroke();
-            }
-            
-            // Axis labels
-            ctx.fillStyle = '#4b5563';
-            ctx.font = 'bold 16px Arial';
-            ctx.textAlign = 'center';
-            ctx.fillText('Jarak Horizontal (m)', canvas.width / 2, canvas.height - 30);
-            
-            ctx.save();
-            ctx.translate(30, canvas.height / 2);
-            ctx.rotate(-Math.PI / 2);
-            ctx.fillText('Ketinggian (m)', 0, 0);
-            ctx.restore();
-            
-            // Add data table
-            ctx.font = '14px Arial';
-            ctx.textAlign = 'left';
-            ctx.fillStyle = '#1f2937';
-            ctx.fillText('DATA SIMULASI', padding, 400);
-            
-            // Draw table headers
-            ctx.fillStyle = '#38b2ac';
-            ctx.fillRect(padding, 420, chartWidth, 30);
-            ctx.fillStyle = 'white';
-            ctx.font = 'bold 12px Arial';
-            const headers = ['Waktu (s)', 'Posisi X (m)', 'Posisi Y (m)', 'Vx (m/s)', 'Vy (m/s)'];
-            const colWidth = chartWidth / headers.length;
-            
-            headers.forEach((header, i) => {
-                ctx.fillText(header, padding + i * colWidth + 10, 440);
-            });
-            
-            // Draw table data (last 10 points)
-            ctx.fillStyle = '#f9fafb';
-            const dataToShow = simulationData.slice(-10);
-            
-            dataToShow.forEach((data, rowIndex) => {
-                const y = 470 + rowIndex * 25;
+                // Add title and metadata
+                tempCtx.fillStyle = '#1f2937';
+                tempCtx.font = 'bold 36px "Baloo 2", Arial, sans-serif';
+                tempCtx.textAlign = 'center';
+                tempCtx.fillText('SIMULASI GERAK PARABOLA - QUANTARA', tempCanvas.width / 2, 60);
                 
-                if (rowIndex % 2 === 0) {
-                    ctx.fillStyle = '#f9fafb';
-                } else {
-                    ctx.fillStyle = '#ffffff';
-                }
-                ctx.fillRect(padding, y, chartWidth, 25);
+                tempCtx.font = '24px "Baloo 2", Arial, sans-serif';
+                tempCtx.fillStyle = '#4b5563';
+                tempCtx.fillText(`Parameter: v₀=${params.v0} m/s, θ=${params.angle}°, g=${params.g} m/s², h₀=${params.h0} m`, tempCanvas.width / 2, 110);
+                tempCtx.fillText(`Tanggal: ${new Date().toLocaleString('id-ID')}`, tempCanvas.width / 2, 150);
                 
-                ctx.fillStyle = '#374151';
-                ctx.font = '12px Arial';
-                
-                const values = [
-                    data.time.toFixed(2),
-                    data.x.toFixed(2),
-                    data.y.toFixed(2),
-                    data.vx.toFixed(2),
-                    data.vy.toFixed(2)
+                // Export each chart to image and draw on temp canvas
+                const chartCanvases = [
+                    {canvas: parabolaChartCanvas, title: 'Grafik Lintasan Parabola', y: 200},
+                    {canvas: velocityChartCanvas, title: 'Grafik Kecepatan vs Waktu', y: 650},
+                    {canvas: positionChartCanvas, title: 'Grafik Posisi vs Waktu', y: 1000}
                 ];
                 
-                values.forEach((value, i) => {
-                    ctx.fillText(value, padding + i * colWidth + 10, y + 18);
+                let chartsLoaded = 0;
+                const totalCharts = chartCanvases.length;
+                
+                chartCanvases.forEach((item, index) => {
+                    const chartImg = new Image();
+                    
+                    chartImg.onload = function() {
+                        // Draw chart image
+                        const chartHeight = 400;
+                        tempCtx.drawImage(chartImg, 100, item.y, tempCanvas.width - 200, chartHeight);
+                        
+                        // Add title for each chart
+                        tempCtx.fillStyle = '#1f2937';
+                        tempCtx.font = 'bold 28px "Baloo 2", Arial, sans-serif';
+                        tempCtx.textAlign = 'left';
+                        tempCtx.fillText(item.title, 100, item.y - 20);
+                        
+                        chartsLoaded++;
+                        
+                        // If all charts are loaded, create the download
+                        if (chartsLoaded === totalCharts) {
+                            // Add simulation info at the bottom
+                            const calculatedValues = calculateParabola();
+                            tempCtx.font = '20px "Baloo 2", Arial, sans-serif';
+                            tempCtx.textAlign = 'left';
+                            tempCtx.fillStyle = '#374151';
+                            
+                            const infoY = 1350;
+                            tempCtx.fillText(`Informasi Simulasi:`, 100, infoY);
+                            tempCtx.fillText(`• Jangkauan Maksimum: ${calculatedValues.range.toFixed(2)} m`, 120, infoY + 35);
+                            tempCtx.fillText(`• Ketinggian Maksimum: ${calculatedValues.maxHeight.toFixed(2)} m`, 120, infoY + 70);
+                            tempCtx.fillText(`• Waktu Total: ${calculatedValues.totalTime.toFixed(2)} s`, 120, infoY + 105);
+                            tempCtx.fillText(`• Data Points: ${simulationData.length}`, 120, infoY + 140);
+                            
+                            // Add footer
+                            tempCtx.font = '16px "Baloo 2", Arial, sans-serif';
+                            tempCtx.fillStyle = '#6b7280';
+                            tempCtx.textAlign = 'center';
+                            tempCtx.fillText('Dibuat dengan QUANTARA - Simulator Fisika Interaktif', tempCanvas.width / 2, 1380);
+                            
+                            // Trigger download
+                            setTimeout(() => {
+                                const dataUrl = tempCanvas.toDataURL('image/png');
+                                const link = document.createElement('a');
+                                link.download = `grafik-parabola-quantara-${new Date().toISOString().slice(0, 10)}.png`;
+                                link.href = dataUrl;
+                                document.body.appendChild(link);
+                                link.click();
+                                document.body.removeChild(link);
+                                
+                                showError('Grafik Tersimpan', 'Grafik parabola telah diunduh sebagai PNG');
+                            }, 100);
+                        }
+                    };
+                    
+                    chartImg.onerror = function() {
+                        chartsLoaded++;
+                        console.error(`Failed to load chart image ${index + 1}`);
+                        
+                        // Continue even if one chart fails
+                        if (chartsLoaded === totalCharts) {
+                            // Create download even with missing charts
+                            setTimeout(() => {
+                                const dataUrl = tempCanvas.toDataURL('image/png');
+                                const link = document.createElement('a');
+                                link.download = `grafik-parabola-quantara-${new Date().toISOString().slice(0, 10)}.png`;
+                                link.href = dataUrl;
+                                document.body.appendChild(link);
+                                link.click();
+                                document.body.removeChild(link);
+                                
+                                showError('Grafik Tersimpan', 'Grafik parabola telah diunduh sebagai PNG (beberapa grafik mungkin tidak tampil)');
+                            }, 100);
+                        }
+                    };
+                    
+                    // Get base64 image from chart with better quality
+                    const originalChart = index === 0 ? parabolaChart : 
+                                        index === 1 ? velocityChart : 
+                                        positionChart;
+                    
+                    // Temporarily increase chart size for better quality
+                    const originalDisplay = item.canvas.style.display;
+                    const originalWidth = item.canvas.width;
+                    const originalHeight = item.canvas.height;
+                    
+                    // Create a temporary canvas for high-res export of this specific chart
+                    const tempChartCanvas = document.createElement('canvas');
+                    tempChartCanvas.width = 1800;
+                    tempChartCanvas.height = 600;
+                    const tempChartCtx = tempChartCanvas.getContext('2d');
+                    
+                    // Draw white background
+                    tempChartCtx.fillStyle = 'white';
+                    tempChartCtx.fillRect(0, 0, tempChartCanvas.width, tempChartCanvas.height);
+                    
+                    // Draw the chart
+                    tempChartCtx.drawImage(item.canvas, 0, 0, tempChartCanvas.width, tempChartCanvas.height);
+                    
+                    // Use the temporary canvas for the image
+                    chartImg.src = tempChartCanvas.toDataURL('image/png', 1.0);
                 });
-            });
-            
-            // Add simulation info
-            ctx.fillStyle = '#1f2937';
-            ctx.font = 'bold 14px Arial';
-            ctx.fillText('INFORMASI SIMULASI', padding, 750);
-            
-            ctx.font = '12px Arial';
-            ctx.fillStyle = '#4b5563';
-            ctx.fillText(`Jangkauan Maksimum: ${calculatedValues.range.toFixed(2)} m`, padding, 770);
-            ctx.fillText(`Ketinggian Maksimum: ${calculatedValues.maxHeight.toFixed(2)} m`, padding + 250, 770);
-            ctx.fillText(`Waktu Total: ${calculatedValues.totalTime.toFixed(2)} s`, padding + 500, 770);
-            
-            // Convert to data URL and download
-            const dataUrl = canvas.toDataURL('image/png');
-            const link = document.createElement('a');
-            link.download = `grafik-parabola-${new Date().toISOString().slice(0, 10)}.png`;
-            link.href = dataUrl;
-            link.click();
-            
-            showError('Grafik Tersimpan', 'Grafik parabola telah diunduh sebagai PNG');
+                
+            } catch (error) {
+                console.error('Error exporting chart:', error);
+                showError('Ekspor Gagal', 'Terjadi kesalahan saat mengekspor grafik. Silakan coba lagi.');
+                
+                // Fallback: export just the parabola chart
+                try {
+                    const dataUrl = parabolaChartCanvas.toDataURL('image/png');
+                    const link = document.createElement('a');
+                    link.download = `grafik-parabola-quantara-${new Date().toISOString().slice(0, 10)}.png`;
+                    link.href = dataUrl;
+                    link.click();
+                    showError('Grafik Tersimpan (Fallback)', 'Grafik utama telah diunduh');
+                } catch (fallbackError) {
+                    showError('Ekspor Gagal Total', 'Tidak dapat mengekspor grafik. Pastikan simulasi telah berjalan dan ada data.');
+                }
+            }
         }
         
         // Export all data
@@ -1948,7 +1920,7 @@
             // Wait a moment then export chart
             setTimeout(() => {
                 exportChart();
-            }, 1000);
+            }, 1500);
             
             showError('Ekspor Lengkap', 'Data CSV dan grafik PNG sedang diunduh');
         }

@@ -2,1046 +2,2354 @@
 <html lang="id">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Simulator Medan Magnet - Fisika Interaktif</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QUANTARA - Simulasi Bola Jatuh Hukum Newton</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            -webkit-tap-highlight-color: transparent;
+        :root {
+            --primary: #38b2ac;
+            --secondary: #0e7490;
+            --accent: #f59e0b;
         }
         
         body {
-            background: #ffffff;
-            color: #333;
-            min-height: 100vh;
-            padding: 10px;
-            overflow-x: hidden;
+            font-family: 'Baloo 2', cursive;
+            background-color: #f8fafc;
         }
         
-        .container {
-            width: 100%;
+        .app-container {
+            max-width: 414px;
             margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
         }
         
-        header {
-            text-align: center;
-            margin-bottom: 15px;
-            padding: 15px 10px;
-            background: linear-gradient(135deg, #4a90e2, #357abd);
-            border-radius: 12px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            color: white;
+        /* NAVBAR */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            max-width: 414px;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.05);
+            background: white;
+            z-index: 10;
+            height: 70px;
+            display: flex;
+            align-items: center;
         }
         
-        h1 {
-            font-size: 1.6rem;
-            margin-bottom: 8px;
-            line-height: 1.3;
-        }
-        
-        .subtitle {
-            font-size: 0.95rem;
-            opacity: 0.9;
-            line-height: 1.4;
-        }
-        
-        .content {
+        .nav-item {
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            align-items: center;
+            justify-content: center;
+            color: #6b7280;
+            text-decoration: none;
+            flex: 1;
+            height: 100%;
+            padding: 0.5rem 0;
+            transition: all 0.3s ease;
         }
         
-        .panel {
-            background: #ffffff;
-            border-radius: 12px;
-            padding: 15px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            border: 1px solid #eaeaea;
-            width: 100%;
+        .nav-item span {
+            font-size: 0.75rem;
+            margin-top: 0.25rem;
         }
         
-        .simulation-panel {
-            height: 300px;
+        .nav-item.active {
+            color: var(--primary);
+        }
+        
+        .nav-icon {
+            transition: all 0.3s ease;
+            font-size: 1.25rem;
+        }
+        
+        .nav-icon.active {
+            transform: translateY(-5px);
+            color: var(--primary);
+        }
+        
+        /* Canvas Container */
+        .simulation-container {
             position: relative;
+            background: #000;
+            border-radius: 12px;
             overflow: hidden;
-            order: 1;
+            height: 300px;
         }
         
-        #simulation-container {
+        #simulation-canvas {
             width: 100%;
             height: 100%;
+            background: linear-gradient(to bottom, #1e3a8a 0%, #0ea5e9 100%);
+            display: block;
+        }
+        
+        /* Lux Meter (diubah jadi Energy Meter) */
+        .energy-meter {
+            height: 16px;
+            background: linear-gradient(to right, #1e3a8a, #3b82f6, #60a5fa, #93c5fd, #dbeafe);
             border-radius: 8px;
-            background: #f8f9fa;
-            border: 1px solid #eaeaea;
+            overflow: hidden;
+            position: relative;
         }
         
-        .controls-panel {
-            order: 2;
+        .energy-indicator {
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.9);
+            width: 4px;
+            position: absolute;
+            top: 0;
+            transform: translateX(-50%);
+            transition: left 0.5s ease;
+            box-shadow: 0 0 5px rgba(0,0,0,0.3);
         }
         
-        .tabs {
-            display: flex;
+        /* Chart Container */
+        .chart-container {
+            height: 280px;
+            position: relative;
+            background: white;
+            border-radius: 10px;
+            padding: 10px;
             margin-bottom: 15px;
-            background: #f1f3f5;
-            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        
+        /* Chart Controls */
+        .chart-controls {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+        
+        .chart-btn {
+            padding: 4px 10px;
+            font-size: 11px;
+            border-radius: 6px;
+            background: #f3f4f6;
+            border: 1px solid #d1d5db;
+            color: #374151;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .chart-btn:hover {
+            background: #e5e7eb;
+        }
+        
+        .chart-btn.active {
+            background: #38b2ac;
+            color: white;
+            border-color: #38b2ac;
+        }
+        
+        /* Data panel */
+        .data-panel {
+            transition: all 0.3s ease;
+        }
+        
+        .data-panel.collapsed {
+            max-height: 60px;
             overflow: hidden;
         }
         
-        .tab {
-            flex: 1;
-            padding: 12px 8px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            color: #495057;
-            font-size: 0.95rem;
-            touch-action: manipulation;
+        /* Custom Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
         }
         
-        .tab.active {
-            background: #4a90e2;
-            color: white;
-            font-weight: bold;
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
         }
         
-        .control-group {
-            margin-bottom: 18px;
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 3px;
         }
         
-        label {
-            display: block;
-            margin-bottom: 6px;
-            font-weight: 500;
-            color: #495057;
-            font-size: 0.95rem;
+        /* Detection Status */
+        .simulation-status {
+            font-size: 11px;
+            padding: 4px 8px;
+            border-radius: 12px;
+            display: inline-block;
         }
         
-        input[type="range"] {
-            width: 100%;
-            margin-bottom: 5px;
-            height: 32px;
-            -webkit-appearance: none;
-            background: #e9ecef;
-            border-radius: 16px;
-            outline: none;
+        .simulation-active {
+            background-color: #d1fae5;
+            color: #065f46;
         }
         
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            width: 24px;
-            height: 24px;
+        .simulation-paused {
+            background-color: #fef3c7;
+            color: #92400e;
+        }
+        
+        .simulation-stopped {
+            background-color: #fee2e2;
+            color: #991b1b;
+        }
+        
+        /* Loading Spinner */
+        .loading-spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #38b2ac;
             border-radius: 50%;
-            background: #4a90e2;
-            cursor: pointer;
-            border: 2px solid white;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
         }
         
-        .value-display {
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Error Message */
+        .error-message {
+            background-color: #fee2e2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+            padding: 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+            display: none;
+        }
+        
+        /* Table Styles */
+        .data-table {
+            width: 100%;
+            font-size: 12px;
+            border-collapse: collapse;
+            background: white;
+        }
+        
+        .data-table th {
+            background-color: #38b2ac;
+            color: white;
+            padding: 10px 12px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid #2c9c96;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .data-table td {
+            padding: 8px 12px;
+            border-bottom: 1px solid #f1f5f9;
+            color: #475569;
+        }
+        
+        .data-table tr:hover {
+            background-color: #f8fafc;
+        }
+        
+        .data-table tr:nth-child(even) {
+            background-color: #f9fafb;
+        }
+        
+        .data-table tr:nth-child(even):hover {
+            background-color: #f3f4f6;
+        }
+        
+        /* Export Buttons */
+        .export-buttons {
             display: flex;
-            justify-content: space-between;
-            font-size: 0.85rem;
-            color: #6c757d;
-            margin-top: 3px;
+            gap: 8px;
+            margin-top: 10px;
         }
         
-        .buttons {
+        .export-btn {
+            flex: 1;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            transition: all 0.2s;
+        }
+        
+        .export-btn-chart {
+            background-color: #38b2ac;
+            color: white;
+        }
+        
+        .export-btn-chart:hover {
+            background-color: #319795;
+        }
+        
+        .export-btn-data {
+            background-color: #8b5cf6;
+            color: white;
+        }
+        
+        .export-btn-data:hover {
+            background-color: #7c3aed;
+        }
+        
+        /* Scrollable Table Container */
+        .table-container {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            margin-top: 10px;
+            background: white;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+        }
+        
+        /* Parameter Section */
+        .parameter-section {
+            background-color: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 10px;
+        }
+        
+        .parameter-input {
+            width: 100%;
+            padding: 6px 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-size: 12px;
+        }
+        
+        /* Section header */
+        .section-header {
+            font-size: 13px;
+            font-weight: 600;
+        }
+        
+        /* Result value */
+        .result-value {
+            font-size: 14px;
+        }
+        
+        /* Bounce Type Selection */
+        .bounce-type-toggle {
+            display: flex;
+            gap: 5px;
+            margin-top: 10px;
+        }
+        
+        .type-btn {
+            flex: 1;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+        }
+        
+        .type-btn-perfect {
+            background-color: #e0f2fe;
+            color: #0369a1;
+            border: 1px solid #bae6fd;
+        }
+        
+        .type-btn-perfect.active {
+            background-color: #0ea5e9;
+            color: white;
+            border-color: #0ea5e9;
+        }
+        
+        .type-btn-realistic {
+            background-color: #fce7f3;
+            color: #be185d;
+            border: 1px solid #fbcfe8;
+        }
+        
+        .type-btn-realistic.active {
+            background-color: #ec4899;
+            color: white;
+            border-color: #ec4899;
+        }
+        
+        /* Energy Level Indicators */
+        .energy-level-indicator {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        
+        .energy-value-display {
+            font-size: 28px;
+            font-weight: bold;
+            text-align: center;
+            margin: 10px 0;
+        }
+        
+        /* Energy Categories */
+        .energy-category {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        
+        .energy-low {
+            background-color: #1e293b;
+            color: white;
+        }
+        
+        .energy-medium {
+            background-color: #475569;
+            color: white;
+        }
+        
+        .energy-high {
+            background-color: #60a5fa;
+            color: white;
+        }
+        
+        .energy-very-high {
+            background-color: #fbbf24;
+            color: #78350f;
+        }
+        
+        .energy-extreme {
+            background-color: #fde68a;
+            color: #78350f;
+        }
+        
+        /* Simulation Controls */
+        .simulation-controls {
             display: flex;
             gap: 10px;
             margin-top: 10px;
-            flex-direction: column;
         }
         
-        button {
-            width: 100%;
-            padding: 14px;
-            border: none;
+        .simulation-btn {
+            flex: 1;
+            padding: 10px;
             border-radius: 8px;
-            background: #4a90e2;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            font-size: 1rem;
-            touch-action: manipulation;
-        }
-        
-        button:hover, button:active {
-            background: #357abd;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.15);
-        }
-        
-        button.reset {
-            background: #e74c3c;
-        }
-        
-        button.reset:hover, button.reset:active {
-            background: #c0392b;
-        }
-        
-        .data-panel {
-            order: 3;
-            margin-top: 0;
-        }
-        
-        .data-panel h2 {
-            font-size: 1.3rem;
-            margin-bottom: 12px;
-        }
-        
-        .charts {
+            font-size: 12px;
+            font-weight: 500;
             display: flex;
-            flex-direction: column;
-            gap: 15px;
-            margin-top: 15px;
-        }
-        
-        .chart-container {
-            background: #ffffff;
-            border-radius: 8px;
-            padding: 12px;
-            height: 250px;
-            border: 1px solid #eaeaea;
-        }
-        
-        canvas {
-            width: 100% !important;
-            height: 100% !important;
-        }
-        
-        .data-controls {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-top: 15px;
-            align-items: stretch;
-        }
-        
-        .data-controls div {
-            display: flex;
+            align-items: center;
             justify-content: center;
+            gap: 5px;
         }
         
-        .time-display {
-            font-weight: bold;
-            color: #4a90e2;
-            font-size: 1.1rem;
-            text-align: center;
-            padding: 8px;
-            background: #f8f9fa;
-            border-radius: 8px;
+        /* Gravity Adjustment */
+        .gravity-control {
+            margin-top: 15px;
         }
         
-        .instructions {
-            margin-top: 20px;
-            padding: 12px;
-            background: #f8f9fa;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            line-height: 1.5;
-            color: #495057;
-            border: 1px solid #eaeaea;
+        .gravity-slider {
+            width: 100%;
+            height: 6px;
+            background: linear-gradient(to right, #1e293b, #cbd5e1);
+            border-radius: 3px;
+            outline: none;
         }
         
-        .instructions h3 {
-            margin-bottom: 8px;
-            color: #4a90e2;
-            font-size: 1rem;
+        /* Track Lines */
+        .track-lines {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
         }
         
-        .instructions ul {
-            margin-left: 18px;
+        .track-line {
+            position: absolute;
+            width: 100%;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.2);
         }
         
-        .instructions li {
-            margin-bottom: 6px;
+        .track-label {
+            position: absolute;
+            color: white;
+            font-size: 9px;
+            background: rgba(0,0,0,0.5);
+            padding: 1px 3px;
+            border-radius: 2px;
         }
         
-        /* Responsive improvements */
-        @media (min-width: 768px) {
-            body {
-                padding: 15px;
-            }
-            
-            .simulation-panel {
-                height: 350px;
-            }
-            
-            .buttons {
-                flex-direction: row;
-            }
-            
-            .data-controls {
-                flex-direction: row;
-                justify-content: space-between;
-                align-items: center;
-            }
+        /* Ball Energy Indicator */
+        .energy-indicator-circle {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 0 5px rgba(0,0,0,0.3);
         }
         
-        @media (min-width: 1024px) {
-            .content {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 20px;
-            }
-            
-            .simulation-panel {
-                grid-column: 1;
-                height: 400px;
-            }
-            
-            .controls-panel {
-                grid-column: 2;
-            }
-            
-            .data-panel {
-                grid-column: 1 / -1;
-            }
-            
-            .charts {
-                display: grid;
-                grid-template-columns: 1fr 1fr;
-                gap: 20px;
-            }
+        /* Bounce Animation */
+        .bounce-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: white;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 5;
+            border-radius: 12px;
         }
         
-        /* Touch-friendly improvements */
-        .slider-container {
-            padding: 5px 0;
+        .bounce-animation {
+            animation: bounceFlash 0.3s ease;
         }
         
-        /* Mobile landscape optimization */
-        @media (max-height: 500px) and (orientation: landscape) {
-            .simulation-panel {
+        @keyframes bounceFlash {
+            0% { opacity: 0; }
+            50% { opacity: 0.5; }
+            100% { opacity: 0; }
+        }
+        
+        @media (max-width: 380px) {
+            .chart-container {
                 height: 250px;
             }
             
-            .chart-container {
-                height: 200px;
+            .data-table {
+                font-size: 11px;
             }
             
-            .buttons {
-                flex-direction: row;
+            .data-table th,
+            .data-table td {
+                padding: 8px 10px;
+            }
+        }
+        
+        /* Improved mobile styles untuk konsistensi */
+        @media (max-width: 414px) {
+            .bottom-nav {
+                height: 65px; /* SAMA DENGAN FILE CHAT */
+            }
+            
+            .nav-icon {
+                font-size: 1.1rem; /* SAMA DENGAN FILE CHAT */
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>Simulator Medan Magnet</h1>
-            <p class="subtitle">Visualisasi Gerak Partikel Bermuatan dalam Medan Magnet</p>
-        </header>
+    <!-- Mobile App Container -->
+    <div class="app-container">
         
-        <div class="content">
-            <div class="panel simulation-panel">
-                <div id="simulation-container"></div>
-            </div>
-            
-            <div class="panel controls-panel">
-                <div class="tabs">
-                    <div class="tab active" data-type="uniform">Medan Seragam</div>
-                    <div class="tab" data-type="circular">Gerak Melingkar</div>
-                </div>
-                
-                <div class="control-group">
-                    <label for="velocity">Kecepatan Awal (m/s):</label>
-                    <div class="slider-container">
-                        <input type="range" id="velocity" min="1" max="50" value="20" step="1">
-                    </div>
-                    <div class="value-display">
-                        <span>1</span>
-                        <span id="velocity-value">20 m/s</span>
-                        <span>50</span>
-                    </div>
-                </div>
-                
-                <div class="control-group">
-                    <label for="magnetic-field">Kekuatan Medan Magnet (T):</label>
-                    <div class="slider-container">
-                        <input type="range" id="magnetic-field" min="0.1" max="5" value="1" step="0.1">
-                    </div>
-                    <div class="value-display">
-                        <span>0.1</span>
-                        <span id="magnetic-field-value">1 T</span>
-                        <span>5</span>
-                    </div>
-                </div>
-                
-                <div class="control-group">
-                    <label for="charge">Muatan Partikel (C):</label>
-                    <div class="slider-container">
-                        <input type="range" id="charge" min="-5" max="5" value="1" step="0.1">
-                    </div>
-                    <div class="value-display">
-                        <span>-5</span>
-                        <span id="charge-value">1 C</span>
-                        <span>5</span>
-                    </div>
-                </div>
-                
-                <div class="control-group">
-                    <label for="angle">Sudut Awal (derajat):</label>
-                    <div class="slider-container">
-                        <input type="range" id="angle" min="0" max="90" value="90" step="1">
-                    </div>
-                    <div class="value-display">
-                        <span>0°</span>
-                        <span id="angle-value">90°</span>
-                        <span>90°</span>
-                    </div>
-                </div>
-                
-                <div class="buttons">
-                    <button id="start-btn">Mulai Simulasi</button>
-                    <button id="reset-btn" class="reset">Reset</button>
-                </div>
-                
-                <div class="instructions">
-                    <h3>Petunjuk Penggunaan:</h3>
-                    <ul>
-                        <li>Pilih jenis medan magnet (seragam atau gerak melingkar)</li>
-                        <li>Atur parameter kecepatan, kekuatan medan magnet, muatan, dan sudut</li>
-                        <li>Klik "Mulai Simulasi" untuk menjalankan simulasi</li>
-                        <li>Untuk mengubah sudut pandang: sentuh dan seret untuk memutar, cubit untuk zoom</li>
-                        <li>Warna partikel: merah = muatan positif, biru = muatan negatif</li>
-                        <li>Data simulasi dapat diunduh dalam format CSV</li>
-                    </ul>
-                </div>
-            </div>
-            
-            <div class="panel data-panel">
-                <h2>Data dan Grafik</h2>
-                
-                <div class="data-controls">
-                    <div>
-                        <button id="download-btn">Unduh Data CSV</button>
-                    </div>
-                    <div>
-                        <span>Waktu: <span id="time-display" class="time-display">0.00</span> s</span>
-                    </div>
-                    <div>
-                        <span>Jari-jari: <span id="radius-display" class="time-display">0.00</span> m</span>
-                    </div>
-                </div>
-                
-                <div class="charts">
-                    <div class="chart-container">
-                        <canvas id="trajectory-chart"></canvas>
-                    </div>
-                    <div class="chart-container">
-                        <canvas id="velocity-chart"></canvas>
-                    </div>
+        <!-- Loading Indicator -->
+        <div id="loading" class="fixed inset-0 bg-white bg-opacity-90 flex flex-col items-center justify-center z-50">
+            <div class="loading-spinner mb-4"></div>
+            <p class="text-gray-700 font-medium">Menyiapkan Simulasi Fisika...</p>
+            <p class="text-gray-500 text-sm mt-2">Memuat simulasi hukum Newton</p>
+        </div>
+        
+        <!-- Error Message -->
+        <div id="error-message" class="error-message m-4 hidden">
+            <div class="flex items-center">
+                <i class="fas fa-exclamation-triangle mr-3"></i>
+                <div>
+                    <p class="font-medium" id="error-title">Terjadi Kesalahan</p>
+                    <p class="text-sm" id="error-detail"></p>
                 </div>
             </div>
         </div>
+        
+        <!-- Main Content -->
+        <main class="pb-24 p-4 custom-scrollbar" style="max-height: calc(100vh - 70px); overflow-y: auto;">
+            <!-- Page Title -->
+            <div class="mb-4">
+                <h1 class="text-lg font-bold text-gray-800 mb-1">
+                    <i class="fas fa-basketball-ball text-orange-500 mr-2"></i> Simulasi Bola Jatuh & Memantul
+                </h1>
+                <p class="text-gray-600 text-xs">
+                    Simulasi fisika hukum Newton tentang gerak jatuh bebas dan pantulan
+                </p>
+            </div>
+            
+            <!-- Simulation Section -->
+            <div class="mb-6 p-4 bg-white border border-gray-200 rounded-xl shadow-sm">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="section-header text-gray-700 flex items-center">
+                        <i class="fas fa-cogs text-blue-500 mr-2 text-xs"></i> Simulasi Bola
+                    </h3>
+                    <div class="text-xs text-gray-500" id="simulation-status">
+                        <i class="fas fa-circle text-green-500 mr-1"></i> Siap
+                    </div>
+                </div>
+                
+                <!-- Simulation Canvas -->
+                <div id="simulation-preview-container" class="mt-4">
+                    <div class="simulation-container">
+                        <!-- Bounce Overlay -->
+                        <div id="bounce-overlay" class="bounce-overlay"></div>
+                        
+                        <canvas id="simulation-canvas" width="400" height="300"></canvas>
+                        
+                        <!-- Track Lines -->
+                        <div id="track-lines" class="track-lines">
+                            <!-- Track lines will be generated here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Simulation Controls -->
+                    <div class="simulation-controls">
+                        <button id="btn-drop" class="simulation-btn bg-blue-500 text-white hover:bg-blue-600">
+                            <i class="fas fa-play mr-1"></i> Jatuhkan Bola
+                        </button>
+                        <button id="btn-reset" class="simulation-btn bg-gray-200 text-gray-700 hover:bg-gray-300">
+                            <i class="fas fa-redo mr-1"></i> Reset
+                        </button>
+                        <button id="btn-add-ball" class="simulation-btn bg-gray-200 text-gray-700 hover:bg-gray-300">
+                            <i class="fas fa-plus mr-1"></i> Tambah Bola
+                        </button>
+                    </div>
+                    
+                    <!-- Simulation Info -->
+                    <div class="mt-3 text-xs text-gray-500 flex justify-between">
+                        <div>
+                            <i class="fas fa-info-circle mr-1"></i>
+                            <span id="ball-count">1 Bola</span>
+                        </div>
+                        <div>
+                            <span id="bounce-count">0</span> Pantulan
+                        </div>
+                        <div>
+                            <span id="time-elapsed">0.0s</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Control Buttons -->
+            <div class="mb-6 grid grid-cols-2 gap-3">
+                <button id="btn-start" class="py-3 bg-gradient-to-r from-teal-500 to-teal-600 text-white rounded-lg text-sm font-medium transition-all hover:from-teal-600 hover:to-teal-700 active:scale-95">
+                    <i class="fas fa-play mr-1"></i> Mulai Simulasi
+                </button>
+                <button id="btn-pause" class="py-3 bg-gradient-to-r from-gray-400 to-gray-500 text-white rounded-lg text-sm font-medium transition-all hover:from-gray-500 hover:to-gray-600 active:scale-95">
+                    <i class="fas fa-pause mr-1"></i> Stop
+                </button>
+                <button id="btn-log" class="py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg text-sm font-medium transition-all hover:from-blue-600 hover:to-blue-700 active:scale-95 col-span-2">
+                    <i class="fas fa-save mr-1"></i> Simpan Data Simulasi
+                </button>
+            </div> 
+            <!-- Real-time Energy Display -->
+            <div class="mb-6 p-4 bg-gradient-to-r from-yellow-50 to-amber-50 border border-yellow-200 rounded-xl shadow-sm">
+                <div class="text-center mb-4">
+                    <div class="energy-value-display">
+                        <span id="current-energy">0.0</span>
+                        <span class="text-lg">J</span>
+                    </div>
+                    <div id="energy-category" class="energy-category energy-low inline-block">Energi Rendah</div>
+                </div>
+                
+                <!-- Energy Meter -->
+                <div class="mb-6">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-sm font-medium text-gray-700">Energi Mekanik</span>
+                        <span class="text-sm font-medium text-gray-700" id="energy-percentage">0%</span>
+                    </div>
+                    <div class="energy-meter relative">
+                        <div id="energy-indicator" class="energy-indicator" style="left: 0%;"></div>
+                    </div>
+                    <div class="flex justify-between text-xs text-gray-500 mt-1">
+                        <span>0 J</span>
+                        <span>25 J</span>
+                        <span>50 J</span>
+                        <span>75 J</span>
+                        <span>100 J</span>
+                    </div>
+                </div>
+                
+                <!-- Velocity Display -->
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <span class="text-sm font-medium text-gray-700">Kecepatan</span>
+                        <div class="text-xs text-gray-500">Bola saat ini</div>
+                    </div>
+                    <div class="flex items-center">
+                        <div id="velocity-indicator" class="energy-indicator-circle mr-2" style="background-color: #3b82f6;"></div>
+                        <span id="velocity-value" class="text-sm font-medium">0 m/s</span>
+                    </div>
+                </div>
+                
+                <!-- Bounce Type Selection -->
+                <div class="mb-4">
+                    <label class="block text-xs font-medium text-gray-700 mb-2">Jenis Pantulan</label>
+                    <div class="bounce-type-toggle">
+                        <div id="btn-perfect" class="type-btn type-btn-perfect active">
+                            <i class="fas fa-infinity mr-1"></i> Sempurna
+                        </div>
+                        <div id="btn-realistic" class="type-btn type-btn-realistic">
+                            <i class="fas fa-bolt mr-1"></i> Realistis
+                        </div>
+                        <div id="btn-superball" class="type-btn" style="background-color: #f0f9ff; color: #0e7490; border: 1px solid #bae6fd;">
+                            <i class="fas fa-star mr-1"></i> Superball
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Physics Parameters Section -->
+            <div class="mb-6 p-4 bg-white border border-gray-200 rounded-xl shadow-sm">
+                <h3 class="section-header text-gray-700 flex items-center mb-4">
+                    <i class="fas fa-tachometer-alt text-purple-500 mr-2 text-xs"></i> Parameter Fisika
+                </h3>
+                
+                <div class="space-y-4">
+                    <!-- Gravity Value -->
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-2">
+                            Gravitasi (m/s²)
+                        </label>
+                        <div class="flex gap-2">
+                            <select id="gravity-preset" class="flex-1 p-2 border border-gray-300 rounded-lg text-xs">
+                                <option value="9.8">Bumi (9.8 m/s²)</option>
+                                <option value="1.6">Bulan (1.6 m/s²)</option>
+                                <option value="3.7">Mars (3.7 m/s²)</option>
+                                <option value="24.8">Jupiter (24.8 m/s²)</option>
+                                <option value="0.5">Custom (0.5 m/s²)</option>
+                                <option value="20">Custom (20 m/s²)</option>
+                            </select>
+                            <button id="btn-apply-gravity" class="px-3 bg-purple-100 text-purple-700 rounded-lg text-xs hover:bg-purple-200">
+                                Terapkan
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Manual Parameters -->
+                    <div class="parameter-section">
+                        <label class="block text-xs font-medium text-gray-700 mb-2">
+                            <i class="fas fa-sliders-h mr-1"></i> Parameter Manual
+                        </label>
+                        <div class="grid grid-cols-2 gap-2 mb-2">
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Tinggi Jatuh (m)</label>
+                                <input type="number" id="drop-height" value="10" min="1" step="0.1" class="parameter-input">
+                            </div>
+                            <div>
+                                <label class="block text-xs text-gray-600 mb-1">Koef. Restitusi</label>
+                                <input type="number" id="restitution-coef" value="0.8" min="0.1" max="1" step="0.05" class="parameter-input">
+                            </div>
+                        </div>
+                        <div class="text-xs text-gray-600 mb-2">
+                            <i class="fas fa-info-circle mr-1"></i> Koefisien restitusi: 1 = pantulan sempurna, 0 = tidak memantul
+                        </div>
+                        <button id="btn-apply-params" class="w-full py-2 bg-purple-100 text-purple-700 rounded-lg text-xs font-medium hover:bg-purple-200">
+                            <i class="fas fa-calculator mr-1"></i> Terapkan Parameter
+                        </button>
+                        <div id="physics-result" class="mt-2 text-xs text-green-600 hidden">
+                            <i class="fas fa-check-circle mr-1"></i>
+                            Waktu jatuh: <span id="fall-time">1.43</span> detik
+                        </div>
+                    </div>
+                    
+                    <!-- Gravity Adjustment -->
+                    <div class="gravity-control">
+                        <label class="block text-xs font-medium text-gray-700 mb-2">
+                            Gravitasi: <span id="gravity-value" class="text-teal-600">9.8</span> m/s²
+                        </label>
+                        <input type="range" id="gravity-slider" min="0.1" max="30" step="0.1" value="9.8" class="gravity-slider">
+                        <div class="flex justify-between text-xs text-gray-500 mt-1">
+                            <span>0.1 m/s²</span>
+                            <span>Bumi</span>
+                            <span>30 m/s²</span>
+                        </div>
+                        <p class="text-xs text-gray-400 mt-1">Atur percepatan gravitasi untuk simulasi berbeda</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Physics Analysis -->
+            <div class="mb-6 p-4 bg-white border border-gray-200 rounded-xl shadow-sm">
+                <h3 class="section-header text-gray-700 flex items-center mb-4">
+                    <i class="fas fa-chart-bar text-orange-500 mr-2 text-xs"></i> Analisis Fisika
+                </h3>
+                
+                <div class="space-y-4">
+                    <!-- Energy Distribution -->
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-2">Distribusi Energi</label>
+                        <div class="grid grid-cols-3 gap-2 text-center">
+                            <div class="bg-blue-50 p-3 rounded-lg">
+                                <p class="text-xs text-blue-700">Potensial</p>
+                                <p id="potential-energy" class="result-value font-bold text-blue-800">0.0</p>
+                                <p class="text-xs text-blue-600">Joule</p>
+                            </div>
+                            <div class="bg-green-50 p-3 rounded-lg">
+                                <p class="text-xs text-green-700">Kinetik</p>
+                                <p id="kinetic-energy" class="result-value font-bold text-green-800">0.0</p>
+                                <p class="text-xs text-green-600">Joule</p>
+                            </div>
+                            <div class="bg-red-50 p-3 rounded-lg">
+                                <p class="text-xs text-red-700">Mekanik</p>
+                                <p id="mechanical-energy" class="result-value font-bold text-red-800">0.0</p>
+                                <p class="text-xs text-red-600">Joule</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Energy Conservation -->
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-2">Kekekalan Energi</label>
+                        <div class="flex items-center mb-2">
+                            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                <div id="conservation-bar" class="bg-green-600 h-2.5 rounded-full" style="width: 0%"></div>
+                            </div>
+                            <span id="conservation-value" class="ml-2 text-xs font-medium text-gray-700">0%</span>
+                        </div>
+                        <p class="text-xs text-gray-500">Persentase energi yang tersisa setelah pantulan</p>
+                    </div>
+                    
+                    <!-- Bounce Height -->
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-2">Tinggi Pantulan</label>
+                        <div class="flex items-center">
+                            <div class="flex-1">
+                                <div class="flex justify-between text-xs text-gray-500 mb-1">
+                                    <span>Pantulan 1</span>
+                                    <span>Pantulan 2</span>
+                                    <span>Pantulan 3</span>
+                                </div>
+                                <div class="w-full bg-gradient-to-r from-red-400 via-yellow-400 to-green-400 rounded-full h-2.5"></div>
+                            </div>
+                            <span id="bounce-height" class="ml-2 text-xs font-medium text-gray-700">0 m</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Chart Section -->
+            <div id="chart-section" class="mb-6">
+                <div class="p-4 bg-white border border-gray-200 rounded-xl shadow-sm">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="section-header text-gray-700 flex items-center">
+                            <i class="fas fa-chart-line text-teal-500 mr-2 text-xs"></i> Grafik Data Fisika
+                        </h3>
+                        <div class="chart-controls">
+                            <button class="chart-btn active" id="btn-chart-energy">
+                                Energi
+                            </button>
+                            <button class="chart-btn" id="btn-chart-velocity">
+                                Kecepatan
+                            </button>
+                            <button class="chart-btn" id="btn-chart-height">
+                                Ketinggian
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-container" id="chart-area">
+                        <canvas id="physics-chart"></canvas>
+                    </div>
+                    
+                    <!-- Export Chart Button -->
+                    <div class="export-buttons mt-3">
+                        <button id="btn-download-chart" class="export-btn export-btn-chart">
+                            <i class="fas fa-download"></i> Download Grafik
+                        </button>
+                        <button id="btn-download-snapshot" class="export-btn export-btn-data">
+                            <i class="fas fa-camera"></i> Download Simulasi
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Data Log Section -->
+            <div id="data-section" class="mb-6">
+                <div class="p-4 bg-white border border-gray-200 rounded-xl shadow-sm">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="section-header text-gray-700 flex items-center">
+                            <i class="fas fa-database text-purple-500 mr-2 text-xs"></i> Log Data Simulasi
+                        </h3>
+                        <div class="flex space-x-2">
+                            <button class="text-xs px-3 py-1 bg-gray-100 rounded hover:bg-gray-200" id="table-toggle">
+                                Tampilkan Tabel
+                            </button>
+                            <button id="btn-clear-data" class="text-xs px-3 py-1 bg-red-100 text-red-700 rounded hover:bg-red-200">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="hidden" id="table-area">
+                        <div class="table-container">
+                            <table class="data-table" id="physics-table">
+                                <thead>
+                                    <tr>
+                                        <th>Waktu</th>
+                                        <th>Ketinggian</th>
+                                        <th>Kecepatan</th>
+                                        <th>Energi</th>
+                                        <th>Pantulan</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="table-body">
+                                    <!-- Data rows will be inserted here -->
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Export Data Button -->
+                        <div class="export-buttons mt-4">
+                            <button id="btn-download-csv" class="export-btn export-btn-data">
+                                <i class="fas fa-file-csv"></i> Download CSV
+                            </button>
+                            <button id="btn-download-pdf" class="export-btn export-btn-data">
+                                <i class="fas fa-file-pdf"></i> Download Laporan
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Quick Stats -->
+                    <div id="quick-stats" class="mt-4 grid grid-cols-2 gap-3">
+                        <div class="bg-gray-50 p-3 rounded-lg">
+                            <p class="text-xs text-gray-600">Pantulan Maks</p>
+                            <p id="stats-max-bounce" class="text-lg font-bold text-gray-800">0</p>
+                        </div>
+                        <div class="bg-gray-50 p-3 rounded-lg">
+                            <p class="text-xs text-gray-600">Waktu Total</p>
+                            <p id="stats-total-time" class="text-lg font-bold text-gray-800">0.0s</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Physics Explanations -->
+            <div class="mb-6 p-4 bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-xl">
+                <h3 class="section-header text-gray-700 mb-3 flex items-center">
+                    <i class="fas fa-lightbulb text-green-500 mr-2 text-xs"></i> Penjelasan Hukum Newton
+                </h3>
+                
+                <div class="space-y-3">
+                    <div id="explanation-content" class="text-xs text-gray-700">
+                        <p class="mb-2"><span class="font-bold">Hukum I Newton (Inersia):</span> Bola yang diam akan tetap diam, bola yang bergerak akan tetap bergerak dengan kecepatan konstan kecuali ada gaya yang bekerja.</p>
+                        <p class="mb-2"><span class="font-bold">Hukum II Newton (F=ma):</span> Percepatan bola sebanding dengan gaya gravitasi yang bekerja padanya.</p>
+                        <p class="mb-2"><span class="font-bold">Hukum III Newton (Aksi-Reaksi):</span> Saat bola memantul dari lantai, bola memberikan gaya ke lantai dan lantai memberikan gaya yang sama besar ke arah berlawanan.</p>
+                    </div>
+                    
+                    <!-- Physics Formulas -->
+                    <div class="mt-4 pt-3 border-t border-green-100">
+                        <p class="text-xs font-medium text-gray-700 mb-2">Rumus Fisika:</p>
+                        <div class="text-xs text-gray-600 space-y-1">
+                            <div class="flex justify-between">
+                                <span>Energi Potensial:</span>
+                                <span class="font-medium">Ep = m·g·h</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Energi Kinetik:</span>
+                                <span class="font-medium">Ek = ½·m·v²</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Kecepatan Jatuh:</span>
+                                <span class="font-medium">v = √(2·g·h)</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span>Waktu Jatuh:</span>
+                                <span class="font-medium">t = √(2h/g)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+           
+        </main>
+        
+        <!-- Bottom Navigation -->
+    <nav class="bottom-nav">
+      <a href="../../dashboard siswa.html" class="nav-item">
+        <i class="fas fa-home nav-icon"></i>
+        <span>Beranda</span>
+      </a>
+      <a href="../../soal harian/dashboard soal.html" class="nav-item">
+        <i class="fas fa-flask nav-icon"></i>
+        <span>Soal Harian</span>
+      </a>
+      <a href="../../ai/nayra.html" class="nav-item">
+        <i class="fas fa-robot nav-icon"></i>
+        <span>Nayra AI</span>
+      </a>
+      <a href="../../materi harian/kategori materi.html" class="nav-item">
+        <i class="fas fa-chalkboard-teacher nav-icon"></i>
+        <span>Materi Harian</span>
+      </a>
+      <a href="../../profil/profil.html" class="nav-item">
+        <i class="fas fa-user nav-icon"></i>
+        <span>Profil</span>
+      </a>
+    </nav>
     </div>
 
+    <!-- Chart.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- jsPDF for PDF export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- HTML2Canvas for screenshot -->
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    
     <script>
-        // Variabel global
-        let scene, camera, renderer, particle, magneticFieldLines = [], trail = [];
-        let isAnimating = false;
-        let startTime, currentTime;
-        let velocity, magneticField, charge, angle;
-        let xData = [], yData = [], zData = [], velocityData = [], timeData = [];
-        let trajectoryChart, velocityChart;
-        let trailGeometry, trailMaterial, trailLine;
-        let particles = [];
-        let particleHistory = [];
+        // DOM Elements
+        const simulationCanvas = document.getElementById('simulation-canvas');
+        const loading = document.getElementById('loading');
+        const errorMessage = document.getElementById('error-message');
+        const errorTitle = document.getElementById('error-title');
+        const errorDetail = document.getElementById('error-detail');
+        const bounceOverlay = document.getElementById('bounce-overlay');
+        const trackLines = document.getElementById('track-lines');
         
-        // Inisialisasi Three.js
-        function initThreeJS() {
-            const container = document.getElementById('simulation-container');
-            
-            // Buat scene
-            scene = new THREE.Scene();
-            scene.background = new THREE.Color(0xf8f9fa);
-            
-            // Buat kamera dengan viewport yang lebih sesuai untuk mobile
-            camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
-            camera.position.set(15, 15, 15);
-            camera.lookAt(0, 0, 0);
-            
-            // Buat renderer
-            renderer = new THREE.WebGLRenderer({ antialias: true });
-            renderer.setSize(container.clientWidth, container.clientHeight);
-            container.appendChild(renderer.domElement);
-            
-            // Tambahkan pencahayaan
-            const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
-            scene.add(ambientLight);
-            
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
-            directionalLight.position.set(10, 20, 5);
-            scene.add(directionalLight);
-            
-            // Buat area simulasi (kotak 3D)
-            const boxSize = 20;
-            const boxGeometry = new THREE.BoxGeometry(boxSize, boxSize, boxSize);
-            const edges = new THREE.EdgesGeometry(boxGeometry);
-            const line = new THREE.LineSegments(edges, new THREE.LineBasicMaterial({ color: 0x495057 }));
-            scene.add(line);
-            
-            // Tambahkan grid helper di bidang XY, XZ, dan YZ
-            const gridHelperXY = new THREE.GridHelper(boxSize, boxSize, 0x495057, 0xdee2e6);
-            gridHelperXY.material.opacity = 0.3;
-            gridHelperXY.material.transparent = true;
-            scene.add(gridHelperXY);
-            
-            const gridHelperXZ = new THREE.GridHelper(boxSize, boxSize, 0x495057, 0xdee2e6);
-            gridHelperXZ.material.opacity = 0.3;
-            gridHelperXZ.material.transparent = true;
-            gridHelperXZ.rotation.x = Math.PI / 2;
-            scene.add(gridHelperXZ);
-            
-            const gridHelperYZ = new THREE.GridHelper(boxSize, boxSize, 0x495057, 0xdee2e6);
-            gridHelperYZ.material.opacity = 0.3;
-            gridHelperYZ.material.transparent = true;
-            gridHelperYZ.rotation.z = Math.PI / 2;
-            scene.add(gridHelperYZ);
-            
-            // Buat medan magnet (garis-garis medan)
-            createMagneticFieldLines();
-            
-            // Buat partikel bermuatan
-            createParticle();
-            
-            // Buat jejak partikel
-            trailGeometry = new THREE.BufferGeometry();
-            trailMaterial = new THREE.LineBasicMaterial({ 
-                color: 0x4a90e2,
-                linewidth: 2
-            });
-            trailLine = new THREE.Line(trailGeometry, trailMaterial);
-            scene.add(trailLine);
-            
-            // Kontrol sentuh (touch) untuk mobile
-            let isTouching = false;
-            let previousTouchPosition = {
-                x: 0,
-                y: 0
-            };
-            
-            renderer.domElement.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                isTouching = true;
-                previousTouchPosition = {
-                    x: e.touches[0].clientX,
-                    y: e.touches[0].clientY
-                };
-            }, { passive: false });
-            
-            renderer.domElement.addEventListener('touchend', () => {
-                isTouching = false;
-            });
-            
-            renderer.domElement.addEventListener('touchmove', (e) => {
-                e.preventDefault();
-                if (!isTouching) return;
-                
-                const deltaMove = {
-                    x: e.touches[0].clientX - previousTouchPosition.x,
-                    y: e.touches[0].clientY - previousTouchPosition.y
-                };
-                
-                // Rotasi kamera berdasarkan pergerakan sentuhan
-                camera.position.x -= deltaMove.x * 0.02;
-                camera.position.y += deltaMove.y * 0.02;
-                
-                // Pastikan kamera tetap melihat ke pusat scene
-                camera.lookAt(0, 0, 0);
-                
-                previousTouchPosition = {
-                    x: e.touches[0].clientX,
-                    y: e.touches[0].clientY
-                };
-            }, { passive: false });
-            
-            // Zoom dengan pinch gesture (sederhana)
-            let initialDistance = 0;
-            renderer.domElement.addEventListener('touchstart', (e) => {
-                if (e.touches.length >= 2) {
-                    initialDistance = Math.hypot(
-                        e.touches[0].clientX - e.touches[1].clientX,
-                        e.touches[0].clientY - e.touches[1].clientY
-                    );
-                }
-            });
-            
-            renderer.domElement.addEventListener('touchmove', (e) => {
-                if (e.touches.length >= 2) {
-                    const currentDistance = Math.hypot(
-                        e.touches[0].clientX - e.touches[1].clientX,
-                        e.touches[0].clientY - e.touches[1].clientY
-                    );
-                    
-                    const delta = currentDistance - initialDistance;
-                    camera.position.z += delta * 0.05;
-                    camera.lookAt(0, 0, 0);
-                    
-                    initialDistance = currentDistance;
-                }
-            });
-            
-            // Handle resize window untuk mobile
-            window.addEventListener('resize', () => {
-                camera.aspect = container.clientWidth / container.clientHeight;
-                camera.updateProjectionMatrix();
-                renderer.setSize(container.clientWidth, container.clientHeight);
-            });
-            
-            // Optimasi untuk performa mobile
-            renderer.setPixelRatio(window.devicePixelRatio);
-        }
+        // Control Elements
+        const btnStart = document.getElementById('btn-start');
+        const btnPause = document.getElementById('btn-pause');
+        const btnLog = document.getElementById('btn-log');
+        const btnDrop = document.getElementById('btn-drop');
+        const btnReset = document.getElementById('btn-reset');
+        const btnAddBall = document.getElementById('btn-add-ball');
         
-        // Buat garis-garis medan magnet
-        function createMagneticFieldLines() {
-            // Hapus garis medan yang lama
-            magneticFieldLines.forEach(line => scene.remove(line));
-            magneticFieldLines = [];
-            
-            const fieldType = document.querySelector('.tab.active').dataset.type;
-            
-            if (fieldType === 'uniform') {
-                // Medan magnet seragam (sejajar sumbu Z)
-                for (let i = -8; i <= 8; i += 2) {
-                    for (let j = -8; j <= 8; j += 2) {
-                        const points = [];
-                        points.push(new THREE.Vector3(i, j, -10));
-                        points.push(new THREE.Vector3(i, j, 10));
-                        
-                        const geometry = new THREE.BufferGeometry().setFromPoints(points);
-                        const material = new THREE.LineBasicMaterial({ 
-                            color: 0xe74c3c,
-                            opacity: 0.5,
-                            transparent: true
-                        });
-                        
-                        const line = new THREE.Line(geometry, material);
-                        scene.add(line);
-                        magneticFieldLines.push(line);
-                    }
-                }
-            } else {
-                // Medan magnet untuk gerak melingkar (pusat di origin)
-                for (let r = 2; r <= 8; r += 2) {
-                    const points = [];
-                    const segments = 32;
-                    
-                    for (let i = 0; i <= segments; i++) {
-                        const angle = (i / segments) * Math.PI * 2;
-                        points.push(new THREE.Vector3(
-                            Math.cos(angle) * r,
-                            Math.sin(angle) * r,
-                            0
-                        ));
-                    }
-                    
-                    const geometry = new THREE.BufferGeometry().setFromPoints(points);
-                    const material = new THREE.LineBasicMaterial({ 
-                        color: 0xe74c3c,
-                        opacity: 0.5,
-                        transparent: true
-                    });
-                    
-                    const line = new THREE.Line(geometry, material);
-                    scene.add(line);
-                    magneticFieldLines.push(line);
-                }
-            }
-        }
+        // Display Elements
+        const currentEnergy = document.getElementById('current-energy');
+        const energyIndicator = document.getElementById('energy-indicator');
+        const energyPercentage = document.getElementById('energy-percentage');
+        const energyCategory = document.getElementById('energy-category');
+        const simulationStatus = document.getElementById('simulation-status');
+        const ballCount = document.getElementById('ball-count');
+        const bounceCount = document.getElementById('bounce-count');
+        const timeElapsed = document.getElementById('time-elapsed');
         
-        // Buat partikel bermuatan
-        function createParticle() {
-            // Hapus partikel lama
-            if (particle) {
-                scene.remove(particle);
+        // Parameter Elements
+        const gravityPreset = document.getElementById('gravity-preset');
+        const btnApplyGravity = document.getElementById('btn-apply-gravity');
+        const dropHeight = document.getElementById('drop-height');
+        const restitutionCoef = document.getElementById('restitution-coef');
+        const btnApplyParams = document.getElementById('btn-apply-params');
+        const physicsResult = document.getElementById('physics-result');
+        const fallTime = document.getElementById('fall-time');
+        const gravitySlider = document.getElementById('gravity-slider');
+        const gravityValue = document.getElementById('gravity-value');
+        
+        // Bounce Type Elements
+        const btnPerfect = document.getElementById('btn-perfect');
+        const btnRealistic = document.getElementById('btn-realistic');
+        const btnSuperball = document.getElementById('btn-superball');
+        
+        // Analysis Elements
+        const potentialEnergy = document.getElementById('potential-energy');
+        const kineticEnergy = document.getElementById('kinetic-energy');
+        const mechanicalEnergy = document.getElementById('mechanical-energy');
+        const conservationBar = document.getElementById('conservation-bar');
+        const conservationValue = document.getElementById('conservation-value');
+        const velocityIndicator = document.getElementById('velocity-indicator');
+        const velocityValue = document.getElementById('velocity-value');
+        const bounceHeight = document.getElementById('bounce-height');
+        
+        // Chart Elements
+        const chartSection = document.getElementById('chart-section');
+        const btnChartEnergy = document.getElementById('btn-chart-energy');
+        const btnChartVelocity = document.getElementById('btn-chart-velocity');
+        const btnChartHeight = document.getElementById('btn-chart-height');
+        const physicsChartCanvas = document.getElementById('physics-chart');
+        
+        // Data Elements
+        const dataSection = document.getElementById('data-section');
+        const tableToggle = document.getElementById('table-toggle');
+        const tableArea = document.getElementById('table-area');
+        const tableBody = document.getElementById('table-body');
+        const btnClearData = document.getElementById('btn-clear-data');
+        const statsMaxBounce = document.getElementById('stats-max-bounce');
+        const statsTotalTime = document.getElementById('stats-total-time');
+        
+        // Export Elements
+        const btnDownloadChart = document.getElementById('btn-download-chart');
+        const btnDownloadSnapshot = document.getElementById('btn-download-snapshot');
+        const btnDownloadCSV = document.getElementById('btn-download-csv');
+        const btnDownloadPDF = document.getElementById('btn-download-pdf');
+        
+        // Physics Variables
+        let ctx = simulationCanvas.getContext('2d');
+        let isSimulating = false;
+        let animationFrameId = null;
+        let physicsChart = null;
+        let currentChartType = 'energy';
+        let currentBounceType = 'perfect';
+        
+        // Physics constants
+        let gravity = 9.8; // m/s²
+        let restitution = 0.8; // coefficient of restitution
+        let dropHeightValue = 10; // meters
+        let ballMass = 1; // kg (standardized for calculation)
+        
+        // Simulation state
+        let balls = [];
+        let simulationTime = 0;
+        let totalBounces = 0;
+        let maxBounces = 0;
+        let dataLog = [];
+        let lastLogTime = 0;
+        let hasStopped = false;
+        let stopCheckCounter = 0;
+        let isDataCollecting = false; // Flag untuk mengontrol pengumpulan data grafik
+        
+        // Data storage for charts - TIDAK ADA LIMIT JUMLAH DATA
+        let timeHistory = [];
+        let energyHistory = [];
+        let velocityHistory = [];
+        let heightHistory = [];
+        let kineticEnergyHistory = [];
+        let potentialEnergyHistory = [];
+        
+        // Ball class definition
+        class Ball {
+            constructor(x, y, radius, color, id) {
+                this.id = id;
+                this.x = x;
+                this.y = y;
+                this.radius = radius;
+                this.color = color;
+                this.vy = 0; // vertical velocity
+                this.vx = Math.random() * 2 - 1; // slight horizontal movement
+                this.isFalling = false;
+                this.startHeight = y;
+                this.bounceCount = 0;
+                this.energyLoss = 0;
+                this.maxHeight = y;
+                this.lastBounceTime = 0;
+                this.isResting = false;
+                this.consecutiveSmallBounces = 0;
             }
             
-            const chargeValue = parseFloat(document.getElementById('charge').value);
-            const particleColor = chargeValue >= 0 ? 0xe74c3c : 0x3498db; // Merah untuk positif, biru untuk negatif
-            
-            const sphereGeometry = new THREE.SphereGeometry(0.3, 16, 16);
-            const sphereMaterial = new THREE.MeshLambertMaterial({ 
-                color: particleColor,
-                emissive: particleColor,
-                emissiveIntensity: 0.2
-            });
-            
-            particle = new THREE.Mesh(sphereGeometry, sphereMaterial);
-            particle.position.set(0, 0, 0);
-            scene.add(particle);
-        }
-        
-        // Inisialisasi grafik
-        function initCharts() {
-            const trajectoryCtx = document.getElementById('trajectory-chart').getContext('2d');
-            trajectoryChart = new Chart(trajectoryCtx, {
-                type: 'scatter',
-                data: {
-                    datasets: [{
-                        label: 'Jejak Partikel (X vs Y)',
-                        data: [],
-                        borderColor: '#4a90e2',
-                        backgroundColor: 'rgba(74, 144, 226, 0.5)',
-                        borderWidth: 1,
-                        pointRadius: 3,
-                        showLine: true,
-                        fill: false
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        x: {
-                            title: {
-                                display: true,
-                                text: 'Posisi X (m)',
-                                color: '#495057'
-                            },
-                            grid: {
-                                color: 'rgba(73, 80, 87, 0.1)'
-                            },
-                            ticks: {
-                                color: '#495057',
-                                maxTicksLimit: 8
-                            }
-                        },
-                        y: {
-                            title: {
-                                display: true,
-                                text: 'Posisi Y (m)',
-                                color: '#495057'
-                            },
-                            grid: {
-                                color: 'rgba(73, 80, 87, 0.1)'
-                            },
-                            ticks: {
-                                color: '#495057',
-                                maxTicksLimit: 6
-                            }
+            update(deltaTime) {
+                if (!this.isFalling || this.isResting) return;
+                
+                // Apply gravity
+                this.vy += gravity * deltaTime;
+                
+                // Update position
+                this.y += this.vy;
+                this.x += this.vx;
+                
+                // Check for bounce on ground
+                const ground = simulationCanvas.height - this.radius;
+                if (this.y >= ground) {
+                    this.y = ground;
+                    
+                    // Check if bounce is significant enough
+                    const bounceVelocity = Math.abs(this.vy);
+                    
+                    if (bounceVelocity > 0.1) {
+                        // Significant bounce
+                        this.vy = -this.vy * restitution;
+                        this.vx *= 0.9; // friction
+                        this.consecutiveSmallBounces = 0;
+                        
+                        // Only count bounce if enough time has passed
+                        if (Date.now() - this.lastBounceTime > 100) {
+                            this.bounceCount++;
+                            totalBounces++;
+                            this.energyLoss = Math.pow(restitution, this.bounceCount);
+                            this.lastBounceTime = Date.now();
+                            
+                            // Trigger bounce animation
+                            triggerBounceAnimation();
+                            
+                            // Log bounce
+                            logBounce(this);
                         }
-                    },
-                    plugins: {
-                        legend: {
-                            labels: {
-                                color: '#495057',
-                                font: {
-                                    size: 12
-                                }
-                            }
+                    } else {
+                        // Very small bounce - ball is coming to rest
+                        this.vy = 0;
+                        this.vx = 0;
+                        this.consecutiveSmallBounces++;
+                        
+                        if (this.consecutiveSmallBounces > 10) {
+                            this.isResting = true;
+                            checkAllBallsStopped();
                         }
                     }
                 }
-            });
+                
+                // Check for bounce on walls
+                if (this.x <= this.radius || this.x >= simulationCanvas.width - this.radius) {
+                    this.vx = -this.vx * 0.8;
+                    this.x = Math.max(this.radius, Math.min(simulationCanvas.width - this.radius, this.x));
+                }
+                
+                // Update max height
+                if (this.y < this.maxHeight) {
+                    this.maxHeight = this.y;
+                }
+            }
             
-            const velocityCtx = document.getElementById('velocity-chart').getContext('2d');
-            velocityChart = new Chart(velocityCtx, {
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+                
+                // Create gradient for 3D effect
+                const gradient = ctx.createRadialGradient(
+                    this.x - this.radius/3, this.y - this.radius/3, 1,
+                    this.x, this.y, this.radius
+                );
+                
+                if (this.color === 'red') {
+                    gradient.addColorStop(0, '#ff6b6b');
+                    gradient.addColorStop(1, '#cc0000');
+                } else if (this.color === 'blue') {
+                    gradient.addColorStop(0, '#4dabf7');
+                    gradient.addColorStop(1, '#1864ab');
+                } else if (this.color === 'green') {
+                    gradient.addColorStop(0, '#69db7c');
+                    gradient.addColorStop(1, '#2b8a3e');
+                } else {
+                    gradient.addColorStop(0, '#ffd43b');
+                    gradient.addColorStop(1, '#f08c00');
+                }
+                
+                ctx.fillStyle = gradient;
+                ctx.fill();
+                
+                // Add highlight
+                ctx.beginPath();
+                ctx.arc(this.x - this.radius/3, this.y - this.radius/3, this.radius/3, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+                ctx.fill();
+                
+                // Add shadow
+                ctx.beginPath();
+                ctx.ellipse(this.x, simulationCanvas.height - 5, this.radius/2, 3, 0, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+                ctx.fill();
+            }
+            
+            getEnergy() {
+                const heightFromGround = simulationCanvas.height - this.y - this.radius;
+                const potential = ballMass * gravity * Math.max(0, heightFromGround);
+                const kinetic = 0.5 * ballMass * (this.vy * this.vy + this.vx * this.vx);
+                return {
+                    potential: potential,
+                    kinetic: kinetic,
+                    total: potential + kinetic
+                };
+            }
+            
+            getVelocity() {
+                return Math.sqrt(this.vy * this.vy + this.vx * this.vx);
+            }
+            
+            getHeight() {
+                return Math.max(0, simulationCanvas.height - this.y - this.radius);
+            }
+        }
+        
+        // Initialize
+        function init() {
+            loading.classList.add('hidden');
+            
+            // Setup canvas
+            setupCanvas();
+            createTrackLines();
+            createInitialBall();
+            initChart();
+            updatePhysicsCalculations();
+            
+            // Start simulation
+            setTimeout(() => {
+                btnStart.click();
+            }, 500);
+        }
+        
+        function setupCanvas() {
+            // Set canvas dimensions
+            simulationCanvas.width = simulationCanvas.offsetWidth;
+            simulationCanvas.height = simulationCanvas.offsetHeight;
+            
+            // Create initial ball
+            createInitialBall();
+            
+            // Draw initial state
+            draw();
+        }
+        
+        function createInitialBall() {
+            balls = [];
+            const ballColors = ['red', 'blue', 'green', 'yellow', 'purple'];
+            const x = simulationCanvas.width / 2;
+            const y = 50; // Start near top
+            
+            balls.push(new Ball(x, y, 20, ballColors[0], 1));
+            updateBallCount();
+        }
+        
+        function createTrackLines() {
+            trackLines.innerHTML = '';
+            
+            // Create horizontal lines for reference
+            const lineCount = 6;
+            const lineSpacing = simulationCanvas.height / lineCount;
+            
+            for (let i = 0; i <= lineCount; i++) {
+                const y = i * lineSpacing;
+                
+                const line = document.createElement('div');
+                line.className = 'track-line';
+                line.style.top = `${y}px`;
+                
+                const label = document.createElement('div');
+                label.className = 'track-label';
+                label.style.top = `${y}px`;
+                label.style.left = '5px';
+                label.textContent = `${Math.round((simulationCanvas.height - y) / 10)}m`;
+                
+                trackLines.appendChild(line);
+                trackLines.appendChild(label);
+            }
+            
+            // Add ground label
+            const groundLabel = document.createElement('div');
+            groundLabel.className = 'track-label';
+            groundLabel.style.bottom = '5px';
+            groundLabel.style.right = '5px';
+            groundLabel.textContent = 'DASAR';
+            trackLines.appendChild(groundLabel);
+        }
+        
+        // Initialize Chart dengan konfigurasi yang lebih baik
+        function initChart() {
+            const chartCtx = physicsChartCanvas.getContext('2d');
+            
+            physicsChart = new Chart(chartCtx, {
                 type: 'line',
                 data: {
-                    labels: [],
-                    datasets: [{
-                        label: 'Kecepatan (m/s)',
-                        data: [],
-                        borderColor: '#e74c3c',
-                        backgroundColor: 'rgba(231, 76, 60, 0.1)',
-                        borderWidth: 2,
-                        tension: 0.4,
-                        fill: true
-                    }]
+                    labels: timeHistory,
+                    datasets: [
+                        {
+                            label: 'Energi Total (J)',
+                            data: energyHistory,
+                            borderColor: '#f59e0b',
+                            backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.4,
+                            pointRadius: 0 // Hilangkan titik untuk tampilan lebih bersih
+                        },
+                        {
+                            label: 'Energi Kinetik (J)',
+                            data: kineticEnergyHistory,
+                            borderColor: '#10b981',
+                            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+                            borderWidth: 2,
+                            fill: false,
+                            tension: 0.4,
+                            pointRadius: 0
+                        },
+                        {
+                            label: 'Energi Potensial (J)',
+                            data: potentialEnergyHistory,
+                            borderColor: '#3b82f6',
+                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            borderWidth: 2,
+                            fill: false,
+                            tension: 0.4,
+                            pointRadius: 0
+                        }
+                    ]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'top',
+                            labels: {
+                                font: {
+                                    size: 11,
+                                    family: "'Baloo 2', cursive"
+                                }
+                            }
+                        },
+                        title: {
+                            display: true,
+                            text: 'Analisis Energi Bola Jatuh',
+                            font: {
+                                size: 13,
+                                weight: 'bold',
+                                family: "'Baloo 2', cursive"
+                            }
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    label += Math.round(context.parsed.y * 100) / 100;
+                                    return label;
+                                }
+                            }
+                        }
+                    },
                     scales: {
                         x: {
                             title: {
                                 display: true,
-                                text: 'Waktu (s)',
-                                color: '#495057'
+                                text: 'Waktu (detik)',
+                                font: {
+                                    size: 11,
+                                    family: "'Baloo 2', cursive"
+                                }
                             },
                             grid: {
-                                color: 'rgba(73, 80, 87, 0.1)'
+                                color: 'rgba(0, 0, 0, 0.05)'
                             },
                             ticks: {
-                                color: '#495057',
-                                maxTicksLimit: 8
+                                maxTicksLimit: 10 // Batasi jumlah label waktu
                             }
                         },
                         y: {
                             title: {
                                 display: true,
-                                text: 'Kecepatan (m/s)',
-                                color: '#495057'
+                                text: 'Energi (Joule)',
+                                font: {
+                                    size: 11,
+                                    family: "'Baloo 2', cursive"
+                                }
                             },
+                            beginAtZero: true,
                             grid: {
-                                color: 'rgba(73, 80, 87, 0.1)'
-                            },
-                            ticks: {
-                                color: '#495057',
-                                maxTicksLimit: 6
+                                color: 'rgba(0, 0, 0, 0.05)'
                             }
                         }
                     },
-                    plugins: {
-                        legend: {
-                            labels: {
-                                color: '#495057',
-                                font: {
-                                    size: 12
-                                }
-                            }
-                        }
+                    interaction: {
+                        intersect: false,
+                        mode: 'nearest'
+                    },
+                    animation: {
+                        duration: 0 // Nonaktifkan animasi untuk performa lebih baik
                     }
                 }
             });
         }
         
-        // Fungsi animasi
-        function animate() {
-            requestAnimationFrame(animate);
+        // Start simulation
+        function startSimulation() {
+            if (isSimulating) return;
             
-            if (isAnimating) {
-                currentTime = (Date.now() - startTime) / 1000;
-                document.getElementById('time-display').textContent = currentTime.toFixed(2);
-                
-                // Hitung posisi partikel berdasarkan medan magnet
-                const fieldType = document.querySelector('.tab.active').dataset.type;
-                
-                // Kecepatan sudut: ω = qB/m (massa partikel dianggap 1 kg untuk penyederhanaan)
-                const mass = 1; // kg
-                const omega = (charge * magneticField) / mass;
-                
-                let x, y, z, v;
-                
-                if (fieldType === 'uniform') {
-                    // Untuk medan seragam sepanjang sumbu Z
-                    // Partikel bergerak dalam lingkaran di bidang XY dan bergerak lurus di sumbu Z
-                    const radius = (mass * velocity * Math.sin(angle * Math.PI / 180)) / (Math.abs(charge) * magneticField);
-                    const vz = velocity * Math.cos(angle * Math.PI / 180);
-                    
-                    x = radius * Math.sin(omega * currentTime);
-                    y = radius * Math.cos(omega * currentTime) * (charge > 0 ? 1 : -1);
-                    z = vz * currentTime;
-                    v = velocity; // Kecepatan konstan dalam medan magnet
-                    
-                    // Update tampilan jari-jari
-                    document.getElementById('radius-display').textContent = radius.toFixed(2);
-                } else {
-                    // Gerak melingkar murni di bidang XY
-                    const radius = (mass * velocity) / (Math.abs(charge) * magneticField);
-                    
-                    x = radius * Math.sin(omega * currentTime);
-                    y = radius * Math.cos(omega * currentTime) * (charge > 0 ? 1 : -1);
-                    z = 0;
-                    v = velocity; // Kecepatan konstan
-                    
-                    // Update tampilan jari-jari
-                    document.getElementById('radius-display').textContent = radius.toFixed(2);
-                }
-                
-                // Update posisi partikel
-                particle.position.set(x, y, z);
-                
-                // Tambahkan posisi ke jejak
-                trail.push(new THREE.Vector3(x, y, z));
-                
-                // Batasi panjang jejak
-                if (trail.length > 200) {
-                    trail.shift();
-                }
-                
-                // Update geometri jejak
-                trailGeometry.setFromPoints(trail);
-                
-                // Simpan data untuk grafik
-                timeData.push(currentTime);
-                xData.push(x);
-                yData.push(y);
-                zData.push(z);
-                velocityData.push(v);
-                
-                // Update grafik
-                updateCharts();
-                
-                // Hentikan animasi jika partikel keluar dari area atau waktu terlalu lama
-                if (Math.abs(x) > 10 || Math.abs(y) > 10 || Math.abs(z) > 10 || currentTime > 20) {
-                    isAnimating = false;
-                }
-            }
+            isSimulating = true;
+            hasStopped = false;
+            isDataCollecting = true; // Mulai mengumpulkan data untuk grafik
+            simulationStatus.innerHTML = '<i class="fas fa-circle text-green-500 mr-1"></i> Simulasi Berjalan';
             
-            renderer.render(scene, camera);
+            btnStart.disabled = true;
+            btnStart.classList.add('opacity-50');
+            btnPause.disabled = false;
+            btnPause.classList.remove('opacity-50');
+            
+            // Start all balls falling
+            balls.forEach(ball => {
+                if (!ball.isFalling) {
+                    ball.isFalling = true;
+                    ball.startHeight = ball.y;
+                    ball.isResting = false;
+                    ball.consecutiveSmallBounces = 0;
+                }
+            });
+            
+            simulationLoop();
         }
         
-        // Update grafik
-        function updateCharts() {
-            // Batasi jumlah data yang ditampilkan untuk performa mobile
-            const maxDataPoints = 100;
+        // Pause simulation
+        function pauseSimulation() {
+            if (!isSimulating) return;
             
-            // Update grafik jejak
-            const trailDataPoints = [];
-            const step = Math.max(1, Math.floor(xData.length / maxDataPoints));
+            isSimulating = false;
+            isDataCollecting = false; // Berhenti mengumpulkan data
+            simulationStatus.innerHTML = '<i class="fas fa-circle text-yellow-500 mr-1"></i> Dijeda';
             
-            for (let i = 0; i < xData.length; i += step) {
-                trailDataPoints.push({ x: xData[i], y: yData[i] });
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+                animationFrameId = null;
             }
             
-            trajectoryChart.data.datasets[0].data = trailDataPoints;
+            btnStart.disabled = false;
+            btnStart.classList.remove('opacity-50');
+            btnPause.disabled = true;
+            btnPause.classList.add('opacity-50');
+        }
+        
+        // Check if all balls have stopped
+        function checkAllBallsStopped() {
+            if (balls.length === 0) return false;
             
-            // Update grafik kecepatan
-            if (timeData.length > maxDataPoints) {
-                const filteredTimeData = timeData.filter((_, i) => i % step === 0);
-                const filteredVelocityData = velocityData.filter((_, i) => i % step === 0);
+            const allStopped = balls.every(ball => ball.isResting);
+            
+            if (allStopped && !hasStopped) {
+                hasStopped = true;
+                stopCheckCounter++;
                 
-                velocityChart.data.labels = filteredTimeData;
-                velocityChart.data.datasets[0].data = filteredVelocityData;
+                // Tunggu beberapa frame untuk memastikan benar-benar berhenti
+                if (stopCheckCounter > 30) {
+                    autoStopSimulation();
+                    return true;
+                }
+            } else if (!allStopped) {
+                stopCheckCounter = 0;
+            }
+            
+            return false;
+        }
+        
+        // Auto stop simulation when balls have stopped
+        function autoStopSimulation() {
+            pauseSimulation();
+            isDataCollecting = false; // Pastikan pengumpulan data dihentikan
+            simulationStatus.innerHTML = '<i class="fas fa-circle text-red-500 mr-1"></i> Selesai';
+            
+            showError('Simulasi Selesai', 'Bola telah berhenti memantul. Simulasi dihentikan secara otomatis.');
+            
+            // Log final data
+            logSimulationData();
+            
+            // Update chart satu kali terakhir untuk menampilkan data akhir
+            updateChartDataFinal();
+        }
+        
+        // Update chart data terakhir (hanya sekali saat simulasi berhenti)
+        function updateChartDataFinal() {
+            if (balls.length === 0) return;
+            
+            if (physicsChart) {
+                physicsChart.update('none');
+            }
+        }
+        
+        // Main simulation loop
+        function simulationLoop() {
+            if (!isSimulating) return;
+            
+            const now = Date.now();
+            const deltaTime = 0.016; // Approximate 60fps
+            
+            // Update simulation time
+            simulationTime += deltaTime;
+            
+            // Update balls
+            balls.forEach(ball => ball.update(deltaTime));
+            
+            // Check if all balls have stopped
+            checkAllBallsStopped();
+            
+            // Update display
+            updateDisplay();
+            
+            // Update chart data hanya jika masih mengumpulkan data
+            if (isDataCollecting) {
+                updateChartData();
+            }
+            
+            // Draw everything
+            draw();
+            
+            // Log data periodically
+            if (now - lastLogTime > 100 && isDataCollecting) { // Every 100ms
+                logSimulationData();
+                lastLogTime = now;
+            }
+            
+            // Update time display
+            timeElapsed.textContent = simulationTime.toFixed(1) + 's';
+            
+            // Continue loop
+            animationFrameId = requestAnimationFrame(simulationLoop);
+        }
+        
+        // Draw everything
+        function draw() {
+            // Clear canvas
+            ctx.clearRect(0, 0, simulationCanvas.width, simulationCanvas.height);
+            
+            // Draw sky gradient
+            const skyGradient = ctx.createLinearGradient(0, 0, 0, simulationCanvas.height);
+            skyGradient.addColorStop(0, '#1e3a8a');
+            skyGradient.addColorStop(1, '#0ea5e9');
+            ctx.fillStyle = skyGradient;
+            ctx.fillRect(0, 0, simulationCanvas.width, simulationCanvas.height);
+            
+            // Draw ground
+            ctx.fillStyle = '#365314';
+            ctx.fillRect(0, simulationCanvas.height - 20, simulationCanvas.width, 20);
+            
+            // Draw grass texture
+            ctx.fillStyle = '#4d7c0f';
+            for (let i = 0; i < simulationCanvas.width; i += 5) {
+                ctx.fillRect(i, simulationCanvas.height - 20, 3, 5);
+            }
+            
+            // Draw balls
+            balls.forEach(ball => ball.draw());
+            
+            // Draw velocity vectors (only if ball is moving)
+            if (balls.length > 0 && balls[0].getVelocity() > 0.1) {
+                drawVelocityVector(balls[0]);
+            }
+            
+            // Draw energy info
+            drawEnergyInfo();
+            
+            // Draw "STOPPED" text if simulation has stopped
+            if (hasStopped) {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+                ctx.fillRect(simulationCanvas.width/2 - 60, simulationCanvas.height/2 - 20, 120, 40);
+                
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 16px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText('BERHENTI', simulationCanvas.width/2, simulationCanvas.height/2);
+                ctx.font = '12px Arial';
+                ctx.fillText('Simulasi Selesai', simulationCanvas.width/2, simulationCanvas.height/2 + 15);
+            }
+        }
+        
+        function drawVelocityVector(ball) {
+            if (ball.getVelocity() < 0.1) return;
+            
+            const scale = 5;
+            const arrowLength = ball.getVelocity() * scale;
+            const angle = Math.atan2(ball.vy, ball.vx);
+            
+            ctx.beginPath();
+            ctx.moveTo(ball.x, ball.y);
+            ctx.lineTo(
+                ball.x + Math.cos(angle) * arrowLength,
+                ball.y + Math.sin(angle) * arrowLength
+            );
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // Draw arrowhead
+            ctx.beginPath();
+            ctx.fillStyle = '#ffffff';
+            ctx.moveTo(
+                ball.x + Math.cos(angle) * arrowLength,
+                ball.y + Math.sin(angle) * arrowLength
+            );
+            ctx.lineTo(
+                ball.x + Math.cos(angle - Math.PI/6) * 10,
+                ball.y + Math.sin(angle - Math.PI/6) * 10
+            );
+            ctx.lineTo(
+                ball.x + Math.cos(angle + Math.PI/6) * 10,
+                ball.y + Math.sin(angle + Math.PI/6) * 10
+            );
+            ctx.closePath();
+            ctx.fill();
+        }
+        
+        function drawEnergyInfo() {
+            if (balls.length === 0) return;
+            
+            const ball = balls[0];
+            const energy = ball.getEnergy();
+            
+            // Draw energy bar
+            const barWidth = 100;
+            const barHeight = 10;
+            const barX = 10;
+            const barY = 30;
+            
+            // Total energy background
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+            ctx.fillRect(barX, barY, barWidth, barHeight);
+            
+            // Kinetic energy portion
+            const kineticWidth = energy.total > 0 ? (energy.kinetic / energy.total) * barWidth : 0;
+            ctx.fillStyle = '#10b981';
+            ctx.fillRect(barX, barY, kineticWidth, barHeight);
+            
+            // Potential energy portion
+            ctx.fillStyle = '#3b82f6';
+            ctx.fillRect(barX + kineticWidth, barY, barWidth - kineticWidth, barHeight);
+            
+            // Draw labels
+            ctx.fillStyle = 'white';
+            ctx.font = '10px Arial';
+            ctx.fillText(`E: ${energy.total.toFixed(1)}J`, barX, barY - 5);
+            ctx.fillText(`Ek: ${energy.kinetic.toFixed(1)}J`, barX, barY + 20);
+            ctx.fillText(`Ep: ${energy.potential.toFixed(1)}J`, barX + 60, barY + 20);
+            
+            // Draw bounce count
+            ctx.fillText(`Pantulan: ${ball.bounceCount}`, barX, barY + 35);
+            
+            // Draw status
+            if (hasStopped) {
+                ctx.fillText('STATUS: BERHENTI', barX, barY + 50);
+            } else if (ball.isResting) {
+                ctx.fillText('STATUS: DIAM', barX, barY + 50);
+            }
+        }
+        
+        // Update display
+        function updateDisplay() {
+            if (balls.length === 0) return;
+            
+            const ball = balls[0];
+            const energy = ball.getEnergy();
+            const velocity = ball.getVelocity();
+            const height = ball.getHeight();
+            
+            // Update energy display
+            const energyValue = energy.total;
+            currentEnergy.textContent = energyValue.toFixed(1);
+            
+            // Update energy meter
+            const maxEnergy = ballMass * gravity * dropHeightValue;
+            const energyPercent = maxEnergy > 0 ? Math.min((energyValue / maxEnergy) * 100, 100) : 0;
+            energyIndicator.style.left = `${energyPercent}%`;
+            energyPercentage.textContent = `${Math.round(energyPercent)}%`;
+            
+            // Update energy category
+            updateEnergyCategory(energyValue, maxEnergy);
+            
+            // Update velocity
+            velocityValue.textContent = velocity.toFixed(1) + ' m/s';
+            
+            // Update velocity indicator color based on speed
+            const velocityPercent = Math.min(velocity / 20 * 100, 100);
+            const hue = 240 - (velocityPercent * 2.4); // Blue (240) to Red (0)
+            velocityIndicator.style.backgroundColor = `hsl(${hue}, 100%, 50%)`;
+            
+            // Update analysis values
+            potentialEnergy.textContent = energy.potential.toFixed(1);
+            kineticEnergy.textContent = energy.kinetic.toFixed(1);
+            mechanicalEnergy.textContent = energy.total.toFixed(1);
+            
+            // Update conservation (energy retention)
+            const initialEnergy = ballMass * gravity * dropHeightValue;
+            const conservation = initialEnergy > 0 ? (energy.total / initialEnergy) * 100 : 0;
+            conservationBar.style.width = `${Math.max(0, conservation)}%`;
+            conservationValue.textContent = `${Math.round(conservation)}%`;
+            
+            // Update bounce height
+            if (ball.bounceCount > 0) {
+                const currentMaxHeight = simulationCanvas.height - ball.maxHeight - ball.radius;
+                bounceHeight.textContent = currentMaxHeight.toFixed(1) + ' m';
+            }
+            
+            // Update bounce count
+            bounceCount.textContent = totalBounces;
+            maxBounces = Math.max(maxBounces, totalBounces);
+            statsMaxBounce.textContent = maxBounces;
+            
+            // Update total time
+            statsTotalTime.textContent = simulationTime.toFixed(1) + 's';
+        }
+        
+        function updateEnergyCategory(energy, maxEnergy) {
+            const percentage = maxEnergy > 0 ? (energy / maxEnergy) * 100 : 0;
+            let category = '';
+            let colorClass = '';
+            
+            if (percentage < 20) {
+                category = 'Energi Rendah';
+                colorClass = 'energy-low';
+            } else if (percentage < 40) {
+                category = 'Energi Sedang';
+                colorClass = 'energy-medium';
+            } else if (percentage < 60) {
+                category = 'Energi Tinggi';
+                colorClass = 'energy-high';
+            } else if (percentage < 80) {
+                category = 'Energi Sangat Tinggi';
+                colorClass = 'energy-very-high';
             } else {
-                velocityChart.data.labels = timeData;
-                velocityChart.data.datasets[0].data = velocityData;
+                category = 'Energi Maksimal';
+                colorClass = 'energy-extreme';
             }
             
-            trajectoryChart.update('none');
-            velocityChart.update('none');
+            energyCategory.textContent = category;
+            energyCategory.className = `energy-category ${colorClass} inline-block`;
         }
         
-        // Reset simulasi
-        function resetSimulation() {
-            isAnimating = false;
-            particle.position.set(0, 0, 0);
+        // Update chart data - HANYA jika masih mengumpulkan data
+        function updateChartData() {
+            if (balls.length === 0 || !isDataCollecting) return;
             
-            // Reset jejak
-            trail = [];
-            trailGeometry.setFromPoints(trail);
+            const ball = balls[0];
+            const energy = ball.getEnergy();
+            const time = simulationTime.toFixed(3);
             
-            // Reset data
-            timeData = [];
-            xData = [];
-            yData = [];
-            zData = [];
-            velocityData = [];
+            // Add to history - TIDAK PERNAH DIHAPUS DATA LAMA
+            timeHistory.push(time);
+            energyHistory.push(energy.total);
+            velocityHistory.push(ball.getVelocity());
+            heightHistory.push(ball.getHeight());
+            kineticEnergyHistory.push(energy.kinetic);
+            potentialEnergyHistory.push(energy.potential);
             
-            // Reset grafik
-            trajectoryChart.data.datasets[0].data = [];
-            velocityChart.data.labels = [];
-            velocityChart.data.datasets[0].data = [];
-            
-            trajectoryChart.update();
-            velocityChart.update();
-            
-            document.getElementById('time-display').textContent = '0.00';
-            document.getElementById('radius-display').textContent = '0.00';
-        }
-        
-        // Unduh data sebagai CSV
-        function downloadData() {
-            let csvContent = "Waktu (s),Posisi X (m),Posisi Y (m),Posisi Z (m),Kecepatan (m/s)\n";
-            
-            for (let i = 0; i < timeData.length; i++) {
-                csvContent += `${timeData[i].toFixed(2)},${xData[i].toFixed(2)},${yData[i].toFixed(2)},${zData[i].toFixed(2)},${velocityData[i].toFixed(2)}\n`;
+            // Update chart based on current type
+            if (physicsChart) {
+                // Update data arrays
+                physicsChart.data.labels = timeHistory;
+                
+                if (currentChartType === 'energy') {
+                    physicsChart.data.datasets[0].data = energyHistory;
+                    physicsChart.data.datasets[1].data = kineticEnergyHistory;
+                    physicsChart.data.datasets[2].data = potentialEnergyHistory;
+                    physicsChart.options.plugins.title.text = 'Analisis Energi Bola Jatuh';
+                    physicsChart.options.scales.y.title.text = 'Energi (Joule)';
+                } else if (currentChartType === 'velocity') {
+                    physicsChart.data.datasets[0].data = velocityHistory;
+                    physicsChart.data.datasets[1].data = [];
+                    physicsChart.data.datasets[2].data = [];
+                    physicsChart.options.plugins.title.text = 'Kecepatan Bola vs Waktu';
+                    physicsChart.options.scales.y.title.text = 'Kecepatan (m/s)';
+                } else if (currentChartType === 'height') {
+                    physicsChart.data.datasets[0].data = heightHistory;
+                    physicsChart.data.datasets[1].data = [];
+                    physicsChart.data.datasets[2].data = [];
+                    physicsChart.options.plugins.title.text = 'Ketinggian Bola vs Waktu';
+                    physicsChart.options.scales.y.title.text = 'Ketinggian (meter)';
+                }
+                
+                // Update chart dengan performa optimal
+                physicsChart.update('none');
             }
-            
-            const blob = new Blob([csvContent], { type: 'text/csv' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'data_simulasi_medan_magnet.csv';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
         }
         
-        // Event listeners untuk mobile
-        document.addEventListener('DOMContentLoaded', () => {
-            // Inisialisasi
-            initThreeJS();
-            initCharts();
-            animate();
+        // Log simulation data
+        function logSimulationData() {
+            if (balls.length === 0 || !isDataCollecting) return;
             
-            // Update nilai slider dengan format yang lebih baik untuk mobile
-            const updateSliderValue = (sliderId, displayId, unit) => {
-                const slider = document.getElementById(sliderId);
-                const display = document.getElementById(displayId);
-                
-                slider.addEventListener('input', function() {
-                    display.textContent = this.value + unit;
-                    
-                    // Jika slider muatan berubah, update warna partikel
-                    if (sliderId === 'charge') {
-                        createParticle();
-                    }
-                });
-                
-                // Trigger initial value
-                display.textContent = slider.value + unit;
+            const ball = balls[0];
+            const data = {
+                timestamp: new Date().toISOString(),
+                time: simulationTime.toFixed(2),
+                height: ball.getHeight().toFixed(2),
+                velocity: ball.getVelocity().toFixed(2),
+                energy: ball.getEnergy().total.toFixed(2),
+                bounce: ball.bounceCount
             };
             
-            updateSliderValue('velocity', 'velocity-value', ' m/s');
-            updateSliderValue('magnetic-field', 'magnetic-field-value', ' T');
-            updateSliderValue('charge', 'charge-value', ' C');
-            updateSliderValue('angle', 'angle-value', '°');
+            dataLog.push(data);
+            updateDataTable();
+        }
+        
+        // Log bounce event
+        function logBounce(ball) {
+            const bounceData = {
+                timestamp: new Date().toISOString(),
+                time: simulationTime.toFixed(2),
+                bounceNumber: ball.bounceCount,
+                height: ball.getHeight().toFixed(2),
+                velocity: Math.abs(ball.vy).toFixed(2),
+                energyLoss: ball.energyLoss.toFixed(3)
+            };
             
-            // Tombol mulai
-            document.getElementById('start-btn').addEventListener('click', function() {
-                if (isAnimating) return;
-                
-                // Ambil nilai dari slider
-                velocity = parseFloat(document.getElementById('velocity').value);
-                magneticField = parseFloat(document.getElementById('magnetic-field').value);
-                charge = parseFloat(document.getElementById('charge').value);
-                angle = parseFloat(document.getElementById('angle').value);
-                
-                // Reset data sebelumnya
-                resetSimulation();
-                
-                // Buat partikel dengan warna sesuai muatan
-                createParticle();
-                
-                // Mulai animasi
-                isAnimating = true;
-                startTime = Date.now();
-            });
+            // Show bounce notification
+            showError(`Pantulan ke-${ball.bounceCount}`, `Tinggi: ${bounceData.height}m, Kecepatan: ${bounceData.velocity}m/s`);
+        }
+        
+        // Update data table
+        function updateDataTable() {
+            tableBody.innerHTML = '';
             
-            // Tombol reset
-            document.getElementById('reset-btn').addEventListener('click', resetSimulation);
-            
-            // Tombol unduh data
-            document.getElementById('download-btn').addEventListener('click', downloadData);
-            
-            // Tab jenis medan magnet
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.addEventListener('click', function() {
-                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                    this.classList.add('active');
-                    
-                    // Perbarui garis medan magnet
-                    createMagneticFieldLines();
-                    
-                    // Reset simulasi
-                    resetSimulation();
-                });
-            });
-            
-            // Mencegah zoom halaman pada interaksi slider (untuk iOS)
-            document.querySelectorAll('input[type="range"]').forEach(slider => {
-                slider.addEventListener('touchstart', function(e) {
-                    e.stopPropagation();
-                });
-            });
-            
-            // Optimasi untuk performa mobile
-            if ('ontouchstart' in window) {
-                // Jika perangkat memiliki layar sentuh, tambahkan kelas khusus
-                document.body.classList.add('touch-device');
+            if (dataLog.length === 0) {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td colspan="5" class="text-center py-6 text-gray-500">
+                        <i class="fas fa-database text-2xl mb-2 block text-gray-300"></i>
+                        <p class="text-sm">Belum ada data simulasi</p>
+                        <p class="text-xs mt-1">Mulai simulasi untuk melihat data</p>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+                return;
             }
+            
+            // Show ALL data points (mungkin perlu di-scroll)
+            for (let i = 0; i < dataLog.length; i++) {
+                const d = dataLog[i];
+                const row = document.createElement('tr');
+                
+                row.innerHTML = `
+                    <td>${d.time}s</td>
+                    <td>${d.height} m</td>
+                    <td>${d.velocity} m/s</td>
+                    <td class="font-semibold">${d.energy} J</td>
+                    <td><span class="px-2 py-1 rounded text-xs ${getBounceClass(d.bounce)}">${d.bounce}</span></td>
+                `;
+                
+                tableBody.appendChild(row);
+            }
+            
+            // Scroll ke bawah untuk melihat data terbaru
+            if (tableBody.children.length > 0) {
+                tableBody.lastElementChild.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+        
+        function getBounceClass(bounceCount) {
+            if (bounceCount === 0) return 'bg-gray-100 text-gray-800';
+            if (bounceCount === 1) return 'bg-green-100 text-green-800';
+            if (bounceCount === 2) return 'bg-yellow-100 text-yellow-800';
+            if (bounceCount === 3) return 'bg-orange-100 text-orange-800';
+            return 'bg-red-100 text-red-800';
+        }
+        
+        // Drop ball
+        function dropBall() {
+            if (balls.length === 0) return;
+            
+            // Reset stopping state
+            hasStopped = false;
+            stopCheckCounter = 0;
+            isDataCollecting = true; // Mulai mengumpulkan data lagi
+            
+            balls.forEach(ball => {
+                if (!ball.isFalling) {
+                    ball.isFalling = true;
+                    ball.isResting = false;
+                    ball.startHeight = ball.y;
+                    ball.consecutiveSmallBounces = 0;
+                    startSimulation();
+                    
+                    showError('Bola Dijatuhkan', `Tinggi awal: ${dropHeightValue}m, Gravitasi: ${gravity}m/s²`);
+                }
+            });
+        }
+        
+        // Reset simulation
+        function resetSimulation() {
+            pauseSimulation();
+            
+            // Reset variables
+            simulationTime = 0;
+            totalBounces = 0;
+            hasStopped = false;
+            stopCheckCounter = 0;
+            isDataCollecting = false;
+            timeElapsed.textContent = '0.0s';
+            bounceCount.textContent = '0';
+            
+            // Reset balls
+            const ballColors = ['red', 'blue', 'green', 'yellow', 'purple'];
+            balls.forEach((ball, index) => {
+                ball.x = simulationCanvas.width / 2 + (index * 30 - (balls.length * 15));
+                ball.y = 50;
+                ball.vy = 0;
+                ball.vx = Math.random() * 2 - 1;
+                ball.isFalling = false;
+                ball.isResting = false;
+                ball.bounceCount = 0;
+                ball.energyLoss = 0;
+                ball.maxHeight = ball.y;
+                ball.lastBounceTime = 0;
+                ball.consecutiveSmallBounces = 0;
+            });
+            
+            // Clear ALL data
+            timeHistory = [];
+            energyHistory = [];
+            velocityHistory = [];
+            heightHistory = [];
+            kineticEnergyHistory = [];
+            potentialEnergyHistory = [];
+            dataLog = [];
+            updateDataTable();
+            
+            // Reset chart
+            if (physicsChart) {
+                physicsChart.data.labels = timeHistory;
+                physicsChart.data.datasets.forEach(dataset => dataset.data = []);
+                physicsChart.update();
+            }
+            
+            // Redraw
+            draw();
+            
+            showError('Simulasi Direset', 'Semua parameter telah direset ke awal');
+        }
+        
+        // Add new ball
+        function addBall() {
+            if (balls.length >= 5) {
+                showError('Batas Maksimum', 'Maksimal 5 bola dalam simulasi');
+                return;
+            }
+            
+            const ballColors = ['red', 'blue', 'green', 'yellow', 'purple'];
+            const x = simulationCanvas.width / 2 + (balls.length * 30 - (balls.length * 15));
+            const y = 50;
+            const newBall = new Ball(x, y, 20, ballColors[balls.length], balls.length + 1);
+            
+            balls.push(newBall);
+            updateBallCount();
+            
+            // Redraw
+            draw();
+            
+            showError('Bola Ditambahkan', `Total bola: ${balls.length}`);
+        }
+        
+        function updateBallCount() {
+            ballCount.textContent = `${balls.length} Bola`;
+        }
+        
+        // Apply gravity preset
+        function applyGravityPreset() {
+            const presetValue = parseFloat(gravityPreset.value);
+            if (isNaN(presetValue)) return;
+            
+            gravity = presetValue;
+            gravitySlider.value = presetValue;
+            gravityValue.textContent = presetValue.toFixed(1);
+            
+            updatePhysicsCalculations();
+            
+            showError('Gravitasi Diubah', `Nilai gravitasi: ${presetValue}m/s²`);
+        }
+        
+        // Apply physics parameters
+        function applyPhysicsParams() {
+            const height = parseFloat(dropHeight.value);
+            const coeff = parseFloat(restitutionCoef.value);
+            
+            if (isNaN(height) || height < 1 || height > 100) {
+                showError('Input Error', 'Tinggi jatuh harus antara 1-100 meter');
+                return;
+            }
+            
+            if (isNaN(coeff) || coeff < 0.1 || coeff > 1) {
+                showError('Input Error', 'Koefisien restitusi harus antara 0.1-1.0');
+                return;
+            }
+            
+            dropHeightValue = height;
+            restitution = coeff;
+            
+            // Calculate fall time
+            const fallTimeValue = Math.sqrt(2 * height / gravity);
+            fallTime.textContent = fallTimeValue.toFixed(2);
+            physicsResult.classList.remove('hidden');
+            
+            updatePhysicsCalculations();
+            
+            showError('Parameter Diperbarui', `Tinggi: ${height}m, Restitusi: ${coeff}`);
+        }
+        
+        // Update physics calculations
+        function updatePhysicsCalculations() {
+            // Calculate theoretical values
+            const initialEnergy = ballMass * gravity * dropHeightValue;
+            const impactVelocity = Math.sqrt(2 * gravity * dropHeightValue);
+            
+            // Update display with theoretical values
+            potentialEnergy.textContent = initialEnergy.toFixed(1);
+            kineticEnergy.textContent = '0.0';
+            mechanicalEnergy.textContent = initialEnergy.toFixed(1);
+            
+            // Update velocity display
+            velocityValue.textContent = '0.0 m/s';
+            
+            // Update bounce height display
+            bounceHeight.textContent = '0.0 m';
+            
+            // Update chart
+            if (physicsChart) {
+                physicsChart.data.labels = [];
+                physicsChart.data.datasets.forEach(dataset => dataset.data = []);
+                physicsChart.update();
+            }
+        }
+        
+        // Trigger bounce animation
+        function triggerBounceAnimation() {
+            bounceOverlay.classList.add('bounce-animation');
+            setTimeout(() => {
+                bounceOverlay.classList.remove('bounce-animation');
+            }, 300);
+        }
+        
+        // Error handling
+        function showError(title, message) {
+            errorTitle.textContent = title;
+            errorDetail.textContent = message;
+            errorMessage.classList.remove('hidden');
+            
+            setTimeout(() => {
+                errorMessage.classList.add('hidden');
+            }, 3000);
+        }
+        
+        // Event Listeners
+        btnStart.addEventListener('click', startSimulation);
+        btnPause.addEventListener('click', pauseSimulation);
+        btnLog.addEventListener('click', () => {
+            logSimulationData();
+            showError('Data Tersimpan', 'Data simulasi telah disimpan ke log');
+        });
+        btnDrop.addEventListener('click', dropBall);
+        btnReset.addEventListener('click', resetSimulation);
+        btnAddBall.addEventListener('click', addBall);
+        
+        btnApplyGravity.addEventListener('click', applyGravityPreset);
+        btnApplyParams.addEventListener('click', applyPhysicsParams);
+        
+        gravitySlider.addEventListener('input', (e) => {
+            gravity = parseFloat(e.target.value);
+            gravityValue.textContent = gravity.toFixed(1);
+            updatePhysicsCalculations();
+        });
+        
+        btnPerfect.addEventListener('click', () => {
+            currentBounceType = 'perfect';
+            restitution = 1.0;
+            restitutionCoef.value = '1.0';
+            btnPerfect.classList.add('active');
+            btnRealistic.classList.remove('active');
+            btnSuperball.classList.remove('active');
+            showError('Pantulan Sempurna', 'Tidak ada energi yang hilang (restitusi=1.0)');
+        });
+        
+        btnRealistic.addEventListener('click', () => {
+            currentBounceType = 'realistic';
+            restitution = 0.8;
+            restitutionCoef.value = '0.8';
+            btnPerfect.classList.remove('active');
+            btnRealistic.classList.add('active');
+            btnSuperball.classList.remove('active');
+            showError('Pantulan Realistis', 'Energi berkurang 20% setiap pantulan (restitusi=0.8)');
+        });
+        
+        btnSuperball.addEventListener('click', () => {
+            currentBounceType = 'superball';
+            restitution = 0.9;
+            restitutionCoef.value = '0.9';
+            btnPerfect.classList.remove('active');
+            btnRealistic.classList.remove('active');
+            btnSuperball.classList.add('active');
+            showError('Pantulan Superball', 'Energi berkurang 10% setiap pantulan (restitusi=0.9)');
+        });
+        
+        btnChartEnergy.addEventListener('click', () => {
+            currentChartType = 'energy';
+            btnChartEnergy.classList.add('active');
+            btnChartVelocity.classList.remove('active');
+            btnChartHeight.classList.remove('active');
+            updateChartData();
+        });
+        
+        btnChartVelocity.addEventListener('click', () => {
+            currentChartType = 'velocity';
+            btnChartEnergy.classList.remove('active');
+            btnChartVelocity.classList.add('active');
+            btnChartHeight.classList.remove('active');
+            updateChartData();
+        });
+        
+        btnChartHeight.addEventListener('click', () => {
+            currentChartType = 'height';
+            btnChartEnergy.classList.remove('active');
+            btnChartVelocity.classList.remove('active');
+            btnChartHeight.classList.add('active');
+            updateChartData();
+        });
+        
+        tableToggle.addEventListener('click', () => {
+            if (tableArea.classList.contains('hidden')) {
+                tableArea.classList.remove('hidden');
+                tableToggle.textContent = 'Sembunyikan Tabel';
+                updateDataTable();
+            } else {
+                tableArea.classList.add('hidden');
+                tableToggle.textContent = 'Tampilkan Tabel';
+            }
+        });
+        
+        btnClearData.addEventListener('click', () => {
+            if (dataLog.length > 0 && confirm('Hapus semua data simulasi?')) {
+                dataLog = [];
+                updateDataTable();
+                showError('Data Dihapus', 'Semua data simulasi telah dihapus');
+            }
+        });
+        
+        // Export functions
+        btnDownloadChart.addEventListener('click', () => {
+            if (!physicsChart) {
+                showError('Grafik Tidak Tersedia', 'Tidak ada grafik untuk diunduh');
+                return;
+            }
+            
+            const link = document.createElement('a');
+            link.download = `grafik-simulasi-${new Date().toISOString().slice(0, 10)}.png`;
+            link.href = physicsChartCanvas.toDataURL('image/png');
+            link.click();
+            
+            showError('Grafik Tersimpan', 'Grafik analisis fisika telah diunduh');
+        });
+        
+        btnDownloadSnapshot.addEventListener('click', () => {
+            // Capture screenshot of simulation
+            const link = document.createElement('a');
+            link.download = `simulasi-bola-${new Date().toISOString().slice(0, 19).replace(/[:]/g, '-')}.png`;
+            link.href = simulationCanvas.toDataURL('image/png');
+            link.click();
+            
+            showError('Snapshot Tersimpan', 'Gambar simulasi telah diunduh');
+        });
+        
+        btnDownloadCSV.addEventListener('click', () => {
+            if (dataLog.length === 0) {
+                showError('Data Tidak Tersedia', 'Tidak ada data untuk diunduh');
+                return;
+            }
+            
+            let csvContent = "data:text/csv;charset=utf-8,";
+            csvContent += "Waktu(s),Ketinggian(m),Kecepatan(m/s),Energi(J),Pantulan\n";
+            
+            dataLog.forEach(d => {
+                const row = [
+                    d.time,
+                    d.height,
+                    d.velocity,
+                    d.energy,
+                    d.bounce
+                ].join(',');
+                csvContent += row + "\n";
+            });
+            
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement('a');
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `data-simulasi-${new Date().toISOString().slice(0, 10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showError('CSV Tersimpan', 'Data simulasi telah diunduh sebagai CSV');
+        });
+        
+        btnDownloadPDF.addEventListener('click', () => {
+            if (dataLog.length === 0) {
+                showError('Data Tidak Tersedia', 'Tidak ada data untuk laporan');
+                return;
+            }
+            
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                doc.setFontSize(16);
+                doc.text('LAPORAN SIMULASI FISIKA - BOLA JATUH', 105, 15, null, null, 'center');
+                
+                doc.setFontSize(10);
+                doc.text(`Tanggal: ${new Date().toLocaleDateString('id-ID')}`, 105, 23, null, null, 'center');
+                
+                let yPos = 35;
+                doc.setFontSize(12);
+                doc.text('Parameter Simulasi:', 20, yPos);
+                yPos += 8;
+                
+                doc.setFontSize(10);
+                doc.text(`Gravitasi: ${gravity} m/s²`, 20, yPos);
+                yPos += 6;
+                doc.text(`Tinggi Jatuh: ${dropHeightValue} m`, 20, yPos);
+                yPos += 6;
+                doc.text(`Koefisien Restitusi: ${restitution}`, 20, yPos);
+                yPos += 6;
+                doc.text(`Jenis Pantulan: ${currentBounceType}`, 20, yPos);
+                yPos += 10;
+                
+                doc.setFontSize(12);
+                doc.text('Ringkasan Hasil:', 20, yPos);
+                yPos += 8;
+                
+                doc.setFontSize(10);
+                doc.text(`Waktu Simulasi: ${simulationTime.toFixed(2)} s`, 20, yPos);
+                yPos += 6;
+                doc.text(`Total Pantulan: ${totalBounces}`, 20, yPos);
+                yPos += 6;
+                doc.text(`Jumlah Bola: ${balls.length}`, 20, yPos);
+                yPos += 10;
+                
+                doc.setFontSize(12);
+                doc.text('Data Simulasi (10 titik pertama):', 20, yPos);
+                yPos += 10;
+                
+                const headers = ['Waktu', 'Tinggi', 'Kecepatan', 'Energi', 'Pantulan'];
+                const columnWidths = [25, 25, 30, 30, 25];
+                let xPos = 20;
+                
+                doc.setFontSize(9);
+                headers.forEach((header, i) => {
+                    doc.text(header, xPos, yPos);
+                    xPos += columnWidths[i];
+                });
+                
+                yPos += 2;
+                doc.line(20, yPos, 140, yPos);
+                yPos += 3;
+                
+                doc.setFontSize(8);
+                const dataToShow = dataLog.slice(0, 20);
+                dataToShow.forEach((d, i) => {
+                    xPos = 20;
+                    doc.text(d.time, xPos, yPos);
+                    xPos += columnWidths[0];
+                    doc.text(d.height, xPos, yPos);
+                    xPos += columnWidths[1];
+                    doc.text(d.velocity, xPos, yPos);
+                    xPos += columnWidths[2];
+                    doc.text(d.energy, xPos, yPos);
+                    xPos += columnWidths[3];
+                    doc.text(d.bounce.toString(), xPos, yPos);
+                    yPos += 5;
+                    
+                    if (yPos > 270 && i < dataLog.length - 1) {
+                        doc.addPage();
+                        yPos = 20;
+                        doc.setFontSize(8);
+                        doc.text('... dan data selanjutnya ...', 20, yPos);
+                        yPos += 10;
+                    }
+                });
+                
+                doc.save(`laporan-simulasi-${new Date().toISOString().slice(0, 10)}.pdf`);
+                
+                showError('Laporan Tersimpan', 'Laporan simulasi telah diunduh sebagai PDF');
+                
+            } catch (error) {
+                console.error('Error generating PDF:', error);
+                showError('Error PDF', 'Gagal membuat laporan PDF');
+            }
+        });
+        
+        // Initialize app
+        window.addEventListener('load', init);
+        window.addEventListener('resize', () => {
+            simulationCanvas.width = simulationCanvas.offsetWidth;
+            simulationCanvas.height = simulationCanvas.offsetHeight;
+            createTrackLines();
+            draw();
         });
     </script>
 </body>

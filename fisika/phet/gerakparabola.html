@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QUANTARA - Luxmeter dengan Simulasi Parabola</title>
+    <title>QUANTARA -  Simulasi Parabola</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -744,18 +744,38 @@
                             </div>
                         </div>
                         
-                        <!-- Export Buttons -->
-                        <div class="grid grid-cols-2 gap-3">
-                            <button id="btn-export-csv" class="export-btn export-btn-data">
-                                <i class="fas fa-file-csv"></i> Download CSV
-                            </button>
-                            <button id="btn-export-chart" class="export-btn export-btn-chart">
-                                <i class="fas fa-chart-line"></i> Download Grafik
-                            </button>
-                            <button id="btn-export-all" class="export-btn col-span-2" style="background: linear-gradient(to right, #10b981, #059669); color: white;">
-                                <i class="fas fa-file-archive"></i> Download Semua Data
-                            </button>
+                        <!-- Export Charts Separately -->
+                        <div class="bg-purple-50 p-4 rounded-lg">
+                            <h4 class="text-sm font-semibold text-purple-800 mb-3">
+                                <i class="fas fa-chart-pie mr-2"></i> Ekspor Grafik (File Terpisah)
+                            </h4>
+                            
+                            <div class="grid grid-cols-3 gap-3 mb-3">
+                                <button onclick="exportSingleChart('parabola')" class="export-btn" style="background: linear-gradient(to right, #8b5cf6, #7c3aed); color: white;">
+                                    <i class="fas fa-project-diagram"></i> Grafik Parabola
+                                </button>
+                                <button onclick="exportSingleChart('velocity')" class="export-btn" style="background: linear-gradient(to right, #3b82f6, #1d4ed8); color: white;">
+                                    <i class="fas fa-tachometer-alt"></i> Grafik Kecepatan
+                                </button>
+                                <button onclick="exportSingleChart('position')" class="export-btn" style="background: linear-gradient(to right, #10b981, #059669); color: white;">
+                                    <i class="fas fa-map-marker-alt"></i> Grafik Posisi
+                                </button>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-3">
+                                <button id="btn-export-chart" class="export-btn export-btn-chart">
+                                    <i class="fas fa-chart-line"></i> Download Semua Grafik
+                                </button>
+                                <button id="btn-export-csv" class="export-btn export-btn-data">
+                                    <i class="fas fa-file-csv"></i> Download CSV
+                                </button>
+                            </div>
                         </div>
+                        
+                        <!-- Export All Button -->
+                        <button id="btn-export-all" class="export-btn w-full" style="background: linear-gradient(to right, #10b981, #059669); color: white;">
+                            <i class="fas fa-file-archive"></i> Download Semua Data & Grafik
+                        </button>
                         
                         <!-- Export Preview -->
                         <div class="mt-4">
@@ -1748,7 +1768,7 @@
             showError('CSV Tersimpan', `${filteredData.length} data telah diunduh sebagai CSV`);
         }
         
-        // Export chart as PNG - FIXED VERSION
+        // Export chart as PNG - SEPARATED VERSION
         function exportChart() {
             if (!parabolaChart || simulationData.length === 0) {
                 showError('Grafik Tidak Tersedia', 'Tidak ada data simulasi untuk diekspor');
@@ -1756,155 +1776,283 @@
             }
             
             try {
-                // Create a temporary canvas for high-quality export
-                const tempCanvas = document.createElement('canvas');
-                const tempCtx = tempCanvas.getContext('2d');
-                
-                // Set dimensions for high-quality export
-                tempCanvas.width = 2000;
-                tempCanvas.height = 1400;
-                
-                // White background
-                tempCtx.fillStyle = 'white';
-                tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
-                
-                // Add title and metadata
-                tempCtx.fillStyle = '#1f2937';
-                tempCtx.font = 'bold 36px "Baloo 2", Arial, sans-serif';
-                tempCtx.textAlign = 'center';
-                tempCtx.fillText('SIMULASI GERAK PARABOLA - QUANTARA', tempCanvas.width / 2, 60);
-                
-                tempCtx.font = '24px "Baloo 2", Arial, sans-serif';
-                tempCtx.fillStyle = '#4b5563';
-                tempCtx.fillText(`Parameter: v₀=${params.v0} m/s, θ=${params.angle}°, g=${params.g} m/s², h₀=${params.h0} m`, tempCanvas.width / 2, 110);
-                tempCtx.fillText(`Tanggal: ${new Date().toLocaleString('id-ID')}`, tempCanvas.width / 2, 150);
-                
-                // Export each chart to image and draw on temp canvas
-                const chartCanvases = [
-                    {canvas: parabolaChartCanvas, title: 'Grafik Lintasan Parabola', y: 200},
-                    {canvas: velocityChartCanvas, title: 'Grafik Kecepatan vs Waktu', y: 650},
-                    {canvas: positionChartCanvas, title: 'Grafik Posisi vs Waktu', y: 1000}
+                // Buat daftar grafik yang akan diekspor
+                const chartsToExport = [
+                    {
+                        name: 'lintasan-parabola',
+                        title: 'Grafik Lintasan Parabola',
+                        canvas: parabolaChartCanvas,
+                        chart: parabolaChart
+                    },
+                    {
+                        name: 'kecepatan-waktu',
+                        title: 'Grafik Kecepatan vs Waktu',
+                        canvas: velocityChartCanvas,
+                        chart: velocityChart
+                    },
+                    {
+                        name: 'posisi-waktu',
+                        title: 'Grafik Posisi vs Waktu',
+                        canvas: positionChartCanvas,
+                        chart: positionChart
+                    }
                 ];
                 
-                let chartsLoaded = 0;
-                const totalCharts = chartCanvases.length;
+                let exportCount = 0;
                 
-                chartCanvases.forEach((item, index) => {
+                chartsToExport.forEach((chartInfo, index) => {
+                    // Buat canvas sementara untuk ekspor kualitas tinggi
+                    const tempCanvas = document.createElement('canvas');
+                    const tempCtx = tempCanvas.getContext('2d');
+                    
+                    // Set dimensi untuk kualitas tinggi
+                    tempCanvas.width = 1600;
+                    tempCanvas.height = 1200;
+                    
+                    // Latar belakang putih
+                    tempCtx.fillStyle = 'white';
+                    tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+                    
+                    // Tambahkan judul dan metadata
+                    tempCtx.fillStyle = '#1f2937';
+                    tempCtx.font = 'bold 36px "Baloo 2", Arial, sans-serif';
+                    tempCtx.textAlign = 'center';
+                    tempCtx.fillText('SIMULASI GERAK PARABOLA - QUANTARA', tempCanvas.width / 2, 60);
+                    
+                    tempCtx.font = '28px "Baloo 2", Arial, sans-serif';
+                    tempCtx.fillStyle = '#4b5563';
+                    tempCtx.fillText(chartInfo.title, tempCanvas.width / 2, 120);
+                    
+                    // Tambahkan parameter simulasi
+                    tempCtx.font = '22px "Baloo 2", Arial, sans-serif';
+                    tempCtx.fillText(`Parameter: v₀=${params.v0} m/s, θ=${params.angle}°, g=${params.g} m/s², h₀=${params.h0} m`, 
+                                   tempCanvas.width / 2, 170);
+                    
+                    // Simpan status asli chart
+                    const originalWidth = chartInfo.canvas.width;
+                    const originalHeight = chartInfo.canvas.height;
+                    
+                    // Buat gambar dari chart
                     const chartImg = new Image();
                     
-                    chartImg.onload = function() {
-                        // Draw chart image
-                        const chartHeight = 400;
-                        tempCtx.drawImage(chartImg, 100, item.y, tempCanvas.width - 200, chartHeight);
-                        
-                        // Add title for each chart
-                        tempCtx.fillStyle = '#1f2937';
-                        tempCtx.font = 'bold 28px "Baloo 2", Arial, sans-serif';
-                        tempCtx.textAlign = 'left';
-                        tempCtx.fillText(item.title, 100, item.y - 20);
-                        
-                        chartsLoaded++;
-                        
-                        // If all charts are loaded, create the download
-                        if (chartsLoaded === totalCharts) {
-                            // Add simulation info at the bottom
-                            const calculatedValues = calculateParabola();
-                            tempCtx.font = '20px "Baloo 2", Arial, sans-serif';
-                            tempCtx.textAlign = 'left';
-                            tempCtx.fillStyle = '#374151';
+                    // Gunakan timeout untuk memastikan chart dirender dengan benar
+                    setTimeout(() => {
+                        try {
+                            // Dapatkan base64 dari chart dengan kualitas baik
+                            const chartDataUrl = chartInfo.canvas.toDataURL('image/png', 1.0);
                             
-                            const infoY = 1350;
-                            tempCtx.fillText(`Informasi Simulasi:`, 100, infoY);
-                            tempCtx.fillText(`• Jangkauan Maksimum: ${calculatedValues.range.toFixed(2)} m`, 120, infoY + 35);
-                            tempCtx.fillText(`• Ketinggian Maksimum: ${calculatedValues.maxHeight.toFixed(2)} m`, 120, infoY + 70);
-                            tempCtx.fillText(`• Waktu Total: ${calculatedValues.totalTime.toFixed(2)} s`, 120, infoY + 105);
-                            tempCtx.fillText(`• Data Points: ${simulationData.length}`, 120, infoY + 140);
-                            
-                            // Add footer
-                            tempCtx.font = '16px "Baloo 2", Arial, sans-serif';
-                            tempCtx.fillStyle = '#6b7280';
-                            tempCtx.textAlign = 'center';
-                            tempCtx.fillText('Dibuat dengan QUANTARA - Simulator Fisika Interaktif', tempCanvas.width / 2, 1380);
-                            
-                            // Trigger download
-                            setTimeout(() => {
-                                const dataUrl = tempCanvas.toDataURL('image/png');
-                                const link = document.createElement('a');
-                                link.download = `grafik-parabola-quantara-${new Date().toISOString().slice(0, 10)}.png`;
-                                link.href = dataUrl;
-                                document.body.appendChild(link);
-                                link.click();
-                                document.body.removeChild(link);
+                            chartImg.onload = function() {
+                                // Gambar chart ke canvas sementara
+                                const chartWidth = tempCanvas.width - 200;
+                                const chartHeight = 800;
+                                const chartY = 250;
                                 
-                                showError('Grafik Tersimpan', 'Grafik parabola telah diunduh sebagai PNG');
-                            }, 100);
+                                tempCtx.drawImage(chartImg, 100, chartY, chartWidth, chartHeight);
+                                
+                                // Tambahkan info simulasi di bagian bawah (hanya untuk grafik pertama)
+                                if (index === 0) {
+                                    const calculatedValues = calculateParabola();
+                                    tempCtx.font = '20px "Baloo 2", Arial, sans-serif';
+                                    tempCtx.textAlign = 'left';
+                                    tempCtx.fillStyle = '#374151';
+                                    
+                                    const infoY = chartY + chartHeight + 80;
+                                    tempCtx.fillText(`Informasi Simulasi:`, 100, infoY);
+                                    tempCtx.fillText(`• Jangkauan Maksimum: ${calculatedValues.range.toFixed(2)} m`, 120, infoY + 35);
+                                    tempCtx.fillText(`• Ketinggian Maksimum: ${calculatedValues.maxHeight.toFixed(2)} m`, 120, infoY + 70);
+                                    tempCtx.fillText(`• Waktu Total: ${calculatedValues.totalTime.toFixed(2)} s`, 120, infoY + 105);
+                                    tempCtx.fillText(`• Data Points: ${simulationData.length}`, 120, infoY + 140);
+                                }
+                                
+                                // Tambahkan footer
+                                tempCtx.font = '18px "Baloo 2", Arial, sans-serif';
+                                tempCtx.fillStyle = '#6b7280';
+                                tempCtx.textAlign = 'center';
+                                tempCtx.fillText('Dibuat dengan QUANTARA - Simulator Fisika Interaktif', 
+                                               tempCanvas.width / 2, tempCanvas.height - 40);
+                                tempCtx.fillText(`Tanggal: ${new Date().toLocaleString('id-ID')}`, 
+                                               tempCanvas.width / 2, tempCanvas.height - 10);
+                                
+                                // Trigger download untuk grafik ini
+                                setTimeout(() => {
+                                    const dataUrl = tempCanvas.toDataURL('image/png');
+                                    const link = document.createElement('a');
+                                    const timestamp = new Date().toISOString().slice(0, 10);
+                                    link.download = `grafik-${chartInfo.name}-${timestamp}.png`;
+                                    link.href = dataUrl;
+                                    document.body.appendChild(link);
+                                    link.click();
+                                    document.body.removeChild(link);
+                                    
+                                    exportCount++;
+                                    
+                                    // Jika semua grafik telah diekspor, tampilkan notifikasi
+                                    if (exportCount === chartsToExport.length) {
+                                        showError('Semua Grafik Tersimpan', 
+                                                `${chartsToExport.length} grafik telah diunduh sebagai file PNG terpisah`);
+                                    }
+                                }, 100);
+                            };
+                            
+                            chartImg.onerror = function() {
+                                console.error(`Gagal memuat grafik ${chartInfo.name}`);
+                                exportCount++;
+                                
+                                // Coba ekspor grafik berikutnya meskipun yang ini gagal
+                                if (exportCount === chartsToExport.length && exportCount > 0) {
+                                    showError('Ekspar Sebagian Berhasil', 
+                                            `${exportCount} dari ${chartsToExport.length} grafik berhasil diunduh`);
+                                }
+                            };
+                            
+                            chartImg.src = chartDataUrl;
+                            
+                        } catch (error) {
+                            console.error(`Error processing chart ${chartInfo.name}:`, error);
+                            exportCount++;
                         }
+                    }, index * 500); // Beri jeda antar grafik untuk menghindari konflik
+                });
+                
+                // Tampilkan notifikasi sedang memproses
+                showError('Mengekspor Grafik', 
+                         `Sedang menyiapkan ${chartsToExport.length} grafik untuk diunduh...`);
+                
+            } catch (error) {
+                console.error('Error exporting charts:', error);
+                showError('Ekspor Gagal', 'Terjadi kesalahan saat mengekspor grafik. Silakan coba lagi.');
+            }
+        }
+        
+        // Fungsi untuk mengekspor grafik tertentu saja
+        function exportSingleChart(chartName) {
+            let chartInfo;
+            
+            switch(chartName) {
+                case 'parabola':
+                    chartInfo = {
+                        name: 'lintasan-parabola',
+                        title: 'Grafik Lintasan Parabola',
+                        canvas: parabolaChartCanvas,
+                        chart: parabolaChart
+                    };
+                    break;
+                case 'velocity':
+                    chartInfo = {
+                        name: 'kecepatan-waktu',
+                        title: 'Grafik Kecepatan vs Waktu',
+                        canvas: velocityChartCanvas,
+                        chart: velocityChart
+                    };
+                    break;
+                case 'position':
+                    chartInfo = {
+                        name: 'posisi-waktu',
+                        title: 'Grafik Posisi vs Waktu',
+                        canvas: positionChartCanvas,
+                        chart: positionChart
+                    };
+                    break;
+                default:
+                    return;
+            }
+            
+            if (!chartInfo.chart || simulationData.length === 0) {
+                showError('Grafik Tidak Tersedia', 'Tidak ada data simulasi untuk grafik ini');
+                return;
+            }
+            
+            // Buat canvas sementara untuk ekspor kualitas tinggi
+            const tempCanvas = document.createElement('canvas');
+            const tempCtx = tempCanvas.getContext('2d');
+            
+            // Set dimensi untuk kualitas tinggi
+            tempCanvas.width = 1600;
+            tempCanvas.height = 1200;
+            
+            // Latar belakang putih
+            tempCtx.fillStyle = 'white';
+            tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+            
+            // Tambahkan judul dan metadata
+            tempCtx.fillStyle = '#1f2937';
+            tempCtx.font = 'bold 36px "Baloo 2", Arial, sans-serif';
+            tempCtx.textAlign = 'center';
+            tempCtx.fillText('SIMULASI GERAK PARABOLA - QUANTARA', tempCanvas.width / 2, 60);
+            
+            tempCtx.font = '28px "Baloo 2", Arial, sans-serif';
+            tempCtx.fillStyle = '#4b5563';
+            tempCtx.fillText(chartInfo.title, tempCanvas.width / 2, 120);
+            
+            // Tambahkan parameter simulasi
+            tempCtx.font = '22px "Baloo 2", Arial, sans-serif';
+            tempCtx.fillText(`Parameter: v₀=${params.v0} m/s, θ=${params.angle}°, g=${params.g} m/s², h₀=${params.h0} m`, 
+                           tempCanvas.width / 2, 170);
+            
+            // Buat gambar dari chart
+            const chartImg = new Image();
+            
+            setTimeout(() => {
+                try {
+                    const chartDataUrl = chartInfo.canvas.toDataURL('image/png', 1.0);
+                    
+                    chartImg.onload = function() {
+                        // Gambar chart ke canvas sementara
+                        const chartWidth = tempCanvas.width - 200;
+                        const chartHeight = 800;
+                        const chartY = 250;
+                        
+                        tempCtx.drawImage(chartImg, 100, chartY, chartWidth, chartHeight);
+                        
+                        // Tambahkan info simulasi di bagian bawah
+                        const calculatedValues = calculateParabola();
+                        tempCtx.font = '20px "Baloo 2", Arial, sans-serif';
+                        tempCtx.textAlign = 'left';
+                        tempCtx.fillStyle = '#374151';
+                        
+                        const infoY = chartY + chartHeight + 80;
+                        tempCtx.fillText(`Informasi Simulasi:`, 100, infoY);
+                        tempCtx.fillText(`• Jangkauan Maksimum: ${calculatedValues.range.toFixed(2)} m`, 120, infoY + 35);
+                        tempCtx.fillText(`• Ketinggian Maksimum: ${calculatedValues.maxHeight.toFixed(2)} m`, 120, infoY + 70);
+                        tempCtx.fillText(`• Waktu Total: ${calculatedValues.totalTime.toFixed(2)} s`, 120, infoY + 105);
+                        tempCtx.fillText(`• Data Points: ${simulationData.length}`, 120, infoY + 140);
+                        
+                        // Tambahkan footer
+                        tempCtx.font = '18px "Baloo 2", Arial, sans-serif';
+                        tempCtx.fillStyle = '#6b7280';
+                        tempCtx.textAlign = 'center';
+                        tempCtx.fillText('Dibuat dengan QUANTARA - Simulator Fisika Interaktif', 
+                                       tempCanvas.width / 2, tempCanvas.height - 40);
+                        tempCtx.fillText(`Tanggal: ${new Date().toLocaleString('id-ID')}`, 
+                                       tempCanvas.width / 2, tempCanvas.height - 10);
+                        
+                        // Trigger download
+                        setTimeout(() => {
+                            const dataUrl = tempCanvas.toDataURL('image/png');
+                            const link = document.createElement('a');
+                            const timestamp = new Date().toISOString().slice(0, 10);
+                            link.download = `grafik-${chartInfo.name}-${timestamp}.png`;
+                            link.href = dataUrl;
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                            
+                            showError('Grafik Tersimpan', 
+                                    `Grafik ${chartInfo.title} telah diunduh sebagai PNG`);
+                        }, 100);
                     };
                     
                     chartImg.onerror = function() {
-                        chartsLoaded++;
-                        console.error(`Failed to load chart image ${index + 1}`);
-                        
-                        // Continue even if one chart fails
-                        if (chartsLoaded === totalCharts) {
-                            // Create download even with missing charts
-                            setTimeout(() => {
-                                const dataUrl = tempCanvas.toDataURL('image/png');
-                                const link = document.createElement('a');
-                                link.download = `grafik-parabola-quantara-${new Date().toISOString().slice(0, 10)}.png`;
-                                link.href = dataUrl;
-                                document.body.appendChild(link);
-                                link.click();
-                                document.body.removeChild(link);
-                                
-                                showError('Grafik Tersimpan', 'Grafik parabola telah diunduh sebagai PNG (beberapa grafik mungkin tidak tampil)');
-                            }, 100);
-                        }
+                        showError('Ekspor Gagal', `Gagal memuat grafik ${chartInfo.title}`);
                     };
                     
-                    // Get base64 image from chart with better quality
-                    const originalChart = index === 0 ? parabolaChart : 
-                                        index === 1 ? velocityChart : 
-                                        positionChart;
+                    chartImg.src = chartDataUrl;
                     
-                    // Temporarily increase chart size for better quality
-                    const originalDisplay = item.canvas.style.display;
-                    const originalWidth = item.canvas.width;
-                    const originalHeight = item.canvas.height;
-                    
-                    // Create a temporary canvas for high-res export of this specific chart
-                    const tempChartCanvas = document.createElement('canvas');
-                    tempChartCanvas.width = 1800;
-                    tempChartCanvas.height = 600;
-                    const tempChartCtx = tempChartCanvas.getContext('2d');
-                    
-                    // Draw white background
-                    tempChartCtx.fillStyle = 'white';
-                    tempChartCtx.fillRect(0, 0, tempChartCanvas.width, tempChartCanvas.height);
-                    
-                    // Draw the chart
-                    tempChartCtx.drawImage(item.canvas, 0, 0, tempChartCanvas.width, tempChartCanvas.height);
-                    
-                    // Use the temporary canvas for the image
-                    chartImg.src = tempChartCanvas.toDataURL('image/png', 1.0);
-                });
-                
-            } catch (error) {
-                console.error('Error exporting chart:', error);
-                showError('Ekspor Gagal', 'Terjadi kesalahan saat mengekspor grafik. Silakan coba lagi.');
-                
-                // Fallback: export just the parabola chart
-                try {
-                    const dataUrl = parabolaChartCanvas.toDataURL('image/png');
-                    const link = document.createElement('a');
-                    link.download = `grafik-parabola-quantara-${new Date().toISOString().slice(0, 10)}.png`;
-                    link.href = dataUrl;
-                    link.click();
-                    showError('Grafik Tersimpan (Fallback)', 'Grafik utama telah diunduh');
-                } catch (fallbackError) {
-                    showError('Ekspor Gagal Total', 'Tidak dapat mengekspor grafik. Pastikan simulasi telah berjalan dan ada data.');
+                } catch (error) {
+                    console.error(`Error exporting single chart ${chartInfo.name}:`, error);
+                    showError('Ekspor Gagal', 'Terjadi kesalahan saat mengekspor grafik');
                 }
-            }
+            }, 100);
         }
         
         // Export all data
@@ -1917,12 +2065,12 @@
             // Export CSV
             exportCSV();
             
-            // Wait a moment then export chart
+            // Wait a moment then export all charts
             setTimeout(() => {
                 exportChart();
             }, 1500);
             
-            showError('Ekspor Lengkap', 'Data CSV dan grafik PNG sedang diunduh');
+            showError('Ekspor Lengkap', 'Data CSV dan semua grafik PNG sedang diunduh');
         }
         
         // Error handling

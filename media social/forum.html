@@ -1252,10 +1252,10 @@
     const CLOUDINARY_API_KEY = "846512428512365";
     const CLOUDINARY_UPLOAD_PRESET = "forum_images"; // Anda perlu membuat upload preset di Cloudinary
 
-    // 🔹 Groq AI Configuration
-    const GROQ_API_KEY = "gsk_YOUR_API_KEY_HERE"; // Ganti dengan API key Groq Anda
+    // 🔹 Groq AI Configuration - Diubah ke llama-3.1-8b-instant
+    const GROQ_API_KEY = "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"; // Ganti dengan API key Groq Anda
     const GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions";
-    const AI_MODEL = "mixtral-8x7b-32768"; // Atau model lain yang tersedia di Groq
+    const AI_MODEL = "llama-3.1-8b-instant"; // Diubah dari mixtral-8x7b-32768 ke llama-3.1-8b-instant
 
     const app = initializeApp(firebaseConfig);
     const auth = getAuth(app);
@@ -1706,12 +1706,12 @@
       return cleanedText || "Hai! Apa yang bisa saya bantu?";
     }
 
-    // Fungsi untuk memanggil Groq AI API
+    // Fungsi untuk memanggil Groq AI API dengan llama-3.1-8b-instant
     async function callGroqAI(question, threadContext = null) {
       try {
-        if (!GROQ_API_KEY || GROQ_API_KEY === "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") {
-          console.error("Maaf server Nayra AI sedang sibuk!");
-          return "Maaf, saya sedang tidak bisa menjawab saat ini. Silakan hubungi bantuan Quantara.";
+        if (!GROQ_API_KEY || GROQ_API_KEY === "gsk_YOUR_API_KEY_HERE") {
+          console.error("API Key Groq tidak ditemukan!");
+          return "Maaf, server Nayra AI sedang sibuk!";
         }
         
         // Siapkan prompt untuk AI
@@ -1792,7 +1792,7 @@
           repliesDiv.scrollTop = repliesDiv.scrollHeight;
         }
         
-        // Panggil Groq AI
+        // Panggil Groq AI dengan model llama-3.1-8b-instant
         const aiResponse = await callGroqAI(question, threadContext);
         
         // Hapus indikator typing
@@ -2556,7 +2556,7 @@
           // Ekstrak pertanyaan dari komentar
           const question = extractQuestionFromComment(commentText);
           
-          // Panggil AI untuk membalas
+          // Panggil AI untuk membalas (menggunakan llama-3.1-8b-instant)
           await addAIReply(id, question, threadContext);
         }
         

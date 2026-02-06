@@ -313,6 +313,16 @@
             background: #2563eb;
         }
         
+        .export-save {
+            background: #10b981;
+            color: white;
+            border: none;
+        }
+        
+        .export-save:hover {
+            background: #059669;
+        }
+        
         /* Style untuk mobile consistency */
         @media (max-width: 414px) {
             .bottom-nav {
@@ -332,6 +342,87 @@
                 font-size: 0.8rem;
             }
         }
+        
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: #10b981;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            animation: slideUp 0.3s ease, fadeOut 0.3s ease 2.7s;
+            max-width: 350px;
+            text-align: center;
+        }
+        
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+        
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+            }
+            to {
+                opacity: 0;
+            }
+        }
+        
+        .saved-notes-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+        
+        .saved-note-item {
+            padding: 12px;
+            border-bottom: 1px solid #e5e7eb;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .saved-note-item:hover {
+            background-color: #f9fafb;
+        }
+        
+        .note-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .note-action-btn {
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            border: none;
+        }
+        
+        .load-btn {
+            background-color: #3b82f6;
+            color: white;
+        }
+        
+        .delete-btn {
+            background-color: #ef4444;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -348,6 +439,9 @@
                 </div>
                 <div class="flex items-center">
                     <div class="export-buttons">
+                        <button id="save-note" class="export-btn export-save" title="Simpan ke Browser">
+                            <i class="fas fa-save"></i>
+                        </button>
                         <button id="download-png" class="export-btn export-png">
                             <i class="fas fa-download"></i> PNG
                         </button>
@@ -364,7 +458,7 @@
         <main class="pb-20 px-4">
             <div class="pt-4 pb-4">
                 <h2 class="text-xl font-bold text-gray-800 mb-1">Note Canvas A4</h2>
-                <p class="text-gray-600 text-sm">Buat catatan dengan teks, gambar, dan rumus LaTeX. Unduh sebagai PNG atau PDF.</p>
+                <p class="text-gray-600 text-sm">Buat catatan dengan teks, gambar, dan rumus LaTeX. Simpan ke browser atau unduh sebagai PNG/PDF.</p>
             </div>
             
             <!-- Toolbar -->
@@ -438,13 +532,29 @@
             </div>
             
             <!-- Quick Actions -->
-            <div class="mt-4 grid grid-cols-2 gap-3">
+            <div class="mt-4 grid grid-cols-3 gap-3">
+                <button id="btn-load-saved" class="bg-green-50 text-green-600 p-3 rounded-lg font-semibold flex items-center justify-center">
+                    <i class="fas fa-folder-open mr-2"></i> Catatan Tersimpan
+                </button>
                 <button id="btn-clear" class="bg-red-50 text-red-600 p-3 rounded-lg font-semibold flex items-center justify-center">
                     <i class="fas fa-broom mr-2"></i> Hapus Semua
                 </button>
                 <button id="btn-add-sample" class="bg-blue-50 text-blue-600 p-3 rounded-lg font-semibold flex items-center justify-center">
-                    <i class="fas fa-plus mr-2"></i> Contoh Catatan
+                    <i class="fas fa-plus mr-2"></i> Contoh
                 </button>
+            </div>
+            
+            <!-- Saved Notes Section (awalnya tersembunyi) -->
+            <div id="saved-notes-section" class="mt-4 hidden">
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="text-lg font-bold text-gray-800">Catatan Tersimpan</h3>
+                    <button id="btn-close-saved" class="text-gray-500 hover:text-gray-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div id="saved-notes-list" class="saved-notes-list">
+                    <!-- Daftar catatan akan dimuat di sini -->
+                </div>
             </div>
             
             <!-- Instructions -->
@@ -455,6 +565,7 @@
                     <li><i class="fas fa-font text-primary mr-1"></i> Klik di canvas untuk menambahkan teks</li>
                     <li><i class="fas fa-square-root-alt text-primary mr-1"></i> Gunakan LaTeX untuk rumus matematika</li>
                     <li><i class="fas fa-image text-primary mr-1"></i> Unggah gambar dari perangkat Anda</li>
+                    <li><i class="fas fa-save text-primary mr-1"></i> Klik tombol simpan untuk menyimpan ke browser</li>
                     <li><i class="fas fa-download text-primary mr-1"></i> Klik tombol PNG/PDF untuk mengunduh</li>
                 </ul>
             </div>
@@ -561,11 +672,53 @@
         </div>
     </div>
 
+    <!-- MODAL UNTUK SAVE NOTE -->
+    <div id="save-modal" class="modal">
+        <div class="modal-content">
+            <div class="p-4 border-b">
+                <h3 class="font-bold text-gray-800">Simpan Catatan</h3>
+            </div>
+            <div class="p-4">
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-medium mb-2">Nama Catatan:</label>
+                    <input type="text" id="note-name" class="w-full border border-gray-300 rounded-lg p-3 text-sm" placeholder="Contoh: Rumus Fisika, Catatan Matematika" maxlength="50">
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-medium mb-2">Kategori:</label>
+                    <select id="note-category" class="w-full border border-gray-300 rounded-lg p-3 text-sm">
+                        <option value="fisika">Fisika</option>
+                        <option value="matematika">Matematika</option>
+                        <option value="kimia">Kimia</option>
+                        <option value="biologi">Biologi</option>
+                        <option value="lainnya">Lainnya</option>
+                    </select>
+                </div>
+                
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-medium mb-2">Pratinjau:</label>
+                    <div class="border border-gray-300 rounded-lg p-2 bg-gray-50">
+                        <div id="note-preview" class="text-center text-gray-500 text-sm">
+                            Gambar preview akan muncul di sini
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex justify-end space-x-2">
+                    <button id="save-cancel" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium">Batal</button>
+                    <button id="save-confirm" class="px-4 py-2 bg-primary text-white rounded-lg font-medium">Simpan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Inisialisasi variabel global
         let canvas;
         let currentTool = 'select';
         let selectedColor = '#3b82f6';
+        let db;
+        let currentNoteId = null;
         
         document.addEventListener('DOMContentLoaded', function() {
             // Inisialisasi canvas Fabric.js
@@ -585,6 +738,9 @@
             // Tambahkan background grid (opsional)
             addGridBackground();
             
+            // Inisialisasi IndexedDB
+            initIndexedDB();
+            
             // Setup event listeners untuk toolbar
             setupToolbar();
             
@@ -603,6 +759,9 @@
             // Setup modal gambar
             setupImageModal();
             
+            // Setup modal save
+            setupSaveModal();
+            
             // Event listener untuk pemilihan objek
             canvas.on('selection:created', updateObjectControls);
             canvas.on('selection:updated', updateObjectControls);
@@ -614,6 +773,9 @@
             // Event listener untuk tool PNG download
             document.getElementById('download-png').addEventListener('click', downloadAsPNG);
             
+            // Event listener untuk tool save
+            document.getElementById('save-note').addEventListener('click', showSaveModal);
+            
             // Render ulang MathJax saat modal LaTeX terbuka
             document.getElementById('latex-input').addEventListener('input', function() {
                 updateLatexPreview(this.value);
@@ -624,7 +786,80 @@
             
             // Inisialisasi preview LaTeX
             updateLatexPreview('E = mc^2');
+            
+            // Auto-save saat ada perubahan (opsional)
+            setupAutoSave();
         });
+        
+        function initIndexedDB() {
+            const request = indexedDB.open('QuantaraNotesDB', 1);
+            
+            request.onerror = function(event) {
+                console.error('IndexedDB error:', event.target.error);
+                showToast('Tidak dapat mengakses database browser', 'error');
+            };
+            
+            request.onupgradeneeded = function(event) {
+                db = event.target.result;
+                
+                // Buat object store jika belum ada
+                if (!db.objectStoreNames.contains('notes')) {
+                    const objectStore = db.createObjectStore('notes', { 
+                        keyPath: 'id',
+                        autoIncrement: true 
+                    });
+                    
+                    // Buat indeks untuk pencarian
+                    objectStore.createIndex('name', 'name', { unique: false });
+                    objectStore.createIndex('category', 'category', { unique: false });
+                    objectStore.createIndex('createdAt', 'createdAt', { unique: false });
+                    objectStore.createIndex('updatedAt', 'updatedAt', { unique: false });
+                }
+            };
+            
+            request.onsuccess = function(event) {
+                db = event.target.result;
+                console.log('IndexedDB initialized successfully');
+                
+                // Coba muat catatan terakhir yang dibuka
+                const lastOpenedNoteId = localStorage.getItem('lastOpenedNote');
+                if (lastOpenedNoteId) {
+                    loadNoteFromDB(parseInt(lastOpenedNoteId));
+                }
+            };
+        }
+        
+        function showToast(message, type = 'success') {
+            // Hapus toast sebelumnya
+            const existingToast = document.querySelector('.toast');
+            if (existingToast) {
+                existingToast.remove();
+            }
+            
+            // Buat elemen toast baru
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            toast.textContent = message;
+            
+            // Atur warna berdasarkan type
+            if (type === 'error') {
+                toast.style.backgroundColor = '#ef4444';
+            } else if (type === 'warning') {
+                toast.style.backgroundColor = '#f59e0b';
+            } else {
+                toast.style.backgroundColor = '#10b981';
+            }
+            
+            // Tambahkan ke body
+            document.body.appendChild(toast);
+            
+            // Hapus otomatis setelah 3 detik
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.remove();
+                }
+            }, 3000);
+        }
         
         function updateLatexPreview(latexCode) {
             const previewDiv = document.getElementById('latex-preview');
@@ -998,12 +1233,24 @@
                     });
                     canvas.discardActiveObject();
                     canvas.requestRenderAll();
+                    currentNoteId = null;
+                    showToast('Canvas berhasil dibersihkan');
                 }
             });
             
             // Tombol tambahkan contoh catatan
             document.getElementById('btn-add-sample').addEventListener('click', function() {
                 addSampleNote();
+            });
+            
+            // Tombol muat catatan tersimpan
+            document.getElementById('btn-load-saved').addEventListener('click', function() {
+                loadSavedNotes();
+            });
+            
+            // Tombol tutup daftar catatan tersimpan
+            document.getElementById('btn-close-saved').addEventListener('click', function() {
+                document.getElementById('saved-notes-section').classList.add('hidden');
             });
         }
         
@@ -1221,6 +1468,13 @@
         }
         
         function addSampleNote() {
+            // Hapus semua objek terlebih dahulu
+            canvas.getObjects().forEach(obj => {
+                if (obj.id !== 'background-grid') {
+                    canvas.remove(obj);
+                }
+            });
+            
             // Tambahkan contoh catatan fisika
             const title = new fabric.Textbox('Hukum Newton II', {
                 left: 50,
@@ -1278,6 +1532,353 @@
             canvas.add(description);
             
             canvas.requestRenderAll();
+            currentNoteId = null;
+            
+            showToast('Contoh catatan telah dimuat');
+        }
+        
+        function setupSaveModal() {
+            const modal = document.getElementById('save-modal');
+            const cancelBtn = document.getElementById('save-cancel');
+            const confirmBtn = document.getElementById('save-confirm');
+            const noteNameInput = document.getElementById('note-name');
+            
+            // Fungsi untuk menampilkan modal
+            window.showSaveModal = function() {
+                // Generate preview
+                const previewDiv = document.getElementById('note-preview');
+                const dataUrl = canvas.toDataURL({
+                    format: 'png',
+                    quality: 0.5,
+                    multiplier: 0.3
+                });
+                
+                previewDiv.innerHTML = `<img src="${dataUrl}" alt="Preview" style="max-width: 100%; border-radius: 4px;">`;
+                
+                // Set default name jika kosong
+                if (!noteNameInput.value) {
+                    const now = new Date();
+                    const dateStr = now.toLocaleDateString('id-ID');
+                    const timeStr = now.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                    noteNameInput.value = `Catatan ${dateStr} ${timeStr}`;
+                }
+                
+                modal.style.display = 'flex';
+                noteNameInput.focus();
+                noteNameInput.select();
+            };
+            
+            // Fungsi untuk menyembunyikan modal
+            function hideSaveModal() {
+                modal.style.display = 'none';
+                noteNameInput.value = '';
+            }
+            
+            // Event listener untuk tombol batal
+            cancelBtn.addEventListener('click', hideSaveModal);
+            
+            // Event listener untuk tombol simpan
+            confirmBtn.addEventListener('click', function() {
+                const noteName = noteNameInput.value.trim();
+                const noteCategory = document.getElementById('note-category').value;
+                
+                if (!noteName) {
+                    alert('Silakan beri nama untuk catatan Anda.');
+                    return;
+                }
+                
+                saveNoteToDB(noteName, noteCategory);
+                hideSaveModal();
+            });
+            
+            // Tutup modal saat klik di luar konten modal
+            modal.addEventListener('click', function(e) {
+                if (e.target === modal) {
+                    hideSaveModal();
+                }
+            });
+            
+            // Submit dengan Enter
+            noteNameInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    confirmBtn.click();
+                }
+            });
+        }
+        
+        function saveNoteToDB(name, category) {
+            if (!db) {
+                showToast('Database tidak tersedia', 'error');
+                return;
+            }
+            
+            // Serialize canvas ke JSON
+            const canvasJSON = canvas.toJSON(['id']);
+            
+            // Siapkan data note
+            const noteData = {
+                name: name,
+                category: category,
+                canvasData: canvasJSON,
+                thumbnail: canvas.toDataURL({
+                    format: 'png',
+                    quality: 0.3,
+                    multiplier: 0.2
+                }),
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
+            };
+            
+            // Jika sedang mengedit note yang ada, gunakan ID yang sama
+            if (currentNoteId) {
+                noteData.id = currentNoteId;
+            }
+            
+            const transaction = db.transaction(['notes'], 'readwrite');
+            const objectStore = transaction.objectStore('notes');
+            
+            const request = currentNoteId ? 
+                objectStore.put(noteData) : 
+                objectStore.add(noteData);
+            
+            request.onsuccess = function(event) {
+                const noteId = event.target.result;
+                currentNoteId = currentNoteId || noteId;
+                
+                // Simpan ID note terakhir yang dibuka
+                localStorage.setItem('lastOpenedNote', currentNoteId);
+                
+                showToast(currentNoteId ? 'Catatan diperbarui' : 'Catatan disimpan');
+                
+                // Refresh daftar catatan jika sedang ditampilkan
+                if (!document.getElementById('saved-notes-section').classList.contains('hidden')) {
+                    loadSavedNotes();
+                }
+            };
+            
+            request.onerror = function(event) {
+                console.error('Error saving note:', event.target.error);
+                showToast('Gagal menyimpan catatan', 'error');
+            };
+        }
+        
+        function loadSavedNotes() {
+            if (!db) {
+                showToast('Database tidak tersedia', 'error');
+                return;
+            }
+            
+            const transaction = db.transaction(['notes'], 'readonly');
+            const objectStore = transaction.objectStore('notes');
+            const request = objectStore.getAll();
+            
+            request.onsuccess = function(event) {
+                const notes = event.target.result;
+                displaySavedNotes(notes);
+                
+                // Tampilkan section
+                const section = document.getElementById('saved-notes-section');
+                section.classList.remove('hidden');
+                section.scrollIntoView({ behavior: 'smooth' });
+            };
+            
+            request.onerror = function(event) {
+                console.error('Error loading notes:', event.target.error);
+                showToast('Gagal memuat catatan', 'error');
+            };
+        }
+        
+        function displaySavedNotes(notes) {
+            const container = document.getElementById('saved-notes-list');
+            
+            if (notes.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-8 text-gray-500">
+                        <i class="fas fa-clipboard text-3xl mb-2"></i>
+                        <p>Belum ada catatan yang disimpan</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Urutkan berdasarkan tanggal update terbaru
+            notes.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+            
+            let html = '';
+            
+            notes.forEach(note => {
+                const date = new Date(note.updatedAt);
+                const dateStr = date.toLocaleDateString('id-ID');
+                const timeStr = date.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+                
+                // Kategori color
+                const categoryColors = {
+                    'fisika': 'bg-blue-100 text-blue-800',
+                    'matematika': 'bg-purple-100 text-purple-800',
+                    'kimia': 'bg-green-100 text-green-800',
+                    'biologi': 'bg-pink-100 text-pink-800',
+                    'lainnya': 'bg-gray-100 text-gray-800'
+                };
+                
+                const categoryClass = categoryColors[note.category] || categoryColors.lainnya;
+                
+                html += `
+                    <div class="saved-note-item" data-id="${note.id}">
+                        <div>
+                            <div class="font-medium">${note.name}</div>
+                            <div class="flex items-center gap-2 mt-1">
+                                <span class="text-xs px-2 py-1 rounded ${categoryClass}">${note.category}</span>
+                                <span class="text-xs text-gray-500">${dateStr} ${timeStr}</span>
+                            </div>
+                        </div>
+                        <div class="note-actions">
+                            <button class="note-action-btn load-btn" onclick="loadNoteFromDB(${note.id})" title="Muat">
+                                <i class="fas fa-folder-open"></i>
+                            </button>
+                            <button class="note-action-btn delete-btn" onclick="deleteNoteFromDB(${note.id})" title="Hapus">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        window.loadNoteFromDB = function(noteId) {
+            if (!db) {
+                showToast('Database tidak tersedia', 'error');
+                return;
+            }
+            
+            const transaction = db.transaction(['notes'], 'readonly');
+            const objectStore = transaction.objectStore('notes');
+            const request = objectStore.get(noteId);
+            
+            request.onsuccess = function(event) {
+                const note = event.target.result;
+                if (note) {
+                    // Clear canvas terlebih dahulu
+                    canvas.getObjects().forEach(obj => {
+                        if (obj.id !== 'background-grid') {
+                            canvas.remove(obj);
+                        }
+                    });
+                    
+                    // Load canvas data
+                    canvas.loadFromJSON(note.canvasData, function() {
+                        canvas.renderAll();
+                        currentNoteId = noteId;
+                        
+                        // Simpan ID note terakhir yang dibuka
+                        localStorage.setItem('lastOpenedNote', noteId);
+                        
+                        // Tutup section saved notes
+                        document.getElementById('saved-notes-section').classList.add('hidden');
+                        
+                        showToast(`Catatan "${note.name}" dimuat`);
+                    });
+                } else {
+                    showToast('Catatan tidak ditemukan', 'error');
+                }
+            };
+            
+            request.onerror = function(event) {
+                console.error('Error loading note:', event.target.error);
+                showToast('Gagal memuat catatan', 'error');
+            };
+        };
+        
+        window.deleteNoteFromDB = function(noteId) {
+            if (!confirm('Apakah Anda yakin ingin menghapus catatan ini?')) {
+                return;
+            }
+            
+            if (!db) {
+                showToast('Database tidak tersedia', 'error');
+                return;
+            }
+            
+            const transaction = db.transaction(['notes'], 'readwrite');
+            const objectStore = transaction.objectStore('notes');
+            const request = objectStore.delete(noteId);
+            
+            request.onsuccess = function() {
+                // Jika note yang dihapus sedang dibuka, clear canvas
+                if (currentNoteId === noteId) {
+                    canvas.getObjects().forEach(obj => {
+                        if (obj.id !== 'background-grid') {
+                            canvas.remove(obj);
+                        }
+                    });
+                    canvas.requestRenderAll();
+                    currentNoteId = null;
+                    localStorage.removeItem('lastOpenedNote');
+                }
+                
+                showToast('Catatan dihapus');
+                
+                // Refresh daftar
+                loadSavedNotes();
+            };
+            
+            request.onerror = function(event) {
+                console.error('Error deleting note:', event.target.error);
+                showToast('Gagal menghapus catatan', 'error');
+            };
+        };
+        
+        function setupAutoSave() {
+            let saveTimeout;
+            let lastSaveTime = 0;
+            
+            canvas.on('object:added', function() {
+                scheduleAutoSave();
+            });
+            
+            canvas.on('object:modified', function() {
+                scheduleAutoSave();
+            });
+            
+            canvas.on('object:removed', function() {
+                scheduleAutoSave();
+            });
+            
+            function scheduleAutoSave() {
+                const now = Date.now();
+                // Hanya auto-save setiap 30 detik
+                if (now - lastSaveTime > 30000) {
+                    clearTimeout(saveTimeout);
+                    saveTimeout = setTimeout(() => {
+                        if (currentNoteId && canvas.getObjects().length > 1) { // >1 karena ada background grid
+                            autoSaveNote();
+                        }
+                    }, 2000); // Delay 2 detik setelah perubahan terakhir
+                }
+            }
+            
+            function autoSaveNote() {
+                if (!db) return;
+                
+                const transaction = db.transaction(['notes'], 'readwrite');
+                const objectStore = transaction.objectStore('notes');
+                const getRequest = objectStore.get(currentNoteId);
+                
+                getRequest.onsuccess = function(event) {
+                    const note = event.target.result;
+                    if (note) {
+                        note.canvasData = canvas.toJSON(['id']);
+                        note.updatedAt = new Date().toISOString();
+                        
+                        const updateRequest = objectStore.put(note);
+                        updateRequest.onsuccess = function() {
+                            lastSaveTime = Date.now();
+                            console.log('Auto-saved note:', currentNoteId);
+                        };
+                    }
+                };
+            }
         }
         
         async function downloadAsPDF() {

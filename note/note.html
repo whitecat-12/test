@@ -13,6 +13,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
     <!-- jsPDF untuk ekspor PDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- html2canvas untuk export PNG yang lebih baik -->
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -198,6 +200,8 @@
             padding: 1rem;
             min-height: 80px;
             overflow-x: auto;
+            font-size: 1.2em;
+            text-align: center;
         }
         
         /* A4 Paper Size */
@@ -248,6 +252,67 @@
             background: #e5e7eb;
         }
         
+        .latex-examples {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .latex-example-btn {
+            background: #f3f4f6;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 8px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+        }
+        
+        .latex-example-btn:hover {
+            background: #e5e7eb;
+            border-color: #d1d5db;
+        }
+        
+        .export-buttons {
+            display: flex;
+            gap: 8px;
+            margin-left: 8px;
+        }
+        
+        .export-btn {
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .export-pdf {
+            background: #dc2626;
+            color: white;
+            border: none;
+        }
+        
+        .export-pdf:hover {
+            background: #b91c1c;
+        }
+        
+        .export-png {
+            background: #3b82f6;
+            color: white;
+            border: none;
+        }
+        
+        .export-png:hover {
+            background: #2563eb;
+        }
+        
         /* Style untuk mobile consistency */
         @media (max-width: 414px) {
             .bottom-nav {
@@ -256,6 +321,15 @@
             
             .nav-icon {
                 font-size: 1.1rem;
+            }
+            
+            .export-buttons {
+                margin-left: 4px;
+            }
+            
+            .export-btn {
+                padding: 4px 8px;
+                font-size: 0.8rem;
             }
         }
     </style>
@@ -272,11 +346,16 @@
                     </div>
                     <h1 class="app-name">QUANTARA</h1>
                 </div>
-                <div class="flex items-center space-x-3">
-                    <button id="download-pdf" class="bg-white text-primary px-3 py-1 rounded-lg font-semibold text-sm">
-                        <i class="fas fa-download mr-1"></i> PDF
-                    </button>
-                    <i class="fas fa-user-circle text-xl"></i>
+                <div class="flex items-center">
+                    <div class="export-buttons">
+                        <button id="download-png" class="export-btn export-png">
+                            <i class="fas fa-download"></i> PNG
+                        </button>
+                        <button id="download-pdf" class="export-btn export-pdf">
+                            <i class="fas fa-file-pdf"></i> PDF
+                        </button>
+                    </div>
+                    <i class="fas fa-user-circle text-xl ml-3"></i>
                 </div>
             </div>
         </header>
@@ -285,7 +364,7 @@
         <main class="pb-20 px-4">
             <div class="pt-4 pb-4">
                 <h2 class="text-xl font-bold text-gray-800 mb-1">Note Canvas A4</h2>
-                <p class="text-gray-600 text-sm">Buat catatan dengan teks, gambar, dan rumus LaTeX. Unduh sebagai PDF.</p>
+                <p class="text-gray-600 text-sm">Buat catatan dengan teks, gambar, dan rumus LaTeX. Unduh sebagai PNG atau PDF.</p>
             </div>
             
             <!-- Toolbar -->
@@ -376,7 +455,7 @@
                     <li><i class="fas fa-font text-primary mr-1"></i> Klik di canvas untuk menambahkan teks</li>
                     <li><i class="fas fa-square-root-alt text-primary mr-1"></i> Gunakan LaTeX untuk rumus matematika</li>
                     <li><i class="fas fa-image text-primary mr-1"></i> Unggah gambar dari perangkat Anda</li>
-                    <li><i class="fas fa-download text-primary mr-1"></i> Klik tombol PDF untuk mengunduh</li>
+                    <li><i class="fas fa-download text-primary mr-1"></i> Klik tombol PNG/PDF untuk mengunduh</li>
                 </ul>
             </div>
         </main>
@@ -406,16 +485,30 @@
         </nav>
     </div>
 
-    <!-- MODAL UNTUK INPUT LaTeX -->
+    <!-- MODAL UNTUK INPUT LaTeX YANG DIPERBAIKI -->
     <div id="latex-modal" class="modal">
         <div class="modal-content">
             <div class="p-4 border-b">
                 <h3 class="font-bold text-gray-800">Tambahkan Rumus LaTeX</h3>
+                <p class="text-sm text-gray-600 mt-1">Gunakan sintaks LaTeX standar untuk rumus matematika</p>
             </div>
             <div class="p-4">
                 <div class="mb-4">
                     <label class="block text-gray-700 text-sm font-medium mb-2">Masukkan kode LaTeX:</label>
                     <textarea id="latex-input" class="w-full border border-gray-300 rounded-lg p-3 text-sm" rows="3" placeholder="Contoh: E = mc^2 atau \frac{a}{b}">E = mc^2</textarea>
+                </div>
+                
+                <!-- Contoh LaTeX -->
+                <div class="mb-4">
+                    <label class="block text-gray-700 text-sm font-medium mb-2">Contoh cepat:</label>
+                    <div class="latex-examples">
+                        <div class="latex-example-btn" data-example="\frac{a}{b}">Pecahan</div>
+                        <div class="latex-example-btn" data-example="\sqrt{x^2 + y^2}">Akar</div>
+                        <div class="latex-example-btn" data-example="\sum_{i=1}^{n} i">Sigma</div>
+                        <div class="latex-example-btn" data-example="\int_{a}^{b} f(x) dx">Integral</div>
+                        <div class="latex-example-btn" data-example="\alpha \beta \gamma">Huruf Yunani</div>
+                        <div class="latex-example-btn" data-example="\vec{F} = m\vec{a}">Vektor</div>
+                    </div>
                 </div>
                 
                 <div class="mb-4">
@@ -428,7 +521,7 @@
                 
                 <div class="flex justify-end space-x-2">
                     <button id="latex-cancel" class="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 font-medium">Batal</button>
-                    <button id="latex-insert" class="px-4 py-2 bg-primary text-white rounded-lg font-medium">Tambahkan</button>
+                    <button id="latex-insert" class="px-4 py-2 bg-primary text-white rounded-lg font-medium">Tambahkan ke Canvas</button>
                 </div>
             </div>
         </div>
@@ -504,7 +597,7 @@
             // Setup event listeners untuk tombol aksi
             setupActionButtons();
             
-            // Setup modal LaTeX
+            // Setup modal LaTeX yang diperbaiki
             setupLatexModal();
             
             // Setup modal gambar
@@ -518,17 +611,35 @@
             // Event listener untuk tool PDF download
             document.getElementById('download-pdf').addEventListener('click', downloadAsPDF);
             
+            // Event listener untuk tool PNG download
+            document.getElementById('download-png').addEventListener('click', downloadAsPNG);
+            
             // Render ulang MathJax saat modal LaTeX terbuka
             document.getElementById('latex-input').addEventListener('input', function() {
-                document.getElementById('latex-preview').innerHTML = `\\(${this.value}\\)`;
-                if (window.MathJax) {
-                    MathJax.typesetPromise(['#latex-preview']);
-                }
+                updateLatexPreview(this.value);
             });
             
             // NAVBAR ACTIVE STATE MANAGEMENT
             setupNavbar();
+            
+            // Inisialisasi preview LaTeX
+            updateLatexPreview('E = mc^2');
         });
+        
+        function updateLatexPreview(latexCode) {
+            const previewDiv = document.getElementById('latex-preview');
+            if (latexCode.trim()) {
+                previewDiv.innerHTML = `\\(${latexCode}\\)`;
+                if (window.MathJax) {
+                    MathJax.typesetPromise([previewDiv]).catch(err => {
+                        console.error('Error rendering LaTeX preview:', err);
+                        previewDiv.innerHTML = `<span class="text-red-500">Error: ${latexCode}</span>`;
+                    });
+                }
+            } else {
+                previewDiv.innerHTML = '<span class="text-gray-400">Pratinjau akan muncul di sini</span>';
+            }
+        }
         
         function addGridBackground() {
             // Membuat background dengan grid tipis
@@ -900,11 +1011,13 @@
             const modal = document.getElementById('latex-modal');
             const cancelBtn = document.getElementById('latex-cancel');
             const insertBtn = document.getElementById('latex-insert');
+            const latexInput = document.getElementById('latex-input');
             
             // Fungsi untuk menampilkan modal
             window.showLatexModal = function() {
                 modal.style.display = 'flex';
-                document.getElementById('latex-input').focus();
+                latexInput.focus();
+                latexInput.select();
             };
             
             // Fungsi untuk menyembunyikan modal
@@ -917,22 +1030,45 @@
             
             // Event listener untuk tombol tambahkan
             insertBtn.addEventListener('click', function() {
-                const latexCode = document.getElementById('latex-input').value;
-                if (latexCode.trim()) {
+                const latexCode = latexInput.value.trim();
+                if (latexCode) {
                     addLatexToCanvas(latexCode);
                     hideLatexModal();
                     
-                    // Reset input
-                    document.getElementById('latex-input').value = 'E = mc^2';
-                    document.getElementById('latex-preview').innerHTML = `\\(E = mc^2\\)`;
-                    MathJax.typesetPromise(['#latex-preview']);
+                    // Reset input ke contoh default
+                    latexInput.value = 'E = mc^2';
+                    updateLatexPreview('E = mc^2');
+                    
+                    // Kembalikan ke tool select
+                    setTimeout(() => {
+                        document.getElementById('tool-select').click();
+                    }, 100);
+                } else {
+                    alert('Silakan masukkan kode LaTeX terlebih dahulu.');
                 }
+            });
+            
+            // Event listener untuk contoh LaTeX cepat
+            document.querySelectorAll('.latex-example-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const example = this.getAttribute('data-example');
+                    latexInput.value = example;
+                    updateLatexPreview(example);
+                    latexInput.focus();
+                });
             });
             
             // Tutup modal saat klik di luar konten modal
             modal.addEventListener('click', function(e) {
                 if (e.target === modal) {
                     hideLatexModal();
+                }
+            });
+            
+            // Submit dengan Enter
+            latexInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && e.ctrlKey) {
+                    insertBtn.click();
                 }
             });
         }
@@ -945,6 +1081,8 @@
             latexContainer.style.left = '-9999px';
             latexContainer.style.top = '-9999px';
             latexContainer.style.fontSize = '20px';
+            latexContainer.style.padding = '10px';
+            latexContainer.style.backgroundColor = 'white';
             document.body.appendChild(latexContainer);
             
             // Render MathJax
@@ -963,10 +1101,12 @@
                         fabric.Image.fromURL(svgUrl, function(img) {
                             // Posisikan di tengah canvas
                             img.set({
-                                left: canvas.width / 2 - img.width / 2,
-                                top: canvas.height / 2 - img.height / 2,
+                                left: canvas.width / 2 - img.width / 4,
+                                top: canvas.height / 2 - img.height / 4,
                                 scaleX: 0.5,
-                                scaleY: 0.5
+                                scaleY: 0.5,
+                                originX: 'center',
+                                originY: 'center'
                             });
                             
                             canvas.add(img);
@@ -975,11 +1115,6 @@
                             
                             // Bersihkan URL
                             URL.revokeObjectURL(svgUrl);
-                            
-                            // Kembalikan ke tool select
-                            setTimeout(() => {
-                                document.getElementById('tool-select').click();
-                            }, 100);
                         });
                     }
                 }
@@ -997,17 +1132,13 @@
                     width: 200,
                     fontSize: 16,
                     fill: selectedColor,
-                    fontFamily: 'Arial'
+                    fontFamily: 'Arial',
+                    textAlign: 'center'
                 });
                 
                 canvas.add(text);
                 canvas.setActiveObject(text);
                 canvas.requestRenderAll();
-                
-                // Kembalikan ke tool select
-                setTimeout(() => {
-                    document.getElementById('tool-select').click();
-                }, 100);
             });
         }
         
@@ -1152,16 +1283,16 @@
         async function downloadAsPDF() {
             // Tampilkan loading
             const downloadBtn = document.getElementById('download-pdf');
-            const originalText = downloadBtn.innerHTML;
-            downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Membuat PDF...';
+            const originalHTML = downloadBtn.innerHTML;
+            downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>';
             downloadBtn.disabled = true;
             
             try {
-                // Ekspor canvas ke gambar
+                // Ekspor canvas ke gambar dengan kualitas tinggi
                 const dataUrl = canvas.toDataURL({
                     format: 'png',
                     quality: 1.0,
-                    multiplier: 2 // Resolusi lebih tinggi untuk PDF
+                    multiplier: 3 // Resolusi tinggi untuk PDF
                 });
                 
                 // Buat PDF dengan jsPDF
@@ -1196,6 +1327,11 @@
                 });
                 pdf.text(dateStr, 105, 285, { align: 'center' });
                 
+                // Tambahkan watermark
+                pdf.setFontSize(8);
+                pdf.setTextColor(200, 200, 200);
+                pdf.text('www.quantara.id', 105, 290, { align: 'center' });
+                
                 // Simpan PDF
                 pdf.save(`catatan-quantara-${Date.now()}.pdf`);
                 
@@ -1204,7 +1340,95 @@
                 alert('Terjadi kesalahan saat membuat PDF. Silakan coba lagi.');
             } finally {
                 // Kembalikan tombol ke keadaan semula
-                downloadBtn.innerHTML = originalText;
+                downloadBtn.innerHTML = originalHTML;
+                downloadBtn.disabled = false;
+            }
+        }
+        
+        async function downloadAsPNG() {
+            // Tampilkan loading
+            const downloadBtn = document.getElementById('download-png');
+            const originalHTML = downloadBtn.innerHTML;
+            downloadBtn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i>';
+            downloadBtn.disabled = true;
+            
+            try {
+                // Buat canvas temporary dengan resolusi tinggi
+                const tempCanvas = document.createElement('canvas');
+                const tempCtx = tempCanvas.getContext('2d');
+                
+                // Atur ukuran canvas temporary (2x lebih besar untuk kualitas lebih baik)
+                tempCanvas.width = canvas.width * 2;
+                tempCanvas.height = canvas.height * 2;
+                
+                // Isi background putih
+                tempCtx.fillStyle = 'white';
+                tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+                
+                // Ekspor canvas Fabric.js ke data URL
+                const fabricDataUrl = canvas.toDataURL({
+                    format: 'png',
+                    quality: 1.0,
+                    multiplier: 2
+                });
+                
+                // Tunggu gambar load
+                await new Promise((resolve, reject) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        tempCtx.drawImage(img, 0, 0, tempCanvas.width, tempCanvas.height);
+                        resolve();
+                    };
+                    img.onerror = reject;
+                    img.src = fabricDataUrl;
+                });
+                
+                // Tambahkan watermark teks
+                tempCtx.font = '20px Arial';
+                tempCtx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+                tempCtx.textAlign = 'center';
+                tempCtx.fillText('QUANTARA', tempCanvas.width / 2, tempCanvas.height - 30);
+                
+                // Tambahkan border
+                tempCtx.strokeStyle = '#e5e7eb';
+                tempCtx.lineWidth = 4;
+                tempCtx.strokeRect(2, 2, tempCanvas.width - 4, tempCanvas.height - 4);
+                
+                // Konversi ke blob dan download
+                tempCanvas.toBlob(blob => {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `catatan-quantara-${Date.now()}.png`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }, 'image/png', 1.0);
+                
+            } catch (error) {
+                console.error('Error generating PNG:', error);
+                
+                // Fallback: gunakan metode sederhana
+                try {
+                    const dataUrl = canvas.toDataURL({
+                        format: 'png',
+                        quality: 1.0
+                    });
+                    
+                    const a = document.createElement('a');
+                    a.href = dataUrl;
+                    a.download = `catatan-quantara-${Date.now()}.png`;
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                } catch (fallbackError) {
+                    console.error('Fallback error:', fallbackError);
+                    alert('Terjadi kesalahan saat membuat PNG. Silakan coba lagi.');
+                }
+            } finally {
+                // Kembalikan tombol ke keadaan semula
+                downloadBtn.innerHTML = originalHTML;
                 downloadBtn.disabled = false;
             }
         }

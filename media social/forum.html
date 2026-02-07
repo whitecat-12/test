@@ -419,22 +419,45 @@
       transform: rotate(-90deg);
     }
     
-    /* Comments section - initially hidden */
+    /* PERBAIKAN: Comments section - initially hidden */
     .comments-section {
       max-height: 0;
       overflow: hidden;
-      transition: max-height 0.3s ease-out, opacity 0.2s ease-out;
+      transition: max-height 0.5s cubic-bezier(0, 1, 0, 1);
       opacity: 0;
     }
     
     .comments-section.expanded {
-      max-height: 2000px;
+      max-height: 2000px; /* Nilai besar untuk memungkinkan semua komentar terlihat */
       opacity: 1;
+      transition: max-height 0.5s ease-in-out, opacity 0.3s ease-out;
+      overflow: visible;
     }
     
-    /* Comment list inside expanded section */
+    /* PERBAIKAN: Comment list inside expanded section */
     .comments-list {
       padding: 12px 16px 0;
+      max-height: 500px; /* Batas maksimal tapi dengan scroll */
+      overflow-y: auto;
+    }
+    
+    /* Custom scrollbar untuk komentar */
+    .comments-list::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    .comments-list::-webkit-scrollbar-track {
+      background: #f1f1f1;
+      border-radius: 3px;
+    }
+    
+    .comments-list::-webkit-scrollbar-thumb {
+      background: #c1c1c1;
+      border-radius: 3px;
+    }
+    
+    .comments-list::-webkit-scrollbar-thumb:hover {
+      background: #a1a1a1;
     }
     
     .comment {
@@ -471,6 +494,8 @@
       font-size: 0.875rem;
       color: #374151;
       line-height: 1.4;
+      word-break: break-word;
+      white-space: pre-wrap; /* Menjaga line breaks dalam komentar */
     }
     
     .comment-actions {
@@ -520,6 +545,7 @@
       align-items: center;
       padding: 12px 16px;
       border-top: 1px solid #f3f4f6;
+      background-color: white;
     }
     
     .comment-input {
@@ -531,8 +557,10 @@
       color: #111827;
       outline: none;
       resize: none;
-      max-height: 60px;
+      max-height: 100px;
+      min-height: 20px;
       font-family: 'Baloo 2', cursive;
+      line-height: 1.4;
     }
     
     .comment-input::placeholder {
@@ -548,6 +576,7 @@
       cursor: pointer;
       padding: 8px 0 8px 8px;
       transition: color 0.2s ease;
+      flex-shrink: 0;
     }
     
     .post-comment-btn:hover {
@@ -1027,6 +1056,7 @@
       
       .comments-list {
         padding: 10px 12px 0;
+        max-height: 400px; /* Lebih kecil di mobile */
       }
       
       .add-comment {
@@ -2364,7 +2394,7 @@
       });
     }
 
-    // Toggle show/hide comments
+    // PERBAIKAN: Toggle show/hide comments dengan animasi yang lebih baik
     window.toggleComments = function(threadId) {
       const commentsSection = document.getElementById(`comments-${threadId}`);
       const toggleIcon = document.getElementById(`toggle-icon-${threadId}`);
@@ -2375,7 +2405,18 @@
       
       if (commentsSection.classList.contains('expanded')) {
         // Collapse comments
-        commentsSection.classList.remove('expanded');
+        commentsSection.style.maxHeight = commentsSection.scrollHeight + 'px';
+        
+        // Trigger reflow
+        commentsSection.offsetHeight;
+        
+        commentsSection.style.maxHeight = '0px';
+        commentsSection.style.opacity = '0';
+        
+        setTimeout(() => {
+          commentsSection.classList.remove('expanded');
+        }, 500);
+        
         toggleIcon.classList.add('collapsed');
         if (toggleBtn) {
           toggleBtn.innerHTML = `
@@ -2386,6 +2427,22 @@
       } else {
         // Expand comments
         commentsSection.classList.add('expanded');
+        commentsSection.style.maxHeight = '0px';
+        commentsSection.style.opacity = '0';
+        
+        // Trigger reflow
+        commentsSection.offsetHeight;
+        
+        const scrollHeight = commentsSection.scrollHeight;
+        commentsSection.style.maxHeight = scrollHeight + 'px';
+        commentsSection.style.opacity = '1';
+        
+        setTimeout(() => {
+          if (commentsSection.classList.contains('expanded')) {
+            commentsSection.style.maxHeight = 'none';
+          }
+        }, 500);
+        
         toggleIcon.classList.remove('collapsed');
         if (toggleBtn) {
           toggleBtn.innerHTML = `
@@ -2399,6 +2456,12 @@
           const commentInput = document.getElementById(`comment-${threadId}`);
           if (commentInput) {
             commentInput.focus();
+          }
+          
+          // Scroll to bottom of comments if there are many
+          const repliesDiv = document.getElementById(`replies-${threadId}`);
+          if (repliesDiv && repliesDiv.scrollHeight > repliesDiv.clientHeight) {
+            repliesDiv.scrollTop = repliesDiv.scrollHeight;
           }
         }, 300);
       }
